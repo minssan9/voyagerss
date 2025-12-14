@@ -1,0 +1,88 @@
+# Uploaded files and data directories
+uploads/
+upload/
+data/uploads/
+public/uploads/
+storage/
+temp/
+
+# Generated files
+*.generated.*
+dist/
+build/
+
+# Large binary files
+*.zip
+*.tar
+*.tar.gz
+*.jar
+*.war
+*.ear
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+
+# Media files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.ico
+*.svg
+*.webp
+*.mp4
+*.webm
+*.ogg
+*.mp3
+*.wav
+
+# Database files
+*.db
+*.sql
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+log/
+
+# Caches and temporary files
+.cache/
+.tmp/
+.temp/
+tmp/
+temp/
+
+# Node modules and package directories
+node_modules/
+jspm_packages/
+bower_components/
+
+# Environment and config files with sensitive data
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config/secrets.yml
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db 

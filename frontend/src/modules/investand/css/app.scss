@@ -1,0 +1,65 @@
+// Quasar SCSS 변수 임포트
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
+// 앱 전역 스타일
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+// Fear & Greed Index 색상 테마
+.fear-extreme {
+  color: #d32f2f;
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+.fear {
+  color: #f57c00;
+  background-color: rgba(245, 124, 0, 0.1);
+}
+
+.neutral {
+  color: #fbc02d;
+  background-color: rgba(251, 192, 45, 0.1);
+}
+
+.greed {
+  color: #689f38;
+  background-color: rgba(104, 159, 56, 0.1);
+}
+
+.greed-extreme {
+  color: #388e3c;
+  background-color: rgba(56, 142, 60, 0.1);
+}
+
+// 애니메이션
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+// 차트 컨테이너
+.chart-container {
+  position: relative;
+  height: 300px;
+  
+  canvas {
+    max-height: 100%;
+  }
+}
+
+// 반응형 유틸리티
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .desktop-hide {
+    display: none !important;
+  }
+} 

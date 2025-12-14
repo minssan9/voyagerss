@@ -1,0 +1,101 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Cursor Rules for workschd-vue3
+
+## General Principles
+- Move all entity detail, edit, and management logic into dialog components (e.g., TaskDialog.vue, MemberDialog.vue).
+- Keep page components (e.g., TaskManage.vue, TeamManage.vue) as thin as possible: only handle list/grid display, dialog open/close, and high-level event handling.
+- Use event-driven communication between parent and dialog: parent opens dialog and passes props, dialog emits events for CRUD actions, parent reloads data as needed.
+- Use dialogMode (e.g., 'view', 'edit', 'add', 'approval', etc.) to divide dialog UI sections and control button visibility.
+- Use Quasar grid system and components for all layouts and dialogs.
+- Use TypeScript with interfaces for all data structures.
+- Use script setup and Composition API for all Vue components.
+- Use computed properties for all derived state and button visibility.
+- Use ref for all local state.
+- Use clear, descriptive variable and prop names (e.g., showTaskDialog, selectedTask, isSubmitting, dialogMode).
+- Use v-model for dialog open/close and for form fields.
+- Use @emit for all dialog actions (submit, add, join-request, cancel, approve, etc.).
+- Use a single source of truth for each piece of state (e.g., selectedTask only in parent, dialogMode only in dialog).
+- Use Quasar's built-in transitions and persistent dialogs for UX.
+- Use gridOptions and columnDefs for all ag-Grid tables, and handle row clicks via @row-clicked or gridOptions.onRowClicked.
+- Use a single Pagination component for all paginated lists.
+- Use a single style file or scoped styles per component, with consistent class naming.
+- Use functional, declarative, and modular code: avoid duplication, keep logic in the most relevant component.
+- Use code splitting and lazy loading for non-critical components.
+- Use sample/mock data in components for UI development, structure code for easy API integration later.
+- Use a single <q-form> block for both add and edit modes, and display the fields in read-only mode for view.
+- Use computed properties to determine the current form data and whether fields should be editable.
+- Use the same form structure for all three modes, only changing the interactivity and button set.
+
+## Example Patterns
+
+### Page Component (Thin)
+```vue
+<script setup lang="ts">
+const selectedEntity = ref<Entity | null>(null)
+const showDialog = ref(false)
+function handleRowClicked(params) {
+  selectedEntity.value = params.data
+  showDialog.value = true
+}
+function handleDialogEvent() {
+  showDialog.value = false
+  reloadGridData()
+}
+</script>
+<template>
+  <GridDefault ... @row-clicked="handleRowClicked" />
+  <EntityDialog v-model="showDialog" :entity="selectedEntity" @submit="handleDialogEvent" />
+</template>
+```
+
+### Dialog Component (Fat)
+```vue
+<script setup lang="ts">
+const dialogMode = ref<'view'|'edit'|'add'>('view')
+const isSubmitting = ref(false)
+function onSubmit() { ... emit('submit', data) }
+</script>
+<template>
+  <q-dialog v-model="isOpen">
+    <template v-if="dialogMode === 'view'">...</template>
+    <template v-else-if="dialogMode === 'edit'">...</template>
+    <template v-else-if="dialogMode === 'add'">...</template>
+  </q-dialog>
+</template>
+```
+
+### Grid Event Pattern
+```vue
+<GridDefault ... @row-clicked="handleRowClicked" />
+```
+
+### Dialog Event Pattern
+```vue
+<EntityDialog v-model="showDialog" :entity="selectedEntity" @submit="handleDialogEvent" />
+```
+
+### UI/UX
+- Use Quasar's grid, card, dialog, and button components for all layouts.
+- Use responsive, mobile-first design.
+- Use computed properties for button visibility (e.g., showEditBtn, showCancelBtn).
+- Use transitions for dialog open/close.
+
+### Naming
+- Use PascalCase for components, camelCase for variables, kebab-case for directories.
+- Use descriptive names for all props, events, and state.
+
+### TypeScript
+- Use interfaces for all data types.
+- Use ref and computed for all state and derived state.
+- Use defineProps and defineEmits in script setup.
+
+### Code Organization
+- Keep each file focused: page for orchestration, dialog for detail logic, grid for table logic.
+- Move all entity-specific logic (validation, API calls, form state) into the dialog.
+- Only reload data or update parent state in response to dialog events.
+
+# End of rules 

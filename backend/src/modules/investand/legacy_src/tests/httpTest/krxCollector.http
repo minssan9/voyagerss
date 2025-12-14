@@ -1,0 +1,7 @@
+GET https://openapi.koreainvestment.com:9443/uapi/domestic-stock/v1/quotations/inquire-price?fid_cond_mrkt_div_code=J&fid_input_iscd=005930
+content-type: application/json
+authorization:  `Bearer ${this.ACCESS_TOKEN}
+appkey:  PSqbOVRAwZDBCqzgNoPdEj5K4mkIcvYEUNX5
+appsecret:  CHAoVmMo0zgyHNcr/gC/1tFdCBZxaAhkMzqFOx1JeYUgcmAYotOH7i7Ygs38lvTxNyzOUFfQyxktxyHJlSrunF+AzigY4BlCrjcMYkH5TlGg+Bvlwt5PViK8t7ZBF6V6km7Ye8ZSayNsQoBNKgq49o7V7XrxfwbMIgJtJBSJrL78L0f0dio=
+tr_id:  FHKST01010900
+custtype: P

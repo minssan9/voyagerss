@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "commonjs",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "allowJs": true,
+        "baseUrl": ".",
+        "paths": {
+            "@prisma/client-workschd": [
+                "node_modules/@prisma/client-workschd"
+            ],
+            "@prisma/client-investand": [
+                "node_modules/@prisma/client-investand"
+            ],
+            "@prisma/client-aviation": [
+                "node_modules/@prisma/client-aviation"
+            ],
+            "@/*": [
+                "src/modules/investand/legacy_src/*"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/legacy_src/tests/**/*"
+    ]
+}

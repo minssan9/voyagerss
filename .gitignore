@@ -1,0 +1,5 @@
+﻿*/node_modules
+*/dist
+*/dev-dist
+*.zip
+backend/package-lock.json

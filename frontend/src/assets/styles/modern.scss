@@ -1,0 +1,208 @@
+// Modern design variables
+$modern-primary: #4361ee; // Modern blue
+$modern-secondary: #3f37c9; // Deeper blue
+$modern-accent: #4cc9f0; // Bright blue for accent
+$modern-success: #4ade80; // Vibrant green
+$modern-warning: #fbbf24; // Warm amber
+$modern-danger: #f87171; // Soft red
+$modern-info: #60a5fa; // Light blue
+$modern-light: #f9fafb; // Nearly white
+$modern-dark: #111827; // Nearly black
+$modern-gray: #6b7280; // Medium gray
+
+// Gradients
+$gradient-primary: linear-gradient(145deg, $modern-primary, $modern-secondary);
+$gradient-cool: linear-gradient(145deg, $modern-accent, $modern-primary);
+$gradient-warm: linear-gradient(145deg, $modern-warning, $modern-danger);
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// Typography
+$font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+$font-secondary: 'Poppins', sans-serif;
+$font-mono: 'JetBrains Mono', monospace;
+
+// Spacing scale
+$spacing-base: 4px;
+$spacing-xs: $spacing-base; // 4px
+$spacing-sm: $spacing-base * 2; // 8px
+$spacing-md: $spacing-base * 4; // 16px
+$spacing-lg: $spacing-base * 6; // 24px
+$spacing-xl: $spacing-base * 8; // 32px
+$spacing-2xl: $spacing-base * 12; // 48px
+$spacing-3xl: $spacing-base * 16; // 64px
+
+// Border radius
+$radius-sm: 0.125rem; // 2px
+$radius-md: 0.375rem; // 6px
+$radius-lg: 0.5rem; // 8px
+$radius-xl: 1rem; // 16px
+$radius-2xl: 1.5rem; // 24px
+$radius-full: 9999px;
+
+// Transitions
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Z-index scale
+$z-0: 0;
+$z-10: 10;
+$z-20: 20;
+$z-30: 30;
+$z-40: 40;
+$z-50: 50;
+$z-auto: auto;
+
+// Modern components
+.modern-card {
+  background-color: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+  
+  &__header {
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  &__body {
+    padding: $spacing-lg;
+  }
+  
+  &__footer {
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+}
+
+.modern-button {
+  background: $gradient-primary;
+  color: white;
+  border: none;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-lg;
+  font-weight: 600;
+  transition: all $transition-fast;
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+  
+  &--secondary {
+    background: white;
+    color: $modern-primary;
+    border: 1px solid $modern-primary;
+  }
+  
+  &--accent {
+    background: $gradient-cool;
+  }
+}
+
+// Modern page layout
+.modern-page {
+  min-height: 100vh;
+  background-color: $modern-light;
+  
+  &__header {
+    padding: $spacing-lg $spacing-xl;
+    background: $gradient-primary;
+    color: white;
+    border-radius: 0 0 $radius-xl $radius-xl;
+    margin-bottom: $spacing-xl;
+    box-shadow: $shadow-lg;
+  }
+  
+  &__content {
+    padding: $spacing-lg;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  
+  &__footer {
+    padding: $spacing-md;
+    background-color: $modern-dark;
+    color: white;
+    margin-top: $spacing-2xl;
+  }
+}
+
+// Modern text styling
+.modern-text {
+  &__title {
+    font-family: $font-secondary;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  
+  &__subtitle {
+    font-weight: 500;
+    color: $modern-gray;
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__gradient {
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+// Modern backgrounds
+.modern-bg {
+  &__pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%234361ee' fill-opacity='0.05'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  &__gradient {
+    background: $gradient-primary;
+  }
+  
+  &__glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Modern animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn $transition-normal forwards;
+}
+
+.slide-up {
+  animation: slideUp $transition-normal forwards;
+}
+
+// Staggered animation children
+@for $i from 1 through 10 {
+  .stagger-#{$i} {
+    animation-delay: #{$i * 0.1}s;
+  }
+} 

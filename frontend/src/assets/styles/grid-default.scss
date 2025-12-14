@@ -1,0 +1,47 @@
+// Grid default styles
+.ag-theme-alpine,
+.ag-theme-alpine-dark {
+  --ag-foreground-color: #181d1f;
+  --ag-background-color: #fff;
+  --ag-header-foreground-color: #181d1f;
+  --ag-header-background-color: #f5f7fa;
+  --ag-odd-row-background-color: #fcfcfc;
+  --ag-header-column-resize-handle-color: #181d1f;
+  --ag-border-color: #e0e0e0;
+  
+  // Customize grid appearance
+  .ag-header {
+    font-weight: 600;
+  }
+  
+  .ag-row {
+    border-bottom-color: #f0f0f0;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+  }
+  
+  .ag-cell {
+    padding: 8px 15px;
+  }
+}
+
+// Dark theme overrides
+.ag-theme-alpine-dark {
+  --ag-foreground-color: #fff;
+  --ag-background-color: #1e1e1e;
+  --ag-header-foreground-color: #fff;
+  --ag-header-background-color: #2d3033;
+  --ag-odd-row-background-color: #262626;
+  --ag-header-column-resize-handle-color: #fff;
+  --ag-border-color: #444;
+  
+  .ag-row {
+    border-bottom-color: #333;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+} 

@@ -1,0 +1,1072 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-investand"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL_INVESTAND")
+  relationMode = "prisma"
+}
+
+// --------------------------------------------------------
+// Investand Models (Merged)
+// --------------------------------------------------------
+
+model FearGreedIndex {
+  id                Int      @id @default(autoincrement())
+  date              DateTime @unique @db.Date
+  value             Int
+  level             String
+  confidence        Int
+  priceMomentum     Int
+  investorSentiment Int
+  putCallRatio      Int
+  volatilityIndex   Int
+  safeHavenDemand   Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("sentiment_fear_greed_index")
+}
+
+model KospiData {
+  id                       Int      @id @default(autoincrement())
+  date                     DateTime @unique @db.Date
+  iscd_stat_cls_code       String
+  marg_rate                String
+  rprs_mrkt_kor_name       String
+  new_hgpr_lwpr_cls_code   String
+  bstp_kor_isnm            String
+  temp_stop_yn             String
+  oprc_rang_cont_yn        String
+  clpr_rang_cont_yn        String
+  crdt_able_yn             String
+  grmn_rate_cls_code       String
+  elw_pblc_yn              String
+  stck_prpr                String
+  prdy_vrss                String
+  prdy_vrss_sign           String
+  prdy_ctrt                String
+  acml_tr_pbmn             String
+  acml_vol                 String
+  prdy_vrss_vol_rate       String
+  stck_oprc                String
+  stck_hgpr                String
+  stck_lwpr                String
+  stck_mxpr                String
+  stck_llam                String
+  stck_sdpr                String
+  wghn_avrg_stck_prc       String
+  hts_frgn_ehrt            String
+  frgn_ntby_qty            String
+  pgtr_ntby_qty            String
+  pvt_scnd_dmrs_prc        String
+  pvt_frst_dmrs_prc        String
+  pvt_pont_val             String
+  pvt_frst_dmsp_prc        String
+  pvt_scnd_dmsp_prc        String
+  dmrs_val                 String
+  dmsp_val                 String
+  cpfn                     String
+  rstc_wdth_prc            String
+  stck_fcam                String
+  stck_sspr                String
+  aspr_unit                String
+  hts_deal_qty_unit_val    String
+  lstn_stcn                String
+  hts_avls                 String
+  per                      String
+  pbr                      String
+  stac_month               String
+  vol_tnrt                 String
+  eps                      String
+  bps                      String
+  d250_hgpr                String
+  d250_hgpr_date           String
+  d250_hgpr_vrss_prpr_rate String
+  d250_lwpr                String
+  d250_lwpr_date           String
+  d250_lwpr_vrss_prpr_rate String
+  stck_dryy_hgpr           String
+  dryy_hgpr_vrss_prpr_rate String
+  dryy_hgpr_date           String
+  stck_dryy_lwpr           String
+  dryy_lwpr_vrss_prpr_rate String
+  dryy_lwpr_date           String
+  w52_hgpr                 String
+  w52_hgpr_vrss_prpr_ctrt  String
+  w52_hgpr_date            String
+  w52_lwpr                 String
+  w52_lwpr_vrss_prpr_ctrt  String
+  w52_lwpr_date            String
+  whol_loan_rmnd_rate      String
+  ssts_yn                  String
+  stck_shrn_iscd           String
+  fcam_cnnm                String
+  cpfn_cnnm                String
+  apprch_rate              String
+  frgn_hldn_qty            String
+  vi_cls_code              String
+  ovtm_vi_cls_code         String
+  last_ssts_cntg_qty       String
+  invt_caful_yn            String
+  mrkt_warn_cls_code       String
+  short_over_yn            String
+  sltr_yn                  String
+  mang_issu_cls_code       String
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("market_kospi_data")
+}
+
+model KosdaqData {
+  id                       Int      @id @default(autoincrement())
+  date                     DateTime @unique @db.Date
+  iscd_stat_cls_code       String
+  marg_rate                String
+  rprs_mrkt_kor_name       String
+  new_hgpr_lwpr_cls_code   String
+  bstp_kor_isnm            String
+  temp_stop_yn             String
+  oprc_rang_cont_yn        String
+  clpr_rang_cont_yn        String
+  crdt_able_yn             String
+  grmn_rate_cls_code       String
+  elw_pblc_yn              String
+  stck_prpr                String
+  prdy_vrss                String
+  prdy_vrss_sign           String
+  prdy_ctrt                String
+  acml_tr_pbmn             String
+  acml_vol                 String
+  prdy_vrss_vol_rate       String
+  stck_oprc                String
+  stck_hgpr                String
+  stck_lwpr                String
+  stck_mxpr                String
+  stck_llam                String
+  stck_sdpr                String
+  wghn_avrg_stck_prc       String
+  hts_frgn_ehrt            String
+  frgn_ntby_qty            String
+  pgtr_ntby_qty            String
+  pvt_scnd_dmrs_prc        String
+  pvt_frst_dmrs_prc        String
+  pvt_pont_val             String
+  pvt_frst_dmsp_prc        String
+  pvt_scnd_dmsp_prc        String
+  dmrs_val                 String
+  dmsp_val                 String
+  cpfn                     String
+  rstc_wdth_prc            String
+  stck_fcam                String
+  stck_sspr                String
+  aspr_unit                String
+  hts_deal_qty_unit_val    String
+  lstn_stcn                String
+  hts_avls                 String
+  per                      String
+  pbr                      String
+  stac_month               String
+  vol_tnrt                 String
+  eps                      String
+  bps                      String
+  d250_hgpr                String
+  d250_hgpr_date           String
+  d250_hgpr_vrss_prpr_rate String
+  d250_lwpr                String
+  d250_lwpr_date           String
+  d250_lwpr_vrss_prpr_rate String
+  stck_dryy_hgpr           String
+  dryy_hgpr_vrss_prpr_rate String
+  dryy_hgpr_date           String
+  stck_dryy_lwpr           String
+  dryy_lwpr_vrss_prpr_rate String
+  dryy_lwpr_date           String
+  w52_hgpr                 String
+  w52_hgpr_vrss_prpr_ctrt  String
+  w52_hgpr_date            String
+  w52_lwpr                 String
+  w52_lwpr_vrss_prpr_ctrt  String
+  w52_lwpr_date            String
+  whol_loan_rmnd_rate      String
+  ssts_yn                  String
+  stck_shrn_iscd           String
+  fcam_cnnm                String
+  cpfn_cnnm                String
+  apprch_rate              String
+  frgn_hldn_qty            String
+  vi_cls_code              String
+  ovtm_vi_cls_code         String
+  last_ssts_cntg_qty       String
+  invt_caful_yn            String
+  mrkt_warn_cls_code       String
+  short_over_yn            String
+  sltr_yn                  String
+  mang_issu_cls_code       String
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("market_kosdaq_data")
+}
+
+model InvestorTrading {
+  id                    Int      @id @default(autoincrement())
+  date                  DateTime @unique @db.Date
+  frgn_seln_vol         String
+  frgn_shnu_vol         String
+  frgn_ntby_qty         String
+  frgn_seln_tr_pbmn     String
+  frgn_shnu_tr_pbmn     String
+  frgn_ntby_tr_pbmn     String
+  prsn_seln_vol         String
+  prsn_shnu_vol         String
+  prsn_ntby_qty         String
+  prsn_seln_tr_pbmn     String
+  prsn_shnu_tr_pbmn     String
+  prsn_ntby_tr_pbmn     String
+  orgn_seln_vol         String
+  orgn_shnu_vol         String
+  orgn_ntby_qty         String
+  orgn_seln_tr_pbmn     String
+  orgn_shnu_tr_pbmn     String
+  orgn_ntby_tr_pbmn     String
+  scrt_seln_vol         String
+  scrt_shnu_vol         String
+  scrt_ntby_qty         String
+  scrt_seln_tr_pbmn     String
+  scrt_shnu_tr_pbmn     String
+  scrt_ntby_tr_pbmn     String
+  ivtr_seln_vol         String
+  ivtr_shnu_vol         String
+  ivtr_ntby_qty         String
+  ivtr_seln_tr_pbmn     String
+  ivtr_shnu_tr_pbmn     String
+  ivtr_ntby_tr_pbmn     String
+  pe_fund_seln_tr_pbmn  String
+  pe_fund_seln_vol      String
+  pe_fund_ntby_vol      String
+  pe_fund_shnu_tr_pbmn  String
+  pe_fund_shnu_vol      String
+  pe_fund_ntby_tr_pbmn  String
+  bank_seln_vol         String
+  bank_shnu_vol         String
+  bank_ntby_qty         String
+  bank_seln_tr_pbmn     String
+  bank_shnu_tr_pbmn     String
+  bank_ntby_tr_pbmn     String
+  insu_seln_vol         String
+  insu_shnu_vol         String
+  insu_ntby_qty         String
+  insu_seln_tr_pbmn     String
+  insu_shnu_tr_pbmn     String
+  insu_ntby_tr_pbmn     String
+  mrbn_seln_vol         String
+  mrbn_shnu_vol         String
+  mrbn_ntby_qty         String
+  mrbn_seln_tr_pbmn     String
+  mrbn_shnu_tr_pbmn     String
+  mrbn_ntby_tr_pbmn     String
+  fund_seln_vol         String
+  fund_shnu_vol         String
+  fund_ntby_qty         String
+  fund_seln_tr_pbmn     String
+  fund_shnu_tr_pbmn     String
+  fund_ntby_tr_pbmn     String
+  etc_orgt_seln_vol     String
+  etc_orgt_shnu_vol     String
+  etc_orgt_ntby_vol     String
+  etc_orgt_seln_tr_pbmn String
+  etc_orgt_shnu_tr_pbmn String
+  etc_orgt_ntby_tr_pbmn String
+  etc_corp_seln_vol     String
+  etc_corp_shnu_vol     String
+  etc_corp_ntby_vol     String
+  etc_corp_seln_tr_pbmn String
+  etc_corp_shnu_tr_pbmn String
+  etc_corp_ntby_tr_pbmn String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("trading_investor_trading")
+}
+
+model OptionData {
+  id           Int      @id @default(autoincrement())
+  date         DateTime @unique @db.Date
+  putVolume    BigInt
+  callVolume   BigInt
+  putCallRatio Decimal  @db.Decimal(8, 4)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("trading_option_data")
+}
+
+model InterestRateData {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @unique @db.Date
+  baseRate        Decimal  @db.Decimal(5, 2)
+  callRate        Decimal  @db.Decimal(5, 2)
+  cd91Rate        Decimal  @db.Decimal(5, 2)
+  treasuryBond3Y  Decimal  @db.Decimal(5, 2)
+  treasuryBond10Y Decimal  @db.Decimal(5, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("macro_interest_rate_data")
+}
+
+model ExchangeRateData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  usdKrw    Decimal  @db.Decimal(8, 2)
+  eurKrw    Decimal  @db.Decimal(8, 2)
+  jpyKrw    Decimal  @db.Decimal(8, 4)
+  cnyKrw    Decimal  @db.Decimal(8, 4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("macro_exchange_rate_data")
+}
+
+model EconomicIndicatorData {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @unique @db.Date
+  cpi              Decimal? @db.Decimal(5, 2)
+  ppi              Decimal? @db.Decimal(5, 2)
+  unemploymentRate Decimal? @db.Decimal(4, 2)
+  gdpGrowthRate    Decimal? @db.Decimal(5, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("macro_economic_indicator_data")
+}
+
+model VkospiData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  value     Decimal  @db.Decimal(5, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("market_vkospi_data")
+}
+
+model BondYieldCurveData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  yield1Y   Decimal? @db.Decimal(5, 2)
+  yield3Y   Decimal? @db.Decimal(5, 2)
+  yield5Y   Decimal? @db.Decimal(5, 2)
+  yield10Y  Decimal? @db.Decimal(5, 2)
+  yield20Y  Decimal? @db.Decimal(5, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("market_bond_yield_curve_data")
+}
+
+model DataCollectionLog {
+  id           Int      @id @default(autoincrement())
+  date         DateTime @db.Date
+  source       String
+  dataType     String
+  status       String
+  recordCount  Int?
+  errorMessage String?  @db.Text
+  duration     Int?
+  createdAt    DateTime @default(now())
+
+  @@map("system_data_collection_log")
+}
+
+model SystemConfig {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+model UpbitIndexData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  value     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("external_upbit_index_data")
+}
+
+model CnnFearGreedIndexData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  value     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("external_cnn_fg_index_data")
+}
+
+model KoreaFGIndexData {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique @db.Date
+  value     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("external_korea_fg_index_data")
+}
+
+model AdminUser {
+  id                        String                     @id @default(cuid())
+  username                  String                     @unique
+  email                     String?                    @unique
+  passwordHash              String
+  role                      AdminRole
+  permissions               String                     @db.Text
+  isActive                  Boolean                    @default(true)
+  isLocked                  Boolean                    @default(false)
+  lockReason                String?
+  lockedAt                  DateTime?
+  lockedUntil               DateTime?
+  failedAttempts            Int                        @default(0)
+  lastFailedAt              DateTime?
+  passwordChangedAt         DateTime                   @default(now())
+  mustChangePassword        Boolean                    @default(false)
+  mfaEnabled                Boolean                    @default(false)
+  mfaSecret                 String?
+  mfaBackupCodes            String                     @db.Text
+  firstName                 String?
+  lastName                  String?
+  lastLoginAt               DateTime?
+  lastLoginIp               String?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  auditLogs                 AdminAuditLog[]
+  loginAttempts             AdminLoginAttempt[]
+  refreshTokens             AdminRefreshToken[]
+  sessions                  AdminSession[]
+  dataExportRequests        DataExportRequest[]
+  notificationSubscriptions NotificationSubscription[]
+  createdReports            ReportDefinition[]         @relation("ReportCreator")
+  executedReports           ReportExecution[]          @relation("ReportExecutor")
+  acknowledgedInsights      SystemInsight[]
+  webSocketConnections      WebSocketConnection[]
+
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id          String    @id @default(cuid())
+  userId      String
+  sessionId   String    @unique
+  accessToken String    @unique
+  ipAddress   String
+  userAgent   String?
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime  @default(now())
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  user        AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([accessToken])
+  @@map("admin_sessions")
+}
+
+model AdminRefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  sessionId String
+  isRevoked Boolean   @default(false)
+  revokedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([sessionId])
+  @@map("admin_refresh_tokens")
+}
+
+model AdminLoginAttempt {
+  id          String     @id @default(cuid())
+  userId      String?
+  username    String
+  ipAddress   String
+  userAgent   String?
+  success     Boolean
+  failReason  String?
+  attemptedAt DateTime   @default(now())
+  user        AdminUser? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([username])
+  @@index([ipAddress])
+  @@index([attemptedAt])
+  @@map("admin_login_attempts")
+}
+
+model AdminAuditLog {
+  id        String         @id @default(cuid())
+  userId    String?
+  sessionId String?
+  action    String
+  resource  String?
+  details   String?        @db.Text
+  ipAddress String
+  userAgent String?
+  success   Boolean
+  riskLevel AuditRiskLevel @default(LOW)
+  timestamp DateTime       @default(now())
+  user      AdminUser?     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([riskLevel])
+  @@map("admin_audit_logs")
+}
+
+model SecurityConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("security_config")
+}
+
+model RateLimitRecord {
+  id          String   @id @default(cuid())
+  identifier  String
+  action      String
+  attempts    Int      @default(1)
+  windowStart DateTime
+  windowEnd   DateTime
+  isBlocked   Boolean  @default(false)
+
+  @@unique([identifier, action, windowStart])
+  @@index([identifier, action])
+  @@index([windowStart, windowEnd])
+  @@map("rate_limit_records")
+}
+
+model NotificationChannel {
+  id            String                     @id @default(cuid())
+  name          String                     @unique
+  type          NotificationChannelType
+  enabled       Boolean                    @default(true)
+  config        String                     @db.Text
+  maxPerHour    Int                        @default(100)
+  maxPerDay     Int                        @default(1000)
+  description   String?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  notifications NotificationLog[]
+  subscriptions NotificationSubscription[]
+  templates     NotificationTemplate[]
+
+  @@map("notification_channels")
+}
+
+model NotificationSubscription {
+  id              String              @id @default(cuid())
+  userId          String?
+  channelId       String
+  eventType       String
+  enabled         Boolean             @default(true)
+  filters         String?             @db.Text
+  immediateNotify Boolean             @default(true)
+  digestSettings  String?             @db.Text
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  channel         NotificationChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user            AdminUser?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId, eventType])
+  @@index([userId])
+  @@index([channelId])
+  @@index([eventType])
+  @@map("notification_subscriptions")
+}
+
+model NotificationTemplate {
+  id            String              @id @default(cuid())
+  name          String              @unique
+  channelId     String
+  eventType     String
+  subject       String?
+  body          String              @db.Text
+  htmlBody      String?             @db.Text
+  variables     String              @db.Text
+  description   String?
+  isDefault     Boolean             @default(false)
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  notifications NotificationLog[]
+  channel       NotificationChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@index([eventType])
+  @@map("notification_templates")
+}
+
+model NotificationLog {
+  id           String                @id @default(cuid())
+  channelId    String
+  templateId   String?
+  recipient    String
+  eventType    String
+  eventId      String?
+  subject      String?
+  body         String                @db.Text
+  metadata     String?               @db.Text
+  status       NotificationStatus    @default(PENDING)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?               @db.Text
+  retryCount   Int                   @default(0)
+  maxRetries   Int                   @default(3)
+  nextRetryAt  DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  channel      NotificationChannel   @relation(fields: [channelId], references: [id])
+  template     NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([channelId])
+  @@index([eventType])
+  @@index([status])
+  @@index([createdAt])
+  @@index([templateId], map: "notification_logs_templateId_fkey")
+  @@map("notification_logs")
+}
+
+model ReportDefinition {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  description      String?
+  category         ReportCategory
+  dataSource       String
+  parameters       String            @db.Text
+  template         String            @db.Text
+  supportedFormats String            @db.Text
+  defaultFormat    String            @default("PDF")
+  isScheduled      Boolean           @default(false)
+  cronExpression   String?
+  timezone         String            @default("Asia/Seoul")
+  requiredRole     AdminRole         @default(VIEWER)
+  isPublic         Boolean           @default(false)
+  isActive         Boolean           @default(true)
+  createdBy        String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  creator          AdminUser?        @relation("ReportCreator", fields: [createdBy], references: [id])
+  executions       ReportExecution[]
+  schedules        ReportSchedule[]
+
+  @@index([category])
+  @@index([isScheduled])
+  @@index([createdBy])
+  @@map("report_definitions")
+}
+
+model ReportExecution {
+  id            String                @id @default(cuid())
+  reportId      String
+  executedBy    String?
+  parameters    String?               @db.Text
+  format        String
+  status        ReportExecutionStatus @default(PENDING)
+  startedAt     DateTime              @default(now())
+  completedAt   DateTime?
+  failedAt      DateTime?
+  errorMessage  String?               @db.Text
+  fileName      String?
+  filePath      String?
+  fileSize      Int?
+  rowCount      Int?
+  executionTime Int?
+  metadata      String?               @db.Text
+  executor      AdminUser?            @relation("ReportExecutor", fields: [executedBy], references: [id])
+  report        ReportDefinition      @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@index([executedBy])
+  @@index([status])
+  @@index([startedAt])
+  @@map("report_executions")
+}
+
+model ReportSchedule {
+  id                  String           @id @default(cuid())
+  reportId            String
+  name                String
+  cronExpression      String
+  timezone            String           @default("Asia/Seoul")
+  parameters          String?          @db.Text
+  format              String           @default("PDF")
+  notifyOnSuccess     Boolean          @default(true)
+  notifyOnFailure     Boolean          @default(true)
+  recipients          String           @db.Text
+  isActive            Boolean          @default(true)
+  lastRunAt           DateTime?
+  nextRunAt           DateTime?
+  consecutiveFailures Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  report              ReportDefinition @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@index([isActive])
+  @@index([nextRunAt])
+  @@map("report_schedules")
+}
+
+model DataExportRequest {
+  id            String       @id @default(cuid())
+  requestedBy   String
+  dataType      String
+  format        String
+  dateRange     String       @db.Text
+  filters       String?      @db.Text
+  status        ExportStatus @default(PENDING)
+  startedAt     DateTime     @default(now())
+  completedAt   DateTime?
+  failedAt      DateTime?
+  errorMessage  String?      @db.Text
+  fileName      String?
+  filePath      String?
+  fileSize      Int?
+  recordCount   Int?
+  downloadCount Int          @default(0)
+  expiresAt     DateTime?
+  requester     AdminUser    @relation(fields: [requestedBy], references: [id], onDelete: Cascade)
+
+  @@index([requestedBy])
+  @@index([status])
+  @@index([startedAt])
+  @@map("data_export_requests")
+}
+
+model SystemInsight {
+  id              String          @id @default(cuid())
+  type            InsightType
+  category        String
+  title           String
+  description     String          @db.Text
+  severity        InsightSeverity
+  confidence      Int
+  dataSource      String
+  analysisDate    DateTime
+  affectedPeriod  String?         @db.Text
+  metrics         String          @db.Text
+  recommendations String          @db.Text
+  actionItems     String          @db.Text
+  status          InsightStatus   @default(NEW)
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime?
+  resolvedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  acknowledger    AdminUser?      @relation(fields: [acknowledgedBy], references: [id])
+
+  @@index([type])
+  @@index([category])
+  @@index([severity])
+  @@index([status])
+  @@index([analysisDate])
+  @@index([acknowledgedBy], map: "system_insights_acknowledgedBy_fkey")
+  @@map("system_insights")
+}
+
+model WebSocketConnection {
+  id             String     @id @default(cuid())
+  sessionId      String     @unique
+  userId         String?
+  socketId       String     @unique
+  ipAddress      String
+  userAgent      String?
+  isActive       Boolean    @default(true)
+  connectedAt    DateTime   @default(now())
+  lastPingAt     DateTime   @default(now())
+  disconnectedAt DateTime?
+  subscriptions  String     @db.Text
+  user           AdminUser? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([connectedAt])
+  @@map("websocket_connections")
+}
+
+model DartDisclosure {
+  id              Int      @id @default(autoincrement())
+  receiptNumber   String   @unique
+  corpCode        String
+  corpName        String
+  stockCode       String?
+  reportName      String   @db.Text
+  flrName         String
+  receiptDate     DateTime @db.Date
+  disclosureDate  DateTime @db.Date
+  reportCode      String
+  remarks         String?  @db.Text
+  sentimentImpact String?
+  impactScore     Int?
+  keywords        String?  @db.Text
+  category        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([corpCode])
+  @@index([receiptDate])
+  @@index([reportCode])
+  @@index([sentimentImpact])
+  @@map("dart_disclosures")
+}
+
+model DartCompany {
+  id           Int      @id @default(autoincrement())
+  corpCode     String   @unique
+  corpName     String
+  corpNameEng  String?
+  stockName    String?
+  stockCode    String?
+  ceoName      String?
+  corpCls      String?
+  jurirNo      String?
+  bizrNo       String?
+  adres        String?  @db.Text
+  homUrl       String?
+  irUrl        String?
+  phnNo        String?
+  faxNo        String?
+  indutyCode   String?
+  estDate      String?
+  accMt        String?
+  isKospi200   Boolean  @default(false)
+  kospi200Rank Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([stockCode])
+  @@index([corpCls])
+  @@index([isKospi200])
+  @@map("dart_companies")
+}
+
+model DartFinancial {
+  id              Int      @id @default(autoincrement())
+  corpCode        String
+  businessYear    String
+  reportCode      String
+  reprtNm         String?
+  acntNm          String
+  thstrmNm        String?
+  thstrmAmount    String?
+  frmtrmNm        String?
+  frmtrmAmount    String?
+  bfefrmtrmNm     String?
+  bfefrmtrmAmount String?
+  ord             String?
+  currency        String?
+  fsCls           String?
+  sjNm            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([corpCode, businessYear, reportCode, acntNm])
+  @@index([corpCode])
+  @@index([businessYear])
+  @@map("dart_financials")
+}
+
+model DartBatchLog {
+  id             String    @id @default(cuid())
+  jobId          String    @unique
+  jobType        String
+  status         String
+  startTime      DateTime  @default(now())
+  endTime        DateTime?
+  processedCount Int       @default(0)
+  successCount   Int       @default(0)
+  failedCount    Int       @default(0)
+  errors         String?   @db.Text
+  parameters     String?   @db.Text
+  resultSummary  String?   @db.Text
+
+  @@index([jobType])
+  @@index([status])
+  @@index([startTime])
+  @@map("dart_batch_logs")
+}
+
+model DartCollectionStat {
+  id                  Int      @id @default(autoincrement())
+  date                DateTime @unique @db.Date
+  totalApiCalls       Int      @default(0)
+  successfulCalls     Int      @default(0)
+  failedCalls         Int      @default(0)
+  dataPoints          Int      @default(0)
+  averageResponseTime Int      @default(0)
+  rateLimitRemaining  Int      @default(10000)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("dart_collection_stats")
+}
+
+model DartStockHolding {
+  id                 Int      @id @default(autoincrement())
+  
+  // Basic identification fields
+  receiptNumber      String?  // 접수번호 (14자리)
+  receiptDate        DateTime? @db.Date // 접수일자 (YYYYMMDD)
+  corpCode           String   // 기업 고유번호 (8자리)
+  corpName           String   // 기업명
+  stockCode          String?  // 주식코드
+  reportType         String?  // 보고구분 (주식등의 대량보유상황 보고구분)
+  reporterName       String   // 대표보고자
+  
+  // Stock holding information
+  holdingShares      String?  // 보유주식등의 수 (stkqy)
+  changeShares       String?  // 보유주식등의 증감 (stkqy_irds)
+  holdingRatio       String?  // 보유비율 (stkrt)
+  changeRatio        String?  // 보유비율 증감 (stkrt_irds)
+  
+  // Major transaction information
+  majorTransactionShares String? // 주요체결 주식등의 수 (ctr_stkqy)
+  majorTransactionRatio  String? // 주요체결 보유비율 (ctr_stkrt)
+  
+  // Report reason
+  reportReason       String?  @db.Text // 보고사유 (report_resn)
+  
+  // Legacy fields for backward compatibility
+  reportDate         DateTime? @db.Date // 기존 reportDate 필드 (호환성)
+  changeReason       String?  // 기존 changeReason 필드 (호환성)
+  
+  // Executive holdings fields (legacy)
+  isu_main_shrholdr  String?  // 주요주주 여부
+  isu_exctv_rgist_at String?  // 발행회사 임원 등기여부 (Y/N)
+  isu_exctv_ofcps    String?  // 발행회사 임원 직책
+  
+  createdAt          DateTime @default(now())
+
+  @@index([corpCode])
+  @@index([receiptNumber])
+  @@index([receiptDate])
+  @@index([reporterName])
+  @@map("dart_stock_holdings")
+}
+
+model DartAlert {
+  id             String   @id @default(cuid())
+  name           String
+  corpCodes      String   @db.Text
+  keywords       String   @db.Text
+  reportTypes    String   @db.Text
+  minImpactScore Int      @default(0)
+  channels       String   @db.Text
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("dart_alerts")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  VIEWER
+  ANALYST
+}
+
+enum AuditRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationChannelType {
+  EMAIL
+  SLACK
+  TEAMS
+  WEBHOOK
+  SMS
+  PUSH
+  WEBSOCKET
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  RETRYING
+}
+
+enum ReportCategory {
+  SYSTEM_STATUS
+  DATA_QUALITY
+  BUSINESS_METRICS
+  SECURITY_AUDIT
+  PERFORMANCE
+  COMPLIANCE
+  CUSTOM
+}
+
+enum ReportExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum InsightType {
+  TREND_ANALYSIS
+  ANOMALY_DETECTION
+  PERFORMANCE_OPTIMIZATION
+  SECURITY_RECOMMENDATION
+  DATA_QUALITY_ISSUE
+  BUSINESS_OPPORTUNITY
+}
+
+enum InsightSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum InsightStatus {
+  NEW
+  ACKNOWLEDGED
+  IN_PROGRESS
+  RESOLVED
+  DISMISSED
+}

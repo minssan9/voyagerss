@@ -1,0 +1,316 @@
+// Info pages styles - for About, Home, and other informational pages
+@import './variables.scss';
+@import './modern.scss';
+
+// Custom info page components
+.info-hero {
+  position: relative;
+  padding: 80px 0;
+  margin-bottom: 60px;
+  overflow: hidden;
+  
+  &__pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='152' height='152' viewBox='0 0 152 152'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='temple' fill='%234361ee' fill-opacity='0.06'%3E%3Cpath d='M152 150v2H0v-2h28v-8H8v-20H0v-2h8V80h42v20h20v42H30v8h90v-8H80v-42h20V80h42v40h8V30h-8v40h-42V50H80V8h40V0h2v8h20v20h8V0h2v150zm-2 0v-28h-8v20h-20v8h28zM82 30v18h18V30H82zm20 18h20v20h18V30h-20V10H82v18h20v20zm0 2v18h18V50h-18zm20-22h18V10h-18v18zm-54 92v-18H50v18h18zm-20-18H28V82H10v38h20v20h38v-18H48v-20zm0-2V82H30v18h18zm-20 22H10v18h18v-18zm54 0v18h38v-20h20V82h-18v20h-20v20H82zm18-20H82v18h18v-18zm2-2h18V82h-18v18zm20 40v-18h18v18h-18zM30 0h-2v8H8v20H0v2h8v40h42V50h20V8H30V0zm20 48h18V30H50v18zm18-20H48v20H28v20H10V30h20V10h38v18zM30 50h18v18H30V50zm-2-40H10v18h18V10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: -1;
+  }
+  
+  &__content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+  }
+  
+  &__title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    
+    @media (max-width: 600px) {
+      font-size: 2rem;
+    }
+  }
+  
+  &__subtitle {
+    font-size: 1.5rem;
+    color: $modern-gray;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    
+    @media (max-width: 600px) {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+// Feature cards styling
+.feature-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: $shadow-md;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-lg;
+  }
+  
+  &__icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: $gradient-cool;
+    color: white;
+    font-size: 24px;
+  }
+  
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  &__content {
+    color: $modern-gray;
+    line-height: 1.6;
+  }
+}
+
+// Testimonial styling
+.testimonial {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: $shadow-md;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  &__content {
+    font-style: italic;
+    position: relative;
+    padding: 1rem 2rem;
+    
+    &:before, &:after {
+      content: '"';
+      font-family: $font-secondary;
+      font-size: 4rem;
+      color: rgba(67, 97, 238, 0.15);
+      position: absolute;
+      line-height: 1;
+    }
+    
+    &:before {
+      top: -10px;
+      left: -10px;
+    }
+    
+    &:after {
+      bottom: -40px;
+      right: -10px;
+      transform: rotate(180deg);
+    }
+  }
+  
+  &__author {
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-right: 1.5rem;
+    justify-content: flex-end;
+    
+    &-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 1rem;
+      background: $gradient-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+    }
+    
+    &-info {
+      h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      
+      p {
+        margin: 0;
+        color: $modern-gray;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+// Pricing table styling
+.pricing-table {
+  border-radius: 12px;
+  overflow: hidden;
+  
+  th {
+    font-weight: 600;
+    background-color: rgba(67, 97, 238, 0.08);
+    padding: 1rem !important;
+  }
+  
+  td {
+    padding: 1rem !important;
+  }
+  
+  tr:nth-child(even) {
+    background-color: rgba(76, 201, 240, 0.05);
+  }
+  
+  tr:hover {
+    background-color: rgba(67, 97, 238, 0.1);
+  }
+  
+  // Price highlight
+  .price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    
+    &--featured {
+      color: $modern-primary;
+    }
+  }
+}
+
+// Custom spacing for info pages
+.section-spacer {
+  &--md {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  &--lg {
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+  }
+}
+
+// Modern footer for info pages
+.info-footer {
+  background-color: $modern-dark;
+  color: white;
+  padding-top: 3rem;
+  margin-top: 5rem;
+  
+  &__logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  &__links {
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: $gradient-primary;
+      }
+    }
+    
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      
+      li {
+        margin-bottom: 0.75rem;
+        
+        a {
+          color: rgba(255, 255, 255, 0.7);
+          text-decoration: none;
+          transition: color 0.2s ease;
+          
+          &:hover {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+  
+  &__copyright {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+  }
+}
+
+// Call to action section
+.cta-section {
+  padding: 3rem;
+  background: $gradient-cool;
+  border-radius: 16px;
+  margin: 5rem auto;
+  max-width: 1000px;
+  text-align: center;
+  color: white;
+  box-shadow: $shadow-lg;
+  
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    opacity: 0.9;
+  }
+  
+  .btn {
+    background-color: white;
+    color: $modern-primary;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    border: none;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+  }
+} 

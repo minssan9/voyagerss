@@ -1,0 +1,48 @@
+@import './variables.scss';
+
+/* Global styles for content sections */
+.page-container {
+  background-color: $background-color;
+}
+
+.content-section {
+  background-color: #fff;
+  border-radius: $border-radius;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: $spacing-md;
+}
+
+/* Common form styles */
+.q-field {
+  margin-bottom: 8px;
+  
+  &--filled {
+    .q-field__control {
+      border-radius: 8px;
+      background-color: #f5f5f5;
+      
+      &:hover {
+        background-color: #eeeeee;
+      }
+    }
+    
+    &.q-field--focused .q-field__control {
+      background-color: #e0e0e0;
+    }
+  }
+}
+
+/* Card styles */
+.q-card {
+  border-radius: 8px;
+}
+
+/* Table styles */
+.q-table {
+  border-radius: 8px;
+  
+  &__card {
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+  }
+} 

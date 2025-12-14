@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-workschd"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL_WORKSCHD")
+  relationMode = "prisma"
+}
+
+// --------------------------------------------------------
+// Workschd Models (Ported from Java entities)
+// --------------------------------------------------------
+
+model Account {
+  accountId       Int       @id @default(autoincrement()) @map("account_id")
+  username        String    @map("username") @db.VarChar(100)
+  email           String?   @map("email") @db.VarChar(512)
+  phone           String?   @map("phone") @db.VarChar(20)
+  password        String    @map("password")
+  status          String    @map("status") // Enum string
+  accessToken     String?   @map("access_token")
+  refreshToken    String?   @map("refresh_token")
+  profileImageUrl String?   @map("profile_image_url")
+  profileVideoUrl String?   @map("profile_video_url")
+  
+  // Relations
+  accountRoles    AccountRole[]
+  accountInfo     AccountInfo?
+  teamMembers     TeamMember[]
+  // shops, etc depending on relationships
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@map("account")
+}
+
+model AccountRole {
+  id        Int     @id @default(autoincrement())
+  accountId Int      @map("account_id")
+  roleType  String   @map("role_type")
+  
+  account   Account  @relation(fields: [accountId], references: [accountId])
+
+  @@map("account_role")
+}
+
+model AccountInfo {
+  id        Int    @id @default(autoincrement())
+  accountId Int     @unique @map("account_id")
+  // Add other fields from AccountInfo.java
+
+  account   Account @relation(fields: [accountId], references: [accountId])
+
+  @@map("account_info")
+}
+
+model Team {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  region              String
+  scheduleType        String?   @map("schedule_type")
+  invitationHash      String?   @map("invitation_hash")
+  invitationCreatedAt DateTime? @map("invitation_created_at")
+  invitationExpireAt  DateTime? @map("invitation_expire_at")
+  location            String?
+  
+  teamMembers         TeamMember[]
+  shops               Shop[]
+  tasks               Task[]
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@map("team")
+}
+
+model TeamMember {
+  id        Int    @id @default(autoincrement())
+  teamId    Int    @map("team_id")
+  accountId Int     @map("account_id")
+  
+  team      Team    @relation(fields: [teamId], references: [id])
+  account   Account @relation(fields: [accountId], references: [accountId])
+
+  @@map("team_member")
+}
+
+model Shop {
+  id        Int    @id @default(autoincrement())
+  teamId    Int    @map("team_id")
+  name      String
+
+  team      Team    @relation(fields: [teamId], references: [id])
+  tasks     Task[]
+
+  @@map("shop")
+}
+
+model Task {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  workerCount   Int       @map("worker_count")
+  startDateTime DateTime  @map("start_date_time")
+  endDateTime   DateTime  @map("end_date_time")
+  status        String
+  teamId        Int      @map("team_id")
+  shopId        Int      @map("shop_id")
+
+  team          Team      @relation(fields: [teamId], references: [id])
+  shop          Shop      @relation(fields: [shopId], references: [id])
+  taskEmployees TaskEmployee[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("task")
+}
+
+model TaskEmployee {
+  id        Int    @id @default(autoincrement())
+  taskId    Int    @map("task_id")
+  // accountId or teamMemberId
+
+  task      Task    @relation(fields: [taskId], references: [id])
+
+  @@map("task_employee")
+}

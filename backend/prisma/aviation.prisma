@@ -1,0 +1,248 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-aviation"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL_AVIATION")
+  relationMode = "prisma"
+}
+
+// --------------------------------------------------------
+// Aviation Models (Converted from SQL)
+// --------------------------------------------------------
+
+model NavTerminal {
+  id          String    @id @db.VarChar(10)
+  nameKo      String    @map("name_ko") @db.VarChar(100)
+  nameEn      String    @map("name_en") @db.VarChar(100)
+  airportCode String    @default("ICN") @map("airport_code") @db.VarChar(3)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  floors      NavFloor[]
+  waypoints   NavWaypoint[]
+  userLocations NavUserLocation[]
+
+  @@map("nav_terminals")
+}
+
+model NavFloor {
+  id            String      @id @db.VarChar(20)
+  terminalId    String      @map("terminal_id") @db.VarChar(10)
+  floorNumber   Int         @map("floor_number")
+  mapSvgPath    String?     @map("map_svg_path") @db.VarChar(500)
+  mapImagePath  String?     @map("map_image_path") @db.VarChar(500)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  terminal      NavTerminal @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+
+  @@index([terminalId, floorNumber])
+  @@map("nav_floors")
+}
+
+model NavWaypoint {
+  id            String             @id @db.VarChar(50)
+  terminalId    String             @map("terminal_id") @db.VarChar(10)
+  floorNumber   Int                @map("floor_number")
+  type          NavWaypointType
+  nameKo        String             @map("name_ko") @db.VarChar(200)
+  nameEn        String?            @map("name_en") @db.VarChar(200)
+  mapX          Int                @map("map_x")
+  mapY          Int                @map("map_y")
+  gpsLat        Decimal?           @map("gps_lat") @db.Decimal(10, 8)
+  gpsLon        Decimal?           @map("gps_lon") @db.Decimal(11, 8)
+  metadata      Json?
+  isAccessible  Boolean            @default(true) @map("is_accessible")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  terminal      NavTerminal        @relation(fields: [terminalId], references: [id], onDelete: Cascade)
+  
+  outgoingConnections NavWaypointConnection[] @relation("FromWaypoint")
+  incomingConnections NavWaypointConnection[] @relation("ToWaypoint")
+  
+  // Flight gates relation fields
+  gatesAsGate NavFlightGate[] @relation("GateWaypoint")
+  gatesAsCounter NavFlightGate[] @relation("CounterWaypoint")
+  
+  // User locations
+  nearestUsers NavUserLocation[]
+  
+  // Routes
+  routesStarting NavNavigationRoute[] @relation("StartWaypoint")
+  routesEnding   NavNavigationRoute[] @relation("EndWaypoint")
+
+  @@index([type])
+  @@index([terminalId, floorNumber])
+  @@index([isAccessible])
+  @@map("nav_waypoints")
+}
+
+model NavWaypointConnection {
+  id                Int                     @id @default(autoincrement())
+  fromWaypointId    String                  @map("from_waypoint_id") @db.VarChar(50)
+  toWaypointId      String                  @map("to_waypoint_id") @db.VarChar(50)
+  distanceMeters    Decimal                 @map("distance_meters") @db.Decimal(6, 2)
+  walkingTimeSeconds Int                    @map("walking_time_seconds")
+  isAccessible      Boolean                 @default(true) @map("is_accessible")
+  connectionType    NavConnectionType       @default(WALK) @map("connection_type")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+
+  fromWaypoint      NavWaypoint             @relation("FromWaypoint", fields: [fromWaypointId], references: [id], onDelete: Cascade)
+  toWaypoint        NavWaypoint             @relation("ToWaypoint", fields: [toWaypointId], references: [id], onDelete: Cascade)
+
+  @@unique([fromWaypointId, toWaypointId], map: "unique_connection")
+  @@index([fromWaypointId])
+  @@index([toWaypointId])
+  @@index([connectionType])
+  @@map("nav_waypoint_connections")
+}
+
+model NavFlightGate {
+  id                Int           @id @default(autoincrement())
+  flightNumber      String        @map("flight_number") @db.VarChar(10)
+  airlineCode       String        @map("airline_code") @db.VarChar(3)
+  airlineNameKo     String?       @map("airline_name_ko") @db.VarChar(100)
+  airlineNameEn     String?       @map("airline_name_en") @db.VarChar(100)
+  departureTime     DateTime      @map("departure_time")
+  destinationCode   String?       @map("destination_code") @db.VarChar(3)
+  destinationNameKo String?       @map("destination_name_ko") @db.VarChar(100)
+  destinationNameEn String?       @map("destination_name_en") @db.VarChar(100)
+  terminalId        String        @map("terminal_id") @db.VarChar(10)
+  counterZone       String?       @map("counter_zone") @db.VarChar(5)
+  counterNumbers    String?       @map("counter_numbers") @db.VarChar(20)
+  gateNumber        String?       @map("gate_number") @db.VarChar(10)
+  gateWaypointId    String?       @map("gate_waypoint_id") @db.VarChar(50)
+  counterWaypointId String?       @map("counter_waypoint_id") @db.VarChar(50)
+  boardingTime      DateTime?     @map("boarding_time")
+  lastCallTime      DateTime?     @map("last_call_time")
+  status            NavFlightStatus @default(SCHEDULED)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  gateWaypoint      NavWaypoint?  @relation("GateWaypoint", fields: [gateWaypointId], references: [id], onDelete: SetNull)
+  counterWaypoint   NavWaypoint?  @relation("CounterWaypoint", fields: [counterWaypointId], references: [id], onDelete: SetNull)
+
+  @@index([flightNumber, departureTime])
+  @@index([airlineCode])
+  @@index([departureTime])
+  @@index([status])
+  @@map("nav_flight_gates")
+}
+
+model NavUserLocation {
+  id                Int             @id @default(autoincrement())
+  telegramUserId    BigInt          @map("telegram_user_id")
+  terminalId        String?         @map("terminal_id") @db.VarChar(10)
+  floorNumber       Int?            @map("floor_number")
+  nearestWaypointId String?         @map("nearest_waypoint_id") @db.VarChar(50)
+  gpsLat            Decimal?        @map("gps_lat") @db.Decimal(10, 8)
+  gpsLon            Decimal?        @map("gps_lon") @db.Decimal(11, 8)
+  gpsAccuracyMeters Int?            @map("gps_accuracy_meters")
+  locationSource    NavLocationSource @default(MANUAL) @map("location_source")
+  timestamp         DateTime
+  createdAt         DateTime        @default(now()) @map("created_at")
+
+  terminal          NavTerminal?    @relation(fields: [terminalId], references: [id], onDelete: SetNull)
+  nearestWaypoint   NavWaypoint?    @relation(fields: [nearestWaypointId], references: [id], onDelete: SetNull)
+
+  @@index([telegramUserId])
+  @@index([timestamp])
+  @@index([terminalId, floorNumber])
+  @@map("nav_user_locations")
+}
+
+model NavNavigationRoute {
+  id                  String        @id @db.VarChar(36)
+  telegramUserId      BigInt        @map("telegram_user_id")
+  flightNumber        String?       @map("flight_number") @db.VarChar(10)
+  startWaypointId     String        @map("start_waypoint_id") @db.VarChar(50)
+  endWaypointId       String        @map("end_waypoint_id") @db.VarChar(50)
+  routeWaypoints      Json          @map("route_waypoints")
+  totalDistanceMeters Decimal?      @map("total_distance_meters") @db.Decimal(7, 2)
+  estimatedTimeMinutes Int?         @map("estimated_time_minutes")
+  mapImagePath        String?       @map("map_image_path") @db.VarChar(500)
+  status              NavRouteStatus @default(ACTIVE)
+  startedAt           DateTime      @default(now()) @map("started_at")
+  completedAt         DateTime?     @map("completed_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  startWaypoint       NavWaypoint   @relation("StartWaypoint", fields: [startWaypointId], references: [id])
+  endWaypoint         NavWaypoint   @relation("EndWaypoint", fields: [endWaypointId], references: [id])
+
+  @@index([telegramUserId, status])
+  @@index([flightNumber])
+  @@index([status])
+  @@index([startedAt])
+  @@map("nav_navigation_routes")
+}
+
+model TelegramUser {
+  id                  BigInt        @id @map("id")
+  username            String?       @db.VarChar(255)
+  firstName           String?       @map("first_name") @db.VarChar(255)
+  lastName            String?       @map("last_name") @db.VarChar(255)
+  languageCode        String?       @default("en") @map("language_code") @db.VarChar(10)
+  isSubscribed        Boolean?      @default(true) @map("is_subscribed")
+  subscribedAt        DateTime?     @default(now()) @map("subscribed_at")
+  unsubscribedAt      DateTime?     @map("unsubscribed_at")
+  totalMessagesReceived Int?        @default(0) @map("total_messages_received")
+  lastActivity        DateTime?     @default(now()) @updatedAt @map("last_activity")
+  createdAt           DateTime?     @default(now()) @map("created_at")
+  updatedAt           DateTime?     @default(now()) @updatedAt @map("updated_at")
+
+  @@index([isSubscribed])
+  @@index([lastActivity])
+  @@index([languageCode])
+  @@index([username])
+  @@map("users")
+}
+
+enum NavWaypointType {
+  COUNTER
+  GATE
+  IMMIGRATION
+  SECURITY
+  ELEVATOR
+  ESCALATOR
+  ENTRANCE
+  INFO
+  TRANSIT
+  RESTROOM
+  RESTAURANT
+  SHOP
+  LOUNGE
+}
+
+enum NavConnectionType {
+  WALK
+  ELEVATOR
+  ESCALATOR
+  STAIRS
+}
+
+enum NavFlightStatus {
+  SCHEDULED
+  BOARDING
+  DEPARTED
+  CANCELLED
+  DELAYED
+}
+
+enum NavLocationSource {
+  GPS
+  MANUAL
+  WIFI
+  BEACON
+}
+
+enum NavRouteStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
