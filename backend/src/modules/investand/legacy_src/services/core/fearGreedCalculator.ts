@@ -220,14 +220,14 @@ export class FearGreedCalculator {
       }
 
       // 날짜순 정렬 (최신순)
-      const sortedData = historicalData.sort((a, b) => 
+      const sortedData = historicalData.sort((a: any, b: any) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       )
 
       // 20일/120일 이동평균 계산
-      const ma20 = sortedData.slice(0, 20).reduce((sum, data) => 
+      const ma20 = sortedData.slice(0, 20).reduce((sum: number, data: any) =>
         sum + Number(data.stck_prpr || 0), 0) / 20
-      const ma120 = sortedData.reduce((sum, data) => 
+      const ma120 = sortedData.reduce((sum: number, data: any) =>
         sum + Number(data.stck_prpr || 0), 0) / sortedData.length
 
       // 모멘텀 점수 계산 (MA20이 MA120 대비 ±10% 범위를 0-100으로 변환)
@@ -263,7 +263,7 @@ export class FearGreedCalculator {
 
       // 외국인과 기관의 순매수 합산
       let totalNetBuying = 0
-      tradingData.forEach(data => {
+      tradingData.forEach((data: any) => {
         // 외국인 순매수 = 매수 - 매도 (거래대금 기준)
         const foreignNet = Number(data.frgn_shnu_tr_pbmn || 0) - Number(data.frgn_seln_tr_pbmn || 0)
         // 기관 순매수 = 매수 - 매도 (거래대금 기준)

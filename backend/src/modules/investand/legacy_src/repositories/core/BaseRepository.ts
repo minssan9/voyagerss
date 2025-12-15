@@ -50,7 +50,7 @@ export class BaseRepository {
   static async executeBatch<T>(
     operations: Array<(prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => Promise<T>>
   ): Promise<T[]> {
-    return this.prisma.$transaction(async (prisma) => {
+    return this.prisma.$transaction(async (prisma: any) => {
       return Promise.all(operations.map(op => op(prisma)))
     })
   }
