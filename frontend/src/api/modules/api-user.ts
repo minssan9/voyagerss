@@ -1,4 +1,4 @@
-import service from '@/api/axios-voyagerss'
+﻿import service from '@/api/axios-voyagerss'
 
 export default {
   getCurrentUser: () => service.get('/user/current'),
@@ -12,3 +12,4 @@ export default {
       }
     })
 } 
+

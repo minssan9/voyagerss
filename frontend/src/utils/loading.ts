@@ -1,4 +1,4 @@
-import NProgress from 'nprogress'
+﻿import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
 // Configure NProgress
@@ -19,3 +19,4 @@ export const LoadingService = {
     NProgress.done()
   }
 } 
+

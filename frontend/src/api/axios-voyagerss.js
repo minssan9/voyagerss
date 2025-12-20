@@ -1,4 +1,4 @@
-import { useUserStore } from '@/stores/modules/store_user'
+﻿import { useUserStore } from '@/stores/common/store_user'
 import axios from 'axios'
 import router from "@/router"
 import Cookies from 'js-cookie'
@@ -142,3 +142,5 @@ const apiError = {
 }
 
 export default service  // Default export
+
+

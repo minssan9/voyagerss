@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-footer class="bg-grey-9 text-white">
     <div class="q-pa-md">
       <div class="row justify-center items-center">
@@ -36,3 +36,4 @@ const { t } = useI18n()
   }
 }
 </style> 
+

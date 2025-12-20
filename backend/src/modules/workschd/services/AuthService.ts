@@ -1,4 +1,4 @@
-import { workschdPrisma as prisma } from '../../config/prisma';
+import { workschdPrisma as prisma } from '../../../config/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 

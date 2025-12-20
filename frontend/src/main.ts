@@ -1,4 +1,4 @@
-import './assets/styles/index.scss'
+﻿import './assets/styles/index.scss'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -9,8 +9,8 @@ import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 import { i18n } from "@/locales/i18n";
 // Module Styles
-import '@/modules/aviation/styles/app.sass'
-import '@/modules/investand/css/app.scss'
+import '@/views/aviation/styles/app.sass'
+import '@/views/investand/styles/app.scss'
 
 // import { app as firebaseApp } from './firebase/config'  // Import Firebase
 
@@ -47,3 +47,5 @@ declare global {
 // window.Kakao.init(import.meta.env.VITE_KAKAO_CLIENT_ID);
 
 app.mount('#app')
+
+

@@ -1,5 +1,5 @@
 import { Team } from '@prisma/client-workschd';
-import { workschdPrisma as prisma } from '../../config/prisma';
+import { workschdPrisma as prisma } from '../../../config/prisma';
 
 export class TeamService {
     async getTeamById(id: number): Promise<Team | null> {

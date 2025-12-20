@@ -1,5 +1,5 @@
-import { Router, RouteLocationNormalized } from 'vue-router'
-import { useUserStore } from '@/stores/modules/store_user'
+﻿import { Router, RouteLocationNormalized } from 'vue-router'
+import { useUserStore } from '@/stores/common/store_user'
 import { LoadingService } from '@/utils/loading'
 
 // Whitelist routes that don't require authentication
@@ -11,7 +11,7 @@ const whiteList = [
   '/about',
   '/subscription',
   '/privacy-policy',
-  '/terms',  
+  '/terms',
   '/401',
   '/403',
   '/404'
@@ -22,41 +22,43 @@ export function setupRouterGuards(router: Router) {
     // Start progress bar
     LoadingService.start()
 
-    const userStore = useUserStore()
-    const hasToken = userStore.accessToken
-    
-    // Allow access to whitelisted routes
-    if (whiteList.includes(to.path) || whiteList.some(path => path.endsWith('*') && to.path.startsWith(path.slice(0, -1)))) {
-      next()
-      return
-    }
+    // Authentication and role checks disabled
 
-    // Check if user is authenticated
-    if (!hasToken) {
-      next(`/401?redirect=${to.path}`)
-      return
-    }
+    // const userStore = useUserStore()
+    // const hasToken = userStore.accessToken
 
-    try {
-      // Check route permissions
-      const userRole = userStore.role
-      const requiredRoles = to.meta?.roles as string[] | undefined
+    // // Allow access to whitelisted routes
+    // if (whiteList.includes(to.path) || whiteList.some(path => path.endsWith('*') && to.path.startsWith(path.slice(0, -1)))) {
+    //   next()
+    //   return
+    // }
 
-      // If route requires specific roles
-      if (requiredRoles && requiredRoles.length > 0) {
-        if (!requiredRoles.includes(userRole)) {
-          next('/403')
-          return
-        }
-      }
+    // // Check if user is authenticated
+    // if (!hasToken) {
+    //   next(`/401?redirect=${to.path}`)
+    //   return
+    // }
 
-      next()
-    } catch (error) {
-      // Handle any errors during authentication check
-      console.error('Navigation guard error:', error)
-      userStore.resetUserState()
-      next(`/401?redirect=${to.path}`)
-    }
+    // try {
+    //   // Check route permissions
+    //   const userRole = userStore.role
+    //   const requiredRoles = to.meta?.roles as string[] | undefined
+
+    //   // If route requires specific roles
+    //   if (requiredRoles && requiredRoles.length > 0) {
+    //     if (!requiredRoles.includes(userRole)) {
+    //       next('/403')
+    //       return
+    //     }
+    //   }
+
+    next()
+    // } catch (error) {
+    //   // Handle any errors during authentication check
+    //   console.error('Navigation guard error:', error)
+    //   userStore.resetUserState()
+    //   next(`/401?redirect=${to.path}`)
+    // }
   })
 
   router.afterEach(() => {
@@ -64,8 +66,10 @@ export function setupRouterGuards(router: Router) {
     LoadingService.done()
   })
 
-  router.onError(() => {
+  router.onError((e) => {
     // Ensure progress bar is completed on error
     LoadingService.done()
+    console.error('Navigation guard error:', e)
   })
-} 
+}
+

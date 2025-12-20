@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-header elevated :class="$q.dark.isActive ? 'bg-secondary' : 'bg-black'">
     <q-toolbar>
       <q-btn flat @click="layoutStore.toggleLeftDrawer()" round dense icon="menu" />
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import { useLayoutStore } from '@/stores/modules/store_layout'
+import { useLayoutStore } from '@/stores/common/store_layout'
 import {onMounted} from "vue";
 
 const $q = useQuasar()
@@ -27,3 +27,4 @@ onMounted(() => {
 
 })
 </script> 
+

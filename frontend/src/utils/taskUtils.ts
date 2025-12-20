@@ -1,4 +1,4 @@
-export function getStatusLabel(status: string): string {
+﻿export function getStatusLabel(status: string): string {
   const statusMap: Record<string, string> = {
     'SCHEDULED': '예정됨',
     'IN_PROGRESS': '진행중',
@@ -43,4 +43,6 @@ export function getRequestStatusColor(status: string | null): string {
   }
   return colorMap[status] || 'grey'
 } 
+
+
 

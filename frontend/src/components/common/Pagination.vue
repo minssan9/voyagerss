@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pagination-container">
     <q-pagination
       v-model="currentPage"
@@ -107,3 +107,4 @@ onMounted(() => {
   width: 150px;
 }
 </style> 
+

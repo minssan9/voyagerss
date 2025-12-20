@@ -1,4 +1,4 @@
-import axios from 'axios'
+﻿import service from '@/api/axios-voyagerss'
 
 const ASSEMBLY_API_URL = 'https://open.assembly.go.kr/portal/openapi/ALLNAMEMBER'
 const ASSEMBLY_MEMBER_API_URL = 'http://apis.data.go.kr/9710000/NationalAssemblyInfoService/getMemberCurrStateList'
@@ -8,34 +8,34 @@ interface AssemblyParams {
   pSize?: string | number;
   Type?: string;
 }
- 
+
 
 // Helper function to convert XML to JSON
 function xmlToJson(xml: string) {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xml, 'text/xml');
-  
+
   function elementToObj(element: Element): any {
     const obj: any = {};
-    
+
     for (const child of element.children) {
       // Handle items array
       if (child.tagName === 'items') {
         obj.items = Array.from(child.children).map(item => elementToObj(item));
         continue;
       }
-      
+
       // Handle regular elements
-      const value = child.children.length > 0 
-        ? elementToObj(child) 
+      const value = child.children.length > 0
+        ? elementToObj(child)
         : child.textContent;
-        
+
       obj[child.tagName] = value;
     }
-    
+
     return obj;
   }
-  
+
   return elementToObj(xmlDoc.documentElement);
 }
 
@@ -55,7 +55,7 @@ export default {
       )
     ).toString()
 
-    const response = await axios.get(`${ASSEMBLY_API_URL}?${queryString}`, {
+    const response = await service.get(`${ASSEMBLY_API_URL}?${queryString}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json'
@@ -80,7 +80,7 @@ export default {
       )
     ).toString()
 
-    const response = await axios.get(`${ASSEMBLY_MEMBER_API_URL}?${queryString}`, {
+    const response = await service.get(`${ASSEMBLY_MEMBER_API_URL}?${queryString}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/xml'
@@ -90,7 +90,7 @@ export default {
 
     // Convert XML to JSON
     const jsonData = xmlToJson(response.data)
-    
+
     return {
       header: jsonData.header,
       items: jsonData.body.items,
@@ -101,4 +101,5 @@ export default {
       }
     }
   }
-} 
+}
+

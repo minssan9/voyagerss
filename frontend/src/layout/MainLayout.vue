@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <div class="background-pattern"></div>
     <div>
@@ -8,9 +8,12 @@
         </li>
       </ul>
     </div>
-    <q-layout view="hHh LpR fFf" container
-              style="height: 100vh"
-              class="shadow-2 rounded-borders">
+    <q-layout 
+      view="hHh LpR fFf" 
+      container
+      style="height: 100vh"
+      :class="['shadow-2 rounded-borders', { 'with-sidebar': layoutStore.drawerLeft }]"
+    >
       <MainHeader />
       <LeftDrawer />
       <RightDrawer />
@@ -30,9 +33,9 @@ import MainHeader from './components/MainHeader.vue'
 import LeftDrawer from './components/LeftDrawer.vue'
 import RightDrawer from './components/RightDrawer.vue'
 import Footer from './components/Footer.vue'
-import { useLayoutStore } from '@/stores/modules/store_layout'
-import { useUserStore } from '@/stores/modules/store_user'
-import { useTeamStore } from '@/stores/modules/store_team'
+import { useLayoutStore } from '@/stores/common/store_layout'
+import { useUserStore } from '@/stores/common/store_user'
+import { useTeamStore } from '@/stores/workschd/store_team'
 import * as ChannelService from '@channel.io/channel-web-sdk-loader'
 import Cookies from 'js-cookie'
 const layoutStore = useLayoutStore()
@@ -49,10 +52,10 @@ onMounted(() => {
 
 
   
-  ChannelService.loadScript()
-  ChannelService.boot({
-    "pluginKey": import.meta.env.VITE_CHANNEL_TALK_PLUGIN_KEY
-  })
+  // ChannelService.loadScript()
+  // ChannelService.boot({
+  //   "pluginKey": import.meta.env.VITE_CHANNEL_TALK_PLUGIN_KEY
+  // })
 })
 </script>
 
@@ -62,4 +65,8 @@ onMounted(() => {
 .drawer-side {
   height: calc(100vh - 200px);
 }
+
+/* Sidebar margin removed - sidebar now toggles on all screen sizes */
 </style>
+
+

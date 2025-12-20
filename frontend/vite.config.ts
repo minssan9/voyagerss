@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import path from 'node:path'
 
 import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -11,7 +12,10 @@ import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
-  const env = loadEnv(mode, '.', 'VITE_')
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
+  const env = loadEnv(mode, path.resolve(process.cwd(), '../'), '')
 
   return {
     plugins: [
@@ -94,7 +98,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     server: {
-      port: 3003, // 개발 서버 포트 설정
+      port: parseInt(env.FRONTEND_PORT || '9003'), // 개발 서버 포트 설정
       open: true, // 브라우저 자동 열기
       host: 'localhost',
       // https: false, // HTTPS 사용 여부
@@ -102,7 +106,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // API 프록시 설정 - example of using env variables
         '/api': {
-          target: env.VITE_API_URL || 'http://local.voyagerss.com:24000',
+          target: env.VITE_API_URL || `http://localhost:${env.BACKEND_PORT || 14003}`,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, '')
         }

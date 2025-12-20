@@ -1,4 +1,4 @@
-// src/utils/cookieUtils.js
+﻿// src/utils/cookieUtils.js
 import Cookies from 'js-cookie'
 
 export const removeAllCookies = () => {
@@ -6,3 +6,4 @@ export const removeAllCookies = () => {
     Cookies.remove(cookieName)
   })
 }
+

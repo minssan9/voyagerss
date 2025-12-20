@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import { setupRouterGuards } from './permission'
 import { Loading } from 'quasar'
 import { routes } from './routes'
@@ -17,3 +17,5 @@ router.onError(() => {
 })
 
 export default router
+
+

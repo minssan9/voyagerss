@@ -1,4 +1,4 @@
-import service from '@/api/axios-voyagerss.js'
+﻿import service from '@/api/axios-voyagerss.js'
 
 const apiSys = {
   getSysConfLike (code) {
@@ -10,3 +10,5 @@ const apiSys = {
 }
 
 export default apiSys
+
+

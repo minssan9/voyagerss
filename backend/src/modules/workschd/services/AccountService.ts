@@ -1,4 +1,4 @@
-import { workschdPrisma as prisma } from '../../config/prisma';
+import { workschdPrisma as prisma } from '../../../config/prisma';
 import { Account } from '@prisma/client-workschd';
 
 export class AccountService {

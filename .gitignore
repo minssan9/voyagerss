@@ -3,3 +3,5 @@
 */dev-dist
 *.zip
 backend/package-lock.json
+
+.env

@@ -14,16 +14,21 @@ let weatherImageService: any;
 
 async function initServices() {
     if (topicService) return;
+    // @ts-ignore - ApplicationFactory from legacy JS code
     const factory = new ApplicationFactory();
     // We need a DB instance. AviationBot creates it.
     // In unified backend, we should probably share the DB or create one.
     // For legacy support, let the factory create it if it handles it.
+    // @ts-ignore - createApp accepts null parameter
     factory.createApp(null); // Database injected by factory if null? AviationBot passes null to createApp then gets 'database' service.
 
+    // @ts-ignore
     const db = factory.getService('database');
     await db.initialize();
 
+    // @ts-ignore
     topicService = factory.getContainer().resolve('topicService');
+    // @ts-ignore
     weatherImageService = factory.getContainer().resolve('weatherService');
     await weatherImageService.initialize();
 }

@@ -1,4 +1,4 @@
-import service from "@/api/axios-voyagerss.js";
+﻿import service from "@/api/axios-voyagerss.js";
  
 const baesURL = `account` 
 const apiAccount = {
@@ -70,3 +70,5 @@ const apiAccount = {
 }
 
 export default apiAccount
+
+

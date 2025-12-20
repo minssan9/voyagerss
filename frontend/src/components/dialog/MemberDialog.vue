@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-dialog v-model="isOpen" persistent>
     <q-card class="member-dialog-card">
       <q-card-section class="row items-center q-pb-none">
@@ -52,3 +52,4 @@ function closeDialog() {
   max-width: 90vw;
 }
 </style> 
+

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import MainLayout from "@/layout/MainLayout.vue";
 </script>
@@ -72,3 +72,5 @@ nav a:first-of-type {
   }
 }
 </style>
+
+

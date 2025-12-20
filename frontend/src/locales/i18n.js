@@ -1,4 +1,4 @@
-import { createI18n } from "vue-i18n";
+﻿import { createI18n } from "vue-i18n";
 import axios from "axios";
 import apiSys from "@/api/public-modules/api-sys";
 
@@ -41,3 +41,5 @@ export function loadLanaguageAsync(lang) {
       })
 
 }
+
+

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-drawer 
     side="right" 
     v-model="drawerRight"
@@ -126,9 +126,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useLayoutStore } from '@/stores/modules/store_layout'
-import { useUserStore } from '@/stores/modules/store_user'
-import { useTeamStore } from '@/stores/modules/store_team'
+import { useLayoutStore } from '@/stores/common/store_layout'
+import { useUserStore } from '@/stores/common/store_user'
+import { useTeamStore } from '@/stores/workschd/store_team'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -204,3 +204,5 @@ onMounted(() => {
   min-width: 40px;
 }
 </style> 
+
+

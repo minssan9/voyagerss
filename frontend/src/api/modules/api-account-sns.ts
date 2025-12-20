@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+﻿import { AxiosResponse } from 'axios';
 import service from '@/api/axios-voyagerss';
 
 export interface AccountSnsDTO {
@@ -37,3 +37,4 @@ export default {
     return service.get(`/account-sns/account/${accountId}`);
   }
 }; 
+

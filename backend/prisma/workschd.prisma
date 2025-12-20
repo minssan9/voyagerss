@@ -29,6 +29,7 @@ model Account {
   accountRoles    AccountRole[]
   accountInfo     AccountInfo?
   teamMembers     TeamMember[]
+  taskEmployees   TaskEmployee[]
   // shops, etc depending on relationships
   
   createdAt       DateTime  @default(now()) @map("created_at")
@@ -92,6 +93,9 @@ model Shop {
   id        Int    @id @default(autoincrement())
   teamId    Int    @map("team_id")
   name      String
+  district  String?
+  status    String    @default("ACTIVE")
+  address   String?
 
   team      Team    @relation(fields: [teamId], references: [id])
   tasks     Task[]
@@ -123,9 +127,11 @@ model Task {
 model TaskEmployee {
   id        Int    @id @default(autoincrement())
   taskId    Int    @map("task_id")
-  // accountId or teamMemberId
+  accountId Int    @map("account_id")
+  status    String @default("PENDING")
 
   task      Task    @relation(fields: [taskId], references: [id])
+  account   Account @relation(fields: [accountId], references: [accountId])
 
   @@map("task_employee")
 }

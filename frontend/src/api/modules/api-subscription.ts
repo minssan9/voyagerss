@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+﻿import { AxiosResponse } from 'axios';
 import service from "@/api/axios-voyagerss.js";
 
 export interface SubscriptionDTO {
@@ -15,3 +15,4 @@ export default {
     return service.get('/subscription/current');
   }
 }; 
+

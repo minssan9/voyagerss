@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div id="gridDiv">
     <div class="button">
       <button @click="gridApi?.undoCellEditing()">undo</button>
@@ -217,3 +217,4 @@ onMounted(() => {
   }
 }
 </style>
+

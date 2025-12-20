@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-card class="member-card q-pa-md">
     <div class="row items-center q-col-gutter-md">
       <div class="col-auto">
@@ -49,3 +49,4 @@ const props = defineProps<{
   min-width: 280px;
 }
 </style> 
+

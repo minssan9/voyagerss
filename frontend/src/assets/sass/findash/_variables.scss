@@ -1,0 +1,90 @@
+// Findash module SCSS variables and mixins
+// Theme colors
+$findash-primary: #3b82f6;
+$findash-primary-dark: #1e40af;
+$findash-indigo: #6366f1;
+$findash-purple: #8b5cf6;
+$findash-pink: #ec4899;
+$findash-emerald: #10b981;
+$findash-amber: #f59e0b;
+$findash-rose: #f43f5e;
+
+// Slate colors (backgrounds and text)
+$findash-slate-50: #f8fafc;
+$findash-slate-100: #f1f5f9;
+$findash-slate-200: #e2e8f0;
+$findash-slate-300: #cbd5e1;
+$findash-slate-400: #94a3b8;
+$findash-slate-500: #64748b;
+$findash-slate-600: #475569;
+$findash-slate-700: #334155;
+$findash-slate-800: #1e293b;
+$findash-slate-900: #0f172a;
+
+// Sidebar theme
+$sidebar-bg: #0F172A;
+$sidebar-border: $findash-slate-800;
+$sidebar-text: $findash-slate-400;
+$sidebar-text-active: #a5b4fc;
+$sidebar-bg-hover: rgba($findash-slate-800, 0.5);
+
+// Chart colors
+$chart-colors: (
+  $findash-primary,
+  $findash-indigo,
+  $findash-purple,
+  $findash-pink,
+  $findash-emerald,
+  $findash-amber
+);
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+$shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+// Card mixin
+@mixin findash-card {
+  background: white;
+  border-radius: 0.75rem;
+  border: 1px solid $findash-slate-200;
+  box-shadow: $shadow-sm;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+// Gradient backgrounds
+@mixin ai-gradient {
+  background: linear-gradient(to bottom right, #312e81, #4338ca, #581c87);
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

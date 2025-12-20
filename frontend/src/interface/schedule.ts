@@ -1,4 +1,4 @@
-export interface ScheduleConfig {
+﻿export interface ScheduleConfig {
   minStaffPerDay: Record<string, number>;
   maxOffDaysPerMonth: Record<number, number>;
 }
@@ -12,3 +12,4 @@ export interface MonthConfig {
   value: number;
   label: string;
 } 
+

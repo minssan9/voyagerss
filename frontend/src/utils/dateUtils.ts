@@ -1,4 +1,4 @@
-import { date } from 'quasar'
+﻿import { date } from 'quasar'
 
 export function formatDateRange(start?: string, end?: string): string {
   if (!start || !end) return '-'
@@ -20,3 +20,4 @@ export function formatTimeRange(start?: string, end?: string): string {
   
   return `${startTime} - ${endTime}`
 } 
+

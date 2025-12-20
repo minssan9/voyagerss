@@ -1,6 +1,6 @@
-// Re-export all types from their respective files
-export * from './task'
-export * from './shop'
-export * from './assembly'
-export * from './firebase.d'
-export * from './status' 
+﻿// Re-export all types from their respective domain folders
+export * from './workschd/task'
+export * from './workschd/shop'
+export * from './workschd/status'
+export * from './common/assembly' 
+
