@@ -110,7 +110,7 @@ export const adminApi = {
         data: { token: string; user: AdminUser };
         message: string;
         code?: string;
-      }>('/admin/login', { username, password })
+      }>('/investand/admin/login', { username, password })
 
       if (response.data.success) {
         return response.data.data
@@ -132,7 +132,7 @@ export const adminApi = {
         data: { user: AdminUser };
         message: string;
         code?: string;
-      }>('/admin/validate-token', { token })
+      }>('/investand/admin/validate-token', { token })
 
       if (response.data.success) {
         return response.data.data.user
@@ -154,7 +154,7 @@ export const adminApi = {
         data: SignupResponse;
         message: string;
         code?: string;
-      }>('/admin/signup', request)
+      }>('/investand/admin/signup', request)
 
       if (response.data.success) {
         return response.data.data
@@ -173,7 +173,7 @@ export const adminApi = {
   async collectData(request: DataCollectionRequest): Promise<DataCollectionResponse> {
     try {
       const response = await service.post<{ success: boolean; data: DataCollectionResponse }>(
-        '/admin/collect-data',
+        '/investand/admin/collect-data',
         request
       )
       return response.data.data
@@ -187,7 +187,7 @@ export const adminApi = {
   async calculateIndex(request: CalculateIndexRequest): Promise<CalculateIndexResponse> {
     try {
       const response = await service.post<{ success: boolean; data: CalculateIndexResponse }>(
-        '/admin/calculate-index',
+        '/investand/admin/calculate-index',
         request
       )
       return response.data.data
@@ -200,7 +200,7 @@ export const adminApi = {
   async recalculateRange(startDate: string, endDate: string): Promise<any[]> {
     try {
       const response = await service.post<{ success: boolean; data: any[] }>(
-        '/admin/recalculate-range',
+        '/investand/admin/recalculate-range',
         { startDate, endDate }
       )
       return response.data.data
@@ -214,7 +214,7 @@ export const adminApi = {
   async scheduleDartDailyBatch(request: DartBatchRequest): Promise<DartBatchResponse> {
     try {
       const response = await service.post<{ success: boolean; data: DartBatchResponse }>(
-        '/admin/dart/batch/daily',
+        '/investand/admin/dart/batch/daily',
         request
       )
       return response.data.data
@@ -229,7 +229,7 @@ export const adminApi = {
   async scheduleDartFinancialBatch(request: DartFinancialBatchRequest): Promise<DartBatchResponse> {
     try {
       const response = await service.post<{ success: boolean; data: DartBatchResponse }>(
-        '/admin/dart/batch/financial',
+        '/investand/admin/dart/batch/financial',
         request
       )
       return response.data.data
@@ -244,7 +244,7 @@ export const adminApi = {
   async getDartBatchStatus(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/dart/batch/status'
+        '/investand/admin/dart/batch/status'
       )
       return response.data.data
     } catch (error: any) {
@@ -258,7 +258,7 @@ export const adminApi = {
   async getDartHealth(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/dart/health'
+        '/investand/admin/dart/health'
       )
       return response.data.data
     } catch (error: any) {
@@ -273,7 +273,7 @@ export const adminApi = {
     try {
       const queryParams = date ? `?date=${date}` : ''
       const response = await service.get<{ success: boolean; data: any }>(
-        `/admin/dart/stats${queryParams}`
+        `/investand/admin/dart/stats${queryParams}`
       )
       return response.data.data
     } catch (error: any) {
@@ -288,7 +288,7 @@ export const adminApi = {
   async calculateFearGreedIndex(request: FearGreedCalculationRequest): Promise<CalculateIndexResponse> {
     try {
       const response = await service.post<{ success: boolean; data: CalculateIndexResponse }>(
-        '/admin/calculate-index',
+        '/investand/admin/calculate-index',
         request
       )
       return response.data.data
@@ -303,7 +303,7 @@ export const adminApi = {
   async recalculateFearGreedRange(request: FearGreedRangeRequest): Promise<FearGreedRangeResponse[]> {
     try {
       const response = await service.post<{ success: boolean; data: { results: FearGreedRangeResponse[] } }>(
-        '/admin/recalculate-range',
+        '/investand/admin/recalculate-range',
         request
       )
       return response.data.data.results
@@ -318,7 +318,7 @@ export const adminApi = {
   async getFearGreedCurrent(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/fear-greed/current'
+        '/investand/fear-greed/current'
       )
       return response.data.data
     } catch (error: any) {
@@ -332,7 +332,7 @@ export const adminApi = {
   async getFearGreedHistory(days: number = 30): Promise<any[]> {
     try {
       const response = await service.get<{ success: boolean; data: any[] }>(
-        `/fear-greed/history?days=${days}`
+        `/investand/fear-greed/history?days=${days}`
       )
       return response.data.data
     } catch (error: any) {
@@ -346,7 +346,7 @@ export const adminApi = {
   async getFearGreedStats(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/fear-greed/stats'
+        '/investand/fear-greed/stats'
       )
       return response.data.data
     } catch (error: any) {
@@ -361,7 +361,7 @@ export const adminApi = {
   async getSystemHealth(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/system-health'
+        '/investand/admin/system-health'
       )
       return response.data.data
     } catch (error: any) {
@@ -375,7 +375,7 @@ export const adminApi = {
   async getPerformanceMetrics(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/performance-metrics'
+        '/investand/admin/performance-metrics'
       )
       return response.data.data
     } catch (error: any) {
@@ -389,7 +389,7 @@ export const adminApi = {
   async getSystemInfo(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/system-info'
+        '/investand/admin/system-info'
       )
       return response.data.data
     } catch (error: any) {
@@ -403,7 +403,7 @@ export const adminApi = {
   async getLogs(limit: number = 50, level: string = 'all'): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        `/admin/logs?limit=${limit}&level=${level}`
+        `/investand/admin/logs?limit=${limit}&level=${level}`
       )
       return response.data.data
     } catch (error: any) {
@@ -418,7 +418,7 @@ export const adminApi = {
   async restartService(service: string): Promise<any> {
     try {
       const response = await service.post<{ success: boolean; data: any }>(
-        '/admin/restart-service',
+        '/investand/admin/restart-service',
         { service }
       )
       return response.data.data
@@ -433,7 +433,7 @@ export const adminApi = {
   async clearCache(): Promise<any> {
     try {
       const response = await service.post<{ success: boolean; data: any }>(
-        '/admin/clear-cache'
+        '/investand/admin/clear-cache'
       )
       return response.data.data
     } catch (error: any) {
@@ -447,7 +447,7 @@ export const adminApi = {
   async getSystemConfig(): Promise<any> {
     try {
       const response = await service.get<{ success: boolean; data: any }>(
-        '/admin/system-config'
+        '/investand/admin/system-config'
       )
       return response.data.data
     } catch (error: any) {
@@ -461,7 +461,7 @@ export const adminApi = {
   async updateSystemConfig(config: any): Promise<any> {
     try {
       const response = await service.put<{ success: boolean; data: any }>(
-        '/admin/system-config',
+        '/investand/admin/system-config',
         { config }
       )
       return response.data.data

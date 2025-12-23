@@ -1,5 +1,5 @@
 ﻿<template>
-  <q-card class="member-card q-pa-md">
+  <q-card class="card q-pa-md" style="min-width: 280px;">
     <div class="row items-center q-col-gutter-md">
       <div class="col-auto">
         <q-avatar size="64px" :src="member.avatarUrl" color="primary" text-color="white">
@@ -42,11 +42,6 @@ const props = defineProps<{
 </script>
 
 <style scoped lang="scss">
-.member-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.08);
-  background: white;
-  min-width: 280px;
-}
+/* Uses global .card styles from components.scss */
 </style> 
 

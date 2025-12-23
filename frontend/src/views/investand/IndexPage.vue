@@ -233,27 +233,13 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-.fear-greed-card {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
-}
-
-.component-card {
-  min-width: 150px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-}
-
-.market-card {
-  min-width: 200px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-}
-
+<style lang="scss">
+/* Cards now use global .card styles from components.scss */
+.fear-greed-card,
+.component-card,
+.market-card,
 .chart-card {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  /* Uses global card styles */
 }
 
 .index-value {
@@ -274,10 +260,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .chart-card {
-    min-width: 95vw;
-  }
-  
+  .chart-card,
   .fear-greed-card {
     min-width: 95vw;
   }
@@ -286,6 +269,4 @@ onMounted(() => {
     font-size: 3rem;
   }
 }
-</style> 
-
-
+</style>

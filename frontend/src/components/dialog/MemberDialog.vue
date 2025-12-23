@@ -47,9 +47,9 @@ function closeDialog() {
 </script>
 
 <style scoped>
+/* Uses global .dialog-card styles from dialog.scss */
 .member-dialog-card {
   width: 400px;
   max-width: 90vw;
 }
-</style> 
-
+</style>

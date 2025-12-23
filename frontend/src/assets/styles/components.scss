@@ -1,0 +1,364 @@
+// ============================================
+// Component Styles
+// ============================================
+
+@import './variables.scss';
+
+// --------------------------------------------
+// Cards
+// --------------------------------------------
+.card {
+    background-color: $white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
+    overflow: hidden;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+    }
+
+    &-hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: $shadow-lg;
+    }
+
+    &-header {
+        padding: $spacing-base $spacing-lg;
+        border-bottom: $border-width solid $border-color-light;
+        background-color: $gray-50;
+
+        .title {
+            font-size: $text-lg;
+            font-weight: $font-semibold;
+            color: $text-dark;
+            margin: 0;
+        }
+    }
+
+    &-body {
+        padding: $spacing-lg;
+    }
+
+    &-footer {
+        padding: $spacing-base $spacing-lg;
+        border-top: $border-width solid $border-color-light;
+        background-color: $gray-50;
+    }
+
+    &-stat {
+        background-color: $white;
+        border-radius: $border-radius-lg;
+        padding: $spacing-lg;
+        box-shadow: $shadow-sm;
+        transition: all $transition-fast;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: $shadow-md;
+        }
+
+        .stat-label {
+            font-size: $text-sm;
+            color: $text-light;
+            margin-bottom: $spacing-sm;
+        }
+
+        .stat-value {
+            font-size: $text-3xl;
+            font-weight: $font-bold;
+            margin-bottom: $spacing-md;
+        }
+    }
+
+    &-action {
+        background-color: $white;
+        border-radius: $border-radius-lg;
+        padding: $spacing-lg;
+        text-align: center;
+        cursor: pointer;
+        transition: all $transition-fast;
+        box-shadow: $shadow-sm;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: $shadow-lg;
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: $spacing-sm;
+        }
+
+        .action-label {
+            font-size: $text-base;
+            font-weight: $font-medium;
+        }
+    }
+}
+
+// --------------------------------------------
+// Buttons
+// --------------------------------------------
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-sm $spacing-base;
+    font-size: $text-base;
+    font-weight: $font-medium;
+    border-radius: $border-radius-md;
+    border: $border-width solid transparent;
+    cursor: pointer;
+    transition: all $transition-fast;
+    text-decoration: none;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &-sm {
+        padding: $spacing-xs $spacing-sm;
+        font-size: $text-sm;
+    }
+
+    &-lg {
+        padding: $spacing-base $spacing-xl;
+        font-size: $text-lg;
+    }
+
+    &-primary {
+        background-color: $primary-color;
+        color: $white;
+
+        &:hover:not(:disabled) {
+            background-color: $primary-dark;
+            box-shadow: $shadow-md;
+        }
+    }
+
+    &-secondary {
+        background-color: $secondary-color;
+        color: $white;
+
+        &:hover:not(:disabled) {
+            background-color: $secondary-dark;
+            box-shadow: $shadow-md;
+        }
+    }
+
+    &-outline {
+        background-color: transparent;
+        border-color: $primary-color;
+        color: $primary-color;
+
+        &:hover:not(:disabled) {
+            background-color: $primary-color;
+            color: $white;
+        }
+    }
+
+    &-ghost {
+        background-color: transparent;
+        color: $text-color;
+
+        &:hover:not(:disabled) {
+            background-color: $gray-100;
+        }
+    }
+}
+
+// --------------------------------------------
+// Forms
+// --------------------------------------------
+.form {
+    &-group {
+        margin-bottom: $spacing-base;
+
+        label {
+            display: block;
+            margin-bottom: $spacing-xs;
+            font-size: $text-sm;
+            font-weight: $font-medium;
+            color: $text-dark;
+        }
+    }
+
+    &-input,
+    &-select,
+    &-textarea {
+        width: 100%;
+        padding: $spacing-sm $spacing-base;
+        font-size: $text-base;
+        border: $border-width solid $border-color;
+        border-radius: $border-radius-md;
+        transition: border-color $transition-fast, box-shadow $transition-fast;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+        }
+
+        &::placeholder {
+            color: $text-muted;
+        }
+    }
+
+    &-error {
+        margin-top: $spacing-xs;
+        font-size: $text-sm;
+        color: $error-color;
+    }
+
+    &-help {
+        margin-top: $spacing-xs;
+        font-size: $text-sm;
+        color: $text-light;
+    }
+}
+
+// --------------------------------------------
+// Tables
+// --------------------------------------------
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: $white;
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+
+    &-header {
+        background-color: $gray-50;
+        border-bottom: $border-width solid $border-color;
+
+        th {
+            padding: $spacing-base;
+            text-align: left;
+            font-size: $text-sm;
+            font-weight: $font-semibold;
+            color: $text-dark;
+        }
+    }
+
+    &-row {
+        border-bottom: $border-width solid $border-color-light;
+        transition: background-color $transition-fast;
+
+        &:hover {
+            background-color: $gray-50;
+        }
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &-cell {
+        padding: $spacing-base;
+        font-size: $text-sm;
+        color: $text-color;
+    }
+}
+
+// --------------------------------------------
+// Empty States
+// --------------------------------------------
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-3xl $spacing-base;
+    text-align: center;
+
+    &-icon {
+        font-size: 3rem;
+        color: $gray-400;
+        margin-bottom: $spacing-base;
+    }
+
+    &-title {
+        font-size: $text-lg;
+        font-weight: $font-semibold;
+        color: $text-dark;
+        margin-bottom: $spacing-xs;
+    }
+
+    &-text {
+        font-size: $text-base;
+        color: $text-light;
+        margin-bottom: $spacing-lg;
+    }
+}
+
+// --------------------------------------------
+// Badges & Tags
+// --------------------------------------------
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-sm;
+    font-size: $text-xs;
+    font-weight: $font-medium;
+    border-radius: $border-radius-full;
+
+    &-primary {
+        background-color: $primary-muted;
+        color: $primary-dark;
+    }
+
+    &-success {
+        background-color: $success-light;
+        color: $success-dark;
+    }
+
+    &-warning {
+        background-color: $warning-light;
+        color: $warning-dark;
+    }
+
+    &-error {
+        background-color: $error-light;
+        color: $error-dark;
+    }
+
+    &-gray {
+        background-color: $gray-200;
+        color: $gray-700;
+    }
+}
+
+// --------------------------------------------
+// Loading Spinner
+// --------------------------------------------
+.spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid $gray-200;
+    border-top-color: $primary-color;
+    border-radius: $border-radius-full;
+    animation: spin 1s linear infinite;
+
+    &-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 2px;
+    }
+
+    &-lg {
+        width: 3rem;
+        height: 3rem;
+        border-width: 4px;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

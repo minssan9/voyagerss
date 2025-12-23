@@ -342,14 +342,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.ag-theme-alpine {
-  width: 100%;
-}
-
+/* ag-theme handled by grid-default.scss, clickable-cell uses utility classes */
 .clickable-cell {
   cursor: pointer;
   color: var(--q-primary);
   text-decoration: underline;
 }
 </style>
-
+```

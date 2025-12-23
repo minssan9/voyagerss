@@ -1,7 +1,7 @@
 ﻿<template>
   <q-page class="column items-center justify-center q-pa-md">
     <!-- Social Login Container -->
-    <div class="login-container q-pa-lg">
+    <div class="login-container card q-pa-lg">
       <!-- Social Login Buttons -->
       <div class="column items-center q-gutter-y-md">
         <!-- Kakao -->
@@ -226,9 +226,6 @@ const handleLogin = async () => {
 .login-container {
   width: 100%;
   max-width: 450px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .social-login-btn {
@@ -263,19 +260,10 @@ const handleLogin = async () => {
   }
 }
 
-// Optional: Add a subtle background pattern
 .q-page {
   background-color: #f5f5f5;
   background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
   background-size: 20px 20px;
 }
-
-.q-card {
-  width: 360px;
-  
-  @media (max-width: 600px) {
-    width: 100%;
-  }
-}
 </style>
-
+```

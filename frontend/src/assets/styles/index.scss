@@ -1,8 +1,14 @@
 // Import variables first
 @import './variables.scss';
 
-// Import all other SCSS files
+// Import base styles
 @import './base.scss';
+
+// Import utilities and components
+@import './utilities.scss';
+@import './components.scss';
+
+// Import layout and specific styles
 @import './main.scss';
 @import './global.scss';
 @import './grid-default.scss';

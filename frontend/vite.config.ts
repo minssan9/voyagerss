@@ -104,11 +104,11 @@ export default defineConfig(({ mode }) => {
       // https: false, // HTTPS 사용 여부
       cors: true, // CORS 활성화
       proxy: {
-        // API 프록시 설정 - example of using env variables
+        // API 프록시 설정 - handles ALL /api/* routes including aviation, investand, etc.
         '/api': {
           target: env.VITE_API_URL || `http://localhost:${env.BACKEND_PORT || 14003}`,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '')
+          changeOrigin: true
+          // NO rewrite needed - backend expects /api prefix
         }
       }
     },

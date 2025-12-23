@@ -19,10 +19,10 @@
     <div class="row q-col-gutter-md q-mb-lg">
       <!-- Shifts Today Card -->
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
+        <q-card class="card card-stat">
           <q-card-section>
-            <div class="text-subtitle2">{{ t('dashboard.shiftsToday', 'Shifts Today') }}</div>
-            <div class="text-h3 text-primary q-my-md">{{ statistics.shiftsToday }}</div>
+            <div class="stat-label">{{ t('dashboard.shiftsToday', 'Shifts Today') }}</div>
+            <div class="stat-value text-primary">{{ statistics.shiftsToday }}</div>
             <q-btn
               flat
               color="primary"
@@ -36,10 +36,10 @@
 
       <!-- Active Employees Card -->
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
+        <q-card class="card card-stat">
           <q-card-section>
-            <div class="text-subtitle2">{{ t('dashboard.activeEmployees', 'Active Employees') }}</div>
-            <div class="text-h3 text-teal q-my-md">{{ statistics.activeEmployees }}</div>
+            <div class="stat-label">{{ t('dashboard.activeEmployees', 'Active Employees') }}</div>
+            <div class="stat-value text-teal">{{ statistics.activeEmployees }}</div>
             <q-btn
               flat
               color="teal"
@@ -53,10 +53,10 @@
 
       <!-- Weekly Labor Card -->
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
+        <q-card class="card card-stat">
           <q-card-section>
-            <div class="text-subtitle2">{{ t('dashboard.weeklyLabor', 'Weekly Labor') }}</div>
-            <div class="text-h3 text-orange q-my-md">${{ statistics.weeklyLabor.toFixed(2) }}</div>
+            <div class="stat-label">{{ t('dashboard.weeklyLabor', 'Weekly Labor') }}</div>
+            <div class="stat-value text-orange">${{ statistics.weeklyLabor.toFixed(2) }}</div>
             <q-btn
               flat
               color="orange"
@@ -70,10 +70,10 @@
 
       <!-- Attendance Rate Card -->
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
+        <q-card class="card card-stat">
           <q-card-section>
-            <div class="text-subtitle2">{{ t('dashboard.attendanceRate', 'Attendance Rate') }}</div>
-            <div class="text-h3 text-green q-my-md">{{ statistics.attendanceRate }}%</div>
+            <div class="stat-label">{{ t('dashboard.attendanceRate', 'Attendance Rate') }}</div>
+            <div class="stat-value text-green">{{ statistics.attendanceRate }}%</div>
             <q-btn
               flat
               color="green"
@@ -92,28 +92,28 @@
       <div class="row q-col-gutter-md">
         <!-- Only show Add Employee and Create Schedule for Managers -->
         <div v-if="isManager" class="col-12 col-sm-6 col-md-3">
-          <q-card class="action-card q-pa-md text-center cursor-pointer" @click="navigateToAddEmployee">
-            <q-icon name="person_add" size="2.5rem" color="primary" class="q-mb-sm" />
-            <div class="text-subtitle1 text-primary">{{ t('dashboard.addEmployee', 'Add Employee') }}</div>
+          <q-card class="card card-action" @click="navigateToAddEmployee">
+            <q-icon name="person_add" class="action-icon" color="primary" />
+            <div class="action-label text-primary">{{ t('dashboard.addEmployee', 'Add Employee') }}</div>
           </q-card>
         </div>
         <div v-if="isManager" class="col-12 col-sm-6 col-md-3">
-          <q-card class="action-card q-pa-md text-center cursor-pointer" @click="navigateToCreateSchedule">
-            <q-icon name="event" size="2.5rem" color="teal" class="q-mb-sm" />
-            <div class="text-subtitle1 text-teal">{{ t('dashboard.createSchedule', 'Create Schedule') }}</div>
+          <q-card class="card card-action" @click="navigateToCreateSchedule">
+            <q-icon name="event" class="action-icon" color="teal" />
+            <div class="action-label text-teal">{{ t('dashboard.createSchedule', 'Create Schedule') }}</div>
           </q-card>
         </div>
         <!-- Show for all users -->
         <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="action-card q-pa-md text-center cursor-pointer" @click="navigateToTrackAttendance">
-            <q-icon name="schedule" size="2.5rem" color="orange" class="q-mb-sm" />
-            <div class="text-subtitle1 text-orange">{{ t('dashboard.trackAttendance', 'Track Attendance') }}</div>
+          <q-card class="card card-action" @click="navigateToTrackAttendance">
+            <q-icon name="schedule" class="action-icon" color="orange" />
+            <div class="action-label text-orange">{{ t('dashboard.trackAttendance', 'Track Attendance') }}</div>
           </q-card>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="action-card q-pa-md text-center cursor-pointer" @click="navigateToReports">
-            <q-icon name="bar_chart" size="2.5rem" color="blue" class="q-mb-sm" />
-            <div class="text-subtitle1 text-blue">{{ t('dashboard.viewReports', 'View Reports') }}</div>
+          <q-card class="card card-action" @click="navigateToReports">
+            <q-icon name="bar_chart" class="action-icon" color="blue" />
+            <div class="action-label text-blue">{{ t('dashboard.viewReports', 'View Reports') }}</div>
           </q-card>
         </div>
       </div>
@@ -258,23 +258,6 @@ async function loadDashboardData() {
 </script>
 
 <style lang="scss" scoped>
-.dashboard-card {
-  transition: transform 0.3s;
-  height: 100%;
-  
-  &:hover {
-    transform: translateY(-4px);
-  }
-}
-
-.action-card {
-  transition: all 0.3s;
-  height: 100%;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  }
-}
+/* Dashboard styles now use .card-stat and .card-action from components.scss */
 </style> 
-
+```

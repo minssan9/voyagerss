@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="pagination-container">
+  <div class="flex justify-between items-center my-sm">
     <q-pagination
       v-model="currentPage"
       :max="totalPages"
@@ -15,7 +15,7 @@
       label="Items per page"
       dense
       options-dense
-      class="page-size-select"
+      style="width: 150px"
       @update:model-value="onPageSizeChange"
     />
   </div>
@@ -96,15 +96,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0.5rem 0;
-}
-
-.page-size-select {
-  width: 150px;
-}
-</style> 
-
+/* Using utility classes from design system */
+</style>

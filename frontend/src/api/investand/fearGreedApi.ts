@@ -61,7 +61,7 @@ export const fearGreedApi = {
   async getCurrentIndex(): Promise<FearGreedIndex> {
     try {
       const response = await service.get<{ success: boolean; data: FearGreedIndex; timestamp: string }>(
-        '/api/fear-greed/current'
+        '/investand/fear-greed/current'
       )
       return response.data.data
     } catch (error) {
@@ -79,7 +79,7 @@ export const fearGreedApi = {
         meta: { totalDays: number; requestedDays: number };
         timestamp: string
       }>(
-        `/api/fear-greed/history?days=${days}`
+        `/investand/fear-greed/history?days=${days}`
       )
       return response.data.data
     } catch (error) {
@@ -92,7 +92,7 @@ export const fearGreedApi = {
   async getIndexByDate(date: string): Promise<FearGreedHistoryItem> {
     try {
       const response = await service.get<{ success: boolean; data: FearGreedHistoryItem; timestamp: string }>(
-        `/api/fear-greed/date/${date}`
+        `/investand/fear-greed/date/${date}`
       )
       return response.data.data
     } catch (error) {
@@ -105,7 +105,7 @@ export const fearGreedApi = {
   async getStats(): Promise<FearGreedStats> {
     try {
       const response = await service.get<{ success: boolean; data: FearGreedStats; timestamp: string }>(
-        '/api/fear-greed/stats'
+        '/investand/fear-greed/stats'
       )
       return response.data.data
     } catch (error) {
@@ -118,7 +118,7 @@ export const fearGreedApi = {
   async calculateIndex(date: string): Promise<FearGreedCalculationResult> {
     try {
       const response = await service.post<{ success: boolean; data: FearGreedCalculationResult }>(
-        '/api/fear-greed/calculate',
+        '/investand/fear-greed/calculate',
         { date }
       )
       return response.data.data
@@ -132,7 +132,7 @@ export const fearGreedApi = {
   async recalculateRange(startDate: string, endDate: string): Promise<FearGreedRangeResult[]> {
     try {
       const response = await service.post<{ success: boolean; data: FearGreedRangeResult[] }>(
-        '/api/fear-greed/recalculate-range',
+        '/investand/fear-greed/recalculate-range',
         { startDate, endDate }
       )
       return response.data.data
@@ -146,7 +146,7 @@ export const fearGreedApi = {
   async getComponents(date: string): Promise<FearGreedIndex['components']> {
     try {
       const response = await service.get<{ success: boolean; data: FearGreedIndex['components'] }>(
-        `/api/fear-greed/components/${date}`
+        `/investand/fear-greed/components/${date}`
       )
       return response.data.data
     } catch (error) {
@@ -181,7 +181,7 @@ export const fearGreedApi = {
           lastUpdated: string
         }
       }>(
-        '/api/fear-greed/stats'
+        '/investand/fear-greed/stats'
       )
       return {
         ...response.data.data.distribution,
@@ -211,7 +211,7 @@ export const fearGreedApi = {
           prediction: number
         }
       }>(
-        `/api/fear-greed/trend?days=${days}`
+        `/investand/fear-greed/trend?days=${days}`
       )
       return response.data.data
     } catch (error) {
@@ -230,7 +230,7 @@ export const fearGreedApi = {
   }): Promise<{ success: boolean; message: string }> {
     try {
       const response = await service.post<{ success: boolean; message: string }>(
-        '/api/fear-greed/alerts/threshold',
+        '/investand/fear-greed/alerts/threshold',
         threshold
       )
       return response.data
@@ -248,7 +248,7 @@ export const fearGreedApi = {
   }): Promise<Blob> {
     try {
       const response = await service.get(
-        `/api/fear-greed/export?startDate=${params.startDate}&endDate=${params.endDate}&format=${params.format}`,
+        `/investand/fear-greed/export?startDate=${params.startDate}&endDate=${params.endDate}&format=${params.format}`,
         { responseType: 'blob' }
       )
       return response.data

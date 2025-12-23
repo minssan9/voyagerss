@@ -21,8 +21,8 @@
             "@prisma/client-aviation": [
                 "node_modules/@prisma/client-aviation"
             ],
-            "@/*": [
-                "src/modules/investand/legacy_src/*"
+            "@investand/*": [
+                "src/modules/investand/*"
             ]
         }
     },

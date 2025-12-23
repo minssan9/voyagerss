@@ -20,18 +20,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'History', icon: 'history' }
       },
       {
-        path: 'statistics',
-        name: 'investand-statistics',
-        component: () => import('@/views/investand/StatisticsPage.vue'),
-        meta: { title: 'Statistics', icon: 'bar_chart' }
-      },
-      {
-        path: 'about',
-        name: 'investand-about',
-        component: () => import('@/views/investand/AboutPage.vue'),
-        meta: { title: 'About', icon: 'info' }
-      },
-      {
         path: 'dart-data',
         name: 'investand-dart-data',
         component: () => import('@/views/investand/DartDataPage.vue'),

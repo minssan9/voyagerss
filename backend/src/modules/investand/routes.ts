@@ -6,16 +6,21 @@ import { Router } from 'express';
 // But we should move them OUT of legacy_src to structured folders eventually.
 // For now, let's just point to legacy_src/routes
 
-import apiRoutes from './legacy_src/routes/fearGreedApi'; // Adapting path
-import fearGreedRoutes from './legacy_src/routes/fearGreedPublic';
-import dataRoutes from './legacy_src/routes/marketData';
-import adminRoutes from './legacy_src/routes/adminManagement';
-import dartRoutes from './legacy_src/routes/dartApiSimple';
-import domainRoutes from './legacy_src/routes/domainApi';
-import messagingRoutes from './legacy_src/routes/messagingApi';
-import telegramWebhookRoutes from './legacy_src/routes/telegramWebhook';
+import apiRoutes from './controllers/fearGreedApi';
+import fearGreedRoutes from './controllers/fearGreedPublic';
+import dataRoutes from './controllers/marketData';
+import adminRoutes from './controllers/adminManagement';
+import dartRoutes from './controllers/dartApiSimple';
+import domainRoutes from './controllers/domainApi';
+import messagingRoutes from './controllers/messagingApi';
+import telegramWebhookRoutes from './controllers/telegramWebhook';
+
+import { initializeInvestand } from './init';
 
 const router = Router();
+
+// Initialize module services/schedulers
+initializeInvestand();
 
 router.use('/', apiRoutes);
 router.use('/fear-greed', fearGreedRoutes);

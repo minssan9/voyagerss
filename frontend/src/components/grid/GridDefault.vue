@@ -216,13 +216,5 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-.button {
-  text-align: end;
-  button {
-    width: 100px;
-    height: 40px;
-  }
-}
+/* Grid styles handled by grid-default.scss */
 </style>
-
-

@@ -1,0 +1,847 @@
+// ============================================
+// Utility Classes
+// ============================================
+
+@import './variables.scss';
+
+// --------------------------------------------
+// Spacing Utilities
+// --------------------------------------------
+
+// Padding
+.p-0 {
+    padding: $spacing-0 !important;
+}
+
+.p-xs {
+    padding: $spacing-xs !important;
+}
+
+.p-sm {
+    padding: $spacing-sm !important;
+}
+
+.p-md {
+    padding: $spacing-md !important;
+}
+
+.p-base {
+    padding: $spacing-base !important;
+}
+
+.p-lg {
+    padding: $spacing-lg !important;
+}
+
+.p-xl {
+    padding: $spacing-xl !important;
+}
+
+.p-2xl {
+    padding: $spacing-2xl !important;
+}
+
+.p-3xl {
+    padding: $spacing-3xl !important;
+}
+
+// Padding X-axis
+.px-0 {
+    padding-left: $spacing-0 !important;
+    padding-right: $spacing-0 !important;
+}
+
+.px-xs {
+    padding-left: $spacing-xs !important;
+    padding-right: $spacing-xs !important;
+}
+
+.px-sm {
+    padding-left: $spacing-sm !important;
+    padding-right: $spacing-sm !important;
+}
+
+.px-md {
+    padding-left: $spacing-md !important;
+    padding-right: $spacing-md !important;
+}
+
+.px-base {
+    padding-left: $spacing-base !important;
+    padding-right: $spacing-base !important;
+}
+
+.px-lg {
+    padding-left: $spacing-lg !important;
+    padding-right: $spacing-lg !important;
+}
+
+.px-xl {
+    padding-left: $spacing-xl !important;
+    padding-right: $spacing-xl !important;
+}
+
+// Padding Y-axis
+.py-0 {
+    padding-top: $spacing-0 !important;
+    padding-bottom: $spacing-0 !important;
+}
+
+.py-xs {
+    padding-top: $spacing-xs !important;
+    padding-bottom: $spacing-xs !important;
+}
+
+.py-sm {
+    padding-top: $spacing-sm !important;
+    padding-bottom: $spacing-sm !important;
+}
+
+.py-md {
+    padding-top: $spacing-md !important;
+    padding-bottom: $spacing-md !important;
+}
+
+.py-base {
+    padding-top: $spacing-base !important;
+    padding-bottom: $spacing-base !important;
+}
+
+.py-lg {
+    padding-top: $spacing-lg !important;
+    padding-bottom: $spacing-lg !important;
+}
+
+.py-xl {
+    padding-top: $spacing-xl !important;
+    padding-bottom: $spacing-xl !important;
+}
+
+// Margin
+.m-0 {
+    margin: $spacing-0 !important;
+}
+
+.m-xs {
+    margin: $spacing-xs !important;
+}
+
+.m-sm {
+    margin: $spacing-sm !important;
+}
+
+.m-md {
+    margin: $spacing-md !important;
+}
+
+.m-base {
+    margin: $spacing-base !important;
+}
+
+.m-lg {
+    margin: $spacing-lg !important;
+}
+
+.m-xl {
+    margin: $spacing-xl !important;
+}
+
+.m-2xl {
+    margin: $spacing-2xl !important;
+}
+
+.m-3xl {
+    margin: $spacing-3xl !important;
+}
+
+.m-auto {
+    margin: auto !important;
+}
+
+// Margin X-axis
+.mx-0 {
+    margin-left: $spacing-0 !important;
+    margin-right: $spacing-0 !important;
+}
+
+.mx-xs {
+    margin-left: $spacing-xs !important;
+    margin-right: $spacing-xs !important;
+}
+
+.mx-sm {
+    margin-left: $spacing-sm !important;
+    margin-right: $spacing-sm !important;
+}
+
+.mx-md {
+    margin-left: $spacing-md !important;
+    margin-right: $spacing-md !important;
+}
+
+.mx-base {
+    margin-left: $spacing-base !important;
+    margin-right: $spacing-base !important;
+}
+
+.mx-lg {
+    margin-left: $spacing-lg !important;
+    margin-right: $spacing-lg !important;
+}
+
+.mx-xl {
+    margin-left: $spacing-xl !important;
+    margin-right: $spacing-xl !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+// Margin Y-axis
+.my-0 {
+    margin-top: $spacing-0 !important;
+    margin-bottom: $spacing-0 !important;
+}
+
+.my-xs {
+    margin-top: $spacing-xs !important;
+    margin-bottom: $spacing-xs !important;
+}
+
+.my-sm {
+    margin-top: $spacing-sm !important;
+    margin-bottom: $spacing-sm !important;
+}
+
+.my-md {
+    margin-top: $spacing-md !important;
+    margin-bottom: $spacing-md !important;
+}
+
+.my-base {
+    margin-top: $spacing-base !important;
+    margin-bottom: $spacing-base !important;
+}
+
+.my-lg {
+    margin-top: $spacing-lg !important;
+    margin-bottom: $spacing-lg !important;
+}
+
+.my-xl {
+    margin-top: $spacing-xl !important;
+    margin-bottom: $spacing-xl !important;
+}
+
+// Margin Bottom
+.mb-0 {
+    margin-bottom: $spacing-0 !important;
+}
+
+.mb-xs {
+    margin-bottom: $spacing-xs !important;
+}
+
+.mb-sm {
+    margin-bottom: $spacing-sm !important;
+}
+
+.mb-md {
+    margin-bottom: $spacing-md !important;
+}
+
+.mb-base {
+    margin-bottom: $spacing-base !important;
+}
+
+.mb-lg {
+    margin-bottom: $spacing-lg !important;
+}
+
+.mb-xl {
+    margin-bottom: $spacing-xl !important;
+}
+
+.mb-2xl {
+    margin-bottom: $spacing-2xl !important;
+}
+
+// Margin Top
+.mt-0 {
+    margin-top: $spacing-0 !important;
+}
+
+.mt-xs {
+    margin-top: $spacing-xs !important;
+}
+
+.mt-sm {
+    margin-top: $spacing-sm !important;
+}
+
+.mt-md {
+    margin-top: $spacing-md !important;
+}
+
+.mt-base {
+    margin-top: $spacing-base !important;
+}
+
+.mt-lg {
+    margin-top: $spacing-lg !important;
+}
+
+.mt-xl {
+    margin-top: $spacing-xl !important;
+}
+
+.mt-2xl {
+    margin-top: $spacing-2xl !important;
+}
+
+// Gap
+.gap-0 {
+    gap: $spacing-0 !important;
+}
+
+.gap-xs {
+    gap: $spacing-xs !important;
+}
+
+.gap-sm {
+    gap: $spacing-sm !important;
+}
+
+.gap-md {
+    gap: $spacing-md !important;
+}
+
+.gap-base {
+    gap: $spacing-base !important;
+}
+
+.gap-lg {
+    gap: $spacing-lg !important;
+}
+
+.gap-xl {
+    gap: $spacing-xl !important;
+}
+
+// --------------------------------------------
+// Flexbox Utilities
+// --------------------------------------------
+.flex {
+    display: flex !important;
+}
+
+.inline-flex {
+    display: inline-flex !important;
+}
+
+.flex-row {
+    flex-direction: row !important;
+}
+
+.flex-row-reverse {
+    flex-direction: row-reverse !important;
+}
+
+.flex-col {
+    flex-direction: column !important;
+}
+
+.flex-col-reverse {
+    flex-direction: column-reverse !important;
+}
+
+.flex-wrap {
+    flex-wrap: wrap !important;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap !important;
+}
+
+.items-start {
+    align-items: flex-start !important;
+}
+
+.items-center {
+    align-items: center !important;
+}
+
+.items-end {
+    align-items: flex-end !important;
+}
+
+.items-stretch {
+    align-items: stretch !important;
+}
+
+.items-baseline {
+    align-items: baseline !important;
+}
+
+.justify-start {
+    justify-content: flex-start !important;
+}
+
+.justify-center {
+    justify-content: center !important;
+}
+
+.justify-end {
+    justify-content: flex-end !important;
+}
+
+.justify-between {
+    justify-content: space-between !important;
+}
+
+.justify-around {
+    justify-content: space-around !important;
+}
+
+.justify-evenly {
+    justify-content: space-evenly !important;
+}
+
+.flex-1 {
+    flex: 1 1 0% !important;
+}
+
+.flex-auto {
+    flex: 1 1 auto !important;
+}
+
+.flex-none {
+    flex: none !important;
+}
+
+// --------------------------------------------
+// Grid Utilities
+// --------------------------------------------
+.grid {
+    display: grid !important;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+.grid-cols-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+
+// --------------------------------------------
+// Text Utilities
+// --------------------------------------------
+
+// Font Size
+.text-xs {
+    font-size: $text-xs !important;
+}
+
+.text-sm {
+    font-size: $text-sm !important;
+}
+
+.text-base {
+    font-size: $text-base !important;
+}
+
+.text-lg {
+    font-size: $text-lg !important;
+}
+
+.text-xl {
+    font-size: $text-xl !important;
+}
+
+.text-2xl {
+    font-size: $text-2xl !important;
+}
+
+.text-3xl {
+    font-size: $text-3xl !important;
+}
+
+.text-4xl {
+    font-size: $text-4xl !important;
+}
+
+.text-5xl {
+    font-size: $text-5xl !important;
+}
+
+// Font Weight
+.font-light {
+    font-weight: $font-light !important;
+}
+
+.font-normal {
+    font-weight: $font-normal !important;
+}
+
+.font-medium {
+    font-weight: $font-medium !important;
+}
+
+.font-semibold {
+    font-weight: $font-semibold !important;
+}
+
+.font-bold {
+    font-weight: $font-bold !important;
+}
+
+.font-extrabold {
+    font-weight: $font-extrabold !important;
+}
+
+// Text Align
+.text-left {
+    text-align: left !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-justify {
+    text-align: justify !important;
+}
+
+// Text Color
+.text-primary {
+    color: $primary-color !important;
+}
+
+.text-secondary {
+    color: $secondary-color !important;
+}
+
+.text-success {
+    color: $success-color !important;
+}
+
+.text-warning {
+    color: $warning-color !important;
+}
+
+.text-error {
+    color: $error-color !important;
+}
+
+.text-info {
+    color: $info-color !important;
+}
+
+.text-dark {
+    color: $text-dark !important;
+}
+
+.text-light {
+    color: $text-light !important;
+}
+
+.text-muted {
+    color: $text-muted !important;
+}
+
+.text-white {
+    color: $white !important;
+}
+
+// Text Transform
+.uppercase {
+    text-transform: uppercase !important;
+}
+
+.lowercase {
+    text-transform: lowercase !important;
+}
+
+.capitalize {
+    text-transform: capitalize !important;
+}
+
+// Text Decoration
+.underline {
+    text-decoration: underline !important;
+}
+
+.no-underline {
+    text-decoration: none !important;
+}
+
+// --------------------------------------------
+// Display Utilities
+// --------------------------------------------
+.block {
+    display: block !important;
+}
+
+.inline-block {
+    display: inline-block !important;
+}
+
+.inline {
+    display: inline !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+// --------------------------------------------
+// Width & Height Utilities
+// --------------------------------------------
+.w-full {
+    width: 100% !important;
+}
+
+.w-auto {
+    width: auto !important;
+}
+
+.w-screen {
+    width: 100vw !important;
+}
+
+.h-full {
+    height: 100% !important;
+}
+
+.h-auto {
+    height: auto !important;
+}
+
+.h-screen {
+    height: 100vh !important;
+}
+
+.min-h-screen {
+    min-height: 100vh !important;
+}
+
+// --------------------------------------------
+// Position Utilities
+// --------------------------------------------
+.relative {
+    position: relative !important;
+}
+
+.absolute {
+    position: absolute !important;
+}
+
+.fixed {
+    position: fixed !important;
+}
+
+.sticky {
+    position: sticky !important;
+}
+
+// --------------------------------------------
+// Cursor Utilities
+// --------------------------------------------
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
+.cursor-default {
+    cursor: default !important;
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed !important;
+}
+
+// --------------------------------------------
+// Overflow Utilities
+// --------------------------------------------
+.overflow-auto {
+    overflow: auto !important;
+}
+
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
+.overflow-visible {
+    overflow: visible !important;
+}
+
+.overflow-scroll {
+    overflow: scroll !important;
+}
+
+// --------------------------------------------
+// Border Utilities
+// --------------------------------------------
+.rounded-none {
+    border-radius: $border-radius-none !important;
+}
+
+.rounded-sm {
+    border-radius: $border-radius-sm !important;
+}
+
+.rounded-md {
+    border-radius: $border-radius-md !important;
+}
+
+.rounded-lg {
+    border-radius: $border-radius-lg !important;
+}
+
+.rounded-xl {
+    border-radius: $border-radius-xl !important;
+}
+
+.rounded-2xl {
+    border-radius: $border-radius-2xl !important;
+}
+
+.rounded-full {
+    border-radius: $border-radius-full !important;
+}
+
+// --------------------------------------------
+// Shadow Utilities
+// --------------------------------------------
+.shadow-none {
+    box-shadow: $shadow-none !important;
+}
+
+.shadow-xs {
+    box-shadow: $shadow-xs !important;
+}
+
+.shadow-sm {
+    box-shadow: $shadow-sm !important;
+}
+
+.shadow-md {
+    box-shadow: $shadow-md !important;
+}
+
+.shadow-lg {
+    box-shadow: $shadow-lg !important;
+}
+
+.shadow-xl {
+    box-shadow: $shadow-xl !important;
+}
+
+.shadow-2xl {
+    box-shadow: $shadow-2xl !important;
+}
+
+// --------------------------------------------
+// Background Utilities
+// --------------------------------------------
+.bg-white {
+    background-color: $white !important;
+}
+
+.bg-gray-50 {
+    background-color: $gray-50 !important;
+}
+
+.bg-gray-100 {
+    background-color: $gray-100 !important;
+}
+
+.bg-primary {
+    background-color: $primary-color !important;
+}
+
+.bg-secondary {
+    background-color: $secondary-color !important;
+}
+
+.bg-success {
+    background-color: $success-color !important;
+}
+
+.bg-warning {
+    background-color: $warning-color !important;
+}
+
+.bg-error {
+    background-color: $error-color !important;
+}
+
+// --------------------------------------------
+// Animation Utilities
+// --------------------------------------------
+.fade-in {
+    animation: fadeIn $transition-base forwards;
+}
+
+.slide-up {
+    animation: slideUp $transition-base forwards;
+}
+
+.hover-lift {
+    transition: transform $transition-fast;
+
+    &:hover {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+// Staggered animation for children
+@for $i from 1 through 10 {
+    .stagger-#{$i} {
+        animation-delay: #{$i * 0.1}s;
+    }
+}

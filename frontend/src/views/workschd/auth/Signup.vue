@@ -1,6 +1,6 @@
 ﻿<template>
   <q-page class="column items-center justify-center q-pa-md">
-    <div class="signup-container q-pa-lg">
+    <div class="signup-container card q-pa-lg">
       <h5 class="text-center q-mb-md">{{ t('signup.title', '회원가입') }}</h5>
       
       <q-form @submit="handleSignup" class="q-gutter-md">
@@ -145,9 +145,6 @@ const handleSignup = async () => {
 .signup-container {
   width: 100%;
   max-width: 450px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .signup-input {

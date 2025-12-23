@@ -142,7 +142,7 @@ export const dartApi = {
       if (params.limit) queryParams.append('limit', params.limit.toString())
 
       const response = await service.get<{ success: boolean; data: DartDisclosuresResponse }>(
-        `/dart/disclosures?${queryParams.toString()}`
+        `/investand/dart/disclosures?${queryParams.toString()}`
       )
       return response.data.data
     } catch (error) {
@@ -155,7 +155,7 @@ export const dartApi = {
   async getCompanyInfo(corpCode: string): Promise<DartCompanyInfo> {
     try {
       const response = await service.get<{ success: boolean; data: DartCompanyInfo }>(
-        `/dart/companies?corpCode=${corpCode}`
+        `/investand/dart/companies?corpCode=${corpCode}`
       )
       return response.data.data
     } catch (error) {
@@ -179,7 +179,7 @@ export const dartApi = {
       if (params.fsDiv) queryParams.append('fsDiv', params.fsDiv)
 
       const response = await service.get<{ success: boolean; data: DartFinancialInfo }>(
-        `/dart/financial?${queryParams.toString()}`
+        `/investand/dart/financial?${queryParams.toString()}`
       )
       return response.data.data
     } catch (error) {
@@ -192,7 +192,7 @@ export const dartApi = {
   async getKospi200(): Promise<{ corpCodes: string[]; count: number; description: string }> {
     try {
       const response = await service.get<{ success: boolean; data: { corpCodes: string[]; count: number; description: string } }>(
-        '/dart/kospi200'
+        '/investand/dart/kospi200'
       )
       return response.data.data
     } catch (error) {
@@ -205,7 +205,7 @@ export const dartApi = {
   async checkHealth(): Promise<DartHealthStatus> {
     try {
       const response = await service.get<{ success: boolean; data: DartHealthStatus }>(
-        '/dart/health'
+        '/investand/dart/health'
       )
       return response.data.data
     } catch (error) {
@@ -219,7 +219,7 @@ export const dartApi = {
     try {
       const queryParams = date ? `?date=${date}` : ''
       const response = await service.get<{ success: boolean; data: DartStats }>(
-        `/dart/stats${queryParams}`
+        `/investand/dart/stats${queryParams}`
       )
       return response.data.data
     } catch (error) {
@@ -232,7 +232,7 @@ export const dartApi = {
   async getBatchStatus(): Promise<DartBatchStatus> {
     try {
       const response = await service.get<{ success: boolean; data: DartBatchStatus }>(
-        '/dart/batch/status'
+        '/investand/dart/batch/status'
       )
       return response.data.data
     } catch (error) {
@@ -245,7 +245,7 @@ export const dartApi = {
   async scheduleDailyBatch(date: string, options: { sentimentOnly?: boolean } = {}): Promise<DartBatchResult> {
     try {
       const response = await service.post<{ success: boolean; data: DartBatchResult }>(
-        '/dart/batch/daily',
+        '/investand/dart/batch/daily',
         { date, options }
       )
       return response.data.data
@@ -268,7 +268,7 @@ export const dartApi = {
   }> {
     try {
       const response = await service.post<{ success: boolean; message: string; data: any }>(
-        '/dart/batch/daily',
+        '/investand/dart/batch/daily',
         { date, maxPages, pageSize }
       )
       return response.data.data
@@ -282,7 +282,7 @@ export const dartApi = {
   async scheduleFinancialBatch(businessYear: string): Promise<DartBatchResult> {
     try {
       const response = await service.post<{ success: boolean; data: DartBatchResult }>(
-        '/dart/batch/financial',
+        '/investand/dart/batch/financial',
         { businessYear }
       )
       return response.data.data
@@ -297,7 +297,7 @@ export const dartApi = {
     try {
       const testDate = date || new Date().toISOString().split('T')[0]
       const response = await service.post<{ success: boolean; testType: string; testDate: string; data: any }>(
-        '/dart/test',
+        '/investand/dart/test',
         { testType, date: testDate }
       )
       return {
@@ -337,7 +337,7 @@ export const dartApi = {
       if (params.limit) queryParams.append('limit', params.limit.toString())
 
       const response = await service.get<{ success: boolean; data: DartStockHoldingsResponse }>(
-        `/dart/stock-holdings?${queryParams.toString()}`
+        `/investand/dart/stock-holdings?${queryParams.toString()}`
       )
       return response.data.data
     } catch (error) {

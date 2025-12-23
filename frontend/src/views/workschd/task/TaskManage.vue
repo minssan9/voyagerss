@@ -379,6 +379,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Task-specific styles - other q-field and button styles handled by global SCSS */
 .detail-card {
   height: 100%;
   transition: all 0.3s ease;
@@ -414,26 +415,5 @@ onMounted(async () => {
   color: var(--q-primary);
   text-decoration: underline;
 }
-
-/* Make the form elements more visually appealing */
-:deep(.q-field) {
-  margin-bottom: 16px;
-}
-
-:deep(.q-field__label) {
-  font-weight: 500;
-}
-
-:deep(.q-field--filled .q-field__control) {
-  border-radius: 8px;
-}
-
-:deep(.q-btn) {
-  border-radius: 8px;
-  padding: 8px 24px;
-}
 </style>
-
-
-
-
+```
