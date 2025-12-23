@@ -26,6 +26,22 @@
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
 
+## Git Commit Rules
+- **Format**: `<type>(<scope>): <subject>`
+- **Agent Instruction**: **Antigravity must provide a suggested git commit message** following this format at the end of every task execution.
+- **Types**:
+  - `feat`: New feature
+  - `fix`: Bug fix
+  - `docs`: Documentation changes
+  - `style`: Formatting, missing semi-colons, etc. (no code change)
+  - `refactor`: Code change that neither fixes a bug nor adds a feature
+  - `perf`: Performance improvements
+  - `test`: Adding or correcting tests
+  - `chore`: Maintenance tasks, build/dependencies, etc.
+- **Scopes**: Use the major module or directory name (e.g., `backend`, `frontend`, `root`, `api`).
+- **Subject**: Use imperative, present tense (e.g., "add", not "added"). No period at the end.
+- **Language**: English only.
+
 ## Agent Rules
 - Always refer to the localized `AGENTS.md` in sub-folders for specific layer rules.
 - Follow the **SOLID**, **DRY**, **KISS**, and **YAGNI** principles.
