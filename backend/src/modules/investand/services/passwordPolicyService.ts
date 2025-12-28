@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 
 const prisma = new PrismaClient()
 
@@ -130,7 +130,7 @@ export class PasswordPolicyService {
   static async setCustomPolicy(policy: Partial<PasswordPolicy>): Promise<void> {
     try {
       const policyJson = JSON.stringify(policy)
-      
+
       await prisma.securityConfig.upsert({
         where: { key: 'password_policy' },
         update: { value: policyJson },
@@ -331,7 +331,7 @@ export class PasswordPolicyService {
   static async canReusePassword(userId: string, newPassword: string): Promise<boolean> {
     try {
       const policy = await this.getCurrentPolicy()
-      
+
       if (policy.preventReuse === 0) {
         return true // No reuse restriction
       }
@@ -418,7 +418,7 @@ export class PasswordPolicyService {
     password += lowercase[Math.floor(Math.random() * lowercase.length)]
     password += uppercase[Math.floor(Math.random() * uppercase.length)]
     password += numbers[Math.floor(Math.random() * numbers.length)]
-    
+
     if (includeSymbols) {
       password += symbols[Math.floor(Math.random() * symbols.length)]
     }
@@ -497,7 +497,7 @@ export class PasswordPolicyService {
     try {
       // Validate new password
       const validation = await this.validatePassword(newPassword, userInfo)
-      
+
       if (!validation.valid) {
         return { success: false, errors: validation.errors }
       }
@@ -510,7 +510,7 @@ export class PasswordPolicyService {
 
       // Hash and update password
       const hashedPassword = await this.hashPassword(newPassword)
-      
+
       await prisma.adminUser.update({
         where: { id: userId },
         data: {

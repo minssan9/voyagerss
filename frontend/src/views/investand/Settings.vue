@@ -145,7 +145,7 @@ function resetSettings() {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/findash/variables';
+@import '@/assets/sass/investand/findash/variables';
 
 .settings-page {
   display: flex;

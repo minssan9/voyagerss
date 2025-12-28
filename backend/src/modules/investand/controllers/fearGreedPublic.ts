@@ -98,7 +98,7 @@ router.get('/history', async (req: Request, res: Response) => {
     const history = await DatabaseService.getFearGreedIndexHistory(limitDays);
     res.json({
       success: true,
-      data: history.map(item => ({
+      data: history.map((item: any) => ({
         date: item.date.toISOString().split('T')[0],
         value: item.value,
         level: item.level
@@ -117,7 +117,7 @@ router.get('/history', async (req: Request, res: Response) => {
 // 특정 날짜의 Fear & Greed Index 조회
 router.get('/date/:date', (req: Request, res: Response) => {
   const { date } = req.params;
-  
+
   // 날짜 파라미터 존재 여부 확인
   if (!date) {
     res.status(400).json({
@@ -127,7 +127,7 @@ router.get('/date/:date', (req: Request, res: Response) => {
     });
     return;
   }
-  
+
   // 날짜 형식 검증 (YYYY-MM-DD)
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!dateRegex.test(date)) {
@@ -138,10 +138,10 @@ router.get('/date/:date', (req: Request, res: Response) => {
     });
     return;
   }
-  
+
   // 샘플 데이터에서 해당 날짜 찾기
   const dataForDate = sampleData.history.find(item => item.date === date);
-  
+
   if (!dataForDate) {
     res.status(404).json({
       success: false,
@@ -150,7 +150,7 @@ router.get('/date/:date', (req: Request, res: Response) => {
     });
     return;
   }
-  
+
   res.json({
     success: true,
     data: dataForDate,
@@ -167,7 +167,7 @@ router.get('/stats', (req: Request, res: Response) => {
     greed: 20,        // 55-75
     extremeGreed: 15  // 75-100
   };
-  
+
   res.json({
     success: true,
     data: {

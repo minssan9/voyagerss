@@ -71,9 +71,9 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import { useMarketLabStore, ASSETS } from '@/stores/investand/store_marketlab';
-import ComparisonChart from '@/components/findash/marketlab/ComparisonChart.vue';
-import AssetGrid from '@/components/findash/marketlab/AssetGrid.vue';
-import CorrelationMatrix from '@/components/findash/marketlab/CorrelationMatrix.vue';
+import ComparisonChart from '@/components/investand/marketlab/ComparisonChart.vue';
+import AssetGrid from '@/components/investand/marketlab/AssetGrid.vue';
+import CorrelationMatrix from '@/components/investand/marketlab/CorrelationMatrix.vue';
 
 const store = useMarketLabStore();
 const ranges = ['1M', '3M', '6M', '1Y'] as const;
@@ -89,7 +89,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/findash/variables';
+@import '@/assets/sass/investand/findash/variables';
 
 .market-lab-page {
   display: flex;

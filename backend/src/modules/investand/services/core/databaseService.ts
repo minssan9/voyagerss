@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 // 이 서비스는 DART 관련 로깅 및 기본 데이터베이스 작업만 담당
 // 다른 데이터 타입들은 각각의 전용 Repository로 이동됨
 
@@ -8,7 +8,7 @@ const prisma = new PrismaClient()
  * 데이터베이스 서비스 클래스
  */
 export class DatabaseService {
-  
+
 
   /**
    * 국채 수익률 커브 데이터 저장
@@ -40,7 +40,7 @@ export class DatabaseService {
           yield20Y: yields.yield20Y
         }
       })
-      
+
       console.log(`[DB] 국채 수익률 커브 저장 완료: ${date}`)
     } catch (error) {
       console.error(`[DB] 국채 수익률 커브 저장 실패 (${date}):`, error)
@@ -72,7 +72,7 @@ export class DatabaseService {
           duration: duration ?? null
         }
       })
-      
+
       console.log(`[DB] 데이터 수집 로그 저장: ${source}/${dataType} - ${status}`)
     } catch (error) {
       console.error(`[DB] 데이터 수집 로그 저장 실패:`, error)

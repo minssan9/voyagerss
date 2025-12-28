@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client-investand'
 import { logger } from '@investand/utils/common/logger'
 
 export interface DatabaseOperation {
@@ -98,7 +98,7 @@ export class TransactionalDatabaseService {
   ): Promise<BatchTransactionResult<T>> {
     const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const prisma = await this.getConnection()
-    
+
     const result: BatchTransactionResult<T> = {
       success: false,
       results: [],
@@ -112,50 +112,50 @@ export class TransactionalDatabaseService {
       logger.info(`[TransactionalDB] Starting batch transaction: ${transactionId} (${operations.length} operations)`)
 
       await prisma.$transaction(
-        async (tx) => {
+        async (tx: any) => {
           const checkpoint = new TransactionCheckpoint()
-          
+
           for (let i = 0; i < operations.length; i++) {
             const operation = operations[i]
             if (!operation) {
               logger.warn(`[TransactionalDB] Skipping undefined operation at index ${i}`)
               continue
             }
-            
+
             try {
               // Create savepoint for each operation
               await checkpoint.createSavepoint(`sp_${operation.id}`)
-              
+
               const operationResult = await this.executeOperation(tx, operation)
               result.results.push(operationResult)
               result.operationsCompleted++
-              
+
               // Memory pressure check
               if (this.isMemoryPressureHigh()) {
                 await this.performGarbageCollection()
               }
-              
+
               // Progress logging every 100 operations
               if ((i + 1) % 100 === 0) {
                 logger.info(`[TransactionalDB] Progress: ${i + 1}/${operations.length} operations completed`)
               }
-              
+
             } catch (error) {
               result.operationsFailed++
               result.errors.push({
                 operationId: operation.id,
                 error: (error as Error).message
               })
-              
+
               logger.error(`[TransactionalDB] Operation failed: ${operation.id}`, error)
-              
+
               // Decide whether to continue or rollback entire transaction
               if (this.isCriticalOperation(operation)) {
                 throw error // This will rollback the entire transaction
               }
             }
           }
-          
+
           result.success = result.operationsFailed === 0
           return result
         },
@@ -166,31 +166,31 @@ export class TransactionalDatabaseService {
       )
 
       logger.info(`[TransactionalDB] Batch transaction completed: ${transactionId} (${result.operationsCompleted}/${operations.length})`)
-      
+
     } catch (error) {
       result.success = false
       result.errors.push({
         operationId: 'transaction_error',
         error: (error as Error).message
       })
-      
+
       logger.error(`[TransactionalDB] Batch transaction failed: ${transactionId}`, error)
-      
+
       // Retry mechanism
       const maxRetries = options.maxRetries || 3
       if (result.operationsFailed > 0 && maxRetries > 1) {
         logger.info(`[TransactionalDB] Retrying failed operations: ${result.operationsFailed} operations`)
-        
-        const failedOperations = operations.filter((operation, index) => 
+
+        const failedOperations = operations.filter((operation, index) =>
           operation && result.errors.some(e => e.operationId === operation.id)
         )
-        
+
         if (failedOperations.length > 0) {
           const retryResult = await this.executeBatchTransaction<T>(
-            failedOperations, 
+            failedOperations,
             { ...options, maxRetries: maxRetries - 1 }
           )
-          
+
           // Merge results
           result.results.push(...retryResult.results)
           result.operationsCompleted += retryResult.operationsCompleted
@@ -208,14 +208,14 @@ export class TransactionalDatabaseService {
     switch (type) {
       case 'insert':
         return await (tx as any)[table].create({ data, ...options })
-        
+
       case 'update':
-        return await (tx as any)[table].update({ 
-          where: where || { id: data.id }, 
-          data, 
-          ...options 
+        return await (tx as any)[table].update({
+          where: where || { id: data.id },
+          data,
+          ...options
         })
-        
+
       case 'upsert':
         return await (tx as any)[table].upsert({
           where: where || { id: data.id },
@@ -223,13 +223,13 @@ export class TransactionalDatabaseService {
           create: data,
           ...options
         })
-        
+
       case 'delete':
-        return await (tx as any)[table].delete({ 
-          where: where || { id: data.id }, 
-          ...options 
+        return await (tx as any)[table].delete({
+          where: where || { id: data.id },
+          ...options
         })
-        
+
       default:
         throw new Error(`Unsupported operation type: ${type}`)
     }
@@ -260,21 +260,21 @@ export class TransactionalDatabaseService {
     }
 
     const prisma = await this.getConnection()
-    
+
     logger.info(`[TransactionalDB] Starting overlap detection persistence: ${data.length} records in batches of ${batchSize}`)
 
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize)
       const batchIndex = Math.floor(i / batchSize)
-      
+
       try {
         // Check for existing records using unique keys
         const existingRecords = await this.checkExistingRecords(prisma, batch, tableName, uniqueKeys)
         const { newRecords, updateRecords } = this.categorizeRecords(batch, existingRecords, uniqueKeys)
-        
+
         // Create operations for batch transaction
         const operations: DatabaseOperation[] = []
-        
+
         // Add insert operations for new records
         newRecords.forEach((record, index) => {
           operations.push({
@@ -284,7 +284,7 @@ export class TransactionalDatabaseService {
             data: record
           })
         })
-        
+
         // Add update operations for existing records
         updateRecords.forEach((record, index) => {
           const whereClause = this.buildWhereClause(record, uniqueKeys)
@@ -296,17 +296,17 @@ export class TransactionalDatabaseService {
             where: whereClause
           })
         })
-        
+
         // Execute batch transaction
         if (operations.length > 0) {
           const batchResult = await this.executeBatchTransaction(operations, {
             timeout: 60000 // 1 minute timeout for large batches
           })
-          
+
           result.inserted += newRecords.length - batchResult.operationsFailed
           result.updated += updateRecords.length
           result.totalProcessed += batch.length
-          
+
           if (batchResult.errors.length > 0) {
             result.errors.push({
               batch: batchIndex,
@@ -318,23 +318,23 @@ export class TransactionalDatabaseService {
           result.skipped += batch.length
           result.totalProcessed += batch.length
         }
-        
+
         // Progress logging
         if ((batchIndex + 1) % 10 === 0) {
           logger.info(`[TransactionalDB] Batch progress: ${batchIndex + 1} batches processed`)
         }
-        
+
       } catch (error) {
         result.errors.push({
           batch: batchIndex,
           error: (error as Error).message,
           affectedRecords: batch.length
         })
-        
+
         logger.error(`[TransactionalDB] Batch ${batchIndex} processing failed:`, error)
       }
     }
-    
+
     logger.info(`[TransactionalDB] Overlap detection persistence completed:`, {
       inserted: result.inserted,
       updated: result.updated,
@@ -378,15 +378,15 @@ export class TransactionalDatabaseService {
   }
 
   private static categorizeRecords(
-    batch: any[], 
-    existingRecords: any[], 
+    batch: any[],
+    existingRecords: any[],
     uniqueKeys: string[]
   ): { newRecords: any[]; updateRecords: any[] } {
     const newRecords: any[] = []
     const updateRecords: any[] = []
 
     batch.forEach(record => {
-      const exists = existingRecords.some(existing => 
+      const exists = existingRecords.some(existing =>
         uniqueKeys.every(key => existing[key] === record[key])
       )
 
@@ -414,7 +414,7 @@ export class TransactionalDatabaseService {
     const memUsage = process.memoryUsage()
     const heapUsedMB = memUsage.heapUsed / 1024 / 1024
     const heapTotalMB = memUsage.heapTotal / 1024 / 1024
-    
+
     // Consider memory pressure high if using > 85% of allocated heap
     return (heapUsedMB / heapTotalMB) > 0.85
   }
@@ -427,8 +427,8 @@ export class TransactionalDatabaseService {
   }
 
   static async updateBatchProgress(
-    transactionId: string, 
-    operationId: string, 
+    transactionId: string,
+    operationId: string,
     status: 'pending' | 'processing' | 'completed' | 'failed'
   ): Promise<void> {
     // This would typically update a progress tracking table
@@ -437,7 +437,7 @@ export class TransactionalDatabaseService {
 
   static async shutdown(): Promise<void> {
     logger.info('[TransactionalDB] Shutting down connection pool...')
-    
+
     await Promise.all(
       this.connectionPool.map(async (prisma) => {
         try {
@@ -447,10 +447,10 @@ export class TransactionalDatabaseService {
         }
       })
     )
-    
+
     this.connectionPool = []
     this.initialized = false
-    
+
     logger.info('[TransactionalDB] Connection pool shutdown completed')
   }
 

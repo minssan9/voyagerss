@@ -10,7 +10,7 @@ import cron from 'node-cron'
  * 스케줄링, 큐 관리, 배치 작업 통합 관리
  */
 export class BatchProcessingService {
-  
+
   private static isInitialized = false
   private static scheduledJobs: Map<string, any> = new Map()
 
@@ -32,10 +32,10 @@ export class BatchProcessingService {
     try {
       // DART 배치 서비스 초기화
       await DartBatchService.initialize()
-      
+
       // 스케줄러 시작
       this.startSchedulers()
-      
+
       this.isInitialized = true
       logger.info('[BatchProcessing] 배치 서비스 초기화 완료')
 
@@ -58,7 +58,7 @@ export class BatchProcessingService {
     } = {}
   ): Promise<string> {
     const jobId = `daily-${date}-${Date.now()}`
-    
+
     logger.info(`[BatchProcessing] 일별 수집 작업 스케줄링: ${jobId}`)
 
     try {
@@ -109,7 +109,7 @@ export class BatchProcessingService {
     sources: ('dart' | 'krx' | 'fearGreed')[] = ['dart', 'krx', 'fearGreed']
   ): Promise<string> {
     const jobId = `historical-${startDate}-${endDate}-${Date.now()}`
-    
+
     logger.info(`[BatchProcessing] 이력 수집 작업 스케줄링: ${jobId}`)
 
     try {
@@ -147,14 +147,14 @@ export class BatchProcessingService {
    */
   static async scheduleWeeklyReport(): Promise<string> {
     const jobId = `weekly-report-${Date.now()}`
-    
+
     logger.info(`[BatchProcessing] 주간 리포트 생성 작업: ${jobId}`)
 
     try {
       // 최근 7일간의 데이터 분석
       const endDate = formatDate(new Date())
       const startDate = formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-      
+
       const weeklyData = await this.generateWeeklyReport(startDate, endDate)
 
       // 배치 로그 저장
@@ -250,10 +250,10 @@ export class BatchProcessingService {
 
     // 수집 상태 조회
     const collectionStatus = await DatabaseService.getDataCollectionStatus(7)
-    
+
     // Fear & Greed Index 히스토리 조회
     const fearGreedHistory = await DatabaseService.getFearGreedIndexHistory(7)
-    
+
     // 최신 시장 데이터 조회
     const latestKospi = await DatabaseService.getLatestKOSPIData()
     const latestKosdaq = await DatabaseService.getLatestKOSDAQData()
@@ -262,10 +262,10 @@ export class BatchProcessingService {
       period: { startDate, endDate },
       collectionStatus: {
         totalJobs: collectionStatus.length,
-        successJobs: collectionStatus.filter(job => job.status === 'SUCCESS').length,
-        failedJobs: collectionStatus.filter(job => job.status === 'FAILED').length
+        successJobs: collectionStatus.filter((job: any) => job.status === 'SUCCESS').length,
+        failedJobs: collectionStatus.filter((job: any) => job.status === 'FAILED').length
       },
-      fearGreedTrend: fearGreedHistory.map(item => ({
+      fearGreedTrend: fearGreedHistory.map((item: any) => ({
         date: item.date,
         value: item.value,
         level: item.level
@@ -332,13 +332,13 @@ export class BatchProcessingService {
    */
   static async shutdown(): Promise<void> {
     logger.info('[BatchProcessing] 배치 서비스 종료 시작')
-    
+
     // 모든 스케줄러 중지
     this.stopAllSchedulers()
-    
+
     // DART 배치 서비스 종료
     await DartBatchService.shutdown()
-    
+
     this.isInitialized = false
     logger.info('[BatchProcessing] 배치 서비스 종료 완료')
   }

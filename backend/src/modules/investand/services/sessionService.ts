@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 import { Request } from 'express'
 import { TokenService } from '@investand/services/tokenService'
 

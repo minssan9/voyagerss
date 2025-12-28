@@ -20,7 +20,7 @@ export class AuthService {
         const valid = await bcrypt.compare(pass, account.password);
         if (!valid) return null;
 
-        const roles = account.accountRoles.map(r => r.roleType);
+        const roles = account.accountRoles.map((r: any) => r.roleType);
 
         const accessToken = jwt.sign(
             { userId: account.accountId, email: account.email, roles },

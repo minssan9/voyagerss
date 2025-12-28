@@ -14,6 +14,7 @@ import dartRoutes from './controllers/dartApiSimple';
 import domainRoutes from './controllers/domainApi';
 import messagingRoutes from './controllers/messagingApi';
 import telegramWebhookRoutes from './controllers/telegramWebhook';
+import findashRoutes from './controllers/findashApi';
 
 import { initializeInvestand } from './init';
 
@@ -30,5 +31,6 @@ router.use('/dart', dartRoutes);
 router.use('/domain', domainRoutes);
 router.use('/messaging', messagingRoutes);
 router.use('/telegram', telegramWebhookRoutes);
+router.use('/findash', findashRoutes);
 
 export default router;

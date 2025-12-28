@@ -1,9 +1,7 @@
-import { Request, Response } from 'express';
-// import { PrismaClient } from '@prisma/client-findash'; // Client needs to be generated
-import { MarketDataService } from './services/MarketDataService';
+import { Request, Response, Router } from 'express';
+import { MarketDataService } from '../services/MarketDataService';
 
-// Mock Client until generation
-// const prisma = new PrismaClient();
+const router = Router();
 
 export class FindashController {
 
@@ -12,7 +10,7 @@ export class FindashController {
             const { assetId } = req.params;
             const { days } = req.query;
 
-            // TODO: Replace with DB call
+            // TODO: Replace with DB call if needed in the future
             // const history = await prisma.marketHistory.findMany({ ... });
 
             // Fallback to Live Fetch for now
@@ -28,3 +26,7 @@ export class FindashController {
         }
     }
 }
+
+router.get('/market/history/:assetId', FindashController.getMarketHistory);
+
+export default router;

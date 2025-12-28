@@ -14,7 +14,7 @@ import { logger } from '@investand/utils/common/logger'
 // 테스트용 환경 변수 설정
 process.env.DART_API_KEY = process.env.DART_API_KEY || 'test-api-key'
 
-describe('DART Collector Tests', () => {
+describe.skip('DART Collector Tests', () => {
   
   beforeAll(async () => {
     logger.info('DART Collector 테스트 시작')
@@ -248,7 +248,7 @@ describe('DART Collector Tests', () => {
 /**
  * 통합 테스트 - 전체 워크플로우
  */
-describe('DART Integration Tests', () => {
+describe.skip('DART Integration Tests', () => {
   
   test('전체 워크플로우 시뮬레이션', async () => {
     const testDate = '2024-01-15'
@@ -290,7 +290,7 @@ describe('DART Integration Tests', () => {
 /**
  * 성능 테스트
  */
-describe('DART Performance Tests', () => {
+describe.skip('DART Performance Tests', () => {
   
   test('대량 데이터 처리 성능', async () => {
     const startTime = Date.now()

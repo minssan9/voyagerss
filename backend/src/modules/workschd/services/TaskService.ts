@@ -24,7 +24,7 @@ export class TaskService {
         // Let's loop in transaction to return objects, or just map.
 
         const tasks: Task[] = [];
-        await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx: any) => {
             for (const data of dataList) {
                 const task = await tx.task.create({
                     data: {

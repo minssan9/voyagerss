@@ -299,7 +299,7 @@ export class DartDisclosureRepository extends BaseRepository {
 
       return {
         total,
-        byReportType: byReportType.reduce((acc, item) => {
+        byReportType: byReportType.reduce((acc: any, item: any) => {
           acc[item.reportCode] = item._count
           return acc
         }, {} as Record<string, number>)
@@ -396,7 +396,7 @@ export class DartDisclosureRepository extends BaseRepository {
       })
 
       const corpNameCache = new Map<string, string>()
-      companies.forEach(c => corpNameCache.set(c.corpCode, c.corpName))
+      companies.forEach((c: any) => corpNameCache.set(c.corpCode, c.corpName))
 
       // 4. 기존 데이터 조회 (필터링된 receiptNumber 기준)
       const receiptNumbers = filteredDataList.map(d => d.majorHoldingReceiptNumber || d.receiptNumber)
@@ -406,14 +406,14 @@ export class DartDisclosureRepository extends BaseRepository {
       })
 
       const existingMap = new Map<string, { id: number }>()
-      existingRecords.forEach(record => {
+      existingRecords.forEach((record: any) => {
         if (record.receiptNumber) {
           existingMap.set(record.receiptNumber, { id: record.id })
         }
       })
 
       // 5. 배치 처리 (트랜잭션 사용)
-      await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async (tx: any) => {
         const createOperations: any[] = []
         const updateOperations: any[] = []
 
@@ -601,9 +601,9 @@ export class DartDisclosureRepository extends BaseRepository {
       })
 
       const totalChanges = trends.length
-      const significantChanges = trends.filter(t => Math.abs(Number(t.changeRatio)) >= 5).length
+      const significantChanges = trends.filter((t: any) => Math.abs(Number(t.changeRatio)) >= 5).length
       const avgChange = trends.length > 0 ?
-        trends.reduce((sum, t) => sum + Number(t.changeRatio), 0) / trends.length : 0
+        trends.reduce((sum: number, t: any) => sum + Number(t.changeRatio), 0) / trends.length : 0
 
       const dominantTrend = avgChange > 1 ? 'accumulation' :
         avgChange < -1 ? 'disposal' : 'stable'
@@ -823,7 +823,7 @@ export class DartDisclosureRepository extends BaseRepository {
       })
 
       // changeRatio가 0보다 큰 항목만 필터링 (String 타입이므로 parseFloat 사용)
-      const filteredHoldings = holdings.filter(holding => {
+      const filteredHoldings = holdings.filter((holding: any) => {
         const changeRatio = parseFloat(holding.changeRatio || '0')
         return changeRatio > 0
       })

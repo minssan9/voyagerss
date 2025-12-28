@@ -1,6 +1,6 @@
 import { Router } from 'express';
 // @ts-ignore
-import ApplicationFactory from './legacy_src/ApplicationFactory';
+import ApplicationFactory from './ApplicationFactory';
 
 const router = Router();
 let topicService: any;

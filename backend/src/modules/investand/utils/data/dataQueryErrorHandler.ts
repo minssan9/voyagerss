@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 
 // ============================================================================
 // DATA QUERY ERROR HANDLER UTILITY
@@ -61,7 +61,7 @@ export class DataQueryErrorHandler {
     while (retryCount <= maxRetries) {
       try {
         const result = await queryFn()
-        
+
         // Cache successful result if cacheKey provided
         if (cacheKey && result !== undefined) {
           this.setCachedData(cacheKey, result, cacheTtl)
@@ -90,7 +90,7 @@ export class DataQueryErrorHandler {
 
     // All retries failed, use fallback or cached data
     const cachedFallback = cacheKey ? this.getCachedData<T>(cacheKey, true) : undefined
-    
+
     if (cachedFallback) {
       console.warn('[DataQuery] Using stale cached data as fallback')
       return {
@@ -140,7 +140,7 @@ export class DataQueryErrorHandler {
     failureCount: number
   }> {
     const results = new Map<string, QueryResult<T>>()
-    
+
     const promises = queries.map(async (query) => {
       const result = await this.executeQuery(query.queryFn, query.options)
       results.set(query.name, result)
@@ -152,8 +152,8 @@ export class DataQueryErrorHandler {
     const successCount = Array.from(results.values()).filter(r => r.success).length
     const failureCount = results.size - successCount
 
-    const overallSuccess = toleratePartialFailure ? 
-      successCount > 0 : 
+    const overallSuccess = toleratePartialFailure ?
+      successCount > 0 :
       failureCount === 0
 
     return {
@@ -248,11 +248,11 @@ export class DataQueryErrorHandler {
     error?: string
   }> {
     const startTime = Date.now()
-    
+
     try {
       await prisma.$queryRaw`SELECT 1 as health_check`
       const responseTime = Date.now() - startTime
-      
+
       return {
         healthy: true,
         responseTime

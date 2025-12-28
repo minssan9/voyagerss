@@ -1,5 +1,5 @@
 import * as crypto from 'crypto'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 
 const prisma = new PrismaClient()
 
@@ -42,13 +42,13 @@ export class MfaService {
     try {
       // Generate a random secret (32 characters, base32 compatible)
       const secret = this.generateRandomSecret()
-      
+
       // Create QR code URL for easy setup
       const qrCodeUrl = this.generateQrCodeUrl(username, secret)
-      
+
       // Generate backup codes
       const backupCodes = this.generateBackupCodes()
-      
+
       // Encrypt backup codes before storing
       const encryptedBackupCodes = backupCodes.map(code => this.encryptBackupCode(code))
 
@@ -289,7 +289,7 @@ export class MfaService {
     const label = encodeURIComponent(`${this.APP_NAME}:${username}`)
     const issuer = encodeURIComponent(this.ISSUER)
     const otpauthUrl = `otpauth://totp/${label}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`
-    
+
     // Return Google Charts QR code URL
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`
   }
@@ -313,7 +313,7 @@ export class MfaService {
       for (let i = -this.WINDOW_SIZE; i <= this.WINDOW_SIZE; i++) {
         const timeWindow = window + i
         const expectedToken = this.generateTotpToken(secret, timeWindow)
-        
+
         if (expectedToken === token) {
           return true
         }
@@ -333,7 +333,7 @@ export class MfaService {
     try {
       // Decode base32 secret
       const key = this.base32Decode(secret)
-      
+
       // Convert time window to 8-byte buffer (big-endian)
       const timeBuffer = Buffer.alloc(8)
       timeBuffer.writeUInt32BE(Math.floor(timeWindow / 0x100000000), 0)
@@ -347,9 +347,9 @@ export class MfaService {
       // Dynamic truncation
       const offset = digest[digest.length - 1]! & 0xf
       const code = ((digest[offset]! & 0x7f) << 24) |
-                   ((digest[offset + 1]! & 0xff) << 16) |
-                   ((digest[offset + 2]! & 0xff) << 8) |
-                   (digest[offset + 3]! & 0xff)
+        ((digest[offset + 1]! & 0xff) << 16) |
+        ((digest[offset + 2]! & 0xff) << 8) |
+        (digest[offset + 3]! & 0xff)
 
       // Return 6-digit code
       return (code % 1000000).toString().padStart(6, '0')
@@ -364,7 +364,7 @@ export class MfaService {
    */
   private static generateBackupCodes(): string[] {
     const codes: string[] = []
-    
+
     for (let i = 0; i < this.BACKUP_CODE_COUNT; i++) {
       // Generate random alphanumeric code
       const code = crypto.randomBytes(this.BACKUP_CODE_LENGTH / 2)
@@ -372,7 +372,7 @@ export class MfaService {
         .toLowerCase()
         .match(/.{1,4}/g)
         ?.join('-') || ''
-      
+
       codes.push(code)
     }
 
@@ -507,7 +507,7 @@ export class MfaService {
     for (let i = 0; i < encoded.length; i++) {
       const char = encoded[i]!.toUpperCase()
       const index = alphabet.indexOf(char)
-      
+
       if (index === -1) continue
 
       value = (value << 5) | index

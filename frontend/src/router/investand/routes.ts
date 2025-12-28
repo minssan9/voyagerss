@@ -30,6 +30,29 @@ const routes: RouteRecordRaw[] = [
         name: 'investand-dart-manage',
         component: () => import('@/views/investand/DartManagePage.vue'),
         meta: { title: 'DART Management', icon: 'manage_search' }
+      },
+      {
+        path: 'findash',
+        name: 'investand-findash',
+        meta: { icon: 'analytics' },
+        children: [
+          {
+            path: '',
+            redirect: '/investand/findash/market-lab'
+          },
+          {
+            path: 'settings',
+            name: 'FindashSettings',
+            component: () => import('@/views/investand/Settings.vue'),
+            meta: { icon: 'settings' }
+          },
+          {
+            path: 'market-lab',
+            name: 'FindashMarketLab',
+            component: () => import('@/views/investand/MarketLab.vue'),
+            meta: { icon: 'science' }
+          }
+        ]
       }
     ],
   },

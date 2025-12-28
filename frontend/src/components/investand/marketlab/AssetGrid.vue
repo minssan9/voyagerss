@@ -82,7 +82,7 @@ function getDescription(id: string) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/findash/variables';
+@import '@/assets/sass/investand/findash/variables';
 
 .asset-card {
   @include findash-card;

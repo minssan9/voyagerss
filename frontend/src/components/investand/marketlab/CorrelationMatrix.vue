@@ -63,7 +63,7 @@ function getCellClass(val: number) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/sass/findash/variables';
+@import '@/assets/sass/investand/findash/variables';
 
 .correlation-section {
   @include findash-card;

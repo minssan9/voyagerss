@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import * as os from 'os'
 import { performance } from 'perf_hooks'
 import * as bcrypt from 'bcrypt'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 import { DatabaseService } from '@investand/services/core/databaseService'
 import { FearGreedCalculator } from '@investand/services/core/fearGreedCalculator'
 import { KrxCollectionService } from '@investand/collectors/krxCollectionService'
@@ -557,7 +557,7 @@ router.get('/system-health', requireAdmin, async (_req: AuthenticatedRequest, re
 
     try {
       const recentLogs = await DatabaseService.getDataCollectionStatus(7)
-      const successCount = recentLogs.filter(log => log.status === 'SUCCESS').length
+      const successCount = recentLogs.filter((log: any) => log.status === 'SUCCESS').length
       collectionSuccessRate = recentLogs.length > 0 ? (successCount / recentLogs.length) * 100 : 0
       if (recentLogs.length > 0 && recentLogs[0] && recentLogs[0].createdAt) {
         lastCollectionTime = recentLogs[0].createdAt.toISOString()

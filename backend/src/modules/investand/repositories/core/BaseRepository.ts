@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 
 /**
  * 기본 리포지토리 클래스
@@ -50,7 +50,7 @@ export class BaseRepository {
   static async executeBatch<T>(
     operations: Array<(prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => Promise<T>>
   ): Promise<T[]> {
-    return this.prisma.$transaction(async (prisma) => {
+    return this.prisma.$transaction(async (prisma: any) => {
       return Promise.all(operations.map(op => op(prisma)))
     })
   }
@@ -88,10 +88,10 @@ export class BaseRepository {
    * 필수 필드 검증
    */
   protected static validateRequired(data: Record<string, any>, requiredFields: string[]): void {
-    const missing = requiredFields.filter(field => 
+    const missing = requiredFields.filter(field =>
       data[field] === undefined || data[field] === null || data[field] === ''
     )
-    
+
     if (missing.length > 0) {
       throw new Error(`필수 필드 누락: ${missing.join(', ')}`)
     }
@@ -116,7 +116,7 @@ export class BaseRepository {
    * 작업 시간 측정
    */
   protected static async measureTime<T>(
-    operation: () => Promise<T>, 
+    operation: () => Promise<T>,
     operationName: string
   ): Promise<T> {
     const startTime = Date.now()

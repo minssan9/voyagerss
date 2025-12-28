@@ -189,8 +189,8 @@ export class FearGreedIndexRepository extends BaseRepository {
               lte: this.validateAndFormatDate(endDate)
             }
           },
-          _avg: { 
-            value: true, 
+          _avg: {
+            value: true,
             confidence: true,
             priceMomentum: true,
             investorSentiment: true,
@@ -249,7 +249,7 @@ export class FearGreedIndexRepository extends BaseRepository {
             avgSafeHavenDemand: basic._avg.safeHavenDemand || 0
           }
         },
-        levelDistribution: levelDistribution.reduce((acc, item) => {
+        levelDistribution: levelDistribution.reduce((acc: any, item: any) => {
           acc[item.level] = {
             count: item._count,
             avgValue: item._avg.value || 0
@@ -279,11 +279,11 @@ export class FearGreedIndexRepository extends BaseRepository {
       })
 
       const movingAverages = []
-      
+
       for (let i = 0; i < Math.min(data.length - days + 1, limit); i++) {
         const slice = data.slice(i, i + days)
-        const average = slice.reduce((sum, item) => sum + item.value, 0) / days
-        
+        const average = slice.reduce((sum: number, item: any) => sum + item.value, 0) / days
+
         movingAverages.push({
           date: data[i]?.date!,
           value: data[i]?.value!,
@@ -325,11 +325,11 @@ export class FearGreedIndexRepository extends BaseRepository {
       // 일간 변화량 계산
       const dailyChanges = []
       for (let i = 1; i < data.length; i++) {
-        const change = data[i]?.value! - data[i-1]?.value!
+        const change = data[i]?.value! - data[i - 1]?.value!
         dailyChanges.push({
           date: data[i]?.date!,
           change,
-          previousValue: data[i-1]?.value!,
+          previousValue: data[i - 1]?.value!,
           currentValue: data[i]?.value!
         })
       }
@@ -341,7 +341,7 @@ export class FearGreedIndexRepository extends BaseRepository {
       const standardDeviation = Math.sqrt(variance)
 
       // 레벨 변화 횟수
-      const levelChanges = data.slice(1).reduce((count, current, index) => {
+      const levelChanges = data.slice(1).reduce((count: number, current: any, index: number) => {
         return current.level !== data[index]?.level ? count + 1 : count
       }, 0)
 

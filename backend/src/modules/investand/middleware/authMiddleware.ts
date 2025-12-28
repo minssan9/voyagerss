@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
-import { PrismaClient, AdminRole } from '@prisma/client'
+import { PrismaClient, AdminRole } from '@prisma/client-investand'
 
 const prisma = new PrismaClient()
 
@@ -81,7 +81,7 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
         lastLoginAt: true,
         mustChangePassword: true
       }
-    }).then(dbUser => {
+    }).then((dbUser: any) => {
       if (!dbUser || !dbUser.isActive || dbUser.isLocked) {
         res.status(401).json({
           success: false,
@@ -108,7 +108,7 @@ export function requireAdmin(req: AuthenticatedRequest, res: Response, next: Nex
       // Attach user to request
       req.admin = adminUser
       next()
-    }).catch(error => {
+    }).catch((error: any) => {
       console.error('[Auth] Database error:', error)
       res.status(500).json({
         success: false,
@@ -143,8 +143,8 @@ export function requirePermission(permission: string) {
 
       // Check permission
       const hasPermission = req.admin.role === 'SUPER_ADMIN' ||
-                           req.admin.role === 'ADMIN' ||
-                           req.admin.permissions.includes(permission)
+        req.admin.role === 'ADMIN' ||
+        req.admin.permissions.includes(permission)
 
       if (!hasPermission) {
         res.status(403).json({
@@ -250,8 +250,8 @@ export function verifyToken(token: string): AdminUser | null {
     return null
   }
 }
- 
- 
+
+
 
 export default {
   // Simple functions

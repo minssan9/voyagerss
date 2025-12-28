@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { MarketApi } from '@/api/findash/api-market';
+import { MarketApi } from '@/api/investand/api-market';
 
 export interface Asset {
     id: string;

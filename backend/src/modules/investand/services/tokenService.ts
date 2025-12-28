@@ -1,6 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import * as crypto from 'crypto'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client-investand'
 import { Request } from 'express'
 
 const prisma = new PrismaClient()
@@ -51,7 +51,7 @@ export class TokenService {
     userAgent?: string
   ): Promise<TokenPair> {
     const sessionId = crypto.randomUUID()
-    
+
     // Create token payload
     const payload: TokenPayload = {
       userId,
@@ -81,7 +81,7 @@ export class TokenService {
     // Calculate expiry dates
     const accessTokenDecoded = jwt.decode(accessToken) as any
     const refreshTokenDecoded = jwt.decode(refreshToken) as any
-    
+
     const expiresAt = new Date(accessTokenDecoded.exp * 1000)
     const refreshExpiresAt = new Date(refreshTokenDecoded.exp * 1000)
 
@@ -124,7 +124,7 @@ export class TokenService {
     try {
       // Verify JWT signature and expiry
       const payload = jwt.verify(token, JWT_ACCESS_SECRET) as TokenPayload
-      
+
       // Check if session exists and is active
       const session = await prisma.adminSession.findFirst({
         where: {
@@ -175,7 +175,7 @@ export class TokenService {
     try {
       // Verify refresh token
       const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as any
-      
+
       if (payload.type !== 'refresh') {
         throw new Error('Invalid token type')
       }
