@@ -1,12 +1,17 @@
 name: Dev Deployment (Self-hosted)
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_run:
+    workflows: ["Unified CI"]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Fix Git Safe Directory
