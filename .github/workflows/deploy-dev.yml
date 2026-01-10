@@ -13,8 +13,10 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create .env.dev file from Secret
+      shell: powershell
       run: |
-        echo "${{ secrets.DOTENV_DEV }}" > .env.dev
+        $content = "${{ secrets.DOTENV_DEV }}"
+        [System.IO.File]::WriteAllText(".env.dev", $content, [System.Text.Encoding]::UTF8)
 
     - name: Deploy with Docker Compose
       run: |
