@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../en9door/en9door_web/en9door_web.iml" filepath="$PROJECT_DIR$/../en9door/en9door_web/en9door_web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../devops/voyagers-devops/voyagers-devops.iml" filepath="$PROJECT_DIR$/../devops/voyagers-devops/voyagers-devops.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/voyagerss.iml" filepath="$PROJECT_DIR$/.idea/voyagerss.iml" />
+    </modules>
+  </component>
+</project>

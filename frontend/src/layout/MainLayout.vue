@@ -59,14 +59,3 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss">
-@import "@/assets/styles/index.scss";
-
-.drawer-side {
-  height: calc(100vh - 200px);
-}
-
-/* Sidebar margin removed - sidebar now toggles on all screen sizes */
-</style>
-
-

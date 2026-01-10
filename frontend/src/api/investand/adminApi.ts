@@ -1,4 +1,4 @@
-﻿import service from '@/api/axios-voyagerss'
+﻿import service from '@/api/common/axios-voyagerss'
 
 // Admin API 응답 타입 정의
 export interface DataCollectionRequest {

@@ -178,7 +178,7 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useUserStore } from '@/stores/common/store_user'
-import apiAccount from '@/api/modules/api-account'
+import apiAccount from '@/api/account/api-account'
 
 const { t } = useI18n()
 const $q = useQuasar()

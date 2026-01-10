@@ -2,5 +2,5 @@
 export * from './workschd/task'
 export * from './workschd/shop'
 export * from './workschd/status'
-export * from './common/assembly' 
+export * from './common/assembly'
 

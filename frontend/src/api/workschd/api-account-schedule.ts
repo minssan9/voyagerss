@@ -1,5 +1,5 @@
 ﻿import { AxiosResponse } from 'axios';
-import service from '@/api/axios-voyagerss';
+import service from '@/api/common/axios-voyagerss';
 
 // Define interfaces for schedule configuration
 export interface DayValueConfig {
@@ -48,8 +48,8 @@ export const months: MonthValueConfig[] = [
 ];
 
 
-const baesURL = `account` 
-const apiAccountSchedule = { 
+const baesURL = `/workschd/account`
+const apiAccountSchedule = {
   // Schedule preferences methods
   getSchedulePreferences(accountId) {
     return service.get(`${baesURL}/${accountId}/schedule-preferences`)

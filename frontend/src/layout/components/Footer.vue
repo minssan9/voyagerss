@@ -27,13 +27,3 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 </script>
-
-<style lang="scss" scoped>
-.q-footer {
-  .q-separator.vertical {
-    height: 12px;
-    margin-top: 8px;
-  }
-}
-</style> 
-

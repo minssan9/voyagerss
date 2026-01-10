@@ -1,5 +1,5 @@
 ﻿import { AxiosResponse } from 'axios';
-import service from "@/api/axios-voyagerss.js";
+import service from "@/api/common/axios-voyagerss.js";
 
 export interface SubscriptionDTO {
   planType: 'premium' | 'basic' | 'starter' | 'small';

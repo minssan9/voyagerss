@@ -1,6 +1,6 @@
 ﻿<template>
-  <q-page class="column items-center justify-center q-pa-md">
-    <div class="signup-container card q-pa-lg">
+  <q-page class="column items-center justify-center q-pa-md auth-page">
+    <div class="auth-container card q-pa-lg">
       <h5 class="text-center q-mb-md">{{ t('signup.title', '회원가입') }}</h5>
       
       <q-form @submit="handleSignup" class="q-gutter-md">
@@ -9,7 +9,7 @@
           :label="t('signup.email.label', '이메일')"
           type="email"
           outlined
-          class="signup-input"
+          class="auth-input"
           :rules="[
             val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
             val => isValidEmail(val) || t('signup.validation.email', '올바른 이메일 형식이 아닙니다')
@@ -24,7 +24,7 @@
           v-model="signupForm.username"
           :label="t('signup.username.label', '사용자 이름')"
           outlined
-          class="signup-input"
+          class="auth-input"
           :rules="[
             val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
             val => val.length >= 2 || t('signup.validation.username.length', '사용자 이름은 2자 이상이어야 합니다')
@@ -40,7 +40,7 @@
           :label="t('signup.password.label', '비밀번호')"
           type="password"
           outlined
-          class="signup-input"
+          class="auth-input"
           :rules="[
             val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
             val => val.length >= 4 || t('signup.validation.password.length', '비밀번호는 4자 이상이어야 합니다')
@@ -98,7 +98,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
-import apiAccount from "@/api/modules/api-account"
+import apiAccount from "@/api/account/api-account"
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -140,29 +140,3 @@ const handleSignup = async () => {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.signup-container {
-  width: 100%;
-  max-width: 450px;
-}
-
-.signup-input {
-  font-size: 1.1em;
-
-  :deep(.q-field__control) {
-    height: 56px;
-  }
-
-  :deep(.q-field__marginal) {
-    height: 56px;
-  }
-}
-
-.q-page {
-  background-color: #f5f5f5;
-  background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-</style> 
-

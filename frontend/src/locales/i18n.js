@@ -1,6 +1,6 @@
 ﻿import { createI18n } from "vue-i18n";
 import axios from "axios";
-import apiSys from "@/api/public-modules/api-sys";
+import apiSys from "@/api/system/api-sys";
 
 const userLocale = navigator.languages ? navigator.languages[0] : navigator.language || navigator.userLanguage;
 

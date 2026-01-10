@@ -6,15 +6,9 @@
 
 // Import utilities and components
 @import './utilities.scss';
-@import './components.scss';
-
-// Import layout and specific styles
-@import './main.scss';
 @import './global.scss';
-@import './grid-default.scss';
+@import './components.scss';
 @import './layout.scss';
-@import './dialog.scss';
-@import './modern.scss';
-@import './info-pages.scss';
+@import './views.scss';
 
-// Add any additional global styles here 
+// Add any additional global styles here

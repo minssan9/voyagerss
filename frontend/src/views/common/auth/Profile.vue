@@ -1,7 +1,7 @@
 ﻿<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import apiUser from '@/api/modules/api-user'
+import apiUser from '@/api/account/api-user'
 
 const $q = useQuasar()
 const userProfile = ref(null)

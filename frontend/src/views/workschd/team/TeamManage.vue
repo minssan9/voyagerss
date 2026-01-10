@@ -105,7 +105,7 @@ import TeamManageShop from './subpage/TeamManageShop.vue'
 import GridDefault from '@/components/grid/GridDefault.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import apiTeam, {TeamDTO, TeamMemberParams} from '@/api/workschd/api-team'
-import { PageDTO } from '@/api/modules/api-common'
+import { PageDTO } from '@/api/common/api-common'
 import MemberDialog from '@/components/dialog/MemberDialog.vue'
 import TeamMembersGrid from './subpage/TeamMembers.vue'
 
@@ -341,12 +341,5 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-/* ag-theme handled by grid-default.scss, clickable-cell uses utility classes */
-.clickable-cell {
-  cursor: pointer;
-  color: var(--q-primary);
-  text-decoration: underline;
-}
-</style>
+
 ```

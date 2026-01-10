@@ -5,7 +5,9 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/workschd',
         name: 'Workschd',
-        meta: { icon: 'business_center' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'], 
+        component: () => import('@/layout/RouteView.vue'),
+        meta: { icon: 'business_center' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
+        redirect: { name: 'TeamManage (Manager)' },
         children: [
             // Team routes - flattened to 1 depth
             {

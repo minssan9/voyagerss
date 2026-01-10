@@ -22,6 +22,16 @@ router.get('/accounts/:id', accountController.getAccount.bind(accountController)
 router.post('/accounts', accountController.createAccount.bind(accountController));
 
 // Team Routes
+router.get('/team', (req, res) => {
+    // Return empty paginated response for now
+    res.json({
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        size: parseInt(req.query.size as string) || 10,
+        number: parseInt(req.query.page as string) || 0
+    });
+});
 router.get('/teams/:id', teamController.getTeam.bind(teamController));
 
 // Task Routes

@@ -180,29 +180,3 @@ onMounted(() => {
   userStore.fetchTeams();
 })
 </script>
-
-<style scoped>
-.drawer-header {
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #ddd;
-}
-
-.drawer-side {
-  height: calc(100vh - 250px);
-}
-
-.drawer-footer {
-  position: fixed;
-  bottom: 0;
-  width: 200px;
-  border-top: 1px solid #ddd;
-}
-
-:deep(.q-item__section--avatar) {
-  min-width: 40px;
-}
-</style> 
-
-

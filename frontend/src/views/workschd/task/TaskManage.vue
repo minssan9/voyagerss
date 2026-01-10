@@ -378,42 +378,5 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped>
-/* Task-specific styles - other q-field and button styles handled by global SCSS */
-.detail-card {
-  height: 100%;
-  transition: all 0.3s ease;
-}
 
-.detail-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.detail-item {
-  margin-bottom: 12px;
-}
-
-.detail-label {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.detail-value {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.description {
-  white-space: pre-line;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-.clickable-cell {
-  cursor: pointer;
-  color: var(--q-primary);
-  text-decoration: underline;
-}
-</style>
 ```

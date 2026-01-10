@@ -1,4 +1,4 @@
-﻿import service from '@/api/axios-voyagerss'
+﻿import service from '@/api/common/axios-voyagerss'
 
 // DART API Types
 export interface DartDisclosure {

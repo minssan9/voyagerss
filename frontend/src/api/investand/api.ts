@@ -1,4 +1,4 @@
-﻿import service from '@/api/axios-voyagerss'
+﻿import service from '@/api/common/axios-voyagerss'
 
 // Market Data Types
 export interface MarketData {
@@ -52,7 +52,7 @@ export const marketApi = {
   // KOSPI 데이터 가져오기
   async getKospiData() {
     try {
-      const response = await service.get<{ success: boolean; data: MarketData['kospi'] }>('/investand/data/kospi/latest')
+      const response = await service.get<{ success: boolean; data: MarketData['kospi'] }>('/investand/data/kospi')
       return response.data.data
     } catch (error) {
       console.warn('Failed to fetch KOSPI data, using fallback')
@@ -69,7 +69,7 @@ export const marketApi = {
   // KOSDAQ 데이터 가져오기
   async getKosdaqData() {
     try {
-      const response = await service.get<{ success: boolean; data: MarketData['kosdaq'] }>('/investand/data/kosdaq/latest')
+      const response = await service.get<{ success: boolean; data: MarketData['kosdaq'] }>('/investand/data/kosdaq')
       return response.data.data
     } catch (error) {
       console.warn('Failed to fetch KOSDAQ data, using fallback')

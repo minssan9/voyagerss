@@ -1,4 +1,4 @@
-﻿import service from "@/api/axios-voyagerss"; // Assuming this is the shared axios instance
+﻿import service from "@/api/common/axios-voyagerss"; // Assuming this is the shared axios instance
 import { AxiosResponse } from 'axios';
 import { DayConfig, MonthConfig } from '@/api/workschd/api-account-schedule';
 export type { DayConfig, MonthConfig };
@@ -49,7 +49,7 @@ export const apiTeamSchedule = {
    * @returns Promise with the schedule configuration
    */
   getTeamScheduleConfig(teamId: number): Promise<AxiosResponse<ScheduleConfig>> {
-    return service.get(`/team/${teamId}/schedule-config`);
+    return service.get(`/workschd/team/${teamId}/schedule-config`);
   },
 
   /**
@@ -59,7 +59,7 @@ export const apiTeamSchedule = {
    * @returns Promise with the result of the operation
    */
   saveTeamScheduleConfig(teamId: number, config: ScheduleConfig): Promise<AxiosResponse<void>> {
-    return service.post(`/team/${teamId}/schedule-config`, config);
+    return service.post(`/workschd/team/${teamId}/schedule-config`, config);
   }
 }; 
 

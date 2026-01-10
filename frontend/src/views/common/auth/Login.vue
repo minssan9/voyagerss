@@ -1,7 +1,7 @@
 ﻿<template>
-  <q-page class="column items-center justify-center q-pa-md">
+  <q-page class="column items-center justify-center q-pa-md auth-page">
     <!-- Social Login Container -->
-    <div class="login-container card q-pa-lg">
+    <div class="auth-container card q-pa-lg">
       <!-- Social Login Buttons -->
       <div class="column items-center q-gutter-y-md">
         <!-- Kakao -->
@@ -60,7 +60,7 @@
             :label="t('login.email.label', '이메일')"
             type="email"
             outlined
-            class="login-input"
+            class="auth-input"
             :rules="[
               val => !!val || t('login.validation.required', '필수 입력 항목입니다'),
               val => isValidEmail(val) || t('login.validation.email', '올바른 이메일 형식이 아닙니다')
@@ -131,7 +131,7 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import apiAccount from "@/api/modules/api-account"
+import apiAccount from "@/api/account/api-account"
 import { removeAllCookies } from '@/utils/cookieUtils'
 import { useRouter } from 'vue-router'
 import Cookies from 'js-cookie'
@@ -222,48 +222,5 @@ const handleLogin = async () => {
 
 </script>
 
-<style lang="scss" scoped>
-.login-container {
-  width: 100%;
-  max-width: 450px;
-}
 
-.social-login-btn {
-  width: 300px;
-  height: 45px;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.2s;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.email-login-form {
-  .login-input {
-    font-size: 1.1em;
-  }
-
-  :deep(.q-field__control) {
-    height: 56px;
-  }
-
-  :deep(.q-field__marginal) {
-    height: 56px;
-  }
-}
-
-.q-page {
-  background-color: #f5f5f5;
-  background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-</style>
 ```

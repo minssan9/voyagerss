@@ -1,4 +1,4 @@
-﻿import service, { requestFile } from "@/api/axios-voyagerss.js";
+﻿import service, { requestFile } from "@/api/common/axios-voyagerss.js";
 
 const baesURL = `account`
 const apiAccount = {

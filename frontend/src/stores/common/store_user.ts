@@ -1,4 +1,4 @@
-﻿import apiAccount from '@/api/modules/api-account'
+﻿import apiAccount from '@/api/account/api-account'
 import apiTeam from '@/api/workschd/api-team'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'

@@ -1,12 +1,12 @@
 {
-	"hosting":{
-		"public":"dist",
+	"hosting": {
+		"public": "../dist",
 		"ignore": [
 			"firebase.json",
 			"**/.*",
 			"**/node_modules/**"
 		],
-		"rewrites":[
+		"rewrites": [
 			{
 				"source": "/api/**",
 				"run": {
@@ -15,8 +15,8 @@
 				}
 			},
 			{
-				"source":"**",
-				"destination":"/index.html"
+				"source": "**",
+				"destination": "/index.html"
 			}
 		],
 		"headers": [

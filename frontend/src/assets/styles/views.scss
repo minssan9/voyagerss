@@ -1,0 +1,327 @@
+@import './variables.scss';
+
+// --------------------------------------------
+// Authentication Pages (Login, Signup)
+// --------------------------------------------
+
+.auth-page {
+    background-color: $background-color;
+    background-image: radial-gradient($gray-200 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.social-login-btn {
+    width: 300px;
+    height: 45px;
+    border-radius: $border-radius-md;
+    overflow: hidden;
+    transition: transform $transition-fast;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.auth-input {
+    font-size: 1.1em;
+
+    :deep(.q-field__control),
+    :deep(.q-field__marginal) {
+        height: 56px;
+    }
+}
+
+// --------------------------------------------
+// Common View Elements
+// --------------------------------------------
+
+.clickable-cell {
+    cursor: pointer;
+    color: $primary-color;
+    text-decoration: underline;
+
+    &:hover {
+        color: $primary-dark;
+    }
+}
+
+.content-section {
+    background-color: $white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-sm;
+}
+
+// --------------------------------------------
+// Info Pages (About, Home, Landing)
+// --------------------------------------------
+
+.info-hero {
+    position: relative;
+    padding: 80px 0;
+    margin-bottom: $spacing-2xl;
+    overflow: hidden;
+
+    &__pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='152' height='152' viewBox='0 0 152 152'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='temple' fill='%234361ee' fill-opacity='0.06'%3E%3Cpath d='M152 150v2H0v-2h28v-8H8v-20H0v-2h8V80h42v20h20v42H30v8h90v-8H80v-42h20V80h42v40h8V30h-8v40h-42V50H80V8h40V0h2v8h20v20h8V0h2v150zm-2 0v-28h-8v20h-20v8h28zM82 30v18h18V30H82zm20 18h20v20h18V30h-20V10H82v18h20v20zm0 2v18h18V50h-18zm20-22h18V10h-18v18zm-54 92v-18H50v18h18zm-20-18H28V82H10v38h20v20h38v-18H48v-20zm0-2V82H30v18h18zm-20 22H10v18h18v-18zm54 0v18h38v-20h20V82h-18v20h-20v20H82zm18-20H82v18h18v-18zm2-2h18V82h-18v18zm20 40v-18h18v18h-18zM30 0h-2v8H8v20H0v2h8v40h42V50h20V8H30V0zm20 48h18V30H50v18zm18-20H48v20H28v20H10V30h20V10h38v18zM30 50h18v18H30V50zm-2-40H10v18h18V10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        z-index: -1;
+    }
+
+    &__content {
+        max-width: 1200px;
+        margin: 0 auto;
+        text-align: center;
+        z-index: 1;
+        position: relative;
+    }
+
+    &__title {
+        font-size: 3rem;
+        font-weight: $font-bold;
+        margin-bottom: $spacing-md;
+        background: $gradient-primary;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+
+        @media (max-width: $breakpoint-md) {
+            font-size: 2rem;
+        }
+    }
+
+    &__subtitle {
+        font-size: 1.5rem;
+        color: $text-light;
+        max-width: 800px;
+        margin: 0 auto $spacing-lg;
+
+        @media (max-width: $breakpoint-md) {
+            font-size: 1.25rem;
+        }
+    }
+}
+
+.feature-card {
+    background-color: $white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-lg;
+    height: 100%;
+    transition: all $transition-base ease;
+    box-shadow: $shadow-md;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: $shadow-lg;
+    }
+
+    &__icon {
+        width: 60px;
+        height: 60px;
+        border-radius: $border-radius-lg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: $spacing-md;
+        background: $gradient-cool;
+        color: $white;
+        font-size: 24px;
+    }
+
+    &__title {
+        font-size: 1.5rem;
+        font-weight: $font-bold;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__content {
+        color: $text-light;
+        line-height: $leading-relaxed;
+    }
+}
+
+.testimonial {
+    background-color: rgba($white, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: $border-radius-lg;
+    padding: $spacing-lg;
+    box-shadow: $shadow-md;
+    border: 1px solid rgba($white, 0.2);
+
+    &__content {
+        font-style: italic;
+        position: relative;
+        padding: $spacing-sm $spacing-lg;
+
+        &:before,
+        &:after {
+            content: '"';
+            font-family: $font-secondary;
+            font-size: 4rem;
+            color: rgba($modern-primary, 0.15);
+            position: absolute;
+            line-height: 1;
+        }
+
+        &:before {
+            top: -10px;
+            left: -10px;
+        }
+
+        &:after {
+            bottom: -40px;
+            right: -10px;
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.pricing-table {
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+
+    th {
+        font-weight: $font-semibold;
+        background-color: rgba($modern-primary, 0.08);
+        padding: $spacing-md !important;
+    }
+
+    td {
+        padding: $spacing-md !important;
+    }
+
+    tr:nth-child(even) {
+        background-color: rgba($modern-accent, 0.05);
+    }
+
+    tr:hover {
+        background-color: rgba($modern-primary, 0.1);
+    }
+
+    .price {
+        font-weight: $font-bold;
+        font-size: 1.1rem;
+
+        &--featured {
+            color: $modern-primary;
+        }
+    }
+}
+
+.cta-section {
+    padding: $spacing-xl;
+    background: $gradient-cool;
+    border-radius: $border-radius-xl;
+    margin: $spacing-2xl auto;
+    max-width: 1000px;
+    text-align: center;
+    color: $white;
+    box-shadow: $shadow-lg;
+
+    h2 {
+        font-size: 2rem;
+        margin-bottom: $spacing-md;
+    }
+
+    p {
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto $spacing-lg;
+        opacity: 0.9;
+    }
+}
+
+// --------------------------------------------
+// Task & Team Management
+// --------------------------------------------
+
+.detail-card {
+    height: 100%;
+    transition: all $transition-base ease;
+    border-radius: $border-radius-lg;
+
+    &:hover {
+        box-shadow: $shadow-md;
+    }
+}
+
+.detail-item {
+    margin-bottom: $spacing-md;
+}
+
+.detail-label {
+    font-size: $text-sm;
+    color: $text-light;
+    margin-bottom: $spacing-xs;
+}
+
+.detail-value {
+    font-size: $text-base;
+    font-weight: $font-medium;
+    color: $text-dark;
+}
+
+.description-text {
+    white-space: pre-line;
+    max-height: 15rem;
+    overflow-y: auto;
+    font-size: $text-sm;
+    line-height: $leading-relaxed;
+}
+
+// --------------------------------------------
+// Grid & Calendar containers
+// --------------------------------------------
+.calendar-container {
+    margin-bottom: $spacing-lg;
+}
+
+.drag-task {
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+// --------------------------------------------
+// Dashboard & Information Pages
+// --------------------------------------------
+
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+// Generic page header
+.view-header {
+    margin-bottom: $spacing-lg;
+
+    .title {
+        font-size: $text-2xl;
+        font-weight: $font-bold;
+        color: $text-dark;
+        margin: 0;
+    }
+
+    .subtitle {
+        font-size: $text-base;
+        color: $text-light;
+        margin-top: $spacing-xs;
+    }
+}

@@ -131,28 +131,5 @@ const pricingRows = [
 ]
 </script>
 
-<style lang="scss">
-// Local styles
-.modern-table {
-  border-radius: $radius-lg;
-  overflow: hidden;
-  
-  th {
-    font-weight: 600;
-    background-color: rgba(67, 97, 238, 0.05);
-  }
-  
-  tr:nth-child(even) {
-    background-color: rgba(76, 201, 240, 0.03);
-  }
-  
-  tr:hover {
-    background-color: rgba(67, 97, 238, 0.08);
-  }
-}
 
-.q-footer {
-  margin-top: 0 !important;
-}
-</style>
 

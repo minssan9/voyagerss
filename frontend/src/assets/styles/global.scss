@@ -1,48 +1,190 @@
 @import './variables.scss';
 
+// --------------------------------------------
+// Global App Styles
+// --------------------------------------------
+#app {
+  width: 100%;
+  padding: 0;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: all $transition-fast;
+  padding: 2px;
+
+  &:hover {
+    @media (hover: hover) {
+      background-color: hsla(160, 100%, 37%, 0.2);
+    }
+  }
+}
+
 /* Global styles for content sections */
 .page-container {
   background-color: $background-color;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .content-section {
-  background-color: #fff;
-  border-radius: $border-radius;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  background-color: $white;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
   margin-bottom: $spacing-md;
+  padding: $spacing-lg;
 }
 
-/* Common form styles */
+/* Quasar Component Overrides */
 .q-field {
-  margin-bottom: 8px;
-  
+  margin-bottom: $spacing-sm;
+
   &--filled {
     .q-field__control {
-      border-radius: 8px;
-      background-color: #f5f5f5;
-      
+      border-radius: $border-radius-md;
+      background-color: $gray-50;
+
       &:hover {
-        background-color: #eeeeee;
+        background-color: $gray-100;
       }
     }
-    
+
     &.q-field--focused .q-field__control {
-      background-color: #e0e0e0;
+      background-color: $gray-200;
     }
   }
 }
 
-/* Card styles */
 .q-card {
-  border-radius: 8px;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
 }
 
-/* Table styles */
 .q-table {
-  border-radius: 8px;
-  
+  border-radius: $border-radius-lg;
+
   &__card {
     box-shadow: none;
-    border: 1px solid #e0e0e0;
+    border: 1px solid $border-color-light;
   }
-} 
+}
+
+// Global Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn $transition-base forwards;
+}
+
+.slide-up {
+  animation: slideUp $transition-base forwards;
+}
+
+// Staggered animation
+@for $i from 1 through 10 {
+  .stagger-#{$i} {
+    animation-delay: #{$i * 0.1}s;
+  }
+}
+
+// --------------------------------------------
+// Modern Layout & Text Patterns
+// --------------------------------------------
+// --------------------------------------------
+// Modern Layout & Text Patterns
+// --------------------------------------------
+.modern-page {
+  min-height: 100vh;
+  background-color: $background-color;
+  background-image: $background-hero; // Use hero gradient
+
+  &__header {
+    padding: $spacing-xl $spacing-2xl; // More spacious header
+    background: transparent; // Clean header for modern look, or use gradient overlay if needed
+    color: $brand-navy;
+    margin-bottom: $spacing-xl;
+    text-align: center;
+
+    // Optional: If a colored header is desired like before
+    // background: $gradient-navy;
+    // color: $white;
+    // border-radius: 0 0 $border-radius-2xl $border-radius-2xl;
+  }
+
+  &__content {
+    padding: $spacing-lg;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  &__footer {
+    padding: $spacing-xl;
+    background-color: $brand-navy;
+    color: $white;
+    margin-top: $spacing-4xl;
+    border-top-left-radius: $border-radius-2xl;
+    border-top-right-radius: $border-radius-2xl;
+  }
+}
+
+.modern-text {
+  &__title {
+    font-family: $font-secondary;
+    font-weight: $font-bold;
+    letter-spacing: -0.025em;
+    line-height: $leading-tight;
+  }
+
+  &__subtitle {
+    font-weight: $font-medium;
+    color: $text-light;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__gradient {
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.modern-bg {
+  &__pattern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%234361ee' fill-opacity='0.05'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  &__gradient {
+    background: $gradient-primary;
+  }
+
+  &__glass {
+    background: rgba($white, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba($white, 0.2);
+  }
+}

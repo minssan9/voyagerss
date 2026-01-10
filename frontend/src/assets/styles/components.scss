@@ -19,21 +19,22 @@
         box-shadow: $shadow-md;
     }
 
-    &-hover-lift:hover {
+    -hover-lift:hover {
         transform: translateY(-4px);
         box-shadow: $shadow-lg;
     }
 
     &-header {
         padding: $spacing-base $spacing-lg;
-        border-bottom: $border-width solid $border-color-light;
-        background-color: $gray-50;
+        border-bottom: 1px solid rgba(0, 0, 90, 0.05); // Softer border
+        background-color: transparent; // Clean header
 
         .title {
-            font-size: $text-lg;
-            font-weight: $font-semibold;
-            color: $text-dark;
+            font-size: $text-xl;
+            font-weight: $font-bold;
+            color: $brand-navy;
             margin: 0;
+            letter-spacing: -0.02em;
         }
     }
 
@@ -43,58 +44,8 @@
 
     &-footer {
         padding: $spacing-base $spacing-lg;
-        border-top: $border-width solid $border-color-light;
+        border-top: 1px solid rgba(0, 0, 90, 0.05);
         background-color: $gray-50;
-    }
-
-    &-stat {
-        background-color: $white;
-        border-radius: $border-radius-lg;
-        padding: $spacing-lg;
-        box-shadow: $shadow-sm;
-        transition: all $transition-fast;
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: $shadow-md;
-        }
-
-        .stat-label {
-            font-size: $text-sm;
-            color: $text-light;
-            margin-bottom: $spacing-sm;
-        }
-
-        .stat-value {
-            font-size: $text-3xl;
-            font-weight: $font-bold;
-            margin-bottom: $spacing-md;
-        }
-    }
-
-    &-action {
-        background-color: $white;
-        border-radius: $border-radius-lg;
-        padding: $spacing-lg;
-        text-align: center;
-        cursor: pointer;
-        transition: all $transition-fast;
-        box-shadow: $shadow-sm;
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: $shadow-lg;
-        }
-
-        .action-icon {
-            font-size: 2.5rem;
-            margin-bottom: $spacing-sm;
-        }
-
-        .action-label {
-            font-size: $text-base;
-            font-weight: $font-medium;
-        }
     }
 }
 
@@ -105,67 +56,91 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: $spacing-sm $spacing-base;
+    padding: $spacing-sm $spacing-lg; // Wider padding for pill shape
     font-size: $text-base;
-    font-weight: $font-medium;
-    border-radius: $border-radius-md;
-    border: $border-width solid transparent;
+    font-weight: $font-semibold;
+    border-radius: $border-radius-pill; // Pill shape
+    border: 2px solid transparent; // Slightly thicker border for outlines
     cursor: pointer;
-    transition: all $transition-fast;
+    transition: all $transition-base;
     text-decoration: none;
+    line-height: 1.5;
 
     &:disabled {
-        opacity: 0.5;
+        opacity: 0.6;
         cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
     }
 
     &-sm {
-        padding: $spacing-xs $spacing-sm;
+        padding: $spacing-xs $spacing-base;
         font-size: $text-sm;
     }
 
     &-lg {
-        padding: $spacing-base $spacing-xl;
+        padding: $spacing-base $spacing-2xl;
         font-size: $text-lg;
     }
 
     &-primary {
-        background-color: $primary-color;
+        background: $gradient-primary;
         color: $white;
+        box-shadow: 0 4px 12px rgba(0, 55, 235, 0.3); // Colored shadow
+        border: none;
 
         &:hover:not(:disabled) {
-            background-color: $primary-dark;
-            box-shadow: $shadow-md;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 55, 235, 0.4);
+            filter: brightness(1.1);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 55, 235, 0.3);
         }
     }
 
     &-secondary {
-        background-color: $secondary-color;
-        color: $white;
+        background-color: $white;
+        color: $brand-navy;
+        border-color: rgba($brand-navy, 0.1);
+        box-shadow: $shadow-sm;
 
         &:hover:not(:disabled) {
-            background-color: $secondary-dark;
-            box-shadow: $shadow-md;
+            border-color: $brand-navy;
+            background-color: $white;
         }
     }
 
     &-outline {
         background-color: transparent;
-        border-color: $primary-color;
-        color: $primary-color;
+        border-color: $white;
+        color: $white;
 
         &:hover:not(:disabled) {
-            background-color: $primary-color;
-            color: $white;
+            background-color: $white;
+            color: $brand-blue;
+        }
+
+        &.dark {
+            border-color: $brand-blue;
+            color: $brand-blue;
+
+            &:hover:not(:disabled) {
+                background-color: $brand-blue;
+                color: $white;
+            }
         }
     }
 
     &-ghost {
         background-color: transparent;
-        color: $text-color;
+        color: $brand-blue;
+        font-weight: $font-medium;
 
         &:hover:not(:disabled) {
-            background-color: $gray-100;
+            background-color: rgba($brand-blue, 0.05);
         }
     }
 }
@@ -360,5 +335,245 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+// --------------------------------------------
+// Modern Components (Consolidated)
+// --------------------------------------------
+
+.modern-card {
+    background-color: $white;
+    border-radius: $border-radius-xl;
+    box-shadow: $shadow-md;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $shadow-lg;
+    }
+
+    &__header {
+        padding: $spacing-md $spacing-lg;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    &__body {
+        padding: $spacing-lg;
+    }
+
+    &__footer {
+        padding: $spacing-md $spacing-lg;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+}
+
+.modern-button {
+    background: $gradient-primary;
+    color: $white;
+    border: none;
+    border-radius: $border-radius-md;
+    padding: $spacing-sm $spacing-lg;
+    font-weight: $font-semibold;
+    transition: all $transition-fast;
+    box-shadow: $shadow-sm;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+
+    &:hover {
+        box-shadow: $shadow-md;
+        transform: translateY(-1px);
+    }
+
+    &--secondary {
+        background: $white;
+        color: $modern-primary;
+        border: 1px solid $modern-primary;
+
+        &:hover {
+            background: $gray-50;
+        }
+    }
+
+    &--accent {
+        background: $gradient-cool;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+// --------------------------------------------
+// Specific Components (Screenshot Derived)
+// --------------------------------------------
+
+// 1. Segmented Search Bar
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: $white;
+    border-radius: $border-radius-pill;
+    box-shadow: 0 8px 16px rgba(0, 55, 235, 0.12); // Blue-tinted shadow
+    padding: $spacing-xs;
+    max-width: 900px;
+    margin: 0 auto $spacing-2xl;
+    position: relative;
+    z-index: $z-10;
+
+    &__segment {
+        flex: 1;
+        position: relative;
+        padding: $spacing-md $spacing-lg;
+        border-right: 1px solid $border-color-light;
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+
+        &:last-of-type {
+            border-right: none;
+        }
+
+        // Icon style
+        .q-icon,
+        i {
+            color: $text-muted;
+            font-size: 1.25rem;
+        }
+
+        // Input reset
+        input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: $font-primary;
+            font-size: $text-base;
+            color: $text-dark;
+            background: transparent;
+
+            &::placeholder {
+                color: $text-muted;
+            }
+        }
+    }
+
+    &__btn {
+        padding: $spacing-sm $spacing-xl;
+        min-height: 48px;
+        margin-left: $spacing-sm;
+    }
+
+    // Stack on mobile
+    @media (max-width: $breakpoint-md) {
+        flex-direction: column;
+        border-radius: $border-radius-xl;
+        padding: $spacing-md;
+
+        &__segment {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid $border-color-light;
+            padding: $spacing-md 0;
+        }
+
+        &__btn {
+            width: 100%;
+            margin: $spacing-md 0 0;
+        }
+    }
+}
+
+// 2. Feature Cards (Image + Content)
+.card-feature {
+    background: $white;
+    border-radius: $border-radius-lg; // 20px
+    overflow: hidden;
+    box-shadow: $shadow-sm;
+    transition: all $transition-base;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 90, 0.1);
+    }
+
+    &__image {
+        height: 240px;
+        width: 100%;
+        background-color: $gray-100;
+        object-fit: cover;
+    }
+
+    &__content {
+        padding: $spacing-xl;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__title {
+        font-family: $font-secondary; // Poppins/Objective
+        font-weight: $font-bold;
+        color: $brand-navy;
+        font-size: $text-xl;
+        margin-bottom: $spacing-sm;
+        line-height: $leading-tight;
+    }
+
+    &__text {
+        color: $text-light;
+        margin-bottom: $spacing-lg;
+        flex: 1;
+    }
+
+    &__link {
+        color: $brand-blue;
+        font-weight: $font-semibold;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-xs;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// 3. Floating Chat Button
+.btn-floating {
+    position: fixed;
+    bottom: $spacing-xl;
+    right: $spacing-xl;
+    z-index: $z-fixed;
+    background-color: $brand-navy;
+    color: $white;
+    border-radius: $border-radius-pill;
+    box-shadow: 0 4px 20px rgba(0, 0, 90, 0.25);
+    padding: $spacing-md $spacing-xl;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    font-weight: $font-bold;
+    border: 2px solid $white; // Contrast border
+    cursor: pointer;
+    transition: all $transition-base;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 24px rgba(0, 0, 90, 0.3);
+    }
+
+    .icon {
+        font-size: 1.5rem;
     }
 }

@@ -9,12 +9,14 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/aviation',
         name: 'Aviation',
+        component: () => import('@/layout/RouteView.vue'),
         meta: { icon: 'flight' },
+        redirect: { name: 'aviation-dashboard' },
         children: [
             {
                 path: '',
                 name: 'aviation-dashboard',
-                component: () => import('@/views/aviation/Dashboard.vue'),
+                component: () => import('@/views/aviation/Landing.vue'),
                 meta: { icon: 'dashboard' }
             },
             {

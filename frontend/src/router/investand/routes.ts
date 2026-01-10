@@ -5,8 +5,16 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/investand',
     name: 'Investand',
+    component: () => import('@/layout/RouteView.vue'),
     meta: { icon: 'show_chart' },
+    redirect: { name: 'investand-landing' },
     children: [
+      {
+        path: '',
+        name: 'investand-landing',
+        component: () => import('@/views/investand/Landing.vue'),
+        meta: { title: 'Investand Landing', icon: 'home' }
+      },
       {
         path: 'home',
         name: 'investand-home',
@@ -34,11 +42,12 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'findash',
         name: 'investand-findash',
+        component: () => import('@/views/investand/FindashLayout.vue'),
         meta: { icon: 'analytics' },
         children: [
           {
             path: '',
-            redirect: '/investand/findash/market-lab'
+            redirect: { name: 'FindashMarketLab' }
           },
           {
             path: 'settings',
@@ -57,21 +66,22 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // Admin Login
-  {
-    path: '/investand/admin/login',
-    name: 'admin-login',
-    component: () => import('@/views/investand/admin/LoginPage.vue'),
-    meta: { title: 'Admin Login' } // , requiresGuest: true
-  },
+
   // Admin Routes - using wrapper component
   {
     path: '/investand/admin',
     name: 'Admin',
     meta: { icon: 'admin_panel_settings' }, // requiresAuth: true, 
     children: [
+      // Admin Login
       {
-        path: '',
+        path: 'login',
+        name: 'admin-login',
+        component: () => import('@/views/common/auth/AdminLogin.vue'),
+        meta: { title: 'Admin Login' } // , requiresGuest: true
+      },
+      {
+        path: 'dashboard',
         name: 'admin-dashboard',
         component: () => import('@/views/investand/admin/DashboardPage.vue'),
         meta: { title: 'Admin Dashboard', icon: 'dashboard' }
@@ -87,7 +97,7 @@ const routes: RouteRecordRaw[] = [
         name: 'admin-fear-greed',
         component: () => import('@/views/investand/admin/FearGreedAdminPage.vue'),
         meta: { title: 'Fear & Greed Index Management', icon: 'psychology' }
-      }
+      },
     ]
   },
 

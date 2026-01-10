@@ -1,7 +1,7 @@
-﻿import {ScheduleConfig} from '@/interface/schedule'; 
-import {AxiosResponse} from 'axios';
-import service from '@/api/axios-voyagerss';
-import { PageDTO, PageResponseDTO, DEFAULT_PAGE_DTO, parseSortParam } from '@/api/modules/api-common';
+﻿import { ScheduleConfig } from '@/types/workschd/schedule';
+import { AxiosResponse } from 'axios';
+import service from '@/api/common/axios-voyagerss';
+import { PageDTO, PageResponseDTO, DEFAULT_PAGE_DTO, parseSortParam } from '@/api/common/api-common';
 
 // Team related interfaces
 export interface TeamDTO {
@@ -11,7 +11,7 @@ export interface TeamDTO {
   region?: string;
   scheduleType?: string;
   invitationHash?: string;
-  
+
   // Optional properties
   location?: string;
   memberCount?: number;
@@ -19,14 +19,14 @@ export interface TeamDTO {
   createdAt?: string;
   managerName?: string;
   preferredPlaces?: string[];
-  
+
   // Team member properties (when used as a team member)
   email?: string;
   joinDate?: string;
   status?: string;
   userId?: number;
   userName?: string;
-  requestDate?: string; 
+  requestDate?: string;
   page: number;
   size: number;
   sort?: string;
@@ -44,7 +44,7 @@ export interface TeamMemberParams {
   name?: string;
   email?: string;
   status?: string;
-} 
+}
 
 
 // Re-export common DTOs
@@ -54,24 +54,24 @@ export type { PageDTO, PageResponseDTO };
 const apiTeam = {
   // TeamApproveDialog APIs
   approveRequest: (teamId: number, joinRequest: TeamDTO): Promise<AxiosResponse> => {
-    return service.post(`/team/${teamId}/approve`, joinRequest);
+    return service.post(`/workschd/team/${teamId}/approve`, joinRequest);
   },
 
   // TeamRegistrationDialog APIs
   registerTeam: (teamData: TeamDTO): Promise<AxiosResponse<TeamDTO>> => {
-    return service.post('/team', teamData);
+    return service.post('/workschd/team', teamData);
   },
 
   generateInviteLink: (teamData: { teamName: string; region: string }): Promise<AxiosResponse> => {
-    return service.post('/team/generate-invite', teamData);
+    return service.post('/workschd/team/generate-invite', teamData);
   },
 
   getTeamMembers: (teamId: number, params: TeamMemberParams = {
-    page: DEFAULT_PAGE_DTO.page, 
+    page: DEFAULT_PAGE_DTO.page,
     size: DEFAULT_PAGE_DTO.size,
     sort: DEFAULT_PAGE_DTO.sort
   }): Promise<AxiosResponse<PageResponseDTO<TeamDTO>>> => {
-    return service.get(`/team/${teamId}/members`, { params });
+    return service.get(`/workschd/team/${teamId}/members`, { params });
   },
 
   // TeamManage APIs
@@ -81,34 +81,34 @@ const apiTeam = {
       page: params.page,
       size: params.size
     };
-    
+
     // Add sort parameter if provided
     if (params.sort) {
       queryParams['sort'] = parseSortParam(params.sort);
     }
-    
+
     // Add any other filter parameters
     if (params.name) queryParams['name'] = params.name;
     if (params.region) queryParams['region'] = params.region;
     if (params.scheduleType) queryParams['scheduleType'] = params.scheduleType;
-    
-    return service.get('/team', { params: queryParams });
+
+    return service.get('/workschd/team', { params: queryParams });
   },
 
   // TeamJoin APIs
   joinTeamByInvitation: (invitationHash: string, accountId: string): Promise<AxiosResponse<TeamDTO>> => {
-    return service.get(`/team/join/${invitationHash}`, { accountId });
+    return service.get(`/workschd/team/join/${invitationHash}`, { accountId });
   },
 
   // TeamScheduleConfig APIs
   saveScheduleConfig: (config: ScheduleConfig): Promise<AxiosResponse> => {
-    return service.post('/schedule-config', config);
+    return service.post('/workschd/schedule-config', config);
   },
- 
+
   approveJoinRequest: (teamId: number, requestId: number): Promise<AxiosResponse<any>> => {
-    return service.post(`/team/${teamId}/approve/${requestId}`);
+    return service.post(`/workschd/team/${teamId}/approve/${requestId}`);
   }
 };
 
-export default apiTeam; 
+export default apiTeam;
 

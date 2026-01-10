@@ -3,7 +3,7 @@ import { TeamDTO as Team, JoinRequest, TeamMember, TeamForm } from '@/api/worksc
 import apiTeam from '@/api/workschd/api-team';
 import { Shop } from '@/api/workschd/api-team-shop';
 import apiTeamShop from '@/api/workschd/api-team-shop';
-import { ScheduleConfig, DayConfig, MonthConfig } from '@/interface/schedule';
+import { ScheduleConfig, DayConfig, MonthConfig } from '@/types/workschd/schedule';
 import { useUserStore } from '@/stores/common/store_user';
 
 // State type

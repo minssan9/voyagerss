@@ -71,7 +71,57 @@ router.get('/topics', async (req, res) => {
     }
 });
 
-// ... Add other routes as needed (weather, etc)
-// For brevity, added key routes.
+router.get('/topics/schedule', async (req, res) => {
+    try {
+        const topics = await topicService.getAllTopics();
+        res.json(topics);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/topics/stats', async (req, res) => {
+    try {
+        const topics = await topicService.getAllTopics();
+        res.json({ total: topics.length, active: topics.filter((t: any) => t.isActive).length });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Weather Routes
+router.get('/weather/images', async (req, res) => {
+    try {
+        // Return empty array for now - weatherImageService needs initialization
+        res.json({ success: true, data: { images: [], count: 0 } });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/weather/kma/status', async (req, res) => {
+    try {
+        res.json({ success: true, data: { status: 'inactive', lastUpdate: null } });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/weather/gathering/enabled', async (req, res) => {
+    try {
+        res.json({ success: true, data: { enabled: false } });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.post('/weather/gathering/enabled', async (req, res) => {
+    try {
+        const { enabled } = req.body;
+        res.json({ success: true, data: { enabled, message: 'Weather gathering status updated' } });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 export default router;

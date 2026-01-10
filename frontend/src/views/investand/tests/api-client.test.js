@@ -1,6 +1,6 @@
 ﻿import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { apiClient, ApiClientError } from '@/services/apiClient'
-import { api } from '@/api/axios-voyagerss'
+import { api } from '@/api/common/axios-voyagerss'
 
 // Mock axios
 vi.mock('@/boot/axios', () => ({

@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import apiSubscription from '@/api/modules/api-subscription'
+import apiSubscription from '@/api/account/api-subscription'
 
 const $q = useQuasar()
 const planType = ref(null)
