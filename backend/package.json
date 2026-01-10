@@ -9,6 +9,8 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
+    "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/investand.prisma && prisma generate --schema=./prisma/aviation.prisma",
+    "postinstall": "npm run generate",
     "test": "jest"
   },
   "keywords": [],

@@ -14,8 +14,8 @@ RUN npm install
 COPY src ./src
 COPY prisma ./prisma
 
-# Generate Prisma client (if applicable)
-RUN npx prisma generate || echo "Prisma generate skipped"
+# Generate Prisma clients for all schemas
+RUN npm run generate || echo "Prisma generate skipped or failed"
 
 # Build the application
 RUN npm run build
