@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || process.env.PORT || 14003;
+const PORT = process.env.BACKEND_PORT || 6172;
 
 app.use(cors());
 app.use(helmet());
