@@ -22,8 +22,10 @@ jobs:
 
     - name: Create .env.dev file from Secret
       shell: powershell
+      env:
+        DOTENV_CONTENT: ${{ secrets.DOTENV_DEV }}
       run: |
-        $content = "${{ secrets.DOTENV_DEV }}"
+        $content = $env:DOTENV_CONTENT
         [System.IO.File]::WriteAllText(".env.dev", $content, [System.Text.Encoding]::UTF8)
 
     - name: Deploy with Docker Compose
