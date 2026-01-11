@@ -41,6 +41,18 @@ const approveJoinRequest = (requestData: Partial<TaskEmployee>): Promise<AxiosRe
   const requestId = requestData.id
   return service.post(`/workschd/task-employee/${taskId}/request/${requestId}/approve`)
 }
+
+// 참여 거절 (NEW)
+const rejectJoinRequest = (requestData: Partial<TaskEmployee>): Promise<AxiosResponse<void>> => {
+  const taskId = requestData.taskId
+  const requestId = requestData.id
+  return service.post(`/workschd/task-employee/${taskId}/request/${requestId}/reject`)
+}
+
+// 참여 취소 (NEW)
+const cancelJoinRequest = (requestId: number): Promise<AxiosResponse<void>> => {
+  return service.delete(`/workschd/task-employee/request/${requestId}`)
+}
 // Updated API to get task employees with pagination and filtering
 const getTaskEmployees = (taskId: number, params?: any): Promise<AxiosResponse<TaskEmployee[]>> => {
   return service.get(`/workschd/task-employee/${taskId}/employees`, { params });
@@ -64,6 +76,8 @@ export default {
   updateTask,
   deleteTask,
   approveJoinRequest,
+  rejectJoinRequest,
+  cancelJoinRequest,
   getTaskEmployees,
   checkIn,
   checkOut

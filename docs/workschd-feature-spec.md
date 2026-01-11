@@ -1519,22 +1519,73 @@ npx prisma db push --schema=./prisma/workschd.prisma
 - [ ] 프론트엔드 OAuth2 버튼 추가
 
 ### Phase 5: 프론트엔드 통합 (1-2주)
+
+#### 5.1 관리자 페이지 (Admin Pages)
+- [x] TaskManage.vue - 데스크톱 관리 페이지 (AG Grid 사용)
+  - 팀장/관리자가 장례식 등록, 수정, 삭제
+  - 참여 신청 승인/거절
+  - 캘린더 뷰 및 자동 스케줄링
+- [ ] 관리자 대시보드
+  - [ ] AdminDashboard.vue - 전체 통계 및 현황
+  - [ ] TaskStatistics.vue - 장례식 통계
+  - [ ] WorkerManagement.vue - 도우미 관리
+- [ ] 알림 관리
+  - [ ] NotificationManagement.vue - 알림 템플릿 관리
+
+#### 5.2 모바일 페이지 (Mobile Pages)
+
+##### 5.2.1 관리자용 모바일 (Manager Mobile)
+- [x] TaskManageMobile.vue - 모바일 관리 페이지
+  - 장례식 목록 및 등록/수정
+  - 참여 신청 승인/거절
+  - 모바일 최적화 UI (Q-List, Q-Card)
+
+##### 5.2.2 사용자용 모바일 (Worker Mobile)
+- [x] TaskListMobile.vue - 사용자별 모바일 페이지
+  - 상조도우미가 참여 가능한 장례식 목록 조회
+  - 참여 신청 기능
+  - 내 신청 내역 확인
+  - 출근/퇴근 체크인
+
+#### 5.3 공통 컴포넌트
 - [ ] 알림 컴포넌트
-  - [ ] NotificationList.vue
-  - [ ] NotificationItem.vue
-  - [ ] NotificationBadge.vue (실시간 카운트)
-- [ ] 장례식 관리 UI 확장
-  - [ ] TaskList.vue (필터링)
-  - [ ] TaskDetail.vue (참여자 목록)
-  - [ ] TaskCreateForm.vue (팀장 전용)
-  - [ ] TaskEditForm.vue
-- [ ] 참여 관리 UI
-  - [ ] JoinButton.vue
-  - [ ] JoinRequestList.vue (팀장)
-  - [ ] ApproveButton.vue
+  - [ ] NotificationList.vue - 알림 목록
+  - [ ] NotificationItem.vue - 알림 아이템
+  - [ ] NotificationBadge.vue - 실시간 알림 카운트
+  - [ ] NotificationCenter.vue - 알림 센터 (드롭다운)
+- [x] 장례식 관리 UI (부분 완성)
+  - [x] TaskDialog.vue - 장례식 등록/수정 다이얼로그
+  - [x] TaskEmployeeGrid.vue - 참여자 목록 그리드
+  - [ ] TaskDetail.vue - 장례식 상세 페이지 (개선 필요)
+  - [ ] TaskFilters.vue - 필터링 컴포넌트
 - [ ] OAuth2 로그인 버튼
-  - [ ] GoogleLoginButton.vue
-  - [ ] KakaoLoginButton.vue
+  - [ ] OAuth2Buttons.vue - Google/Kakao 로그인 버튼
+  - [ ] AuthCallback.vue - OAuth2 콜백 처리 페이지
+
+#### 5.4 API 연동
+- [x] api-task.ts - 기본 Task API (부분 완성)
+  - [x] fetchTasks, createTask, updateTask, deleteTask
+  - [x] createTaskEmployeeRequest, approveJoinRequest
+  - [x] getTaskEmployees, checkIn, checkOut
+  - [ ] rejectJoinRequest - 참여 거절 (추가 필요)
+  - [ ] cancelJoinRequest - 참여 취소 (추가 필요)
+- [ ] api-notification.ts - 알림 API (신규)
+  - [ ] getNotifications - 알림 목록
+  - [ ] markAsRead - 읽음 처리
+  - [ ] deleteNotification - 알림 삭제
+- [ ] api-auth.ts - OAuth2 인증 API (신규)
+  - [ ] googleLogin - Google 로그인 URL
+  - [ ] kakaoLogin - Kakao 로그인 URL
+  - [ ] handleOAuthCallback - 콜백 처리
+
+#### 5.5 상태 관리 (Pinia Store)
+- [ ] notification.ts - 알림 상태 관리
+  - [ ] 알림 목록 저장
+  - [ ] 읽지 않은 알림 카운트
+  - [ ] 실시간 폴링 또는 WebSocket
+- [ ] auth.ts - 인증 상태 관리 (확장)
+  - [ ] OAuth2 토큰 저장
+  - [ ] 사용자 역할 관리 (TEAM_LEADER, HELPER)
 
 ### Phase 6: 테스트 및 배포 (1주)
 - [ ] 단위 테스트

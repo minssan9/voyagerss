@@ -41,6 +41,20 @@ const routes: RouteRecordRaw[] = [
                 name: 'TaskListMobile (Worker)',
                 component: () => import('@/views/workschd/task/TaskListMobile.vue'),
                 meta: { icon: 'work', }
+            },
+            // Admin routes
+            {
+                path: 'admin/dashboard',
+                name: 'AdminDashboard',
+                component: () => import('@/views/workschd/admin/AdminDashboard.vue'),
+                meta: { icon: 'dashboard', requiresAuth: true, roles: ['ADMIN'] }
+            },
+            // Auth callback
+            {
+                path: 'auth/callback',
+                name: 'AuthCallback',
+                component: () => import('@/views/common/auth/AuthCallback.vue'),
+                meta: { hidden: true }
             }
         ]
     }

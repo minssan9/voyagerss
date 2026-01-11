@@ -531,6 +531,42 @@ async googleCallback(req: Request, res: Response) {
 
 ### Phase 5: 프론트엔드 통합 🔄
 
+#### 5.0 현재 상태 확인
+
+**이미 구현된 페이지:**
+- ✅ **TaskManage.vue** - 데스크톱 관리 페이지 (AG Grid, 캘린더 뷰)
+  - 위치: `frontend/src/views/workschd/task/TaskManage.vue`
+  - 역할: TEAM_LEADER, ADMIN
+  - 기능: 장례식 등록/수정/삭제, 참여 승인, 자동 스케줄링
+
+- ✅ **TaskManageMobile.vue** - 모바일 관리 페이지
+  - 위치: `frontend/src/views/workschd/task/TaskManageMobile.vue`
+  - 역할: TEAM_LEADER, ADMIN
+  - 기능: 모바일 환경에서 장례식 관리
+
+- ✅ **TaskListMobile.vue** - 사용자용 모바일 페이지
+  - 위치: `frontend/src/views/workschd/task/TaskListMobile.vue`
+  - 역할: HELPER (상조도우미)
+  - 기능: 참여 가능한 장례식 조회, 참여 신청, 출퇴근 체크
+
+- ✅ **TaskDialog.vue** - 장례식 등록/수정 다이얼로그
+  - 위치: `frontend/src/views/workschd/task/dialog/TaskDialog.vue`
+
+- ✅ **TaskEmployeeGrid.vue** - 참여자 목록 그리드
+  - 위치: `frontend/src/views/workschd/task/grid/TaskEmployeeGrid.vue`
+
+**이미 구현된 API:**
+- ✅ api-task.ts - 기본 Task API
+  - fetchTasks, createTask, updateTask, deleteTask
+  - createTaskEmployeeRequest, approveJoinRequest
+  - getTaskEmployees, checkIn, checkOut
+
+**추가 구현 필요:**
+- ❌ 알림 시스템 (Notification)
+- ❌ OAuth2 로그인 컴포넌트
+- ❌ 관리자 대시보드
+- ❌ API 보완 (reject, cancel, notification)
+
 #### 5.1 알림 컴포넌트
 ```bash
 # 디렉토리: frontend/src/components/workschd/notification/
@@ -540,6 +576,7 @@ async googleCallback(req: Request, res: Response) {
 - [ ] NotificationList.vue (알림 목록)
 - [ ] NotificationItem.vue (알림 아이템)
 - [ ] NotificationBadge.vue (알림 뱃지)
+- [ ] NotificationCenter.vue (알림 센터 드롭다운)
 - [ ] 실시간 업데이트 (폴링 또는 WebSocket)
 - [ ] 읽음/삭제 기능
 
