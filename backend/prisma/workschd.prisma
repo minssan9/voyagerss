@@ -20,21 +20,26 @@ model Account {
   phone           String?   @map("phone") @db.VarChar(20)
   password        String    @map("password")
   status          String    @map("status") // Enum string
-  accessToken     String?   @map("access_token")
-  refreshToken    String?   @map("refresh_token")
+  accessToken     String?   @map("access_token") @db.Text
+  refreshToken    String?   @map("refresh_token") @db.Text
   profileImageUrl String?   @map("profile_image_url")
   profileVideoUrl String?   @map("profile_video_url")
-  
+
+  // OAuth2 fields
+  socialProvider   String?   @map("social_provider") // GOOGLE, KAKAO
+  socialProviderId String?   @map("social_provider_id")
+
   // Relations
   accountRoles    AccountRole[]
   accountInfo     AccountInfo?
   teamMembers     TeamMember[]
   taskEmployees   TaskEmployee[]
-  // shops, etc depending on relationships
-  
+  notifications   Notification[]
+
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
+  @@unique([socialProvider, socialProviderId])
   @@map("account")
 }
 
@@ -79,10 +84,12 @@ model Team {
 }
 
 model TeamMember {
-  id        Int    @id @default(autoincrement())
-  teamId    Int    @map("team_id")
-  accountId Int     @map("account_id")
-  
+  id        Int      @id @default(autoincrement())
+  teamId    Int      @map("team_id")
+  accountId Int      @map("account_id")
+  role      String   @default("MEMBER") @map("role") // LEADER, MEMBER
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
   team      Team    @relation(fields: [teamId], references: [id])
   account   Account @relation(fields: [accountId], references: [accountId])
 
@@ -90,48 +97,79 @@ model TeamMember {
 }
 
 model Shop {
-  id        Int    @id @default(autoincrement())
-  teamId    Int    @map("team_id")
+  id        Int      @id @default(autoincrement())
+  teamId    Int      @map("team_id")
   name      String
   district  String?
-  status    String    @default("ACTIVE")
+  status    String   @default("ACTIVE")
   address   String?
+  phone     String?  @db.VarChar(20)
+  capacity  Int?
 
-  team      Team    @relation(fields: [teamId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
   tasks     Task[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("shop")
 }
 
 model Task {
-  id            Int      @id @default(autoincrement())
-  title         String
-  description   String?
-  workerCount   Int       @map("worker_count")
-  startDateTime DateTime  @map("start_date_time")
-  endDateTime   DateTime  @map("end_date_time")
-  status        String
-  teamId        Int      @map("team_id")
-  shopId        Int      @map("shop_id")
+  id                 Int      @id @default(autoincrement())
+  title              String
+  description        String?  @db.Text
+  workerCount        Int      @map("worker_count")
+  currentWorkerCount Int      @default(0) @map("current_worker_count")
+  startDateTime      DateTime @map("start_date_time")
+  endDateTime        DateTime @map("end_date_time")
+  status             String   // OPEN, CLOSED, COMPLETED, CANCELLED
+  teamId             Int      @map("team_id")
+  shopId             Int      @map("shop_id")
+  createdBy          Int      @map("created_by")
 
-  team          Team      @relation(fields: [teamId], references: [id])
-  shop          Shop      @relation(fields: [shopId], references: [id])
-  taskEmployees TaskEmployee[]
+  team               Team           @relation(fields: [teamId], references: [id])
+  shop               Shop           @relation(fields: [shopId], references: [id])
+  taskEmployees      TaskEmployee[]
+  notifications      Notification[]
 
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   @@map("task")
 }
 
 model TaskEmployee {
-  id        Int    @id @default(autoincrement())
-  taskId    Int    @map("task_id")
-  accountId Int    @map("account_id")
-  status    String @default("PENDING")
+  id         Int       @id @default(autoincrement())
+  taskId     Int       @map("task_id")
+  accountId  Int       @map("account_id")
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  appliedAt  DateTime  @default(now()) @map("applied_at")
+  approvedAt DateTime? @map("approved_at")
 
-  task      Task    @relation(fields: [taskId], references: [id])
-  account   Account @relation(fields: [accountId], references: [accountId])
+  task       Task    @relation(fields: [taskId], references: [id])
+  account    Account @relation(fields: [accountId], references: [accountId])
 
+  @@unique([taskId, accountId])
   @@map("task_employee")
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  accountId Int       @map("account_id")
+  taskId    Int?      @map("task_id")
+  type      String    // TASK_CREATED, JOIN_REQUEST, JOIN_APPROVED, JOIN_REJECTED, TASK_CLOSED, TASK_UPDATED, TASK_CANCELLED
+  channel   String    // EMAIL, KAKAO, SMS
+  status    String    @default("PENDING") // PENDING, SENT, FAILED
+  message   String    @db.Text
+  metadata  String?   @db.Json
+  isRead    Boolean   @default(false) @map("is_read")
+  sentAt    DateTime? @map("sent_at")
+
+  account   Account   @relation(fields: [accountId], references: [accountId])
+  task      Task?     @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("notification")
 }
