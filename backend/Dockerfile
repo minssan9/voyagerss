@@ -6,13 +6,13 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
+COPY prisma ./prisma
 
 # Install dependencies
 RUN npm install
 
 # Copy source code
 COPY src ./src
-COPY prisma ./prisma
 
 # Generate Prisma clients for all schemas
 RUN npm run generate || echo "Prisma generate skipped or failed"
