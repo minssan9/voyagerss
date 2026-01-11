@@ -332,4 +332,64 @@ export class TaskService {
             orderBy: { appliedAt: 'asc' }
         });
     }
+
+    /**
+     * 체크인 (출근)
+     */
+    async checkIn(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
+        const taskEmployee = await prisma.taskEmployee.findUnique({
+            where: { id: taskEmployeeId }
+        });
+
+        if (!taskEmployee) {
+            throw new Error('참여 정보를 찾을 수 없습니다');
+        }
+
+        if (taskEmployee.accountId !== accountId) {
+            throw new Error('권한이 없습니다');
+        }
+
+        if (taskEmployee.status !== 'APPROVED') {
+            throw new Error('승인된 참여만 체크인할 수 있습니다');
+        }
+
+        if (taskEmployee.joinedAt) {
+            throw new Error('이미 체크인 되었습니다');
+        }
+
+        return await prisma.taskEmployee.update({
+            where: { id: taskEmployeeId },
+            data: { joinedAt: new Date() }
+        });
+    }
+
+    /**
+     * 체크아웃 (퇴근)
+     */
+    async checkOut(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
+        const taskEmployee = await prisma.taskEmployee.findUnique({
+            where: { id: taskEmployeeId }
+        });
+
+        if (!taskEmployee) {
+            throw new Error('참여 정보를 찾을 수 없습니다');
+        }
+
+        if (taskEmployee.accountId !== accountId) {
+            throw new Error('권한이 없습니다');
+        }
+
+        if (!taskEmployee.joinedAt) {
+            throw new Error('체크인을 먼저 해야 합니다');
+        }
+
+        if (taskEmployee.leftAt) {
+            throw new Error('이미 체크아웃 되었습니다');
+        }
+
+        return await prisma.taskEmployee.update({
+            where: { id: taskEmployeeId },
+            data: { leftAt: new Date() }
+        });
+    }
 }

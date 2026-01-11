@@ -146,6 +146,8 @@ model TaskEmployee {
   status     String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
   appliedAt  DateTime  @default(now()) @map("applied_at")
   approvedAt DateTime? @map("approved_at")
+  joinedAt   DateTime? @map("joined_at") // 출근 시간 (체크인)
+  leftAt     DateTime? @map("left_at")   // 퇴근 시간 (체크아웃)
 
   task       Task    @relation(fields: [taskId], references: [id])
   account    Account @relation(fields: [accountId], references: [accountId])

@@ -561,13 +561,26 @@ async googleCallback(req: Request, res: Response) {
   - createTaskEmployeeRequest, approveJoinRequest
   - getTaskEmployees, checkIn, checkOut
 
-**추가 구현 필요:**
-- ❌ 알림 시스템 (Notification)
-- ❌ OAuth2 로그인 컴포넌트
-- ❌ 관리자 대시보드
-- ❌ API 보완 (reject, cancel, notification)
+**최근 추가 구현 완료 (2026-01-11):**
+- ✅ 알림 시스템 (Notification)
+  - api-notification.ts
+  - NotificationCenter.vue (드롭다운, 실시간 폴링)
+  - NotificationItem.vue
+- ✅ OAuth2 로그인 컴포넌트
+  - OAuth2Buttons.vue
+  - AuthCallback.vue
+- ✅ 관리자 대시보드
+  - AdminDashboard.vue
+- ✅ API 보완
+  - rejectJoinRequest, cancelJoinRequest
+  - getUnreadCount, markAllAsRead (notification)
 
-#### 5.1 알림 컴포넌트
+**추가 구현 고려사항:**
+- ⏳ 출퇴근 체크인/체크아웃 시스템 (백엔드 API)
+- ⏳ 실시간 알림 (WebSocket)
+- ⏳ 테스트 코드
+
+#### 5.1 알림 컴포넌트 ✅
 ```bash
 # 디렉토리: frontend/src/components/workschd/notification/
 ```

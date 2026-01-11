@@ -216,4 +216,64 @@ export class TaskController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    /**
+     * 체크인 (출근)
+     */
+    async checkIn(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            const taskEmployeeId = parseInt(req.params.taskEmployeeId);
+            const result = await taskService.checkIn(taskEmployeeId, req.user.accountId);
+            res.status(200).json(result);
+        } catch (error: any) {
+            console.error('Check in error:', error);
+
+            if (error.message === '권한이 없습니다') {
+                res.status(403).json({ message: error.message });
+                return;
+            }
+            if (error.message === '승인된 참여만 체크인할 수 있습니다' ||
+                error.message === '이미 체크인 되었습니다') {
+                res.status(400).json({ message: error.message });
+                return;
+            }
+
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    /**
+     * 체크아웃 (퇴근)
+     */
+    async checkOut(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            const taskEmployeeId = parseInt(req.params.taskEmployeeId);
+            const result = await taskService.checkOut(taskEmployeeId, req.user.accountId);
+            res.status(200).json(result);
+        } catch (error: any) {
+            console.error('Check out error:', error);
+
+            if (error.message === '권한이 없습니다') {
+                res.status(403).json({ message: error.message });
+                return;
+            }
+            if (error.message === '체크인을 먼저 해야 합니다' ||
+                error.message === '이미 체크아웃 되었습니다') {
+                res.status(400).json({ message: error.message });
+                return;
+            }
+
+            res.status(500).json({ message: error.message });
+        }
+    }
 }

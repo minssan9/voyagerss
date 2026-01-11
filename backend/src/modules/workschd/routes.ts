@@ -74,6 +74,10 @@ router.post('/task/request/:requestId/reject', authenticate, isTeamLeader, taskC
 // 참여 취소 (본인만)
 router.delete('/task/request/:requestId', authenticate, taskController.cancelJoinRequest.bind(taskController));
 
+// 체크인/체크아웃
+router.post('/task-employee/:taskEmployeeId/check-in', authenticate, taskController.checkIn.bind(taskController));
+router.post('/task-employee/:taskEmployeeId/check-out', authenticate, taskController.checkOut.bind(taskController));
+
 // ===== Notification Routes =====
 router.get('/notifications', authenticate, notificationController.getNotifications.bind(notificationController));
 router.get('/notifications/unread/count', authenticate, notificationController.getUnreadCount.bind(notificationController));
