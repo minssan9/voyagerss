@@ -280,7 +280,11 @@ export class NotificationService {
 
     // 비동기로 실제 알림 발송
     setImmediate(async () => {
-      await this.sendActualNotification(notification.id, account, task, type, message);
+      try {
+        await this.sendActualNotification(notification.id, account, task, type, message);
+      } catch (error) {
+        console.error('[NotificationService] Failed to send notification:', error);
+      }
     });
   }
 
@@ -502,8 +506,14 @@ export class NotificationService {
       prisma.notification.count({ where })
     ]);
 
+    // Parse metadata JSON string to object
+    const parsedNotifications = notifications.map(n => ({
+      ...n,
+      metadata: n.metadata ? JSON.parse(n.metadata as string) : null
+    }));
+
     return {
-      content: notifications,
+      content: parsedNotifications,
       totalElements: total,
       totalPages: Math.ceil(total / params.size)
     };

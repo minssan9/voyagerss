@@ -47,6 +47,12 @@ export class TaskController {
     async getTaskById(req: AuthRequest, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id);
+
+            if (isNaN(id)) {
+                res.status(400).json({ message: 'Invalid ID' });
+                return;
+            }
+
             const task = await taskService.getTaskById(id);
 
             if (!task) {
@@ -95,6 +101,12 @@ export class TaskController {
     async updateTask(req: AuthRequest, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id);
+
+            if (isNaN(id)) {
+                res.status(400).json({ message: 'Invalid ID' });
+                return;
+            }
+
             await taskService.updateTask(id, req.body);
             res.status(200).json({ success: true });
         } catch (error: any) {
@@ -109,6 +121,12 @@ export class TaskController {
     async deleteTask(req: AuthRequest, res: Response): Promise<void> {
         try {
             const id = parseInt(req.params.id);
+
+            if (isNaN(id)) {
+                res.status(400).json({ message: 'Invalid ID' });
+                return;
+            }
+
             await taskService.deleteTask(id);
             res.status(200).json({ success: true });
         } catch (error: any) {
@@ -128,6 +146,12 @@ export class TaskController {
             }
 
             const taskId = parseInt(req.params.taskId);
+
+            if (isNaN(taskId)) {
+                res.status(400).json({ message: 'Invalid task ID' });
+                return;
+            }
+
             const request = await taskService.createJoinRequest(taskId, req.user.accountId);
             res.status(201).json(request);
         } catch (error: any) {
@@ -152,6 +176,12 @@ export class TaskController {
     async approveJoinRequest(req: AuthRequest, res: Response): Promise<void> {
         try {
             const requestId = parseInt(req.params.requestId);
+
+            if (isNaN(requestId)) {
+                res.status(400).json({ message: 'Invalid request ID' });
+                return;
+            }
+
             await taskService.approveJoinRequest(requestId);
             res.status(200).json({ success: true });
         } catch (error: any) {
@@ -166,6 +196,12 @@ export class TaskController {
     async rejectJoinRequest(req: AuthRequest, res: Response): Promise<void> {
         try {
             const requestId = parseInt(req.params.requestId);
+
+            if (isNaN(requestId)) {
+                res.status(400).json({ message: 'Invalid request ID' });
+                return;
+            }
+
             await taskService.rejectJoinRequest(requestId);
             res.status(200).json({ success: true });
         } catch (error: any) {
@@ -185,6 +221,12 @@ export class TaskController {
             }
 
             const requestId = parseInt(req.params.requestId);
+
+            if (isNaN(requestId)) {
+                res.status(400).json({ message: 'Invalid request ID' });
+                return;
+            }
+
             await taskService.cancelJoinRequest(requestId, req.user.accountId);
             res.status(200).json({ success: true });
         } catch (error: any) {
@@ -209,6 +251,12 @@ export class TaskController {
     async getTaskEmployees(req: AuthRequest, res: Response): Promise<void> {
         try {
             const taskId = parseInt(req.params.id);
+
+            if (isNaN(taskId)) {
+                res.status(400).json({ message: 'Invalid task ID' });
+                return;
+            }
+
             const employees = await taskService.getTaskEmployees(taskId);
             res.status(200).json(employees);
         } catch (error: any) {
@@ -228,6 +276,12 @@ export class TaskController {
             }
 
             const taskEmployeeId = parseInt(req.params.taskEmployeeId);
+
+            if (isNaN(taskEmployeeId)) {
+                res.status(400).json({ message: 'Invalid task employee ID' });
+                return;
+            }
+
             const result = await taskService.checkIn(taskEmployeeId, req.user.accountId);
             res.status(200).json(result);
         } catch (error: any) {
@@ -258,6 +312,12 @@ export class TaskController {
             }
 
             const taskEmployeeId = parseInt(req.params.taskEmployeeId);
+
+            if (isNaN(taskEmployeeId)) {
+                res.status(400).json({ message: 'Invalid task employee ID' });
+                return;
+            }
+
             const result = await taskService.checkOut(taskEmployeeId, req.user.accountId);
             res.status(200).json(result);
         } catch (error: any) {

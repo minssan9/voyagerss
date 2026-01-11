@@ -34,7 +34,11 @@ export class TaskService {
 
         // 비동기로 알림 발송
         setImmediate(async () => {
-            await this.notificationService.sendTaskCreatedNotification(task.id);
+            try {
+                await this.notificationService.sendTaskCreatedNotification(task.id);
+            } catch (error) {
+                console.error('[TaskService] Failed to send task created notification:', error);
+            }
         });
 
         return task;
@@ -68,7 +72,11 @@ export class TaskService {
         // 각 Task에 대해 알림 발송
         for (const task of tasks) {
             setImmediate(async () => {
-                await this.notificationService.sendTaskCreatedNotification(task.id);
+                try {
+                    await this.notificationService.sendTaskCreatedNotification(task.id);
+                } catch (error) {
+                    console.error('[TaskService] Failed to send task created notification:', error);
+                }
             });
         }
 
@@ -221,7 +229,11 @@ export class TaskService {
 
         // 팀장에게 알림
         setImmediate(async () => {
-            await this.notificationService.sendJoinRequestNotification(taskId, accountId);
+            try {
+                await this.notificationService.sendJoinRequestNotification(taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send join request notification:', error);
+            }
         });
 
         return taskEmployee;
@@ -249,10 +261,14 @@ export class TaskService {
 
             // 승인 알림
             setImmediate(async () => {
-                await this.notificationService.sendJoinApprovedNotification(
-                    taskEmployee.accountId,
-                    task.id
-                );
+                try {
+                    await this.notificationService.sendJoinApprovedNotification(
+                        taskEmployee.accountId,
+                        task.id
+                    );
+                } catch (error) {
+                    console.error('[TaskService] Failed to send join approved notification:', error);
+                }
             });
 
             // 인원 마감 체크
@@ -264,7 +280,11 @@ export class TaskService {
 
                 // 마감 알림
                 setImmediate(async () => {
-                    await this.notificationService.sendTaskClosedNotification(task.id);
+                    try {
+                        await this.notificationService.sendTaskClosedNotification(task.id);
+                    } catch (error) {
+                        console.error('[TaskService] Failed to send task closed notification:', error);
+                    }
                 });
             }
         });
@@ -281,10 +301,14 @@ export class TaskService {
 
         // 거절 알림
         setImmediate(async () => {
-            await this.notificationService.sendJoinRejectedNotification(
-                taskEmployee.accountId,
-                taskEmployee.taskId
-            );
+            try {
+                await this.notificationService.sendJoinRejectedNotification(
+                    taskEmployee.accountId,
+                    taskEmployee.taskId
+                );
+            } catch (error) {
+                console.error('[TaskService] Failed to send join rejected notification:', error);
+            }
         });
     }
 
@@ -337,29 +361,33 @@ export class TaskService {
      * 체크인 (출근)
      */
     async checkIn(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
-        const taskEmployee = await prisma.taskEmployee.findUnique({
-            where: { id: taskEmployeeId }
-        });
+        return await prisma.$transaction(async (tx) => {
+            // Read with lock to prevent race condition
+            const taskEmployee = await tx.taskEmployee.findUnique({
+                where: { id: taskEmployeeId }
+            });
 
-        if (!taskEmployee) {
-            throw new Error('참여 정보를 찾을 수 없습니다');
-        }
+            if (!taskEmployee) {
+                throw new Error('참여 정보를 찾을 수 없습니다');
+            }
 
-        if (taskEmployee.accountId !== accountId) {
-            throw new Error('권한이 없습니다');
-        }
+            if (taskEmployee.accountId !== accountId) {
+                throw new Error('권한이 없습니다');
+            }
 
-        if (taskEmployee.status !== 'APPROVED') {
-            throw new Error('승인된 참여만 체크인할 수 있습니다');
-        }
+            if (taskEmployee.status !== 'APPROVED') {
+                throw new Error('승인된 참여만 체크인할 수 있습니다');
+            }
 
-        if (taskEmployee.joinedAt) {
-            throw new Error('이미 체크인 되었습니다');
-        }
+            if (taskEmployee.joinedAt) {
+                throw new Error('이미 체크인 되었습니다');
+            }
 
-        return await prisma.taskEmployee.update({
-            where: { id: taskEmployeeId },
-            data: { joinedAt: new Date() }
+            // Update within transaction
+            return await tx.taskEmployee.update({
+                where: { id: taskEmployeeId },
+                data: { joinedAt: new Date() }
+            });
         });
     }
 
@@ -367,29 +395,33 @@ export class TaskService {
      * 체크아웃 (퇴근)
      */
     async checkOut(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
-        const taskEmployee = await prisma.taskEmployee.findUnique({
-            where: { id: taskEmployeeId }
-        });
+        return await prisma.$transaction(async (tx) => {
+            // Read with lock to prevent race condition
+            const taskEmployee = await tx.taskEmployee.findUnique({
+                where: { id: taskEmployeeId }
+            });
 
-        if (!taskEmployee) {
-            throw new Error('참여 정보를 찾을 수 없습니다');
-        }
+            if (!taskEmployee) {
+                throw new Error('참여 정보를 찾을 수 없습니다');
+            }
 
-        if (taskEmployee.accountId !== accountId) {
-            throw new Error('권한이 없습니다');
-        }
+            if (taskEmployee.accountId !== accountId) {
+                throw new Error('권한이 없습니다');
+            }
 
-        if (!taskEmployee.joinedAt) {
-            throw new Error('체크인을 먼저 해야 합니다');
-        }
+            if (!taskEmployee.joinedAt) {
+                throw new Error('체크인을 먼저 해야 합니다');
+            }
 
-        if (taskEmployee.leftAt) {
-            throw new Error('이미 체크아웃 되었습니다');
-        }
+            if (taskEmployee.leftAt) {
+                throw new Error('이미 체크아웃 되었습니다');
+            }
 
-        return await prisma.taskEmployee.update({
-            where: { id: taskEmployeeId },
-            data: { leftAt: new Date() }
+            // Update within transaction
+            return await tx.taskEmployee.update({
+                where: { id: taskEmployeeId },
+                data: { leftAt: new Date() }
+            });
         });
     }
 }
