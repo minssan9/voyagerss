@@ -557,4 +557,43 @@ export class NotificationService {
       return false;
     }
   }
+
+  /**
+   * 읽지 않은 알림 개수 조회
+   */
+  async getUnreadCount(accountId: number): Promise<number> {
+    try {
+      const count = await prisma.notification.count({
+        where: {
+          accountId,
+          isRead: false
+        }
+      });
+
+      return count;
+    } catch (error) {
+      console.error('Failed to get unread count:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * 모든 알림 읽음 처리
+   */
+  async markAllAsRead(accountId: number): Promise<void> {
+    try {
+      await prisma.notification.updateMany({
+        where: {
+          accountId,
+          isRead: false
+        },
+        data: {
+          isRead: true
+        }
+      });
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+      throw error;
+    }
+  }
 }
