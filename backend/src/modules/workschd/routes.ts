@@ -5,6 +5,7 @@ import { TeamController } from './controllers/TeamController';
 import { TaskController } from './controllers/TaskController';
 import { ShopController } from './controllers/ShopController';
 import { NotificationController } from './controllers/NotificationController';
+import { StatisticsController } from './controllers/StatisticsController';
 import {
     authenticate,
     isTeamLeader,
@@ -20,6 +21,7 @@ const teamController = new TeamController();
 const taskController = new TaskController();
 const shopController = new ShopController();
 const notificationController = new NotificationController();
+const statisticsController = new StatisticsController();
 
 // ===== Auth Routes (Public) =====
 router.post('/auth/login', authController.authenticateUser.bind(authController));
@@ -92,5 +94,11 @@ router.get('/team/:teamId/shop', authenticate, shopController.getAllShops.bind(s
 router.get('/team/:teamId/shop/active', authenticate, shopController.getActiveShops.bind(shopController));
 router.put('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.updateShop.bind(shopController));
 router.delete('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.deleteShop.bind(shopController));
+
+// ===== Statistics Routes =====
+router.get('/statistics/dashboard', authenticate, statisticsController.getDashboardStatistics.bind(statisticsController));
+router.get('/statistics/team/:teamId', authenticate, statisticsController.getTeamStatistics.bind(statisticsController));
+router.get('/statistics/worker/:workerId', authenticate, statisticsController.getWorkerStatistics.bind(statisticsController));
+router.get('/statistics/tasks/date-range', authenticate, statisticsController.getTaskStatisticsByDateRange.bind(statisticsController));
 
 export default router;

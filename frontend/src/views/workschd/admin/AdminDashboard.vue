@@ -15,7 +15,7 @@
       />
     </div>
 
-    <!-- Statistics Cards -->
+    <!-- Statistics Cards Row 1 -->
     <div class="row q-col-gutter-md q-mb-lg">
       <!-- Total Tasks -->
       <div class="col-12 col-sm-6 col-md-3">
@@ -47,6 +47,39 @@
         </q-card>
       </div>
 
+      <!-- Closed Tasks -->
+      <div class="col-12 col-sm-6 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="row items-center">
+              <q-icon name="check_circle" size="40px" color="teal" class="q-mr-md" />
+              <div>
+                <div class="text-h4">{{ statistics.closedTasks }}</div>
+                <div class="text-grey-7">Closed Tasks</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Cancelled Tasks -->
+      <div class="col-12 col-sm-6 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="row items-center">
+              <q-icon name="cancel" size="40px" color="red" class="q-mr-md" />
+              <div>
+                <div class="text-h4">{{ statistics.cancelledTasks }}</div>
+                <div class="text-grey-7">Cancelled Tasks</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
+    <!-- Statistics Cards Row 2 -->
+    <div class="row q-col-gutter-md q-mb-lg">
       <!-- Total Workers -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
@@ -70,7 +103,37 @@
               <q-icon name="person_check" size="40px" color="purple" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.activeWorkers }}</div>
-                <div class="text-grey-7">Active Workers</div>
+                <div class="text-grey-7">Active Workers (7d)</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Total Teams -->
+      <div class="col-12 col-sm-6 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="row items-center">
+              <q-icon name="groups" size="40px" color="indigo" class="q-mr-md" />
+              <div>
+                <div class="text-h4">{{ statistics.totalTeams }}</div>
+                <div class="text-grey-7">Total Teams</div>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Active Teams -->
+      <div class="col-12 col-sm-6 col-md-3">
+        <q-card>
+          <q-card-section>
+            <div class="row items-center">
+              <q-icon name="verified" size="40px" color="pink" class="q-mr-md" />
+              <div>
+                <div class="text-h4">{{ statistics.activeTeams }}</div>
+                <div class="text-grey-7">Active Teams (30d)</div>
               </div>
             </div>
           </q-card-section>
@@ -80,23 +143,72 @@
 
     <!-- Charts Row -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <!-- Task Status Chart -->
+      <!-- Task Status Distribution -->
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
             <div class="text-h6 q-mb-md">Task Status Distribution</div>
-            <div class="chart-container">
-              <!-- 차트 라이브러리 사용 (Chart.js, ApexCharts 등) -->
-              <div class="text-center text-grey-7">
-                Chart placeholder - Implement with Chart.js or ApexCharts
-              </div>
-            </div>
+            <q-list separator>
+              <q-item v-for="status in statistics.tasksByStatus" :key="status.status">
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">{{ status.status }}</q-item-label>
+                  <q-linear-progress
+                    :value="status.count / statistics.totalTasks"
+                    :color="getStatusColor(status.status)"
+                    size="20px"
+                    class="q-mt-xs"
+                  >
+                    <div class="absolute-full flex flex-center">
+                      <q-badge color="white" text-color="black" :label="status.count" />
+                    </div>
+                  </q-linear-progress>
+                </q-item-section>
+              </q-item>
+              <q-item v-if="statistics.tasksByStatus.length === 0">
+                <q-item-section class="text-center text-grey-7">
+                  No data available
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Recent Activity -->
+      <!-- Tasks by Region -->
       <div class="col-12 col-md-6">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6 q-mb-md">Tasks by Region</div>
+            <q-list separator>
+              <q-item v-for="region in statistics.tasksByRegion.slice(0, 8)" :key="region.region">
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">{{ region.region }}</q-item-label>
+                  <q-linear-progress
+                    :value="region.count / statistics.totalTasks"
+                    color="blue"
+                    size="20px"
+                    class="q-mt-xs"
+                  >
+                    <div class="absolute-full flex flex-center">
+                      <q-badge color="white" text-color="black" :label="region.count" />
+                    </div>
+                  </q-linear-progress>
+                </q-item-section>
+              </q-item>
+              <q-item v-if="statistics.tasksByRegion.length === 0">
+                <q-item-section class="text-center text-grey-7">
+                  No data available
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
+    <!-- Recent Activity Row -->
+    <div class="row q-col-gutter-md q-mb-lg">
+      <div class="col-12">
         <q-card>
           <q-card-section>
             <div class="text-h6 q-mb-md">Recent Activity</div>
@@ -115,6 +227,11 @@
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label caption>{{ formatDate(activity.timestamp) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item v-if="recentActivities.length === 0">
+                <q-item-section class="text-center text-grey-7">
+                  No recent activities
                 </q-item-section>
               </q-item>
             </q-list>
@@ -178,45 +295,33 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { formatDistanceToNow } from 'date-fns'
+import apiStatistics, { DashboardStatistics, RecentActivity } from '@/api/workschd/api-statistics'
 
 const router = useRouter()
+const $q = useQuasar()
 
 const loading = ref(false)
 
-const statistics = ref({
+const statistics = ref<DashboardStatistics>({
   totalTasks: 0,
   openTasks: 0,
+  closedTasks: 0,
+  cancelledTasks: 0,
   totalWorkers: 0,
-  activeWorkers: 0
+  activeWorkers: 0,
+  totalTeams: 0,
+  activeTeams: 0,
+  totalNotifications: 0,
+  unreadNotifications: 0,
+  tasksByStatus: [],
+  tasksByRegion: [],
+  workersByTeam: [],
+  recentActivities: []
 })
 
-const recentActivities = ref([
-  {
-    id: 1,
-    icon: 'add_task',
-    color: 'blue',
-    title: 'New task created',
-    description: 'Seoul Funeral Service',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5) // 5 minutes ago
-  },
-  {
-    id: 2,
-    icon: 'person_add',
-    color: 'green',
-    title: 'Worker joined',
-    description: 'John Doe joined team',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15) // 15 minutes ago
-  },
-  {
-    id: 3,
-    icon: 'check_circle',
-    color: 'orange',
-    title: 'Task completed',
-    description: 'Busan Funeral Service',
-    timestamp: new Date(Date.now() - 1000 * 60 * 30) // 30 minutes ago
-  }
-])
+const recentActivities = ref<RecentActivity[]>([])
 
 const teams = ref([
   {
@@ -254,26 +359,40 @@ const teamColumns = [
 const refreshData = async () => {
   loading.value = true
   try {
-    // TODO: Fetch real data from API
-    // const response = await dashboardApi.getStatistics()
-    // statistics.value = response.data
-
-    // Mock data for now
-    statistics.value = {
-      totalTasks: 156,
-      openTasks: 42,
-      totalWorkers: 89,
-      activeWorkers: 35
-    }
-  } catch (error) {
+    const response = await apiStatistics.getDashboardStatistics()
+    statistics.value = response.data
+    recentActivities.value = response.data.recentActivities
+  } catch (error: any) {
     console.error('Failed to fetch statistics:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to load dashboard statistics',
+      caption: error.response?.data?.message || error.message,
+      position: 'top'
+    })
   } finally {
     loading.value = false
   }
 }
 
-const formatDate = (date: Date): string => {
-  return formatDistanceToNow(date, { addSuffix: true })
+const formatDate = (date: Date | string): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  return formatDistanceToNow(dateObj, { addSuffix: true })
+}
+
+const getStatusColor = (status: string): string => {
+  switch (status) {
+    case 'OPEN':
+      return 'green'
+    case 'CLOSED':
+      return 'teal'
+    case 'CANCELLED':
+      return 'red'
+    case 'IN_PROGRESS':
+      return 'blue'
+    default:
+      return 'grey'
+  }
 }
 
 const viewTeam = (teamId: number) => {
