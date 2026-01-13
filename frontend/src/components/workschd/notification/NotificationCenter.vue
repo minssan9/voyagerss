@@ -71,20 +71,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import notificationApi, { Notification } from '@/api/workschd/api-notification'
 import NotificationItem from './NotificationItem.vue'
+import { useWebSocket } from '@/composables/useWebSocket'
 
 const router = useRouter()
 const $q = useQuasar()
 
+// Use WebSocket composable for real-time notifications
+const {
+  connected: wsConnected,
+  notifications: wsNotifications,
+  unreadCount: wsUnreadCount,
+  markAsRead: wsMarkAsRead
+} = useWebSocket()
+
 const notifications = ref<Notification[]>([])
 const unreadCount = ref(0)
-let pollingInterval: NodeJS.Timeout | null = null
 
-// 알림 목록 조회
+// Sync WebSocket notifications with local state
+watch(wsNotifications, (newNotifications) => {
+  notifications.value = newNotifications
+}, { deep: true })
+
+watch(wsUnreadCount, (newCount) => {
+  unreadCount.value = newCount
+})
+
+// Initial fetch from API
 const fetchNotifications = async () => {
   try {
     const response = await notificationApi.getNotifications({
@@ -106,7 +123,8 @@ const fetchNotifications = async () => {
 const handleMarkAsRead = async (notificationId: number) => {
   try {
     await notificationApi.markAsRead(notificationId)
-    await fetchNotifications()
+    // Update WebSocket local state
+    wsMarkAsRead(notificationId)
     $q.notify({
       type: 'positive',
       message: 'Notification marked as read',
@@ -180,28 +198,9 @@ const viewAllNotifications = () => {
   router.push({ name: 'NotificationList' })
 }
 
-// 실시간 폴링 시작
-const startPolling = () => {
-  pollingInterval = setInterval(() => {
-    fetchNotifications()
-  }, 30000) // 30초마다 업데이트
-}
-
-// 폴링 중지
-const stopPolling = () => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval)
-    pollingInterval = null
-  }
-}
-
+// Initial load on mount
 onMounted(() => {
   fetchNotifications()
-  startPolling()
-})
-
-onUnmounted(() => {
-  stopPolling()
 })
 </script>
 

@@ -1,6 +1,7 @@
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { SolapiProvider } from './notification/SolapiProvider';
 import { EmailProvider } from './notification/EmailProvider';
+import { webSocketService } from './WebSocketService';
 
 export enum NotificationType {
   TASK_CREATED = 'TASK_CREATED',
@@ -280,7 +281,22 @@ export class NotificationService {
       }
     });
 
-    // 비동기로 실제 알림 발송
+    // WebSocket으로 실시간 알림 전송
+    try {
+      webSocketService.sendNotificationToUser(accountId, {
+        id: notification.id,
+        type,
+        message,
+        taskId,
+        createdAt: notification.createdAt,
+        isRead: false,
+        metadata: metadata || null
+      });
+    } catch (error) {
+      console.error('[NotificationService] Failed to send WebSocket notification:', error);
+    }
+
+    // 비동기로 실제 알림 발송 (카카오톡/이메일)
     setImmediate(async () => {
       try {
         await this.sendActualNotification(notification.id, account, task, type, message);
