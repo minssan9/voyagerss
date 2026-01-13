@@ -107,8 +107,8 @@ export class TaskController {
                 return;
             }
 
-            await taskService.updateTask(id, req.body);
-            res.status(200).json({ success: true });
+            const updatedTask = await taskService.updateTask(id, req.body);
+            res.status(200).json(updatedTask);
         } catch (error: any) {
             console.error('Update task error:', error);
             res.status(500).json({ message: error.message });
@@ -182,8 +182,8 @@ export class TaskController {
                 return;
             }
 
-            await taskService.approveJoinRequest(requestId);
-            res.status(200).json({ success: true });
+            const approvedEmployee = await taskService.approveJoinRequest(requestId);
+            res.status(200).json(approvedEmployee);
         } catch (error: any) {
             console.error('Approve join request error:', error);
             res.status(500).json({ message: error.message });
@@ -202,8 +202,8 @@ export class TaskController {
                 return;
             }
 
-            await taskService.rejectJoinRequest(requestId);
-            res.status(200).json({ success: true });
+            const rejectedEmployee = await taskService.rejectJoinRequest(requestId);
+            res.status(200).json(rejectedEmployee);
         } catch (error: any) {
             console.error('Reject join request error:', error);
             res.status(500).json({ message: error.message });

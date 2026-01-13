@@ -9,7 +9,9 @@ export enum NotificationType {
   JOIN_REJECTED = 'JOIN_REJECTED',
   TASK_CLOSED = 'TASK_CLOSED',
   TASK_UPDATED = 'TASK_UPDATED',
-  TASK_CANCELLED = 'TASK_CANCELLED'
+  TASK_CANCELLED = 'TASK_CANCELLED',
+  CHECKED_IN = 'CHECKED_IN',
+  CHECKED_OUT = 'CHECKED_OUT'
 }
 
 export enum NotificationChannel {
@@ -365,6 +367,12 @@ export class NotificationService {
       case NotificationType.TASK_CANCELLED:
         return `"${task.title}" 장례식이 취소되었습니다.`;
 
+      case NotificationType.CHECKED_IN:
+        return `${metadata?.workerName}님이 "${task.title}" 장례식에 체크인했습니다.`;
+
+      case NotificationType.CHECKED_OUT:
+        return `${metadata?.workerName}님이 "${task.title}" 장례식에서 체크아웃했습니다.`;
+
       default:
         return '알림이 있습니다.';
     }
@@ -483,6 +491,9 @@ export class NotificationService {
   }): Promise<{ content: any[]; totalElements: number; totalPages: number }> {
     const where: any = { accountId: params.accountId };
 
+    // Ensure size is at least 1
+    const size = Math.max(params.size, 1);
+
     if (params.type) {
       where.type = params.type;
     }
@@ -499,8 +510,8 @@ export class NotificationService {
             include: { shop: true }
           }
         },
-        skip: params.page * params.size,
-        take: params.size,
+        skip: params.page * size,
+        take: size,
         orderBy: { createdAt: 'desc' }
       }),
       prisma.notification.count({ where })
@@ -515,7 +526,7 @@ export class NotificationService {
     return {
       content: parsedNotifications,
       totalElements: total,
-      totalPages: Math.ceil(total / params.size)
+      totalPages: Math.ceil(total / size)
     };
   }
 
@@ -604,6 +615,118 @@ export class NotificationService {
     } catch (error) {
       console.error('Failed to mark all as read:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 체크인 알림 전송 (팀장에게)
+   */
+  async sendCheckInNotification(
+    taskId: number,
+    workerAccountId: number
+  ): Promise<void> {
+    try {
+      const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: { shop: true }
+      });
+
+      if (!task) {
+        console.error('Task not found:', taskId);
+        return;
+      }
+
+      const worker = await prisma.account.findUnique({
+        where: { accountId: workerAccountId }
+      });
+
+      if (!worker) {
+        console.error('Worker not found:', workerAccountId);
+        return;
+      }
+
+      // 팀장 찾기
+      const teamLeader = await prisma.teamMember.findFirst({
+        where: {
+          teamId: task.teamId,
+          role: 'LEADER'
+        },
+        include: { account: true }
+      });
+
+      if (!teamLeader) {
+        console.error('Team leader not found for team:', task.teamId);
+        return;
+      }
+
+      await this.createAndSendNotification({
+        accountId: teamLeader.accountId,
+        taskId: task.id,
+        type: NotificationType.CHECKED_IN,
+        account: teamLeader.account,
+        task,
+        metadata: {
+          workerName: worker.username
+        }
+      });
+    } catch (error) {
+      console.error('Failed to send check-in notification:', error);
+    }
+  }
+
+  /**
+   * 체크아웃 알림 전송 (팀장에게)
+   */
+  async sendCheckOutNotification(
+    taskId: number,
+    workerAccountId: number
+  ): Promise<void> {
+    try {
+      const task = await prisma.task.findUnique({
+        where: { id: taskId },
+        include: { shop: true }
+      });
+
+      if (!task) {
+        console.error('Task not found:', taskId);
+        return;
+      }
+
+      const worker = await prisma.account.findUnique({
+        where: { accountId: workerAccountId }
+      });
+
+      if (!worker) {
+        console.error('Worker not found:', workerAccountId);
+        return;
+      }
+
+      // 팀장 찾기
+      const teamLeader = await prisma.teamMember.findFirst({
+        where: {
+          teamId: task.teamId,
+          role: 'LEADER'
+        },
+        include: { account: true }
+      });
+
+      if (!teamLeader) {
+        console.error('Team leader not found for team:', task.teamId);
+        return;
+      }
+
+      await this.createAndSendNotification({
+        accountId: teamLeader.accountId,
+        taskId: task.id,
+        type: NotificationType.CHECKED_OUT,
+        account: teamLeader.account,
+        task,
+        metadata: {
+          workerName: worker.username
+        }
+      });
+    } catch (error) {
+      console.error('Failed to send check-out notification:', error);
     }
   }
 }

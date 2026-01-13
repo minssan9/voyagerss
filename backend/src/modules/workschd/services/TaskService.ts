@@ -120,7 +120,7 @@ export class TaskService {
         endDate?: Date;
     }): Promise<{ content: Task[]; totalElements: number; totalPages: number }> {
         const page = params?.page || 0;
-        const size = params?.size || 10;
+        const size = Math.max(params?.size || 10, 1); // Ensure size is at least 1
 
         const where: any = {};
 
@@ -166,8 +166,8 @@ export class TaskService {
     /**
      * 장례식 수정
      */
-    async updateTask(id: number, data: any): Promise<void> {
-        await prisma.task.update({
+    async updateTask(id: number, data: any): Promise<Task> {
+        return await prisma.task.update({
             where: { id },
             data: {
                 title: data.title,
@@ -177,6 +177,10 @@ export class TaskService {
                 endDateTime: data.endDateTime ? new Date(data.endDateTime) : undefined,
                 status: data.status,
                 shopId: data.shopId
+            },
+            include: {
+                shop: true,
+                team: true
             }
         });
     }
@@ -242,8 +246,8 @@ export class TaskService {
     /**
      * 참여 신청 승인 (인원 마감 체크 포함)
      */
-    async approveJoinRequest(requestId: number): Promise<void> {
-        await prisma.$transaction(async (tx) => {
+    async approveJoinRequest(requestId: number): Promise<TaskEmployee> {
+        return await prisma.$transaction(async (tx) => {
             const taskEmployee = await tx.taskEmployee.update({
                 where: { id: requestId },
                 data: {
@@ -287,13 +291,15 @@ export class TaskService {
                     }
                 });
             }
+
+            return taskEmployee;
         });
     }
 
     /**
      * 참여 신청 거절
      */
-    async rejectJoinRequest(requestId: number): Promise<void> {
+    async rejectJoinRequest(requestId: number): Promise<TaskEmployee> {
         const taskEmployee = await prisma.taskEmployee.update({
             where: { id: requestId },
             data: { status: 'REJECTED' }
@@ -310,6 +316,8 @@ export class TaskService {
                 console.error('[TaskService] Failed to send join rejected notification:', error);
             }
         });
+
+        return taskEmployee;
     }
 
     /**
@@ -361,7 +369,7 @@ export class TaskService {
      * 체크인 (출근)
      */
     async checkIn(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
-        return await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             // Read with lock to prevent race condition
             const taskEmployee = await tx.taskEmployee.findUnique({
                 where: { id: taskEmployeeId }
@@ -389,13 +397,24 @@ export class TaskService {
                 data: { joinedAt: new Date() }
             });
         });
+
+        // 체크인 알림 전송 (트랜잭션 외부)
+        setImmediate(async () => {
+            try {
+                await this.notificationService.sendCheckInNotification(result.taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send check-in notification:', error);
+            }
+        });
+
+        return result;
     }
 
     /**
      * 체크아웃 (퇴근)
      */
     async checkOut(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
-        return await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             // Read with lock to prevent race condition
             const taskEmployee = await tx.taskEmployee.findUnique({
                 where: { id: taskEmployeeId }
@@ -423,5 +442,16 @@ export class TaskService {
                 data: { leftAt: new Date() }
             });
         });
+
+        // 체크아웃 알림 전송 (트랜잭션 외부)
+        setImmediate(async () => {
+            try {
+                await this.notificationService.sendCheckOutNotification(result.taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send check-out notification:', error);
+            }
+        });
+
+        return result;
     }
 }
