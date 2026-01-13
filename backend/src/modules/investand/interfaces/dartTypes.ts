@@ -321,3 +321,27 @@ export interface DartDisclosureRawItem {
   rcept_dt: string        // 접수일자 (YYYYMMDD)
   rm: string              // 비고
 }
+
+/**
+ * DART 공시 필터링 상수
+ * 주주 보유 주식수 변동 및 최대 주주 지분 변동 공시만 수집
+ */
+export const ALLOWED_DART_REPORT_KEYWORDS = [
+  '주식등의대량보유상황보고서',           // 주주 5% 이상 대량보유 보고
+  '대량보유상황보고서',                   // 대량보유 보고 (축약형)
+  '임원ㆍ주요주주특정증권등소유상황보고서', // 임원·주요주주 소유현황
+  '주요주주특정증권등소유상황보고서',      // 주요주주 소유현황 (축약형)
+  '최대주주',                             // 최대주주 관련 공시
+] as const
+
+/**
+ * 보고서명이 허용된 공시 유형인지 확인
+ */
+export function isAllowedDartReport(reportName: string): boolean {
+  if (!reportName) return false
+
+  // 허용된 키워드 중 하나라도 포함되어 있으면 true
+  return ALLOWED_DART_REPORT_KEYWORDS.some(keyword =>
+    reportName.includes(keyword)
+  )
+}

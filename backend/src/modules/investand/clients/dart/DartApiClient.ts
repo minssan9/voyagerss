@@ -8,6 +8,7 @@ import type {
   DartBatchRequest,
   DartDisclosureRawResponse
 } from '@investand/interfaces/dartTypes'
+import { isAllowedDartReport } from '@investand/interfaces/dartTypes'
 import { DartTypesMapper } from '@investand/clients/dart/DartTypesMapper'
 import { logger } from '@investand/utils/common/logger'
 import { retryWithBackoff } from '@investand/utils/common/retryUtils'
@@ -33,6 +34,7 @@ export class DartApiClient {
 
   /**
    * 지분공시 조회 (list.json) - pblntf_ty='D' 고정
+   * 주주 보유 주식수 변동 및 최대 주주 지분 변동 공시만 필터링
    */
   static async fetchDisclosures(request: DartBatchRequest): Promise<DartDisclosureData[]> {
     logger.info(`[DART API] 지분공시 조회: ${request.startDate} ~ ${request.endDate}`)
@@ -51,8 +53,20 @@ export class DartApiClient {
 
     // Raw snake_case API response → camelCase TypeScript interface transformation
     if (response?.list && response.list.length > 0) {
-      logger.info(`[DART API] 지분공시 조회 완료: ${response.list.length}건 → 필드 매핑 적용`)
-      return response.list.map(item => DartTypesMapper.transformDisclosureData(item))
+      const allDisclosures = response.list.map(item => DartTypesMapper.transformDisclosureData(item))
+
+      // 보고서명 기준으로 필터링 (주주 보유 주식수 변동, 최대 주주 지분 변동만 허용)
+      const filteredDisclosures = allDisclosures.filter(disclosure =>
+        isAllowedDartReport(disclosure.reportName)
+      )
+
+      logger.info(`[DART API] 지분공시 조회 완료: ${response.list.length}건 → 필터링 후 ${filteredDisclosures.length}건`)
+
+      if (filteredDisclosures.length < allDisclosures.length) {
+        logger.info(`[DART API] 필터링: ${allDisclosures.length - filteredDisclosures.length}건 제외 (허용되지 않는 보고서 유형)`)
+      }
+
+      return filteredDisclosures
     }
 
     return []
