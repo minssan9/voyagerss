@@ -36,6 +36,8 @@ router.get('/auth/kakao/callback', authController.kakaoCallback.bind(authControl
 // ===== Account Routes =====
 router.get('/accounts/:id', authenticate, accountController.getAccount.bind(accountController));
 router.post('/accounts', accountController.createAccount.bind(accountController));
+router.put('/accounts/profile', authenticate, accountController.updateProfile.bind(accountController));
+router.post('/accounts/change-password', authenticate, accountController.changePassword.bind(accountController));
 
 // ===== Team Routes =====
 router.get('/team', authenticate, (req, res) => {

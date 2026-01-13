@@ -150,8 +150,12 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    async updateUser(): Promise<User> {
+    async updateUser(partialData?: Partial<User>): Promise<User> {
       try {
+        if (partialData) {
+          // Update specific fields in the store
+          this.user = { ...this.user, ...partialData }
+        }
         const res = await apiAccount.putUser(this.user)
         this.user = res
         return res
