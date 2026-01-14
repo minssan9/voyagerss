@@ -66,6 +66,12 @@ const routes: RouteRecordRaw[] = [
             name: 'FindashSectorComparison',
             component: () => import('@/views/investand/SectorComparison.vue'),
             meta: { icon: 'assessment', title: 'Sector Comparison' }
+          },
+          {
+            path: 'global-assets',
+            name: 'FindashGlobalAssets',
+            component: () => import('@/views/investand/GlobalAssetComparison.vue'),
+            meta: { icon: 'public', title: 'Global Assets' }
           }
         ]
       }
