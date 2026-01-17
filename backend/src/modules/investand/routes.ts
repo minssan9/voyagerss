@@ -1,6 +1,18 @@
 import { Router } from 'express';
+import marketDataRouter from './controllers/marketData';
+import sectorApiRouter from './controllers/sectorApi';
+import globalAssetApiRouter from './controllers/globalAssetApi';
 
 const router = Router();
+
+// Market Data Routes
+router.use('/data', marketDataRouter);
+
+// Sector API Routes
+router.use('/sectors', sectorApiRouter);
+
+// Global Asset API Routes
+router.use('/assets', globalAssetApiRouter);
 
 // Dart API Routes - stub implementations
 router.get('/dart/stats', (req, res) => {
