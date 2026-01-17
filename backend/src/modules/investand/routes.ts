@@ -39,4 +39,68 @@ router.get('/admin/performance-metrics', (req, res) => {
     });
 });
 
+
+// Fear & Greed Routes
+router.get('/fear-greed/current', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            score: 45,
+            rating: 'Neutral',
+            timestamp: new Date().toISOString()
+        }
+    });
+});
+
+router.get('/fear-greed/stats', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            daily: { average: 50, high: 60, low: 40 },
+            weekly: { average: 52, high: 65, low: 35 },
+            monthly: { average: 48, high: 70, low: 30 }
+        }
+    });
+});
+
+router.get('/fear-greed/history', (req, res) => {
+    const days = parseInt(req.query.days as string) || 30;
+    const history = Array.from({ length: days }, (_, i) => ({
+        date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
+        score: Math.floor(Math.random() * 100)
+    }));
+    res.json({ success: true, count: days, data: history });
+});
+
+// Stock Data Routes
+router.get('/data/kospi', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            index: 2500.50,
+            change: 15.20,
+            percentChange: 0.61,
+            volume: 5000000,
+            timestamp: new Date().toISOString()
+        }
+    });
+});
+
+router.get('/data/kosdaq', (req, res) => {
+    res.json({
+        success: true,
+        data: {
+            index: 850.30,
+            change: -5.10,
+            percentChange: -0.60,
+            volume: 2000000,
+            timestamp: new Date().toISOString()
+        }
+    });
+});
+
+router.get('/dart/health', (req, res) => {
+    res.json({ success: true, status: 'HEALTHY', message: 'DART service operating normally' });
+});
+
 export default router;

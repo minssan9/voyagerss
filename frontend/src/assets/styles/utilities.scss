@@ -845,3 +845,18 @@
         animation-delay: #{$i * 0.1}s;
     }
 }
+
+// --------------------------------------------
+// Responsive Utilities
+// --------------------------------------------
+@media (max-width: $breakpoint-md) {
+    .mobile-hide {
+        display: none !important;
+    }
+}
+
+@media (min-width: #{$breakpoint-md + 1}) {
+    .desktop-hide {
+        display: none !important;
+    }
+}

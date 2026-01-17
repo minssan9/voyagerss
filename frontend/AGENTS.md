@@ -23,7 +23,7 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
 - **Script Setup**: Always use `<script setup lang="ts">`.
 - **Functional Patterns**: Use functional and declarative programming patterns; avoid classes.
 - **VueUse**: Leverage **VueUse** functions where applicable.
-- **Styling**: Standardize styles in `src/assets/styles`. Avoid scoped styles if they can be global tokens.
+- **Styling**: Standardize styles in `src/assets/styles`. **Do NOT use scoped styles in views** broadly. Use global component classes defined in `components.scss` and utilities in `utilities.scss`.
 - **API Handling**: response should follow the structure:
   - `const response = await api.get(...)`
   - `rows.value = response.data.content;`
@@ -39,3 +39,18 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
 - Optimize Web Vitals (LCP, CLS, FID).
 - Use dynamic loading for non-critical components.
 - Optimize images using WebP format where possible.
+
+## Design System Standards
+- **Global Styles Directory**: `src/assets/styles/`
+  - `components.scss`: Reusable UI components (Cards, Buttons, Inputs, Tables).
+  - `utilities.scss`: Helper classes (Margins, Padding, Animations, Responsive).
+  - `variables.scss`: Global styling tokens (Colors, Spacing, Fonts).
+- **Module Identity**: Use defined gradient classes for branding:
+  - Investand: `.investand-gradient` (Blue/Purple)
+  - WorkSchd: `.workschd-gradient` (Cyan/Blue)
+  - Aviation: `.aviation-gradient` (Green/Teal)
+- **Component Patterns**:
+  - **Cards**: Use `.app-card` or `.modern-card` for consistent elevation, headers, and hover effects.
+  - **Buttons**: Use `.modern-button` with `--secondary` or `--tertiary` modifiers.
+  - **Animations**: Use `.fade-in`, `.slide-up`, and `.stagger-{1-10}` classes for consistent entry effects.
+- **Responsiveness**: Use `.mobile-hide` and `.desktop-hide` for visibility control.

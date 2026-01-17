@@ -35,6 +35,7 @@ model Account {
   teamMembers     TeamMember[]
   taskEmployees   TaskEmployee[]
   notifications   Notification[]
+  createdTasks    Task[]        @relation("TaskCreator")
 
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -132,6 +133,7 @@ model Task {
   shop               Shop           @relation(fields: [shopId], references: [id])
   taskEmployees      TaskEmployee[]
   notifications      Notification[]
+  creator            Account        @relation("TaskCreator", fields: [createdBy], references: [accountId])
 
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
@@ -164,7 +166,7 @@ model Notification {
   channel   String    // EMAIL, KAKAO, SMS
   status    String    @default("PENDING") // PENDING, SENT, FAILED
   message   String    @db.Text
-  metadata  String?   @db.Json
+  metadata  Json?     @db.Json
   isRead    Boolean   @default(false) @map("is_read")
   sentAt    DateTime? @map("sent_at")
 

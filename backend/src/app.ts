@@ -12,7 +12,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || 6172;
+const PORT = process.env.BACKEND_PORT || 9002;
 
 // Create HTTP server
 const httpServer = http.createServer(app);

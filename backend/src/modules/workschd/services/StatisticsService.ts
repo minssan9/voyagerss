@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { workschdPrisma as prisma } from '../../../config/prisma';
 
 export interface DashboardStatistics {
     totalTasks: number;
@@ -100,18 +98,22 @@ export class StatisticsService {
 
                 // Total workers (accounts with HELPER role)
                 prisma.account.count({
-                    where: { role: 'HELPER' }
+                    where: {
+                        accountRoles: {
+                            some: { roleType: 'HELPER' }
+                        }
+                    }
                 }),
 
                 // Active workers (workers who checked in recently - last 7 days)
-                prisma.taskEmployee.count({
+                prisma.taskEmployee.groupBy({
+                    by: ['accountId'],
                     where: {
                         joinedAt: {
                             gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                         }
-                    },
-                    distinct: ['accountId']
-                }),
+                    }
+                }).then(res => res.length),
 
                 // Total teams
                 prisma.team.count(),
@@ -121,7 +123,7 @@ export class StatisticsService {
                     where: {
                         tasks: {
                             some: {
-                                taskDate: {
+                                startDateTime: {
                                     gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
                                 }
                             }
@@ -138,15 +140,9 @@ export class StatisticsService {
                 }),
 
                 // Tasks by region
-                prisma.task.groupBy({
-                    by: ['region'],
-                    _count: true,
-                    orderBy: {
-                        _count: {
-                            region: 'desc'
-                        }
-                    },
-                    take: 10
+                // Tasks by region (Aggregated manually as region is on Team)
+                prisma.task.findMany({
+                    select: { team: { select: { region: true } } }
                 }),
 
                 // Recent tasks (last 10)
@@ -158,8 +154,8 @@ export class StatisticsService {
                         title: true,
                         status: true,
                         createdAt: true,
-                        createdBy: {
-                            select: { name: true }
+                        creator: {
+                            select: { username: true }
                         }
                     }
                 }),
@@ -167,13 +163,13 @@ export class StatisticsService {
                 // Recent join requests (last 5)
                 prisma.taskEmployee.findMany({
                     take: 5,
-                    orderBy: { createdAt: 'desc' },
+                    orderBy: { appliedAt: 'desc' },
                     where: { status: 'PENDING' },
                     select: {
                         id: true,
-                        createdAt: true,
+                        appliedAt: true,
                         account: {
-                            select: { name: true }
+                            select: { username: true }
                         },
                         task: {
                             select: { title: true }
@@ -192,7 +188,7 @@ export class StatisticsService {
                         id: true,
                         joinedAt: true,
                         account: {
-                            select: { name: true }
+                            select: { username: true }
                         },
                         task: {
                             select: { title: true }
@@ -212,9 +208,14 @@ export class StatisticsService {
             const cancelledTasks = statusCounts.find(s => s.status === 'CANCELLED')?.count || 0;
 
             // Transform tasks by region
-            const regionCounts: TaskRegionCount[] = tasksByRegion.map(item => ({
-                region: item.region,
-                count: item._count
+            const regionMap: Record<string, number> = {};
+            (tasksByRegion as any[]).forEach((t: any) => {
+                const r = t.team?.region || 'Unknown';
+                regionMap[r] = (regionMap[r] || 0) + 1;
+            });
+            const regionCounts: TaskRegionCount[] = Object.entries(regionMap).map(([region, count]) => ({
+                region,
+                count
             }));
 
             // Build recent activities from multiple sources
@@ -226,7 +227,7 @@ export class StatisticsService {
                     id: `task-${task.id}`,
                     type: 'TASK_CREATED',
                     title: 'New task created',
-                    description: `${task.title} by ${task.createdBy.name}`,
+                    description: `${task.title} by ${task.creator.username}`,
                     timestamp: task.createdAt,
                     icon: 'add_task',
                     color: 'blue'
@@ -239,8 +240,8 @@ export class StatisticsService {
                     id: `join-${request.id}`,
                     type: 'JOIN_REQUEST',
                     title: 'Join request pending',
-                    description: `${request.account.name} requested to join ${request.task.title}`,
-                    timestamp: request.createdAt,
+                    description: `${request.account.username} requested to join ${request.task.title}`,
+                    timestamp: request.appliedAt,
                     icon: 'person_add',
                     color: 'orange'
                 });
@@ -252,7 +253,7 @@ export class StatisticsService {
                     id: `checkin-${checkIn.id}`,
                     type: 'CHECKED_IN',
                     title: 'Worker checked in',
-                    description: `${checkIn.account.name} checked in to ${checkIn.task.title}`,
+                    description: `${checkIn.account.username} checked in to ${checkIn.task.title}`,
                     timestamp: checkIn.joinedAt!,
                     icon: 'login',
                     color: 'green'
@@ -344,15 +345,15 @@ export class StatisticsService {
             const checkInRate = (checkedInCount / totalAssignedWorkers) * 100;
 
             // Count active members (members who have been assigned to tasks in last 30 days)
-            const activeMembers = await prisma.taskEmployee.count({
+            const activeMembers = await prisma.taskEmployee.groupBy({
+                by: ['accountId'],
                 where: {
                     task: { teamId },
-                    createdAt: {
+                    appliedAt: {
                         gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
                     }
-                },
-                distinct: ['accountId']
-            });
+                }
+            }).then(res => res.length);
 
             return {
                 teamId,
@@ -378,8 +379,8 @@ export class StatisticsService {
         try {
             const [account, taskAssignments] = await Promise.all([
                 prisma.account.findUnique({
-                    where: { id: accountId },
-                    select: { name: true }
+                    where: { accountId: accountId },
+                    select: { username: true }
                 }),
 
                 prisma.taskEmployee.findMany({
@@ -427,7 +428,7 @@ export class StatisticsService {
 
             return {
                 workerId: accountId,
-                workerName: account.name,
+                workerName: account.username,
                 totalTasksAssigned,
                 completedTasks,
                 cancelledTasks,
@@ -448,7 +449,7 @@ export class StatisticsService {
         try {
             const tasks = await prisma.task.findMany({
                 where: {
-                    taskDate: {
+                    startDateTime: {
                         gte: startDate,
                         lte: endDate
                     }
@@ -456,15 +457,15 @@ export class StatisticsService {
                 select: {
                     id: true,
                     status: true,
-                    taskDate: true,
-                    region: true
+                    startDateTime: true,
+                    team: { select: { region: true } }
                 }
             });
 
             // Group by date
             const tasksByDate: { [key: string]: number } = {};
             tasks.forEach(task => {
-                const dateKey = task.taskDate.toISOString().split('T')[0];
+                const dateKey = task.startDateTime.toISOString().split('T')[0];
                 tasksByDate[dateKey] = (tasksByDate[dateKey] || 0) + 1;
             });
 
@@ -476,7 +477,8 @@ export class StatisticsService {
                     return acc;
                 }, {}),
                 tasksByRegion: tasks.reduce((acc: any, task) => {
-                    acc[task.region] = (acc[task.region] || 0) + 1;
+                    const r = task.team?.region || 'Unknown';
+                    acc[r] = (acc[r] || 0) + 1;
                     return acc;
                 }, {})
             };

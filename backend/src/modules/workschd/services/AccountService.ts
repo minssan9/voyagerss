@@ -72,7 +72,7 @@ export class AccountService {
         return prisma.account.update({
             where: { accountId },
             data: {
-                name: profileData.name,
+                username: profileData.name,
                 phone: profileData.phone
             },
             include: {

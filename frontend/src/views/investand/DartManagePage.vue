@@ -549,14 +549,3 @@ onMounted(() => {
   // searchHoldings()
 })
 </script>
-
-<style scoped lang="scss">
-.holdings-table {
-  .q-table__top {
-    padding: 0;
-  }
-}
-</style>
-
-
-
