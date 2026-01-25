@@ -6,6 +6,7 @@ Complete guide for setting up and running Voyagerss in local development and pro
 - [Prerequisites](#prerequisites)
 - [Local Development Setup](#local-development-setup)
 - [Production Deployment](#production-deployment)
+- [Windows Docker Deployment](#windows-docker-deployment)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 
@@ -323,6 +324,244 @@ npm run preview
 **Option 3: Deploy to CDN**
 
 Upload the `dist` directory to your CDN provider (Vercel, Netlify, AWS S3 + CloudFront, etc.)
+
+---
+
+## Windows Docker Deployment
+
+This section covers deploying Voyagerss on a Windows machine using Docker Desktop with GitHub Actions self-hosted runner.
+
+### Prerequisites for Windows Deployment
+
+- **Windows 10/11** (64-bit)
+- **Docker Desktop for Windows**: [Download](https://www.docker.com/products/docker-desktop)
+- **Git**: [Download](https://git-scm.com/download/win)
+- **PowerShell 5.1+** (included with Windows 10/11)
+
+### Quick Start
+
+#### 1. Setup Windows Host (Run as Administrator)
+
+```powershell
+# Run the setup script
+.\scripts\setup-windows-host.ps1
+```
+
+Or manually configure:
+
+```powershell
+# Add local domain to hosts file (Run PowerShell as Administrator)
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "127.0.0.1 local.voyagerss.com"
+```
+
+#### 2. Create Environment File
+
+Create a `.env.dev` file in the project root:
+
+```bash
+# .env.dev
+NODE_ENV=production
+BACKEND_PORT=6172
+FRONTEND_PORT=6171
+
+# Database
+DATABASE_URL=your-database-url
+
+# API Keys
+DART_API_KEY=your-dart-api-key
+JWT_SECRET=your-jwt-secret
+```
+
+#### 3. Deploy with Docker Compose
+
+```powershell
+# Build and start containers
+docker compose up -d --build
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f
+```
+
+#### 4. Verify Deployment
+
+```powershell
+# Run the status check script
+.\scripts\check-status.ps1
+
+# Or manually check endpoints
+Invoke-RestMethod -Uri "http://local.voyagerss.com:6172/health"
+Invoke-WebRequest -Uri "http://local.voyagerss.com:6171" -UseBasicParsing
+```
+
+### Access URLs
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://local.voyagerss.com:6171 |
+| Backend API | http://local.voyagerss.com:6172/api |
+| Backend Health | http://local.voyagerss.com:6172/health |
+| Nginx Health | http://local.voyagerss.com:6171/nginx-health |
+| API via Proxy | http://local.voyagerss.com:6171/api-health |
+
+### GitHub Actions Self-Hosted Runner Setup
+
+#### 1. Install GitHub Actions Runner on Windows
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings > Actions > Runners**
+3. Click **New self-hosted runner**
+4. Select **Windows** and follow the installation instructions
+
+```powershell
+# Example commands (from GitHub UI)
+mkdir actions-runner && cd actions-runner
+Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.xxx/actions-runner-win-x64-2.xxx.zip -OutFile actions-runner-win-x64.zip
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/actions-runner-win-x64.zip", "$PWD")
+
+# Configure
+.\config.cmd --url https://github.com/YOUR_ORG/voyagerss --token YOUR_TOKEN
+
+# Add Windows label during configuration
+# Labels: self-hosted, Windows
+
+# Run as service (recommended)
+.\svc.cmd install
+.\svc.cmd start
+```
+
+#### 2. Configure GitHub Secrets
+
+Add the following secrets in **Settings > Secrets and variables > Actions**:
+
+| Secret Name | Description |
+|-------------|-------------|
+| `DOTENV_DEV` | Full contents of `.env.dev` file |
+
+#### 3. Trigger Deployment
+
+The deployment automatically triggers when:
+- CI workflow succeeds on `main` branch
+- Manual trigger via GitHub Actions UI (workflow_dispatch)
+
+### Docker Commands Reference
+
+```powershell
+# Start services
+docker compose up -d --build
+
+# Stop services
+docker compose down
+
+# View logs
+docker compose logs -f backend
+docker compose logs -f frontend
+
+# Rebuild specific service
+docker compose up -d --build backend
+
+# Check container health
+docker compose ps
+
+# Execute command in container
+docker compose exec backend sh
+docker compose exec frontend sh
+
+# Clean up
+docker compose down -v --rmi all
+```
+
+### Troubleshooting Windows Docker
+
+#### Docker Desktop Not Starting
+
+1. Ensure virtualization is enabled in BIOS
+2. Enable Hyper-V or WSL 2 in Windows Features
+3. Restart Docker Desktop
+
+```powershell
+# Check Docker status
+docker version
+docker info
+```
+
+#### Hosts File Permission Denied
+
+Run PowerShell as Administrator:
+
+```powershell
+# Check current hosts file
+Get-Content C:\Windows\System32\drivers\etc\hosts
+
+# Add entry
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "127.0.0.1 local.voyagerss.com"
+```
+
+#### Container Health Check Failing
+
+```powershell
+# Check container logs
+docker compose logs backend --tail=50
+docker compose logs frontend --tail=50
+
+# Check if ports are available
+netstat -an | findstr "6171"
+netstat -an | findstr "6172"
+
+# Restart containers
+docker compose restart
+```
+
+#### DNS Resolution Issues
+
+```powershell
+# Flush DNS cache
+ipconfig /flushdns
+
+# Verify domain resolves
+nslookup local.voyagerss.com
+
+# Ping test
+ping local.voyagerss.com
+```
+
+### Monitoring and Maintenance
+
+#### Health Check Script
+
+```powershell
+# Run comprehensive status check
+.\scripts\check-status.ps1 -Verbose
+
+# Check specific domain
+.\scripts\check-status.ps1 -Domain "local.voyagerss.com"
+```
+
+#### Container Resource Monitoring
+
+```powershell
+# View container stats
+docker stats
+
+# View specific container
+docker stats voyagerss-backend voyagerss-frontend
+```
+
+#### Log Management
+
+```powershell
+# View recent logs
+docker compose logs --tail=100
+
+# Follow logs in real-time
+docker compose logs -f
+
+# Save logs to file
+docker compose logs > deployment_logs.txt
+```
 
 ---
 

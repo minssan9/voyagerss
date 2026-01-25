@@ -13,6 +13,14 @@ services:
     environment:
       - NODE_ENV=production
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6172/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - voyagerss-network
 
   frontend:
     build:
@@ -22,5 +30,18 @@ services:
     ports:
       - "6171:6171"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:6171"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - voyagerss-network
+
+networks:
+  voyagerss-network:
+    driver: bridge

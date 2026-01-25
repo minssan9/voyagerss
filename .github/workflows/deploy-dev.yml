@@ -1,4 +1,4 @@
-name: Dev Deployment (Self-hosted)
+name: Dev Deployment (Windows Docker)
 
 on:
   workflow_run:
@@ -7,18 +7,56 @@ on:
       - completed
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      skip_health_check:
+        description: 'Skip health check after deployment'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  DOMAIN: local.voyagerss.com
+  FRONTEND_PORT: 6171
+  BACKEND_PORT: 6172
 
 jobs:
   deploy:
-    runs-on: self-hosted
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: [self-hosted, Windows]
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
+    - name: Display deployment info
+      shell: powershell
+      run: |
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "  Voyagerss Deployment to Windows Docker" -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "Domain: $env:DOMAIN"
+        Write-Host "Frontend Port: $env:FRONTEND_PORT"
+        Write-Host "Backend Port: $env:BACKEND_PORT"
+        Write-Host "Triggered by: ${{ github.event_name }}"
+        Write-Host ""
+
     - name: Fix Git Safe Directory
+      shell: powershell
       run: git config --global --add safe.directory '*'
 
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Verify Docker is running
+      shell: powershell
+      run: |
+        Write-Host "Checking Docker status..." -ForegroundColor Yellow
+        try {
+          $dockerVersion = docker version --format '{{.Server.Version}}'
+          Write-Host "Docker Server Version: $dockerVersion" -ForegroundColor Green
+        } catch {
+          Write-Host "ERROR: Docker is not running or not installed!" -ForegroundColor Red
+          Write-Host "Please ensure Docker Desktop is running on the Windows host." -ForegroundColor Red
+          exit 1
+        }
 
     - name: Create .env.dev file from Secret
       shell: powershell
@@ -26,9 +64,168 @@ jobs:
         DOTENV_CONTENT: ${{ secrets.DOTENV_DEV }}
       run: |
         $content = $env:DOTENV_CONTENT
-        [System.IO.File]::WriteAllText(".env.dev", $content, [System.Text.Encoding]::UTF8)
+        if ([string]::IsNullOrEmpty($content)) {
+          Write-Host "WARNING: DOTENV_DEV secret is empty!" -ForegroundColor Yellow
+          # Create minimal env file for local development
+          $minimalEnv = @"
+NODE_ENV=production
+BACKEND_PORT=6172
+FRONTEND_PORT=6171
+"@
+          [System.IO.File]::WriteAllText(".env.dev", $minimalEnv, [System.Text.Encoding]::UTF8)
+        } else {
+          [System.IO.File]::WriteAllText(".env.dev", $content, [System.Text.Encoding]::UTF8)
+        }
+        Write-Host ".env.dev file created successfully" -ForegroundColor Green
 
-    - name: Deploy with Docker Compose
+    - name: Setup hosts file for local domain
+      shell: powershell
       run: |
-        docker compose down
+        $hostsPath = "C:\Windows\System32\drivers\etc\hosts"
+        $domain = "${{ env.DOMAIN }}"
+        $entry = "127.0.0.1 $domain"
+
+        Write-Host "Checking hosts file for $domain..." -ForegroundColor Yellow
+
+        $hostsContent = Get-Content $hostsPath -Raw -ErrorAction SilentlyContinue
+        if ($hostsContent -notmatch [regex]::Escape($domain)) {
+          Write-Host "Adding $domain to hosts file..." -ForegroundColor Yellow
+          try {
+            Add-Content -Path $hostsPath -Value "`n$entry" -ErrorAction Stop
+            Write-Host "Added: $entry" -ForegroundColor Green
+          } catch {
+            Write-Host "WARNING: Could not modify hosts file. Please add manually:" -ForegroundColor Yellow
+            Write-Host "  $entry" -ForegroundColor Cyan
+          }
+        } else {
+          Write-Host "$domain already exists in hosts file" -ForegroundColor Green
+        }
+
+    - name: Stop existing containers
+      shell: powershell
+      run: |
+        Write-Host "Stopping existing containers..." -ForegroundColor Yellow
+        docker compose down --remove-orphans 2>$null
+        Write-Host "Existing containers stopped" -ForegroundColor Green
+      continue-on-error: true
+
+    - name: Build and start containers
+      shell: powershell
+      run: |
+        Write-Host "Building and starting containers..." -ForegroundColor Yellow
         docker compose up -d --build
+
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "ERROR: Docker Compose failed!" -ForegroundColor Red
+          exit 1
+        }
+        Write-Host "Containers started successfully" -ForegroundColor Green
+
+    - name: Wait for services to be ready
+      shell: powershell
+      run: |
+        Write-Host "Waiting for services to start..." -ForegroundColor Yellow
+        Start-Sleep -Seconds 15
+
+        # Show container status
+        Write-Host "`nContainer Status:" -ForegroundColor Cyan
+        docker compose ps
+
+    - name: Health Check - Backend
+      shell: powershell
+      if: ${{ github.event.inputs.skip_health_check != 'true' }}
+      run: |
+        Write-Host "Checking backend health..." -ForegroundColor Yellow
+        $maxRetries = 5
+        $retryCount = 0
+        $backendUrl = "http://localhost:${{ env.BACKEND_PORT }}/health"
+
+        while ($retryCount -lt $maxRetries) {
+          try {
+            $response = Invoke-RestMethod -Uri $backendUrl -Method Get -TimeoutSec 10
+            Write-Host "Backend Health Check: OK" -ForegroundColor Green
+            Write-Host "Response: $($response | ConvertTo-Json -Compress)" -ForegroundColor Gray
+            break
+          } catch {
+            $retryCount++
+            Write-Host "Attempt $retryCount/$maxRetries failed. Retrying in 5 seconds..." -ForegroundColor Yellow
+            Start-Sleep -Seconds 5
+          }
+        }
+
+        if ($retryCount -eq $maxRetries) {
+          Write-Host "ERROR: Backend health check failed after $maxRetries attempts" -ForegroundColor Red
+          docker compose logs backend --tail=50
+          exit 1
+        }
+
+    - name: Health Check - Frontend
+      shell: powershell
+      if: ${{ github.event.inputs.skip_health_check != 'true' }}
+      run: |
+        Write-Host "Checking frontend health..." -ForegroundColor Yellow
+        $maxRetries = 5
+        $retryCount = 0
+        $frontendUrl = "http://localhost:${{ env.FRONTEND_PORT }}"
+
+        while ($retryCount -lt $maxRetries) {
+          try {
+            $response = Invoke-WebRequest -Uri $frontendUrl -Method Get -TimeoutSec 10 -UseBasicParsing
+            if ($response.StatusCode -eq 200) {
+              Write-Host "Frontend Health Check: OK (Status: $($response.StatusCode))" -ForegroundColor Green
+              break
+            }
+          } catch {
+            $retryCount++
+            Write-Host "Attempt $retryCount/$maxRetries failed. Retrying in 5 seconds..." -ForegroundColor Yellow
+            Start-Sleep -Seconds 5
+          }
+        }
+
+        if ($retryCount -eq $maxRetries) {
+          Write-Host "ERROR: Frontend health check failed after $maxRetries attempts" -ForegroundColor Red
+          docker compose logs frontend --tail=50
+          exit 1
+        }
+
+    - name: Health Check - Domain Access
+      shell: powershell
+      if: ${{ github.event.inputs.skip_health_check != 'true' }}
+      run: |
+        Write-Host "Checking domain access: http://${{ env.DOMAIN }}:${{ env.FRONTEND_PORT }}" -ForegroundColor Yellow
+        $domainUrl = "http://${{ env.DOMAIN }}:${{ env.FRONTEND_PORT }}"
+
+        try {
+          $response = Invoke-WebRequest -Uri $domainUrl -Method Get -TimeoutSec 10 -UseBasicParsing
+          if ($response.StatusCode -eq 200) {
+            Write-Host "Domain Access Check: OK" -ForegroundColor Green
+            Write-Host "URL: $domainUrl" -ForegroundColor Cyan
+          }
+        } catch {
+          Write-Host "WARNING: Domain access check failed. Please verify hosts file configuration." -ForegroundColor Yellow
+          Write-Host "Add this line to C:\Windows\System32\drivers\etc\hosts:" -ForegroundColor Yellow
+          Write-Host "  127.0.0.1 ${{ env.DOMAIN }}" -ForegroundColor Cyan
+        }
+
+    - name: Display deployment summary
+      shell: powershell
+      if: always()
+      run: |
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "  Deployment Summary" -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "Access URLs:" -ForegroundColor Green
+        Write-Host "  Frontend: http://${{ env.DOMAIN }}:${{ env.FRONTEND_PORT }}" -ForegroundColor White
+        Write-Host "  Backend API: http://${{ env.DOMAIN }}:${{ env.BACKEND_PORT }}/api" -ForegroundColor White
+        Write-Host "  Backend Health: http://${{ env.DOMAIN }}:${{ env.BACKEND_PORT }}/health" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Localhost Access:" -ForegroundColor Green
+        Write-Host "  Frontend: http://localhost:${{ env.FRONTEND_PORT }}" -ForegroundColor White
+        Write-Host "  Backend API: http://localhost:${{ env.BACKEND_PORT }}/api" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Container Status:" -ForegroundColor Green
+        docker compose ps
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Cyan
