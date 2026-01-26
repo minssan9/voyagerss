@@ -1,10 +1,14 @@
 import { Router } from 'express';
 // @ts-ignore
 import ApplicationFactory from './ApplicationFactory';
+// @ts-ignore
+import AviationAbbreviationService from './features/aviation-abbreviation/architecture/services/AviationAbbreviationService';
 
 const router = Router();
 let topicService: any;
 let weatherImageService: any;
+let schedulingService: any;
+const abbreviationService = new AviationAbbreviationService();
 
 // Initialize services (Async initialization might be tricky in module scope, 
 // usually done in a startup function. For now, lazily or global init).
@@ -31,6 +35,8 @@ async function initServices() {
     // @ts-ignore
     weatherImageService = factory.getContainer().resolve('weatherService');
     await weatherImageService.initialize();
+    // @ts-ignore
+    schedulingService = factory.getContainer().resolve('schedulingService');
 }
 
 // Middleware to ensure services are ready
@@ -119,6 +125,131 @@ router.post('/weather/gathering/enabled', async (req, res) => {
     try {
         const { enabled } = req.body;
         res.json({ success: true, data: { enabled, message: 'Weather gathering status updated' } });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Aviation Abbreviation Routes
+
+/**
+ * Get random abbreviations (preview)
+ * GET /abbreviations/random?count=10
+ */
+router.get('/abbreviations/random', async (req, res) => {
+    try {
+        const count = parseInt(req.query.count as string) || 10;
+        const abbreviations = abbreviationService.getRandomAbbreviations(count);
+        res.json({
+            success: true,
+            data: {
+                abbreviations,
+                count: abbreviations.length,
+                totalAvailable: abbreviationService.getTotalCount()
+            }
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get formatted message preview
+ * GET /abbreviations/preview
+ */
+router.get('/abbreviations/preview', async (req, res) => {
+    try {
+        const abbreviations = abbreviationService.getRandomAbbreviations(10);
+        const message = abbreviationService.formatForTelegram(abbreviations);
+        res.json({
+            success: true,
+            data: {
+                message,
+                abbreviations,
+                messageLength: message.length
+            }
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Search abbreviations
+ * GET /abbreviations/search?q=keyword
+ */
+router.get('/abbreviations/search', async (req, res) => {
+    try {
+        const query = req.query.q as string;
+        if (!query) {
+            return res.status(400).json({ error: 'Search query (q) is required' });
+        }
+        const results = abbreviationService.searchAbbreviations(query);
+        res.json({
+            success: true,
+            data: {
+                results,
+                count: results.length,
+                query
+            }
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get abbreviation by code
+ * GET /abbreviations/:code
+ */
+router.get('/abbreviations/:code', async (req, res) => {
+    try {
+        const code = req.params.code;
+        const abbreviation = abbreviationService.getByCode(code);
+        if (!abbreviation) {
+            return res.status(404).json({ error: `Abbreviation '${code}' not found` });
+        }
+        res.json({
+            success: true,
+            data: abbreviation
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Get all abbreviations
+ * GET /abbreviations
+ */
+router.get('/abbreviations', async (req, res) => {
+    try {
+        res.json({
+            success: true,
+            data: {
+                totalCount: abbreviationService.getTotalCount(),
+                message: 'Use /abbreviations/random to get random abbreviations, or /abbreviations/:code to get specific abbreviation'
+            }
+        });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Trigger manual abbreviation notification to all subscribers
+ * POST /abbreviations/broadcast
+ */
+router.post('/abbreviations/broadcast', async (req, res) => {
+    try {
+        if (!schedulingService) {
+            return res.status(503).json({ error: 'Scheduling service not available' });
+        }
+        const result = await schedulingService.manualAbbreviationNotification();
+        res.json({
+            success: result.success,
+            data: result
+        });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
