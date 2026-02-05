@@ -5,3 +5,9 @@
 backend/package-lock.json
 
 .env
+
+_bmad
+_bmad-output
+.agent
+.claude
+.idea

@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/en9door_api.api.main.iml" filepath="$PROJECT_DIR$/.idea/modules/api/en9door_api.api.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/api/en9door_api.api.test.iml" filepath="$PROJECT_DIR$/.idea/modules/api/en9door_api.api.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/en9door_api.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/en9door_api.core.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/../en9door/en9door_web/en9door_web.iml" filepath="$PROJECT_DIR$/../en9door/en9door_web/en9door_web.iml" />
       <module fileurl="file://$PROJECT_DIR$/../devops/voyagers-devops/voyagers-devops.iml" filepath="$PROJECT_DIR$/../devops/voyagers-devops/voyagers-devops.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/voyagerss.iml" filepath="$PROJECT_DIR$/.idea/voyagerss.iml" />
