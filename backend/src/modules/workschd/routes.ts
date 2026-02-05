@@ -5,6 +5,7 @@ import { TeamController } from './controllers/TeamController';
 import { TaskController } from './controllers/TaskController';
 import { ShopController } from './controllers/ShopController';
 import { NotificationController } from './controllers/NotificationController';
+import { StatisticsController } from './controllers/StatisticsController';
 import {
     authenticate,
     isTeamLeader,
@@ -20,6 +21,7 @@ const teamController = new TeamController();
 const taskController = new TaskController();
 const shopController = new ShopController();
 const notificationController = new NotificationController();
+const statisticsController = new StatisticsController();
 
 // ===== Auth Routes (Public) =====
 router.post('/auth/login', authController.authenticateUser.bind(authController));
@@ -34,6 +36,8 @@ router.get('/auth/kakao/callback', authController.kakaoCallback.bind(authControl
 // ===== Account Routes =====
 router.get('/accounts/:id', authenticate, accountController.getAccount.bind(accountController));
 router.post('/accounts', accountController.createAccount.bind(accountController));
+router.put('/accounts/profile', authenticate, accountController.updateProfile.bind(accountController));
+router.post('/accounts/change-password', authenticate, accountController.changePassword.bind(accountController));
 
 // ===== Team Routes =====
 router.get('/team', authenticate, (req, res) => {
@@ -74,9 +78,15 @@ router.post('/task/request/:requestId/reject', authenticate, isTeamLeader, taskC
 // 참여 취소 (본인만)
 router.delete('/task/request/:requestId', authenticate, taskController.cancelJoinRequest.bind(taskController));
 
+// 체크인/체크아웃
+router.post('/task-employee/:taskEmployeeId/check-in', authenticate, taskController.checkIn.bind(taskController));
+router.post('/task-employee/:taskEmployeeId/check-out', authenticate, taskController.checkOut.bind(taskController));
+
 // ===== Notification Routes =====
 router.get('/notifications', authenticate, notificationController.getNotifications.bind(notificationController));
+router.get('/notifications/unread/count', authenticate, notificationController.getUnreadCount.bind(notificationController));
 router.put('/notifications/:id/read', authenticate, notificationController.markAsRead.bind(notificationController));
+router.put('/notifications/mark-all-read', authenticate, notificationController.markAllAsRead.bind(notificationController));
 router.delete('/notifications/:id', authenticate, notificationController.deleteNotification.bind(notificationController));
 
 // ===== Shop Routes =====
@@ -86,5 +96,11 @@ router.get('/team/:teamId/shop', authenticate, shopController.getAllShops.bind(s
 router.get('/team/:teamId/shop/active', authenticate, shopController.getActiveShops.bind(shopController));
 router.put('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.updateShop.bind(shopController));
 router.delete('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.deleteShop.bind(shopController));
+
+// ===== Statistics Routes =====
+router.get('/statistics/dashboard', authenticate, statisticsController.getDashboardStatistics.bind(statisticsController));
+router.get('/statistics/team/:teamId', authenticate, statisticsController.getTeamStatistics.bind(statisticsController));
+router.get('/statistics/worker/:workerId', authenticate, statisticsController.getWorkerStatistics.bind(statisticsController));
+router.get('/statistics/tasks/date-range', authenticate, statisticsController.getTaskStatisticsByDateRange.bind(statisticsController));
 
 export default router;

@@ -34,7 +34,11 @@ export class TaskService {
 
         // 비동기로 알림 발송
         setImmediate(async () => {
-            await this.notificationService.sendTaskCreatedNotification(task.id);
+            try {
+                await this.notificationService.sendTaskCreatedNotification(task.id);
+            } catch (error) {
+                console.error('[TaskService] Failed to send task created notification:', error);
+            }
         });
 
         return task;
@@ -68,7 +72,11 @@ export class TaskService {
         // 각 Task에 대해 알림 발송
         for (const task of tasks) {
             setImmediate(async () => {
-                await this.notificationService.sendTaskCreatedNotification(task.id);
+                try {
+                    await this.notificationService.sendTaskCreatedNotification(task.id);
+                } catch (error) {
+                    console.error('[TaskService] Failed to send task created notification:', error);
+                }
             });
         }
 
@@ -112,7 +120,7 @@ export class TaskService {
         endDate?: Date;
     }): Promise<{ content: Task[]; totalElements: number; totalPages: number }> {
         const page = params?.page || 0;
-        const size = params?.size || 10;
+        const size = Math.max(params?.size || 10, 1); // Ensure size is at least 1
 
         const where: any = {};
 
@@ -158,8 +166,8 @@ export class TaskService {
     /**
      * 장례식 수정
      */
-    async updateTask(id: number, data: any): Promise<void> {
-        await prisma.task.update({
+    async updateTask(id: number, data: any): Promise<Task> {
+        return await prisma.task.update({
             where: { id },
             data: {
                 title: data.title,
@@ -169,6 +177,10 @@ export class TaskService {
                 endDateTime: data.endDateTime ? new Date(data.endDateTime) : undefined,
                 status: data.status,
                 shopId: data.shopId
+            },
+            include: {
+                shop: true,
+                team: true
             }
         });
     }
@@ -221,7 +233,11 @@ export class TaskService {
 
         // 팀장에게 알림
         setImmediate(async () => {
-            await this.notificationService.sendJoinRequestNotification(taskId, accountId);
+            try {
+                await this.notificationService.sendJoinRequestNotification(taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send join request notification:', error);
+            }
         });
 
         return taskEmployee;
@@ -230,8 +246,8 @@ export class TaskService {
     /**
      * 참여 신청 승인 (인원 마감 체크 포함)
      */
-    async approveJoinRequest(requestId: number): Promise<void> {
-        await prisma.$transaction(async (tx) => {
+    async approveJoinRequest(requestId: number): Promise<TaskEmployee> {
+        return await prisma.$transaction(async (tx) => {
             const taskEmployee = await tx.taskEmployee.update({
                 where: { id: requestId },
                 data: {
@@ -249,10 +265,14 @@ export class TaskService {
 
             // 승인 알림
             setImmediate(async () => {
-                await this.notificationService.sendJoinApprovedNotification(
-                    taskEmployee.accountId,
-                    task.id
-                );
+                try {
+                    await this.notificationService.sendJoinApprovedNotification(
+                        taskEmployee.accountId,
+                        task.id
+                    );
+                } catch (error) {
+                    console.error('[TaskService] Failed to send join approved notification:', error);
+                }
             });
 
             // 인원 마감 체크
@@ -264,16 +284,22 @@ export class TaskService {
 
                 // 마감 알림
                 setImmediate(async () => {
-                    await this.notificationService.sendTaskClosedNotification(task.id);
+                    try {
+                        await this.notificationService.sendTaskClosedNotification(task.id);
+                    } catch (error) {
+                        console.error('[TaskService] Failed to send task closed notification:', error);
+                    }
                 });
             }
+
+            return taskEmployee;
         });
     }
 
     /**
      * 참여 신청 거절
      */
-    async rejectJoinRequest(requestId: number): Promise<void> {
+    async rejectJoinRequest(requestId: number): Promise<TaskEmployee> {
         const taskEmployee = await prisma.taskEmployee.update({
             where: { id: requestId },
             data: { status: 'REJECTED' }
@@ -281,11 +307,17 @@ export class TaskService {
 
         // 거절 알림
         setImmediate(async () => {
-            await this.notificationService.sendJoinRejectedNotification(
-                taskEmployee.accountId,
-                taskEmployee.taskId
-            );
+            try {
+                await this.notificationService.sendJoinRejectedNotification(
+                    taskEmployee.accountId,
+                    taskEmployee.taskId
+                );
+            } catch (error) {
+                console.error('[TaskService] Failed to send join rejected notification:', error);
+            }
         });
+
+        return taskEmployee;
     }
 
     /**
@@ -331,5 +363,95 @@ export class TaskService {
             },
             orderBy: { appliedAt: 'asc' }
         });
+    }
+
+    /**
+     * 체크인 (출근)
+     */
+    async checkIn(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
+        const result = await prisma.$transaction(async (tx) => {
+            // Read with lock to prevent race condition
+            const taskEmployee = await tx.taskEmployee.findUnique({
+                where: { id: taskEmployeeId }
+            });
+
+            if (!taskEmployee) {
+                throw new Error('참여 정보를 찾을 수 없습니다');
+            }
+
+            if (taskEmployee.accountId !== accountId) {
+                throw new Error('권한이 없습니다');
+            }
+
+            if (taskEmployee.status !== 'APPROVED') {
+                throw new Error('승인된 참여만 체크인할 수 있습니다');
+            }
+
+            if (taskEmployee.joinedAt) {
+                throw new Error('이미 체크인 되었습니다');
+            }
+
+            // Update within transaction
+            return await tx.taskEmployee.update({
+                where: { id: taskEmployeeId },
+                data: { joinedAt: new Date() }
+            });
+        });
+
+        // 체크인 알림 전송 (트랜잭션 외부)
+        setImmediate(async () => {
+            try {
+                await this.notificationService.sendCheckInNotification(result.taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send check-in notification:', error);
+            }
+        });
+
+        return result;
+    }
+
+    /**
+     * 체크아웃 (퇴근)
+     */
+    async checkOut(taskEmployeeId: number, accountId: number): Promise<TaskEmployee> {
+        const result = await prisma.$transaction(async (tx) => {
+            // Read with lock to prevent race condition
+            const taskEmployee = await tx.taskEmployee.findUnique({
+                where: { id: taskEmployeeId }
+            });
+
+            if (!taskEmployee) {
+                throw new Error('참여 정보를 찾을 수 없습니다');
+            }
+
+            if (taskEmployee.accountId !== accountId) {
+                throw new Error('권한이 없습니다');
+            }
+
+            if (!taskEmployee.joinedAt) {
+                throw new Error('체크인을 먼저 해야 합니다');
+            }
+
+            if (taskEmployee.leftAt) {
+                throw new Error('이미 체크아웃 되었습니다');
+            }
+
+            // Update within transaction
+            return await tx.taskEmployee.update({
+                where: { id: taskEmployeeId },
+                data: { leftAt: new Date() }
+            });
+        });
+
+        // 체크아웃 알림 전송 (트랜잭션 외부)
+        setImmediate(async () => {
+            try {
+                await this.notificationService.sendCheckOutNotification(result.taskId, accountId);
+            } catch (error) {
+                console.error('[TaskService] Failed to send check-out notification:', error);
+            }
+        });
+
+        return result;
     }
 }

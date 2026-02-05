@@ -90,4 +90,40 @@ export class NotificationController {
             res.status(500).json({ message: error.message });
         }
     }
+
+    /**
+     * 읽지 않은 알림 개수 조회
+     */
+    async getUnreadCount(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            const count = await notificationService.getUnreadCount(req.user.accountId);
+            res.status(200).json({ count });
+        } catch (error: any) {
+            console.error('Get unread count error:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    /**
+     * 모든 알림 읽음 처리
+     */
+    async markAllAsRead(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            await notificationService.markAllAsRead(req.user.accountId);
+            res.status(200).json({ success: true });
+        } catch (error: any) {
+            console.error('Mark all as read error:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
 }

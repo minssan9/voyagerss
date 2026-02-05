@@ -34,16 +34,27 @@ const deleteTask = (taskId: number): Promise<AxiosResponse<void>> => {
 // Task-Employee API to create a task employee request
 const createTaskEmployeeRequest = (requestData: Partial<TaskEmployee>): Promise<AxiosResponse<TaskEmployee>> => {
   const taskId = requestData.taskId
-  return service.post(`/workschd/task-employee/${taskId}/request`, requestData)
+  return service.post(`/workschd/task/${taskId}/request`, requestData)
 }
+
 const approveJoinRequest = (requestData: Partial<TaskEmployee>): Promise<AxiosResponse<void>> => {
-  const taskId = requestData.taskId
   const requestId = requestData.id
-  return service.post(`/workschd/task-employee/${taskId}/request/${requestId}/approve`)
+  return service.post(`/workschd/task/request/${requestId}/approve`)
 }
-// Updated API to get task employees with pagination and filtering
+
+// 참여 거절
+const rejectJoinRequest = (requestData: Partial<TaskEmployee>): Promise<AxiosResponse<void>> => {
+  const requestId = requestData.id
+  return service.post(`/workschd/task/request/${requestId}/reject`)
+}
+
+// 참여 취소
+const cancelJoinRequest = (requestId: number): Promise<AxiosResponse<void>> => {
+  return service.delete(`/workschd/task/request/${requestId}`)
+}
+// Get task employees (참여자 목록 조회)
 const getTaskEmployees = (taskId: number, params?: any): Promise<AxiosResponse<TaskEmployee[]>> => {
-  return service.get(`/workschd/task-employee/${taskId}/employees`, { params });
+  return service.get(`/workschd/task/${taskId}/employees`, { params });
 };
 
 // Check in (출근) - Sets joinedAt to current time and status to ACTIVE
@@ -64,6 +75,8 @@ export default {
   updateTask,
   deleteTask,
   approveJoinRequest,
+  rejectJoinRequest,
+  cancelJoinRequest,
   getTaskEmployees,
   checkIn,
   checkOut
