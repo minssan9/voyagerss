@@ -1,4 +1,4 @@
-name: Unified CI
+name: CI
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -46,7 +46,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -64,4 +64,8 @@ jobs:
       run: npm install
 
     - name: Build
+      env:
+        VITE_API_BASE_URL: https://api.voyagerss.com/api
+        VITE_API_URL: https://api.voyagerss.com
+        VITE_API_WEB: https://api.voyagerss.com
       run: npm run build

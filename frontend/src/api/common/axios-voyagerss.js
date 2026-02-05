@@ -8,9 +8,8 @@ import { Notify } from 'quasar'
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
-    'Access-Control-Allow-Credentials': true,
-    'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json;charset=utf-8'
   },
 })

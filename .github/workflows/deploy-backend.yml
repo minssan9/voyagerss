@@ -1,0 +1,39 @@
+name: Deploy Backend to DigitalOcean
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+    - name: Fix Git Safe Directory
+      run: git config --global --add safe.directory '*'
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Create .env file from Secret
+      run: echo "${{ secrets.DOTENV_PROD }}" > .env.prod
+
+    - name: Deploy Backend with Docker Compose
+      run: |
+        docker compose -f docker-compose.yml down
+        docker compose -f docker-compose.yml up -d --build
+
+    - name: Health Check
+      run: |
+        echo "Waiting for backend to start..."
+        sleep 10
+        curl -f http://localhost:6172/health || echo "Health check failed - check container logs"
+
+    - name: Show container status
+      if: always()
+      run: docker compose ps
