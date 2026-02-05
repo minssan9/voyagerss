@@ -6,6 +6,7 @@ import type {
   DartDisclosureData,
   SentimentRelevantDisclosure
 } from '@investand/interfaces/dartTypes'
+import { isAllowedDartReport, ALLOWED_DART_REPORT_KEYWORDS } from '@investand/interfaces/dartTypes'
 import { logger } from '@investand/utils/common/logger'
 import { formatDate } from '@investand/utils/common/dateUtils'
 
@@ -21,6 +22,7 @@ export class DartCollectionService {
 
   /**
    * 일별 지분공시 수집 및 저장 (D 타입 전용)
+   * 주주 보유 주식수 변동 및 최대 주주 지분 변동 공시만 필터링
    */
   static async collectDailyDisclosures(
     date: string,
@@ -34,6 +36,10 @@ export class DartCollectionService {
     stockDisclosures: DartDisclosureData[]
   }> {
     logger.info(`[DART Collection] ${date} 일별 지분공시 수집 시작`)
+    logger.info(`[DART Collection] 필터링 적용: 다음 보고서 유형만 수집`)
+    ALLOWED_DART_REPORT_KEYWORDS.forEach(keyword => {
+      logger.info(`[DART Collection]  - ${keyword}`)
+    })
 
     // API 키 검증
     if (!DartApiClient.validateApiKey()) {
