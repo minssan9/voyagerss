@@ -1,5 +1,7 @@
 // @ts-ignore
 import cron from 'node-cron';
+// @ts-ignore
+import AviationAbbreviationService from './features/aviation-abbreviation/architecture/services/AviationAbbreviationService.js';
 
 /**
  * Aviation Bot Scheduler
@@ -9,13 +11,17 @@ export default class AviationBotScheduler {
     private scheduleRepository: any;
     private telegramBotService: any;
     private weatherService: any;
+    private userService: any;
+    private abbreviationService: AviationAbbreviationService;
     private jobs: any[];
     private weatherGatheringEnabled: boolean;
 
-    constructor(scheduleRepository: any, telegramBotService: any, weatherService: any) {
+    constructor(scheduleRepository: any, telegramBotService: any, weatherService: any, userService?: any) {
         this.scheduleRepository = scheduleRepository;
         this.telegramBotService = telegramBotService;
         this.weatherService = weatherService;
+        this.userService = userService;
+        this.abbreviationService = new AviationAbbreviationService();
         this.jobs = [];
         this.weatherGatheringEnabled = true; // Default to enabled
     }
@@ -31,6 +37,9 @@ export default class AviationBotScheduler {
 
         // Start weather collection jobs
         this._startWeatherJobs();
+
+        // Start aviation abbreviation notification jobs (every 6 hours)
+        this._startAbbreviationJobs();
 
         console.log('✅ Aviation bot scheduler started successfully');
     }
@@ -112,6 +121,115 @@ export default class AviationBotScheduler {
         console.log('✅ Weather jobs scheduled:');
         console.log('   - Collection: Every 30 minutes');
         console.log('   - Cleanup: Daily at 3:00 AM KST');
+    }
+
+    /**
+     * Start aviation abbreviation notification jobs (every 6 hours)
+     * @private
+     */
+    private _startAbbreviationJobs() {
+        // Abbreviation notification every 6 hours (0:00, 6:00, 12:00, 18:00 KST)
+        const abbreviationJob = cron.schedule('0 0,6,12,18 * * *', async () => {
+            const currentTime = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+            console.log(`✈️ [SCHEDULED] Aviation abbreviation notification triggered at: ${currentTime}`);
+            await this._sendAbbreviationNotification();
+        }, {
+            timezone: 'Asia/Seoul'
+        });
+
+        this.jobs.push(abbreviationJob);
+
+        console.log('✅ Aviation abbreviation jobs scheduled:');
+        console.log('   - Notifications: Every 6 hours (0:00, 6:00, 12:00, 18:00 KST)');
+    }
+
+    /**
+     * Send aviation abbreviation notification to all subscribers
+     * @private
+     */
+    private async _sendAbbreviationNotification() {
+        try {
+            if (!this.telegramBotService || !this.userService) {
+                console.warn('⚠️ TelegramBotService or UserService not available for abbreviation notification');
+                return;
+            }
+
+            // Get 10 random abbreviations
+            const abbreviations = this.abbreviationService.getRandomAbbreviations(10);
+
+            // Format the message
+            const message = this.abbreviationService.formatForTelegram(abbreviations);
+
+            // Get all subscribed users
+            const subscribedUsers = await this.userService.getUsersBySubscriptionStatus(true);
+
+            if (!subscribedUsers || subscribedUsers.length === 0) {
+                console.log('📭 No subscribed users to send abbreviation notification');
+                return;
+            }
+
+            console.log(`📤 Sending abbreviation notification to ${subscribedUsers.length} subscribers...`);
+
+            let successCount = 0;
+            let failCount = 0;
+
+            // Send message to each subscriber
+            for (const user of subscribedUsers) {
+                try {
+                    const chatId = user.chatId || user.chat_id;
+                    if (!chatId) {
+                        console.warn(`⚠️ User ${user.id} has no chatId`);
+                        failCount++;
+                        continue;
+                    }
+
+                    await this.telegramBotService.sendMessage(chatId, message, {
+                        parse_mode: 'Markdown'
+                    });
+                    successCount++;
+
+                    // Add small delay to avoid rate limiting
+                    await this._delay(100);
+                } catch (error: any) {
+                    console.error(`❌ Failed to send to user ${user.id}:`, error.message);
+                    failCount++;
+                }
+            }
+
+            console.log(`✅ Abbreviation notification completed: ${successCount} sent, ${failCount} failed`);
+        } catch (error) {
+            console.error('❌ Error sending abbreviation notification:', error);
+        }
+    }
+
+    /**
+     * Delay helper function
+     * @param {number} ms - Milliseconds to delay
+     * @private
+     */
+    private _delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Manual abbreviation notification (for testing)
+     * @returns {Promise<Object>} Send result
+     */
+    async manualAbbreviationNotification() {
+        try {
+            console.log('✈️ Manual abbreviation notification started...');
+            await this._sendAbbreviationNotification();
+            return {
+                success: true,
+                message: 'Abbreviation notification sent successfully'
+            };
+        } catch (error: any) {
+            console.error('❌ Manual abbreviation notification failed:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
     }
 
     /**

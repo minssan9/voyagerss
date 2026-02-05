@@ -278,10 +278,11 @@ export default class ApplicationFactory {
         this.container.registerSingleton('schedulingService', (container: any) => {
             // @ts-ignore
             const AviationBotScheduler = require('./scheduler');
-            return new AviationBotScheduler(
+            return new AviationBotScheduler.default(
                 container.resolve('scheduleRepository'),
                 container.resolve('telegramBotService'),
-                container.resolve('weatherService')
+                container.resolve('weatherService'),
+                container.resolve('userManagementService')
             );
         });
     }
