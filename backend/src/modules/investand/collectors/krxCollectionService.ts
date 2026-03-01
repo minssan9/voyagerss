@@ -1,6 +1,6 @@
 import { KrxApiClient } from '@investand/clients/krx/KrxApiClient'
 import { MarketDataRepository } from '@investand/repositories/market/MarketDataRepository'
-import type { krxStockData, InvestorTradingData } from '@investand/interfaces/krxTypes'
+import type { krxStockData, InvestorTradingData, StockClosingPriceData } from '@investand/interfaces/krxTypes'
 import { logger } from '@investand/utils/common/logger'
 import { formatDate } from '@investand/utils/common/dateUtils'
 
@@ -112,6 +112,143 @@ export class KrxCollectionService {
     } catch (error) {
       logger.error(`[KRX Collection] ${market} 수집 실패:`, error)
       throw error
+    }
+  }
+
+  /**
+   * 개별 종목 종가 수집 및 저장
+   */
+  static async collectStockClosingPrice(
+    stockCode: string,
+    marketType: 'KOSPI' | 'KOSDAQ' = 'KOSPI',
+    saveToDb: boolean = true
+  ): Promise<{
+    success: boolean
+    data: StockClosingPriceData | null
+    error?: string
+  }> {
+    logger.info(`[KRX Collection] 종목 종가 수집: ${stockCode} (${marketType})`)
+
+    try {
+      // API 키 검증
+      if (!KrxApiClient.validateApiKeys()) {
+        throw new Error('KRX API 키가 설정되지 않았습니다')
+      }
+
+      // 종가 데이터 조회
+      const stockData = await KrxApiClient.fetchStockClosingPrice(stockCode, marketType)
+
+      // 데이터베이스 저장
+      if (saveToDb && stockData) {
+        await MarketDataRepository.saveStockClosingPrice(stockData)
+        logger.info(`[KRX Collection] 종목 종가 저장 완료: ${stockCode}`)
+      }
+
+      return {
+        success: true,
+        data: stockData
+      }
+
+    } catch (error) {
+      const errorMessage = (error as Error).message
+      logger.error(`[KRX Collection] 종목 종가 수집 실패 (${stockCode}):`, error)
+
+      return {
+        success: false,
+        data: null,
+        error: errorMessage
+      }
+    }
+  }
+
+  /**
+   * 여러 종목 종가 일괄 수집 및 저장
+   */
+  static async collectMultipleStockClosingPrices(
+    stockCodes: string[],
+    marketType: 'KOSPI' | 'KOSDAQ' = 'KOSPI',
+    saveToDb: boolean = true
+  ): Promise<{
+    totalCount: number
+    successCount: number
+    failedCount: number
+    successful: StockClosingPriceData[]
+    failed: Array<{ stockCode: string; error: string }>
+  }> {
+    logger.info(`[KRX Collection] ${stockCodes.length}개 종목 종가 일괄 수집 시작`)
+
+    const results = {
+      totalCount: stockCodes.length,
+      successCount: 0,
+      failedCount: 0,
+      successful: [] as StockClosingPriceData[],
+      failed: [] as Array<{ stockCode: string; error: string }>
+    }
+
+    try {
+      // API에서 종가 데이터 일괄 조회
+      const apiResult = await KrxApiClient.fetchMultipleStockClosingPrices(stockCodes, marketType)
+
+      results.successful = apiResult.successful
+      results.failed = apiResult.failed
+      results.successCount = apiResult.successful.length
+      results.failedCount = apiResult.failed.length
+
+      // 데이터베이스 저장
+      if (saveToDb && apiResult.successful.length > 0) {
+        const saveResult = await MarketDataRepository.saveStockClosingPriceBatch(apiResult.successful)
+        logger.info(`[KRX Collection] 종목 종가 배치 저장 완료: ${saveResult.successCount}/${apiResult.successful.length}개`)
+      }
+
+      logger.info(`[KRX Collection] 종목 종가 일괄 수집 완료: 성공 ${results.successCount}개, 실패 ${results.failedCount}개`)
+      return results
+
+    } catch (error) {
+      logger.error(`[KRX Collection] 종목 종가 일괄 수집 실패:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * KOSPI200 종목 종가 수집
+   */
+  static async collectKospi200ClosingPrices(saveToDb: boolean = true): Promise<{
+    totalCount: number
+    successCount: number
+    failedCount: number
+  }> {
+    logger.info('[KRX Collection] KOSPI200 종목 종가 수집 시작')
+
+    // KOSPI200 대표 종목 코드 (상위 주요 종목)
+    const kospi200TopStocks = [
+      '005930', // 삼성전자
+      '000660', // SK하이닉스
+      '373220', // LG에너지솔루션
+      '207940', // 삼성바이오로직스
+      '005380', // 현대차
+      '006400', // 삼성SDI
+      '051910', // LG화학
+      '035420', // NAVER
+      '000270', // 기아
+      '005490', // POSCO홀딩스
+      '035720', // 카카오
+      '105560', // KB금융
+      '055550', // 신한지주
+      '012330', // 현대모비스
+      '096770', // SK이노베이션
+      '003670', // 포스코퓨처엠
+      '028260', // 삼성물산
+      '066570', // LG전자
+      '034730', // SK
+      '003550', // LG
+    ]
+
+    const result = await this.collectMultipleStockClosingPrices(kospi200TopStocks, 'KOSPI', saveToDb)
+
+    return {
+      totalCount: result.totalCount,
+      successCount: result.successCount,
+      failedCount: result.failedCount
     }
   }
 

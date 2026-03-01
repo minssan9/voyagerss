@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { krxStockData, InvestorTradingData, OptionData } from '@investand/interfaces/krxTypes'
+import type { krxStockData, InvestorTradingData, OptionData, StockClosingPriceData, KisStockPriceResponse } from '@investand/interfaces/krxTypes'
 
 /**
  * KRX API 클라이언트
@@ -102,6 +102,79 @@ export class KrxApiClient {
    */
   static async fetchOptionData(date: string): Promise<OptionData> {
     throw new Error('Option data (Put/Call ratio) is not supported by Korea Investment & Securities Open API.')
+  }
+
+  /**
+   * 개별 종목 현재가(종가) 조회
+   * @param stockCode 종목코드 (예: 005930 - 삼성전자)
+   * @param marketType 시장구분 (KOSPI or KOSDAQ)
+   */
+  static async fetchStockClosingPrice(
+    stockCode: string,
+    marketType: 'KOSPI' | 'KOSDAQ' = 'KOSPI'
+  ): Promise<StockClosingPriceData> {
+    await this.enforceRateLimit()
+
+    const marketCode = marketType === 'KOSPI' ? 'J' : 'Q'
+
+    try {
+      const response = await axios.get(
+        `${this.BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price`,
+        {
+          params: {
+            fid_cond_mrkt_div_code: marketCode,
+            fid_input_iscd: stockCode,
+          },
+          headers: await this.getHeaders('FHKST01010100'),
+          timeout: this.TIMEOUT,
+        }
+      )
+
+      const data = response.data?.output as KisStockPriceResponse
+      if (!data) throw new Error(`No stock price data returned for ${stockCode}`)
+
+      return this.transformStockClosingPriceData(data, stockCode, marketType)
+
+    } catch (error) {
+      const errorMessage = `[KIS] 종목 종가 조회 실패 (${stockCode}): ${(error as any)?.message}`
+      console.error(errorMessage)
+      throw new Error(errorMessage)
+    }
+  }
+
+  /**
+   * 여러 종목의 종가 일괄 조회
+   * @param stockCodes 종목코드 배열
+   * @param marketType 시장구분
+   */
+  static async fetchMultipleStockClosingPrices(
+    stockCodes: string[],
+    marketType: 'KOSPI' | 'KOSDAQ' = 'KOSPI'
+  ): Promise<{
+    successful: StockClosingPriceData[]
+    failed: Array<{ stockCode: string; error: string }>
+  }> {
+    console.log(`[KRX] ${stockCodes.length}개 종목 종가 조회 시작`)
+
+    const results = {
+      successful: [] as StockClosingPriceData[],
+      failed: [] as Array<{ stockCode: string; error: string }>
+    }
+
+    for (const stockCode of stockCodes) {
+      try {
+        const data = await this.fetchStockClosingPrice(stockCode, marketType)
+        results.successful.push(data)
+      } catch (error) {
+        results.failed.push({
+          stockCode,
+          error: (error as Error).message
+        })
+      }
+    }
+
+    console.log(`[KRX] 종목 종가 조회 완료: 성공 ${results.successful.length}개, 실패 ${results.failed.length}개`)
+    return results
   }
 
   /**
@@ -297,6 +370,38 @@ export class KrxApiClient {
       short_over_yn: apiData.short_over_yn ?? '',
       sltr_yn: apiData.sltr_yn ?? '',
       mang_issu_cls_code: apiData.mang_issu_cls_code ?? ''
+    }
+  }
+
+  /**
+   * 종목 종가 데이터 변환
+   */
+  private static transformStockClosingPriceData(
+    apiData: KisStockPriceResponse,
+    stockCode: string,
+    marketType: 'KOSPI' | 'KOSDAQ'
+  ): StockClosingPriceData {
+    const today = new Date().toISOString().split('T')[0] as string
+
+    return {
+      date: today,
+      stockCode,
+      stockName: apiData.bstp_kor_isnm ?? '',
+      marketType,
+      closingPrice: Number(apiData.stck_prpr || 0),
+      openingPrice: Number(apiData.stck_oprc || 0),
+      highPrice: Number(apiData.stck_hgpr || 0),
+      lowPrice: Number(apiData.stck_lwpr || 0),
+      volume: Number(apiData.acml_vol || 0),
+      tradingValue: Number(apiData.acml_tr_pbmn || 0),
+      priceChange: Number(apiData.prdy_vrss || 0),
+      changeRate: Number(apiData.prdy_ctrt || 0),
+      changeSign: apiData.prdy_vrss_sign ?? '3',
+      per: apiData.per ? Number(apiData.per) : undefined,
+      pbr: apiData.pbr ? Number(apiData.pbr) : undefined,
+      eps: apiData.eps ? Number(apiData.eps) : undefined,
+      marketCap: apiData.hts_avls ? Number(apiData.hts_avls) : undefined,
+      foreignHoldRatio: apiData.hts_frgn_ehrt ? Number(apiData.hts_frgn_ehrt) : undefined
     }
   }
 

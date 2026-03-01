@@ -2,7 +2,8 @@ import { BaseRepository } from '@investand/repositories/core/BaseRepository'
 import type {
   krxStockData,
   InvestorTradingData,
-  OptionData
+  OptionData,
+  StockClosingPriceData
 } from '@investand/interfaces/krxTypes'
 import type {
   InterestRateData,
@@ -102,6 +103,227 @@ export class MarketDataRepository extends BaseRepository {
         return results
       })
     }, `KRX 배치 저장 (KOSPI: ${kospiData.length}, KOSDAQ: ${kosdaqData.length})`)
+  }
+
+  // ================================
+  // STOCK CLOSING PRICE OPERATIONS
+  // ================================
+
+  /**
+   * 개별 종목 종가 저장
+   */
+  static async saveStockClosingPrice(data: StockClosingPriceData): Promise<void> {
+    this.validateRequired(data, ['date', 'stockCode', 'closingPrice'])
+
+    try {
+      await this.prisma.stockClosingPrice.upsert({
+        where: {
+          date_stockCode: {
+            date: this.validateAndFormatDate(data.date),
+            stockCode: data.stockCode
+          }
+        },
+        update: {
+          stockName: data.stockName,
+          marketType: data.marketType,
+          closingPrice: BigInt(data.closingPrice),
+          openingPrice: BigInt(data.openingPrice),
+          highPrice: BigInt(data.highPrice),
+          lowPrice: BigInt(data.lowPrice),
+          volume: BigInt(data.volume),
+          tradingValue: BigInt(data.tradingValue),
+          priceChange: BigInt(data.priceChange),
+          changeRate: data.changeRate,
+          changeSign: data.changeSign,
+          per: data.per ?? null,
+          pbr: data.pbr ?? null,
+          eps: data.eps ?? null,
+          marketCap: data.marketCap ? BigInt(data.marketCap) : null,
+          foreignHoldRatio: data.foreignHoldRatio ?? null,
+          updatedAt: new Date()
+        },
+        create: {
+          date: this.validateAndFormatDate(data.date),
+          stockCode: data.stockCode,
+          stockName: data.stockName,
+          marketType: data.marketType,
+          closingPrice: BigInt(data.closingPrice),
+          openingPrice: BigInt(data.openingPrice),
+          highPrice: BigInt(data.highPrice),
+          lowPrice: BigInt(data.lowPrice),
+          volume: BigInt(data.volume),
+          tradingValue: BigInt(data.tradingValue),
+          priceChange: BigInt(data.priceChange),
+          changeRate: data.changeRate,
+          changeSign: data.changeSign,
+          per: data.per ?? null,
+          pbr: data.pbr ?? null,
+          eps: data.eps ?? null,
+          marketCap: data.marketCap ? BigInt(data.marketCap) : null,
+          foreignHoldRatio: data.foreignHoldRatio ?? null
+        }
+      })
+
+      this.logSuccess('종목 종가 저장', `${data.stockCode} (${data.date})`)
+    } catch (error) {
+      this.logError('종목 종가 저장', `${data.stockCode} (${data.date})`, error)
+      throw error
+    }
+  }
+
+  /**
+   * 여러 종목 종가 배치 저장
+   */
+  static async saveStockClosingPriceBatch(
+    dataList: StockClosingPriceData[]
+  ): Promise<{
+    successCount: number
+    errorCount: number
+    errors: Array<{ stockCode: string; error: string }>
+  }> {
+    const results = {
+      successCount: 0,
+      errorCount: 0,
+      errors: [] as Array<{ stockCode: string; error: string }>
+    }
+
+    return this.measureTime(async () => {
+      return this.executeTransaction(async (prisma) => {
+        for (const data of dataList) {
+          try {
+            await prisma.stockClosingPrice.upsert({
+              where: {
+                date_stockCode: {
+                  date: this.validateAndFormatDate(data.date),
+                  stockCode: data.stockCode
+                }
+              },
+              update: {
+                stockName: data.stockName,
+                marketType: data.marketType,
+                closingPrice: BigInt(data.closingPrice),
+                openingPrice: BigInt(data.openingPrice),
+                highPrice: BigInt(data.highPrice),
+                lowPrice: BigInt(data.lowPrice),
+                volume: BigInt(data.volume),
+                tradingValue: BigInt(data.tradingValue),
+                priceChange: BigInt(data.priceChange),
+                changeRate: data.changeRate,
+                changeSign: data.changeSign,
+                per: data.per ?? null,
+                pbr: data.pbr ?? null,
+                eps: data.eps ?? null,
+                marketCap: data.marketCap ? BigInt(data.marketCap) : null,
+                foreignHoldRatio: data.foreignHoldRatio ?? null,
+                updatedAt: new Date()
+              },
+              create: {
+                date: this.validateAndFormatDate(data.date),
+                stockCode: data.stockCode,
+                stockName: data.stockName,
+                marketType: data.marketType,
+                closingPrice: BigInt(data.closingPrice),
+                openingPrice: BigInt(data.openingPrice),
+                highPrice: BigInt(data.highPrice),
+                lowPrice: BigInt(data.lowPrice),
+                volume: BigInt(data.volume),
+                tradingValue: BigInt(data.tradingValue),
+                priceChange: BigInt(data.priceChange),
+                changeRate: data.changeRate,
+                changeSign: data.changeSign,
+                per: data.per ?? null,
+                pbr: data.pbr ?? null,
+                eps: data.eps ?? null,
+                marketCap: data.marketCap ? BigInt(data.marketCap) : null,
+                foreignHoldRatio: data.foreignHoldRatio ?? null
+              }
+            })
+            results.successCount++
+          } catch (error) {
+            results.errorCount++
+            results.errors.push({
+              stockCode: data.stockCode,
+              error: (error as Error).message
+            })
+          }
+        }
+
+        this.logBatchResult('종목 종가 배치 저장', results.successCount, dataList.length)
+        return results
+      })
+    }, `종목 종가 배치 저장 (${dataList.length}개)`)
+  }
+
+  /**
+   * 종목별 종가 이력 조회
+   */
+  static async getStockClosingPriceHistory(
+    stockCode: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any[]> {
+    try {
+      const data = await this.prisma.stockClosingPrice.findMany({
+        where: {
+          stockCode,
+          date: {
+            gte: this.validateAndFormatDate(startDate),
+            lte: this.validateAndFormatDate(endDate)
+          }
+        },
+        orderBy: { date: 'asc' }
+      })
+
+      return data
+    } catch (error) {
+      this.logError('종목 종가 이력 조회', stockCode, error)
+      throw error
+    }
+  }
+
+  /**
+   * 특정 날짜의 모든 종목 종가 조회
+   */
+  static async getStockClosingPricesByDate(
+    date: string,
+    marketType?: 'KOSPI' | 'KOSDAQ'
+  ): Promise<any[]> {
+    try {
+      const whereClause: any = {
+        date: this.validateAndFormatDate(date)
+      }
+
+      if (marketType) {
+        whereClause.marketType = marketType
+      }
+
+      const data = await this.prisma.stockClosingPrice.findMany({
+        where: whereClause,
+        orderBy: { stockCode: 'asc' }
+      })
+
+      return data
+    } catch (error) {
+      this.logError('날짜별 종목 종가 조회', date, error)
+      throw error
+    }
+  }
+
+  /**
+   * 최신 종목 종가 조회
+   */
+  static async getLatestStockClosingPrice(stockCode: string): Promise<any | null> {
+    try {
+      const data = await this.prisma.stockClosingPrice.findFirst({
+        where: { stockCode },
+        orderBy: { date: 'desc' }
+      })
+
+      return data
+    } catch (error) {
+      this.logError('최신 종목 종가 조회', stockCode, error)
+      throw error
+    }
   }
 
   // ================================

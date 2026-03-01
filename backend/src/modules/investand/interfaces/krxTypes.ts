@@ -166,4 +166,52 @@ export interface OptionData {
   putVolume: number
   callVolume: number
   putCallRatio: number
+}
+
+/**
+ * 개별 종목 종가 데이터 인터페이스
+ */
+export interface StockClosingPriceData {
+  date: string
+  stockCode: string         // 종목코드 (예: 005930)
+  stockName: string         // 종목명 (예: 삼성전자)
+  marketType: 'KOSPI' | 'KOSDAQ'
+  closingPrice: number      // 종가
+  openingPrice: number      // 시가
+  highPrice: number         // 고가
+  lowPrice: number          // 저가
+  volume: number            // 거래량
+  tradingValue: number      // 거래대금
+  priceChange: number       // 전일대비
+  changeRate: number        // 등락률 (%)
+  changeSign: string        // 상승/하락 부호 (1:상한, 2:상승, 3:보합, 4:하한, 5:하락)
+  per?: number              // PER
+  pbr?: number              // PBR
+  eps?: number              // EPS
+  marketCap?: number        // 시가총액
+  foreignHoldRatio?: number // 외국인보유비율
+}
+
+/**
+ * 한국투자증권 API 개별 종목 현재가 응답
+ */
+export interface KisStockPriceResponse {
+  iscd_stat_cls_code: string  // 종목상태구분코드
+  marg_rate: string           // 증거금률
+  rprs_mrkt_kor_name: string  // 대표시장한글명
+  bstp_kor_isnm: string       // 업종한글명
+  stck_prpr: string           // 주식 현재가
+  prdy_vrss: string           // 전일 대비
+  prdy_vrss_sign: string      // 전일 대비 부호
+  prdy_ctrt: string           // 전일 대비율
+  acml_vol: string            // 누적 거래량
+  acml_tr_pbmn: string        // 누적 거래대금
+  stck_oprc: string           // 주식 시가
+  stck_hgpr: string           // 주식 최고가
+  stck_lwpr: string           // 주식 최저가
+  per: string                 // PER
+  pbr: string                 // PBR
+  eps: string                 // EPS
+  hts_avls: string            // 시가총액
+  hts_frgn_ehrt: string       // 외국인 소진율
 } 

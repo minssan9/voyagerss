@@ -990,6 +990,36 @@ model DartAlert {
   @@map("dart_alerts")
 }
 
+model StockClosingPrice {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @db.Date
+  stockCode        String   @db.VarChar(20)  // 종목코드 (예: 005930)
+  stockName        String   @db.VarChar(100) // 종목명 (예: 삼성전자)
+  marketType       String   @db.VarChar(10)  // KOSPI or KOSDAQ
+  closingPrice     BigInt                    // 종가
+  openingPrice     BigInt                    // 시가
+  highPrice        BigInt                    // 고가
+  lowPrice         BigInt                    // 저가
+  volume           BigInt                    // 거래량
+  tradingValue     BigInt                    // 거래대금
+  priceChange      BigInt                    // 전일대비
+  changeRate       Decimal  @db.Decimal(8, 4) // 등락률 (%)
+  changeSign       String   @db.VarChar(5)   // 상승/하락 부호
+  per              Decimal? @db.Decimal(10, 2) // PER
+  pbr              Decimal? @db.Decimal(10, 2) // PBR
+  eps              Decimal? @db.Decimal(15, 2) // EPS
+  marketCap        BigInt?                   // 시가총액
+  foreignHoldRatio Decimal? @db.Decimal(6, 2) // 외국인보유비율
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([date, stockCode])
+  @@index([stockCode])
+  @@index([date])
+  @@index([marketType])
+  @@map("stock_closing_prices")
+}
+
 enum AdminRole {
   SUPER_ADMIN
   ADMIN
