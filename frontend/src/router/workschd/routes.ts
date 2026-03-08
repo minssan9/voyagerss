@@ -48,6 +48,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/workschd/task/TaskListMobile.vue'),
                 meta: { icon: 'work', }
             },
+            // Funeral board - scraped live ceremony listings (인천/부천)
+            {
+                path: 'funeral-board',
+                name: 'FuneralBoard',
+                component: () => import('@/views/workschd/FuneralBoardView.vue'),
+                meta: { icon: 'home' }
+            },
             // Admin routes
             {
                 path: 'admin/dashboard',
@@ -58,7 +65,7 @@ const routes: RouteRecordRaw[] = [
             // Auth callback
             {
                 path: 'auth/callback',
-                name: 'AuthCallback',
+                name: 'WorkschdAuthCallback',
                 component: () => import('@/views/common/auth/AuthCallback.vue'),
                 meta: { hidden: true }
             }
