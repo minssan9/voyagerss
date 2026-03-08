@@ -101,6 +101,11 @@ export const useUserStore = defineStore('user', {
       state.user.accountRoles?.map(ar => ar.roleType).includes('OWNER') ?? false,
     isManager: (state): boolean =>
       state.user.accountRoles?.map(ar => ar.roleType).includes('MANAGER') ?? false,
+    isTeamLeader: (state): boolean => {
+      const roles = state.user.accountRoles?.map(ar => ar.roleType) ?? [];
+      return roles.includes('TEAM_LEADER') || roles.includes('ADMIN')
+        || roles.includes('MANAGER') || roles.includes('OWNER');
+    },
     teamOptions: (state) => state.teams.map(team => ({
       label: team.name,
       value: team.id

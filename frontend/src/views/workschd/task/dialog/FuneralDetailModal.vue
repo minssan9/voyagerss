@@ -205,7 +205,7 @@ async function createTask() {
       startDateTime: now.toISOString(),
       endDateTime: end.toISOString(),
       status: 'OPEN',
-      teamId: userStore.teamId || 0,
+      teamId: userStore.user.teamId || 0,
       shopId: null,
       active: true
     } as any;

@@ -101,6 +101,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import taskApi from '@/api/workschd/api-task';
+import { useUserStore } from '@/stores/common/store_user';
 
 interface Props {
   taskId: number;
@@ -109,6 +110,7 @@ interface Props {
 const props = defineProps<Props>();
 defineEmits<{ close: [] }>();
 
+const userStore = useUserStore();
 const task = ref<any | null>(null);
 const employees = ref<any[]>([]);
 const loading = ref(false);
@@ -195,10 +197,7 @@ function formatDate(iso: string): string {
 }
 
 function getToken(): string {
-  try {
-    const { useUserStore } = require('@/stores/common/store_user');
-    return useUserStore().accessToken || '';
-  } catch { return ''; }
+  return userStore.accessToken || '';
 }
 </script>
 

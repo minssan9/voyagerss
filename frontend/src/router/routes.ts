@@ -22,6 +22,9 @@ const mainRoutes: RouteRecordRaw[] = [
     { path: '/account/profile', name: 'AccountProfile', component: () => import('@/views/common/account/AccountProfile.vue'), meta: { icon: 'person', hidden: true } },
     { path: '/account/schedule', name: 'AccountSchedule', component: () => import('@/views/common/account/AccountSchedule.vue'), meta: { icon: 'calendar_today', hidden: true } },
 
+    { path: '/workschd/login', name: 'WorkschdLogin', component: () => import('@/views/workschd/WorkschdLogin.vue'), meta: { icon: 'login', hidden: true } },
+    { path: '/auth/callback', name: 'AuthCallback', component: () => import('@/views/common/auth/AuthCallback.vue'), meta: { icon: 'refresh', hidden: true } },
+
     { path: '/401', name: 'Unauthorized', component: () => import('@/views/common/error/401.vue'), meta: { icon: 'gpp_bad', hidden: true } },
     { path: '/403', name: 'Forbidden', component: () => import('@/views/common/error/403.vue'), meta: { icon: 'block', hidden: true } }    // 404 handled globally at end
 

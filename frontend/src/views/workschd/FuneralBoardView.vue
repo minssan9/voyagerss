@@ -166,9 +166,11 @@ const regions = [
   { label: '부천', value: 'BUCHEON' }
 ];
 
-const isTeamLeader = computed(() =>
-  userStore.roles?.includes('TEAM_LEADER') || userStore.roles?.includes('ADMIN')
-);
+const isTeamLeader = computed(() => {
+  const roles = userStore.user?.accountRoles?.map(r => r.roleType) ?? [];
+  return roles.includes('TEAM_LEADER') || roles.includes('ADMIN')
+    || roles.includes('MANAGER') || roles.includes('OWNER');
+});
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
