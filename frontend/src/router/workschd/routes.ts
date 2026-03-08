@@ -41,6 +41,13 @@ const routes: RouteRecordRaw[] = [
                 name: 'TaskListMobile (Worker)',
                 component: () => import('@/views/workschd/task/TaskListMobile.vue'),
                 meta: { icon: 'work', }
+            },
+            // Funeral board - scraped live ceremony listings (인천/부천)
+            {
+                path: 'funeral-board',
+                name: 'FuneralBoard',
+                component: () => import('@/views/workschd/FuneralBoardView.vue'),
+                meta: { icon: 'home' }
             }
         ]
     }

@@ -5,6 +5,7 @@ import { TeamController } from './controllers/TeamController';
 import { TaskController } from './controllers/TaskController';
 import { ShopController } from './controllers/ShopController';
 import { NotificationController } from './controllers/NotificationController';
+import { ScraperController } from './controllers/ScraperController';
 import {
     authenticate,
     isTeamLeader,
@@ -20,6 +21,7 @@ const teamController = new TeamController();
 const taskController = new TaskController();
 const shopController = new ShopController();
 const notificationController = new NotificationController();
+const scraperController = new ScraperController();
 
 // ===== Auth Routes (Public) =====
 router.post('/auth/login', authController.authenticateUser.bind(authController));
@@ -86,5 +88,15 @@ router.get('/team/:teamId/shop', authenticate, shopController.getAllShops.bind(s
 router.get('/team/:teamId/shop/active', authenticate, shopController.getActiveShops.bind(shopController));
 router.put('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.updateShop.bind(shopController));
 router.delete('/team/:teamId/shop/:id', authenticate, isTeamLeader, shopController.deleteShop.bind(shopController));
+
+// ===== Scraper Routes =====
+// Trigger a fresh scrape (team leaders / admins only)
+router.post('/scrape', authenticate, isTeamLeader, scraperController.triggerScrape.bind(scraperController));
+// List scraped funeral ceremonies (any authenticated user)
+router.get('/scraped-funerals', authenticate, scraperController.getScrapedFunerals.bind(scraperController));
+// Scraper metadata / available sites
+router.get('/scraper/status', authenticate, scraperController.getStatus.bind(scraperController));
+// Link a scraped funeral record to a Task record
+router.post('/scraped-funerals/:funeralId/link-task', authenticate, isTeamLeader, scraperController.linkToTask.bind(scraperController));
 
 export default router;
