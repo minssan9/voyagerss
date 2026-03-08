@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
             {
                 path: '',
                 name: 'aviation-dashboard',
-                component: () => import('@/views/aviation/Landing.vue'),
+                component: () => import('@/views/aviation/Dashboard.vue'),
                 meta: { icon: 'dashboard' }
             },
             {

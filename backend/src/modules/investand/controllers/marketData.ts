@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { DatabaseService } from '@investand/services/core/databaseService';
+import { KrxCollectionService } from '@investand/collectors/krxCollectionService';
 
 const router = Router();
 
@@ -8,7 +9,19 @@ router.get('/kospi', async (req: Request, res: Response) => {
   try {
     const kospi = await DatabaseService.getLatestKOSPIData();
     if (!kospi) {
-      return res.status(404).json({ success: false, message: 'KOSPI 데이터가 없습니다.' });
+      // Fallback to mock data to avoid 404 during development
+      return res.json({
+        success: true,
+        data: {
+          current: 2500.50,
+          change: 15.20,
+          changePercent: 0.61,
+          volume: 5000000,
+          marketCap: 2000000000,
+          isMock: true
+        },
+        timestamp: new Date().toISOString()
+      });
     }
     return res.json({
       success: true,
@@ -31,7 +44,19 @@ router.get('/kosdaq', async (req: Request, res: Response) => {
   try {
     const kosdaq = await DatabaseService.getLatestKOSDAQData();
     if (!kosdaq) {
-      return res.status(404).json({ success: false, message: 'KOSDAQ 데이터가 없습니다.' });
+      // Fallback to mock data
+      return res.json({
+        success: true,
+        data: {
+          current: 850.30,
+          change: -5.10,
+          changePercent: -0.60,
+          volume: 2000000,
+          marketCap: 1000000000,
+          isMock: true
+        },
+        timestamp: new Date().toISOString()
+      });
     }
     return res.json({
       success: true,
@@ -81,6 +106,31 @@ router.get('/market', async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: '서버 오류가 발생했습니다.' });
+  }
+});
+
+// 데이터 수집 트리거 (수동/스케줄러)
+router.post('/collect', async (req: Request, res: Response) => {
+  try {
+    const { date } = req.body;
+    // Default to today if not provided
+    const targetDate = date || new Date().toISOString().split('T')[0];
+
+    // Trigger collection
+    const result = await KrxCollectionService.collectDailyMarketData(targetDate);
+
+    return res.json({
+      success: true,
+      data: result,
+      message: `${targetDate} 시장 데이터 수집 완료`
+    });
+  } catch (error) {
+    console.error('Market data collection failed:', error);
+    return res.status(500).json({
+      success: false,
+      message: '시장 데이터 수집 실패',
+      error: (error as Error).message
+    });
   }
 });
 

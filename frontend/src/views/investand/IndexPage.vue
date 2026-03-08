@@ -63,9 +63,9 @@
             <q-card-section>
               <div class="text-h5 q-mb-md text-center">30일 추이</div>
               <div class="chart-container">
-                <!-- Chart.js 차트가 여기에 들어갈 예정 -->
-                <div class="chart-placeholder">
-                  📊 차트 영역 (Chart.js 구현 예정)
+                <canvas ref="chartCanvas" height="300"></canvas>
+                <div v-if="historyLoading" class="chart-overlay">
+                  <q-spinner color="primary" size="2em" />
                 </div>
               </div>
             </q-card-section>
@@ -115,16 +115,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useQuasar } from 'quasar'
-import { fearGreedApi, marketApi, type FearGreedIndex, type MarketData } from '@/api/investand/api'
+import { fearGreedApi, marketApi, type FearGreedIndex, type MarketData, type FearGreedHistoryItem } from '@/api/investand/api'
+import { Chart, registerables } from 'chart.js'
+
+Chart.register(...registerables)
 
 const $q = useQuasar()
 
 // 반응형 데이터
 const loading = ref(true)
 const refreshing = ref(false)
+const historyLoading = ref(false)
 const error = ref('')
+const chartCanvas = ref<HTMLCanvasElement | null>(null)
+let chartInstance: Chart | null = null
 
 const currentIndex = ref<FearGreedIndex>({
   value: 0,
@@ -138,6 +144,8 @@ const currentIndex = ref<FearGreedIndex>({
     safeHavenDemand: 0
   }
 })
+
+const historicalData = ref<FearGreedHistoryItem[]>([])
 
 const marketData = ref<MarketData>({
   kospi: {
@@ -209,6 +217,8 @@ async function loadData(): Promise<void> {
     currentIndex.value = indexData
     marketData.value = marketInfo
     
+    await loadHistoricalData()
+    
   } catch (err) {
     error.value = '데이터를 불러오는 중 오류가 발생했습니다.'
     console.error('Failed to load data:', err)
@@ -220,12 +230,87 @@ async function loadData(): Promise<void> {
   }
 }
 
+async function loadHistoricalData() {
+  historyLoading.value = true
+  try {
+    const data = await fearGreedApi.getHistory(30)
+    historicalData.value = data
+    renderChart()
+  } catch (err) {
+    console.error('Failed to load historical data:', err)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+function renderChart() {
+  if (!chartCanvas.value || historicalData.value.length === 0) return
+
+  if (chartInstance) {
+    chartInstance.destroy()
+  }
+
+  const ctx = chartCanvas.value.getContext('2d')
+  if (!ctx) return
+
+  const labels = historicalData.value.map(d => d.date).reverse()
+  const values = historicalData.value.map(d => d.value).reverse()
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Fear & Greed Index',
+        data: values,
+        borderColor: '#2196F3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          grid: {
+            color: 'rgba(0,0,0,0.05)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    }
+  })
+}
+
 async function refreshData(): Promise<void> {
   refreshing.value = true
   await loadData()
   
   $q.notify({ type: 'positive', message: '데이터가 업데이트되었습니다.', timeout: 2000, position: 'top' })
 }
+
+watch(historicalData, () => {
+  renderChart()
+})
 
 // 라이프사이클
 onMounted(() => {
@@ -248,15 +333,22 @@ onMounted(() => {
   line-height: 1;
 }
 
-.chart-placeholder {
+.chart-container {
   height: 300px;
+  position: relative;
+}
+
+.chart-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  color: #666;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1;
 }
 
 @media (max-width: 768px) {

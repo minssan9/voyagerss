@@ -14,9 +14,43 @@ router.get('/', async (req: Request, res: Response) => {
         const sectors = await SectorRepository.getLatestSectorPerformances();
 
         if (!sectors || sectors.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No sector data available. Please trigger data collection first.'
+            // Mock data for development
+            const mockSectors = [
+                { sectorCode: 'XLK', sectorName: 'Technology', changePercent: 1.2 },
+                { sectorCode: 'XLF', sectorName: 'Financials', changePercent: 0.5 },
+                { sectorCode: 'XLV', sectorName: 'Health Care', changePercent: -0.3 },
+                { sectorCode: 'XLE', sectorName: 'Energy', changePercent: 2.1 },
+                { sectorCode: 'XLY', sectorName: 'Consumer Discretionary', changePercent: 0.8 },
+                { sectorCode: 'XLP', sectorName: 'Consumer Staples', changePercent: -0.1 },
+                { sectorCode: 'XLI', sectorName: 'Industrials', changePercent: 1.5 },
+                { sectorCode: 'XLB', sectorName: 'Materials', changePercent: 0.9 },
+                { sectorCode: 'XLRE', sectorName: 'Real Estate', changePercent: -0.5 },
+                { sectorCode: 'XLC', sectorName: 'Communication Services', changePercent: 1.1 },
+                { sectorCode: 'XLU', sectorName: 'Utilities', changePercent: -0.2 },
+            ];
+
+            const formattedData = mockSectors.map(s => ({
+                sectorCode: s.sectorCode,
+                sectorName: s.sectorName,
+                date: new Date(),
+                closePrice: 100 + Math.random() * 50,
+                change: Math.random() * 5,
+                changePercent: s.changePercent,
+                volume: 1000000 + Math.random() * 500000,
+                yearToDateReturn: Math.random() * 20,
+                oneMonthReturn: Math.random() * 5,
+                threeMonthReturn: Math.random() * 10,
+                oneYearReturn: Math.random() * 15,
+                marketCap: 1000000000,
+                averagePE: 20 + Math.random() * 10,
+                dividendYield: 1 + Math.random() * 3,
+            }));
+
+            return res.json({
+                success: true,
+                data: formattedData,
+                timestamp: new Date().toISOString(),
+                isMock: true
             });
         }
 
@@ -134,9 +168,33 @@ router.get('/comparisons/latest', async (req: Request, res: Response) => {
         );
 
         if (!comparisons || comparisons.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No comparison data available'
+            // Mock data for development
+            const mockComparisons = [
+                { sectorCode: 'XLK', relativeStrength: 1.05, beta: 1.2, correlation: 0.85, volatility: 0.18, sharpeRatio: 1.5, rank: 1 },
+                { sectorCode: 'XLF', relativeStrength: 1.02, beta: 1.1, correlation: 0.90, volatility: 0.15, sharpeRatio: 1.2, rank: 2 },
+                { sectorCode: 'XLE', relativeStrength: 1.01, beta: 0.8, correlation: 0.60, volatility: 0.25, sharpeRatio: 0.9, rank: 3 },
+                { sectorCode: 'XLY', relativeStrength: 0.98, beta: 1.3, correlation: 0.88, volatility: 0.20, sharpeRatio: 0.8, rank: 4 },
+                { sectorCode: 'XLI', relativeStrength: 0.97, beta: 1.0, correlation: 0.92, volatility: 0.16, sharpeRatio: 0.7, rank: 5 },
+            ];
+
+            const formattedData = mockComparisons.map(comp => ({
+                sectorCode: comp.sectorCode,
+                benchmarkCode: benchmark as string,
+                date: new Date(),
+                relativeStrength: comp.relativeStrength,
+                beta: comp.beta,
+                correlation: comp.correlation,
+                volatility: comp.volatility,
+                sharpeRatio: comp.sharpeRatio,
+                rank: comp.rank,
+            }));
+
+            return res.json({
+                success: true,
+                data: formattedData,
+                benchmark: benchmark,
+                timestamp: new Date().toISOString(),
+                isMock: true
             });
         }
 

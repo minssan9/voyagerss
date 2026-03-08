@@ -68,14 +68,15 @@ function getSparkData(asset: any) {
 
 function getDescription(id: string) {
   const desc: Record<string, string> = {
-    'gold': 'Hedge against inflation and safe haven asset. often inverse to USD.',
-    'silver': 'Similar to Gold but more volatile due to industrial demand.',
-    'copper': 'Leading indicator for real economy ("Dr. Copper").',
-    'wti': 'Global energy cost benchmark. Sensitive to geopolitical risks.',
-    'usdkrw': 'Proxy for global risk appetite and Korean economic fundamentals.',
-    'snp500': 'Key benchmark for global equity markets.',
-    'kospi': 'Heavily influenced by semi-conductors and foreign capital flow.',
-    'nikkei': 'Correlated with Yen movements and BOJ policy.'
+    'GOLD': 'Hedge against inflation and safe haven asset. often inverse to USD.',
+    'SILVER': 'Similar to Gold but more volatile due to industrial demand.',
+    'WTI': 'Global energy cost benchmark. Sensitive to geopolitical risks.',
+    'USDKRW': 'Proxy for global risk appetite and Korean economic fundamentals.',
+    'SPX': 'Key benchmark for global equity markets.',
+    'NDX': 'High-growth tech stock benchmark.',
+    'KOSPI': 'Heavily influenced by semi-conductors and foreign capital flow.',
+    'BTC': 'Primary digital asset, often seen as digital gold.',
+    'DXY': 'Measures the value of the USD against a basket of currencies.'
   };
   return desc[id] || '';
 }

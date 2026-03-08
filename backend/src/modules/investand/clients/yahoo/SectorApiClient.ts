@@ -1,4 +1,7 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+// Create Yahoo Finance v3 instance
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 /**
  * Yahoo Finance Sector API Client
@@ -69,13 +72,17 @@ export class SectorApiClient {
         startDate.setDate(endDate.getDate() - days);
 
         try {
-            const result = await yahooFinance.historical(sector.ticker, {
+            // Use chart method in v3 (historical is deprecated)
+            const result = await yahooFinance.chart(sector.ticker, {
                 period1: startDate.toISOString().split('T')[0],
                 period2: endDate.toISOString().split('T')[0],
                 interval: '1d'
-            }) as any[];
+            });
 
-            return result.map((quote: any) => ({
+            // Extract quotes from chart response
+            const quotes = result.quotes || [];
+
+            return quotes.map((quote: any) => ({
                 sectorCode,
                 sectorName: sector.name,
                 date: new Date(quote.date),
@@ -93,6 +100,7 @@ export class SectorApiClient {
         }
     }
 
+
     /**
      * Fetches historical data for all sectors
      */
@@ -104,8 +112,8 @@ export class SectorApiClient {
                 const data = await this.fetchSectorHistory(sectorCode, days);
                 results.set(sectorCode, data);
 
-                // Rate limiting - wait 100ms between requests
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Rate limiting - wait 2000ms between requests to avoid block
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (error) {
                 console.error(`Failed to fetch data for sector ${sectorCode}:`, error);
                 results.set(sectorCode, []);
@@ -157,8 +165,8 @@ export class SectorApiClient {
                     results.set(sectorCode, quote);
                 }
 
-                // Rate limiting - wait 100ms between requests
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Rate limiting - wait 2000ms between requests to avoid block
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (error) {
                 console.error(`Failed to fetch quote for sector ${sectorCode}:`, error);
             }

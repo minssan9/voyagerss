@@ -2,6 +2,7 @@ import { Router } from 'express';
 import marketDataRouter from './controllers/marketData';
 import sectorApiRouter from './controllers/sectorApi';
 import globalAssetApiRouter from './controllers/globalAssetApi';
+import findashApiRouter from './controllers/findashApi';
 
 const router = Router();
 
@@ -13,6 +14,9 @@ router.use('/sectors', sectorApiRouter);
 
 // Global Asset API Routes
 router.use('/assets', globalAssetApiRouter);
+
+// Findash API Routes
+router.use('/findash', findashApiRouter);
 
 // Dart API Routes - stub implementations
 router.get('/dart/stats', (req, res) => {
@@ -84,32 +88,7 @@ router.get('/fear-greed/history', (req, res) => {
     res.json({ success: true, count: days, data: history });
 });
 
-// Stock Data Routes
-router.get('/data/kospi', (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            index: 2500.50,
-            change: 15.20,
-            percentChange: 0.61,
-            volume: 5000000,
-            timestamp: new Date().toISOString()
-        }
-    });
-});
 
-router.get('/data/kosdaq', (req, res) => {
-    res.json({
-        success: true,
-        data: {
-            index: 850.30,
-            change: -5.10,
-            percentChange: -0.60,
-            volume: 2000000,
-            timestamp: new Date().toISOString()
-        }
-    });
-});
 
 router.get('/dart/health', (req, res) => {
     res.json({ success: true, status: 'HEALTHY', message: 'DART service operating normally' });

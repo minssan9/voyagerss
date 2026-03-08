@@ -23,7 +23,14 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
 - **Script Setup**: Always use `<script setup lang="ts">`.
 - **Functional Patterns**: Use functional and declarative programming patterns; avoid classes.
 - **VueUse**: Leverage **VueUse** functions where applicable.
-- **Styling**: Standardize styles in `src/assets/styles`. **Do NOT use scoped styles in views** broadly. Use global component classes defined in `components.scss` and utilities in `utilities.scss`.
+- **Styling**: 
+  - **STRICT ENFORCEMENT**: **All `.vue` files MUST use global stylesheets** located in `src/assets/styles`.
+  - **FORBIDDEN**: Do NOT use `<style scoped>`. All styles must be extracted to the global SCSS files.
+  - **Structure**:
+    - Use `components.scss` for reusable component styles.
+    - Use `utilities.scss` for helper classes.
+    - Create/Use module files in `src/assets/styles/views/` or `src/assets/styles/layout/` for specific page/layout styles and import them in `index.scss`.
+    - Use BEM naming convention to prevent collisions (e.g., `.page-market-lab__header`).
 - **API Handling**: response should follow the structure:
   - `const response = await api.get(...)`
   - `rows.value = response.data.content;`

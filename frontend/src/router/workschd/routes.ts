@@ -7,15 +7,21 @@ const routes: RouteRecordRaw[] = [
         name: 'Workschd',
         component: () => import('@/layout/RouteView.vue'),
         meta: { icon: 'business_center' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
-        redirect: { name: 'TeamManage (Manager)' },
+        redirect: { name: 'workschd-home' },
         children: [
+            // Home page
+            {
+                path: '',
+                name: 'workschd-home',
+                component: () => import('@/views/workschd/main/Home.vue'),
+                meta: { icon: 'home', title: 'WorkSchd Home' }
+            },
             // Team routes - flattened to 1 depth
             {
                 path: 'team/join/:token', // :token
                 name: 'TeamJoin (Worker)',
                 component: () => import('@/views/workschd/team/TeamJoin.vue'),
-                meta: { icon: 'group_add' },
-                hidden: true
+                meta: { icon: 'group_add', hidden: true }
             },
             {
                 path: 'team/manage',

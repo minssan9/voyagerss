@@ -1,6 +1,12 @@
 <template>
   <div class="chart-wrapper">
+    <div v-if="store.loading" class="loading-overlay">
+      <q-spinner color="primary" size="3em" />
+    </div>
     <Line v-if="chartData" :data="chartData" :options="chartOptions" />
+    <div v-else-if="!store.loading" class="no-data">
+      No data available for the selected period.
+    </div>
   </div>
 </template>
 
@@ -90,5 +96,23 @@ const chartOptions = {
   position: relative;
   height: 400px;
   width: 100%;
+}
+
+.loading-overlay, .no-data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 2;
+}
+
+.no-data {
+  color: #718096;
+  font-style: italic;
 }
 </style>

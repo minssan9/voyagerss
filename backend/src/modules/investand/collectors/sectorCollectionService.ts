@@ -263,14 +263,18 @@ export class SectorCollectionService {
         startDate.setDate(endDate.getDate() - days);
 
         try {
-            const yahooFinance = require('yahoo-finance2').default;
-            const result = await yahooFinance.historical(benchmarkCode, {
+            const YahooFinance = require('yahoo-finance2').default;
+            const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
+
+            const result = await yahooFinance.chart(benchmarkCode, {
                 period1: startDate.toISOString().split('T')[0],
                 period2: endDate.toISOString().split('T')[0],
                 interval: '1d'
-            }) as any[];
+            });
 
-            return result.map((quote: any) => ({
+            const quotes = result.quotes || [];
+
+            return quotes.map((quote: any) => ({
                 date: new Date(quote.date),
                 closePrice: quote.close,
                 openPrice: quote.open,
@@ -283,6 +287,7 @@ export class SectorCollectionService {
             throw error;
         }
     }
+
 
     /**
      * Validates if collection should run (market hours, holidays, etc.)

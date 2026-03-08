@@ -11,7 +11,10 @@
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/investand.prisma && prisma generate --schema=./prisma/aviation.prisma",
     "postinstall": "npm run generate",
-    "test": "jest"
+    "test": "jest",
+    "collect:dart": "ts-node -r tsconfig-paths/register src/modules/investand/batch/collectDartData.ts",
+    "collect:krx": "ts-node -r tsconfig-paths/register src/modules/investand/batch/collectKrxData.ts",
+    "test:external": "ts-node -r tsconfig-paths/register src/modules/investand/tests/external-interface-test.ts"
   },
   "keywords": [],
   "author": "",

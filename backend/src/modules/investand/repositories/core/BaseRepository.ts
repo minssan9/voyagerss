@@ -62,15 +62,17 @@ export class BaseRepository {
   /**
    * 작업 성공 로그
    */
-  protected static logSuccess(operation: string, identifier: string): void {
-    console.log(`[DB] ${operation} 완료: ${identifier}`)
+  protected static logSuccess(operation: string, identifier: string | Date): void {
+    const idStr = identifier instanceof Date ? identifier.toISOString() : identifier;
+    console.log(`[DB] ${operation} 완료: ${idStr}`)
   }
 
   /**
    * 작업 실패 로그
    */
-  protected static logError(operation: string, identifier: string, error: any): void {
-    console.error(`[DB] ${operation} 실패 (${identifier}):`, error)
+  protected static logError(operation: string, identifier: string | Date, error: any): void {
+    const idStr = identifier instanceof Date ? identifier.toISOString() : identifier;
+    console.error(`[DB] ${operation} 실패 (${idStr}):`, error)
   }
 
   /**
@@ -100,10 +102,10 @@ export class BaseRepository {
   /**
    * 날짜 형식 검증 및 변환
    */
-  protected static validateAndFormatDate(dateStr: string): Date {
-    const date = new Date(dateStr)
+  protected static validateAndFormatDate(dateInput: string | Date): Date {
+    const date = new Date(dateInput)
     if (isNaN(date.getTime())) {
-      throw new Error(`잘못된 날짜 형식: ${dateStr}`)
+      throw new Error(`잘못된 날짜 형식: ${dateInput}`)
     }
     return date
   }

@@ -94,7 +94,7 @@ function errLogic(err) {
     userStore.logout()
       .catch(() => apiError.onUnauthorized(err))
       .finally(() => {
-        window.location.href = '/'
+        // window.location.href = '/'
       })
   }
   else if (err.response && (err.response.status === Forbidden || err.response.status === MethodNotAllowed)) return apiError.onForbidden(err)

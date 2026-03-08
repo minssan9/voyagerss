@@ -22,36 +22,7 @@
         <!-- Main Platform Section -->
         <div class="nav-section-title">Platform</div>
 
-        <!-- Other Modules Section -->
-        <template v-for="routeProp in filteredRoutes" :key="routeProp.name">
-          <template v-if="shouldShowRoute(routeProp)">
-            <!-- Routes with children - show section title always -->
-            <template v-if="routeProp.children">
-              <template v-if="filterHiddenRoutes(routeProp.children).length > 0">
-                <div class="nav-section-title">{{ formatRouteName(routeProp.name) }}</div>
-                <button v-for="child in filterHiddenRoutes(routeProp.children)" :key="child.name" type="button"
-                  :class="['nav-item', { active: route.name === child.name }]"
-                  @click="handleManualNavigate(child.name)">
-                  <q-icon :name="child.meta?.icon || 'label'"
-                    :class="['nav-icon', { active: route.name === child.name }]" />
-                  <span>{{ formatRouteName(child.name) }}</span>
-                  <q-icon v-if="route.name === child.name" name="chevron_right" class="nav-chevron" />
-                </button>
-              </template>
-            </template>
-
-            <!-- Routes without children - show as standalone items -->
-            <template v-else>
-              <button type="button" :class="['nav-item', { active: route.name === routeProp.name }]"
-                @click="handleManualNavigate(routeProp.name)">
-                <q-icon :name="routeProp.meta?.icon || 'label'"
-                  :class="['nav-icon', { active: route.name === routeProp.name }]" />
-                <span>{{ formatRouteName(routeProp.name) }}</span>
-                <q-icon v-if="route.name === routeProp.name" name="chevron_right" class="nav-chevron" />
-              </button>
-            </template>
-          </template>
-        </template>
+        <sidebar-item v-for="route in filteredRoutes" :key="route.path" :item="route" :base-path="route.path" />
       </nav>
     </q-scroll-area>
   </aside>
@@ -62,14 +33,12 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import SidebarItem from './SidebarItem.vue'
 
-const { t } = useI18n()
 const layoutStore = useLayoutStore()
 const userStore = useUserStore()
 const { drawerLeft } = storeToRefs(layoutStore)
-const route = useRoute()
 const router = useRouter()
 
 const sidebarOpen = ref(drawerLeft.value)
@@ -86,20 +55,6 @@ const closeSidebar = () => {
   layoutStore.setLeftDrawer(false)
 }
 
-// Handle navigation
-const handleManualNavigate = (name: string | symbol | undefined | null) => {
-  if (!name) return
-  router.push({ name: name as string }).catch(err => {
-    // Ignore duplicate navigation errors
-    if (err.name !== 'NavigationDuplicated') {
-      console.error(err)
-    }
-  })
-  if (isMobile.value) {
-    closeSidebar()
-  }
-}
-
 // Watch drawer state from store
 const unwatchDrawer = layoutStore.$subscribe(() => {
   sidebarOpen.value = drawerLeft.value
@@ -110,21 +65,14 @@ const filteredRoutes = computed(() => {
   return filterHiddenRoutes([...router.options.routes])
 })
 
-// Check if route should be shown (exclude home, about, dashboard, findash parent, investand parent path only)
-function shouldShowRoute(route: any) {
-  const excludedNames = ['PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup', 'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden', 'NotFound']
-  const excludedPaths = []
-
-  if (excludedNames.includes(route.name)) return false
-  if (excludedPaths.includes(route.path)) return false
-  if (route.hidden) return false
-
-  return true
-}
 
 // Updated helper function to filter hidden and role-based routes
 function filterHiddenRoutes(routes: any[]) {
-  return routes.filter(route => {
+  const fileterd = routes.filter(route => {
+    // Top Level Exclusions (legacy logic - kept for safety but can be moved to meta.hidden)
+    const excludedNames = ['PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup', 'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden', 'NotFound']
+    if (excludedNames.includes(route.name)) return false
+    
     // Filter out hidden routes
     if (route.hidden) return false
 
@@ -137,20 +85,15 @@ function filterHiddenRoutes(routes: any[]) {
             userStore.user.accountRoles.some((ar: any) => ar.roleType === role)
           )))
       )
-      return accessibleChildren.length > 0
+      // return accessibleChildren.length > 0 // Allow parents even if children are hidden? No, standard logic is hide if no children.
+      if (accessibleChildren.length === 0) {
+        return false // Hide parent if no accessible children
+      }
     }
 
     return true
   })
-}
-
-// Format route name for display
-function formatRouteName(name: string | undefined | null) {
-  if (!name) return ''
-  return String(name)
-    .replace(/([A-Z])/g, ' $1')
-    .trim()
-    .replace(/^./, str => str.toUpperCase())
+  return fileterd
 }
 
 onMounted(() => {

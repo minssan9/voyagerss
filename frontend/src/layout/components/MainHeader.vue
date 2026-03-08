@@ -1,6 +1,10 @@
 ﻿<template>
   <q-header :class="['modern-header', $q.dark.isActive ? 'bg-dark' : 'bg-transparent text-dark']">
     <q-toolbar class="q-py-md q-px-lg">
+      <!-- Mobile Menu Button - Moved to left -->
+      <q-btn flat @click="layoutStore.toggleLeftDrawer()" round dense :icon="layoutStore.drawerLeft ? 'close' : 'menu'"
+        :color="$q.dark.isActive ? 'white' : 'dark'" class="q-mr-sm" />
+
       <q-toolbar-title class="text-weight-bold text-h5 row items-center no-wrap">
         <router-link :to="{ name: 'home' }"
           :class="['text-decoration-none', $q.dark.isActive ? 'text-white' : 'text-primary']"
@@ -27,9 +31,7 @@
         </template>
       </nav>
 
-      <!-- Mobile Menu Button - Visible on all screens now -->
-      <q-btn flat @click="layoutStore.toggleLeftDrawer()" round dense :icon="layoutStore.drawerLeft ? 'close' : 'menu'"
-        :color="$q.dark.isActive ? 'white' : 'dark'" />
+
     </q-toolbar>
   </q-header>
 </template>
