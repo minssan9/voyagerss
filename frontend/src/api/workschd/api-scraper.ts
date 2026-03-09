@@ -33,6 +33,26 @@ export interface ScrapeReport {
   errors: string[];
 }
 
+export interface FuneralHome {
+  id: number;
+  name: string;
+  homeUrl: string;
+  listingUrl: string;
+  region: 'INCHEON' | 'BUCHEON';
+  isActive: boolean;
+  lastScrapedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FuneralHomePage {
+  content: FuneralHome[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}
+
 export interface ScraperStatus {
   sites: string[];
   dbPath: string;
@@ -51,6 +71,19 @@ const getScrapedFunerals = (params?: {
   return service.get('/workschd/scraped-funerals', { params });
 };
 
+const getFuneralHomes = (params?: {
+  region?: 'INCHEON' | 'BUCHEON';
+  isActive?: boolean;
+  page?: number;
+  size?: number;
+}): Promise<AxiosResponse<FuneralHomePage>> => {
+  return service.get('/workschd/funeral-homes', { params });
+};
+
+const syncFuneralHomes = (): Promise<AxiosResponse<{ success: boolean; synced: number }>> => {
+  return service.post('/workschd/scraper/funeral-homes/sync');
+};
+
 const getScraperStatus = (): Promise<AxiosResponse<ScraperStatus>> => {
   return service.get('/workschd/scraper/status');
 };
@@ -62,6 +95,8 @@ const linkFuneralToTask = (funeralId: number, taskId: number): Promise<AxiosResp
 export default {
   triggerScrape,
   getScrapedFunerals,
+  getFuneralHomes,
+  syncFuneralHomes,
   getScraperStatus,
   linkFuneralToTask
 };

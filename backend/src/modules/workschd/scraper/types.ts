@@ -15,6 +15,13 @@ export interface ScrapedFuneral {
   scrapedAt: string;       // ISO datetime string
 }
 
+export interface FuneralHomeSource {
+  funeralHomeName: string;
+  funeralHomeUrl: string;
+  listingUrl: string;
+  region: 'INCHEON' | 'BUCHEON';
+}
+
 export interface ScrapeResult {
   funeralHomeName: string;
   funeralHomeUrl: string;

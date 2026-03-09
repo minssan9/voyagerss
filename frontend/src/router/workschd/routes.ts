@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
         path: '/workschd',
         name: 'Workschd',
         component: () => import('@/layout/RouteView.vue'),
-        meta: { icon: 'business_center' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
+        meta: { icon: 'business_center', project: 'workschd' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
         redirect: { name: 'workschd-home' },
         children: [
             // Home page

@@ -6,6 +6,7 @@ import path from 'path';
 import http from 'http';
 import routes from './routes';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
+import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 
 // Load environment variables from .env.local (priority) or .env (fallback)
 dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
@@ -19,6 +20,7 @@ const httpServer = http.createServer(app);
 
 // Initialize WebSocket service
 webSocketService.initialize(httpServer);
+startWorkschdScraperScheduler();
 
 app.use(cors());
 app.use(helmet());

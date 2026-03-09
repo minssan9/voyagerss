@@ -110,8 +110,12 @@ router.get('/statistics/tasks/date-range', authenticate, statisticsController.ge
 router.post('/scrape', authenticate, isTeamLeader, scraperController.triggerScrape.bind(scraperController));
 // List scraped funeral ceremonies (any authenticated user)
 router.get('/scraped-funerals', authenticate, scraperController.getScrapedFunerals.bind(scraperController));
+// List stored funeral homes catalog
+router.get('/funeral-homes', authenticate, scraperController.getFuneralHomes.bind(scraperController));
 // Scraper metadata / available sites
 router.get('/scraper/status', authenticate, scraperController.getStatus.bind(scraperController));
+// Sync scraper source list to funeral_home table
+router.post('/scraper/funeral-homes/sync', authenticate, isTeamLeader, scraperController.syncFuneralHomes.bind(scraperController));
 // Link a scraped funeral record to a Task record
 router.post('/scraped-funerals/:funeralId/link-task', authenticate, isTeamLeader, scraperController.linkToTask.bind(scraperController));
 

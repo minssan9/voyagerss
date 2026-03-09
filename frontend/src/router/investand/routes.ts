@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
     path: '/investand',
     name: 'Investand',
     component: () => import('@/layout/RouteView.vue'),
-    meta: { icon: 'show_chart' },
+    meta: { icon: 'show_chart', project: 'investand' },
     redirect: { name: 'investand-landing' },
     children: [
       {

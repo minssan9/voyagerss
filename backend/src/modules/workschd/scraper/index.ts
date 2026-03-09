@@ -1,5 +1,5 @@
-import { ScrapeReport, ScrapeResult } from './types';
-import { initDb, clearOldFunerals, insertFunerals } from './db';
+import { FuneralHomeSource, ScrapeReport, ScrapeResult } from './types';
+import { initDb, clearOldFunerals, insertFunerals, syncFuneralHomes } from './db';
 
 // Original 9 sites
 import { InhaHospitalScraper } from './sites/inha-hospital';
@@ -60,6 +60,7 @@ export async function runAllScrapers(): Promise<ScrapeReport> {
 
   // Ensure DB is ready
   await initDb();
+  await syncFuneralHomes(getFuneralHomeSources());
   await clearOldFunerals();
 
   const bySource: ScrapeReport['bySource'] = [];
@@ -71,25 +72,28 @@ export async function runAllScrapers(): Promise<ScrapeReport> {
     try {
       console.log(`[Scraper] Starting: ${scraper.funeralHomeName}`);
       const result: ScrapeResult = await scraper.run();
-
-      const count = result.funerals.length;
-      bySource.push({
-        name: result.funeralHomeName,
-        count,
-        error: result.error
-      });
+      const scrapedCount = result.funerals.length;
+      let savedCount = 0;
 
       if (result.error) {
         errors.push(`${result.funeralHomeName}: ${result.error}`);
       }
 
-      if (count > 0) {
-        await insertFunerals(result.funerals);
-        totalScraped += count;
-        console.log(`[Scraper] ${result.funeralHomeName}: ${count} funerals saved`);
+      if (scrapedCount > 0) {
+        savedCount = await insertFunerals(result.funerals);
+        totalScraped += savedCount;
+        console.log(
+          `[Scraper] ${result.funeralHomeName}: ${savedCount} funerals saved (scraped ${scrapedCount})`
+        );
       } else {
         console.log(`[Scraper] ${result.funeralHomeName}: no funerals found${result.error ? ` (${result.error})` : ''}`);
       }
+
+      bySource.push({
+        name: result.funeralHomeName,
+        count: savedCount,
+        error: result.error
+      });
     } catch (err: any) {
       const msg = `${scraper.funeralHomeName}: unexpected error - ${err.message}`;
       errors.push(msg);
@@ -108,8 +112,22 @@ export async function runAllScrapers(): Promise<ScrapeReport> {
 export async function getScraperStatus(): Promise<{ sites: string[]; dbPath: string }> {
   return {
     sites: ALL_SCRAPERS.map(s => `${s.funeralHomeName} (${s.region})`),
-    dbPath: process.env.SCRAPER_DB_PATH || 'data/scraper.db'
+    dbPath: 'DATABASE_URL_WORKSCHD (Prisma)'
   };
+}
+
+export async function syncScraperFuneralHomes(): Promise<{ synced: number }> {
+  const synced = await syncFuneralHomes(getFuneralHomeSources());
+  return { synced };
+}
+
+function getFuneralHomeSources(): FuneralHomeSource[] {
+  return ALL_SCRAPERS.map((scraper) => ({
+    funeralHomeName: scraper.funeralHomeName,
+    funeralHomeUrl: scraper.funeralHomeUrl,
+    listingUrl: scraper.listingUrl,
+    region: scraper.region
+  }));
 }
 
 function delay(ms: number): Promise<void> {

@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
         path: '/aviation',
         name: 'Aviation',
         component: () => import('@/layout/RouteView.vue'),
-        meta: { icon: 'flight' },
+        meta: { icon: 'flight', project: 'aviation' },
         redirect: { name: 'aviation-dashboard' },
         children: [
             {

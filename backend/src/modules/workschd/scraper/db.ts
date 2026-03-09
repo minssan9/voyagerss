@@ -1,94 +1,175 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
-import { ScrapedFuneral } from './types';
-
-const DB_PATH = process.env.SCRAPER_DB_PATH || path.resolve(__dirname, '../../../../../data/scraper.db');
-
-let db: sqlite3.Database | null = null;
-
-function getDb(): sqlite3.Database {
-  if (!db) {
-    const fs = require('fs');
-    const dir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    db = new sqlite3.Database(DB_PATH);
-  }
-  return db;
-}
+import crypto from 'crypto';
+import { workschdPrisma as prisma } from '../../../config/prisma';
+import { FuneralHomeSource, ScrapedFuneral } from './types';
 
 export async function initDb(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    getDb().run(`
-      CREATE TABLE IF NOT EXISTS scraped_funeral (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        funeral_home_name TEXT NOT NULL,
-        funeral_home_url TEXT NOT NULL,
-        region TEXT NOT NULL,
-        deceased_name TEXT NOT NULL,
-        room_number TEXT,
-        chief_mourner TEXT,
-        funeral_date TEXT,
-        burial_date TEXT,
-        burial_place TEXT,
-        religion TEXT,
-        raw_data TEXT,
-        scraped_at TEXT NOT NULL,
-        task_id INTEGER,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )
-    `, (err) => {
-      if (err) reject(err);
-      else resolve();
+  // Prisma client is initialized at application bootstrap.
+}
+
+export async function syncFuneralHomes(sources: FuneralHomeSource[]): Promise<number> {
+  if (sources.length === 0) {
+    return 0;
+  }
+
+  const listingUrls = sources.map((source) => source.listingUrl);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.funeralHome.updateMany({
+      where: {
+        listingUrl: {
+          notIn: listingUrls
+        }
+      },
+      data: {
+        isActive: false
+      }
     });
+
+    for (const source of sources) {
+      await tx.funeralHome.upsert({
+        where: {
+          listingUrl: source.listingUrl
+        },
+        create: {
+          name: source.funeralHomeName,
+          homeUrl: source.funeralHomeUrl,
+          listingUrl: source.listingUrl,
+          region: source.region,
+          isActive: true
+        },
+        update: {
+          name: source.funeralHomeName,
+          homeUrl: source.funeralHomeUrl,
+          region: source.region,
+          isActive: true
+        }
+      });
+    }
   });
+
+  return sources.length;
 }
 
 export async function clearOldFunerals(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    // Keep only funerals scraped within last 7 days
-    getDb().run(
-      `DELETE FROM scraped_funeral WHERE scraped_at < datetime('now', '-7 days')`,
-      (err) => {
-        if (err) reject(err);
-        else resolve();
+  const threshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  await prisma.funeralEvent.deleteMany({
+    where: {
+      scrapedAt: {
+        lt: threshold
       }
-    );
+    }
   });
 }
 
 export async function insertFunerals(funerals: ScrapedFuneral[]): Promise<number> {
-  if (funerals.length === 0) return 0;
+  const validFunerals = funerals.filter(isValidScrapedFuneral);
+  if (validFunerals.length === 0) {
+    return 0;
+  }
 
-  return new Promise((resolve, reject) => {
-    const database = getDb();
-    const stmt = database.prepare(`
-      INSERT INTO scraped_funeral
-        (funeral_home_name, funeral_home_url, region, deceased_name, room_number,
-         chief_mourner, funeral_date, burial_date, burial_place, religion, raw_data, scraped_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    let inserted = 0;
-    database.serialize(() => {
-      database.run('BEGIN TRANSACTION');
-      for (const f of funerals) {
-        stmt.run(
-          f.funeralHomeName, f.funeralHomeUrl, f.region, f.deceasedName,
-          f.roomNumber || null, f.chiefMourner || null, f.funeralDate || null,
-          f.burialDate || null, f.burialPlace || null, f.religion || null,
-          f.rawData || null, f.scrapedAt,
-          (err: Error | null) => { if (!err) inserted++; }
-        );
-      }
-      stmt.finalize();
-      database.run('COMMIT', (err) => {
-        if (err) reject(err);
-        else resolve(inserted);
-      });
+  const homesByKey = new Map<string, { name: string; homeUrl: string; region: 'INCHEON' | 'BUCHEON' }>();
+  for (const funeral of validFunerals) {
+    const key = `${funeral.funeralHomeName}|${funeral.region}`;
+    homesByKey.set(key, {
+      name: funeral.funeralHomeName,
+      homeUrl: funeral.funeralHomeUrl,
+      region: funeral.region
     });
+  }
+
+  for (const home of homesByKey.values()) {
+    await prisma.funeralHome.upsert({
+      where: {
+        name_region: {
+          name: home.name,
+          region: home.region
+        }
+      },
+      create: {
+        name: home.name,
+        homeUrl: home.homeUrl,
+        listingUrl: home.homeUrl,
+        region: home.region,
+        isActive: true
+      },
+      update: {
+        homeUrl: home.homeUrl,
+        isActive: true
+      }
+    });
+  }
+
+  const homes = await prisma.funeralHome.findMany({
+    where: {
+      OR: Array.from(homesByKey.values()).map((home) => ({
+        name: home.name,
+        region: home.region
+      }))
+    },
+    select: {
+      id: true,
+      name: true,
+      region: true
+    }
   });
+
+  const homeIdByKey = new Map<string, number>();
+  for (const home of homes) {
+    homeIdByKey.set(`${home.name}|${home.region}`, home.id);
+  }
+
+  const events = validFunerals
+    .map((funeral) => {
+      const key = `${funeral.funeralHomeName}|${funeral.region}`;
+      const funeralHomeId = homeIdByKey.get(key);
+      if (!funeralHomeId) {
+        return null;
+      }
+
+      const sourceHash = buildSourceHash(funeralHomeId, funeral);
+      const parsedScrapedAt = parseDateOrNow(funeral.scrapedAt);
+
+      return {
+        funeralHomeId,
+        deceasedName: funeral.deceasedName,
+        roomNumber: funeral.roomNumber ?? null,
+        chiefMourner: funeral.chiefMourner ?? null,
+        funeralDate: funeral.funeralDate ?? null,
+        burialDate: funeral.burialDate ?? null,
+        burialPlace: funeral.burialPlace ?? null,
+        religion: funeral.religion ?? null,
+        rawData: funeral.rawData ?? null,
+        scrapedAt: parsedScrapedAt,
+        sourceHash
+      };
+    })
+    .filter((event): event is NonNullable<typeof event> => event !== null);
+
+  if (events.length === 0) {
+    return 0;
+  }
+
+  const result = await prisma.funeralEvent.createMany({
+    data: events,
+    skipDuplicates: true
+  });
+
+  const touchedHomeIds = Array.from(new Set(events.map((event) => event.funeralHomeId)));
+  const now = new Date();
+
+  await prisma.funeralHome.updateMany({
+    where: {
+      id: {
+        in: touchedHomeIds
+      }
+    },
+    data: {
+      lastScrapedAt: now
+    }
+  });
+
+  return result.count;
 }
 
 export interface FuneralQueryParams {
@@ -107,81 +188,186 @@ export async function queryFunerals(params: FuneralQueryParams = {}): Promise<{
 }> {
   const page = params.page ?? 0;
   const size = params.size ?? 20;
-  const offset = page * size;
 
-  const conditions: string[] = [];
-  const args: any[] = [];
-
-  if (params.region) {
-    conditions.push('region = ?');
-    args.push(params.region);
-  }
-  if (params.funeralHomeName) {
-    conditions.push('funeral_home_name LIKE ?');
-    args.push(`%${params.funeralHomeName}%`);
-  }
-
-  // Only show recently scraped (last 3 days)
-  conditions.push(`scraped_at >= datetime('now', '-3 days')`);
-
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-  return new Promise((resolve, reject) => {
-    const database = getDb();
-    database.get(
-      `SELECT COUNT(*) as total FROM scraped_funeral ${whereClause}`,
-      args,
-      (err, row: any) => {
-        if (err) return reject(err);
-        const total = row?.total ?? 0;
-
-        database.all(
-          `SELECT * FROM scraped_funeral ${whereClause}
-           ORDER BY scraped_at DESC, id DESC
-           LIMIT ? OFFSET ?`,
-          [...args, size, offset],
-          (err2, rows) => {
-            if (err2) return reject(err2);
-            resolve({
-              content: (rows as any[]).map(mapRow),
-              totalElements: total,
-              totalPages: Math.ceil(total / size),
-              page,
-              size
-            });
+  const where = {
+    scrapedAt: {
+      gte: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+    },
+    funeralHome: {
+      ...(params.region ? { region: params.region } : {}),
+      ...(params.funeralHomeName
+        ? {
+            name: {
+              contains: params.funeralHomeName
+            }
           }
-        );
-      }
-    );
-  });
+        : {})
+    }
+  };
+
+  const [totalElements, rows] = await Promise.all([
+    prisma.funeralEvent.count({ where }),
+    prisma.funeralEvent.findMany({
+      where,
+      include: {
+        funeralHome: true
+      },
+      orderBy: [
+        {
+          scrapedAt: 'desc'
+        },
+        {
+          id: 'desc'
+        }
+      ],
+      skip: page * size,
+      take: size
+    })
+  ]);
+
+  return {
+    content: rows.map(mapRow),
+    totalElements,
+    totalPages: Math.ceil(totalElements / size),
+    page,
+    size
+  };
+}
+
+export async function queryFuneralHomes(params: {
+  region?: 'INCHEON' | 'BUCHEON';
+  isActive?: boolean;
+  page?: number;
+  size?: number;
+} = {}): Promise<{
+  content: any[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}> {
+  const page = params.page ?? 0;
+  const size = params.size ?? 50;
+
+  const where = {
+    ...(params.region ? { region: params.region } : {}),
+    ...(params.isActive === undefined ? {} : { isActive: params.isActive })
+  };
+
+  const [totalElements, rows] = await Promise.all([
+    prisma.funeralHome.count({ where }),
+    prisma.funeralHome.findMany({
+      where,
+      orderBy: [
+        {
+          region: 'asc'
+        },
+        {
+          name: 'asc'
+        }
+      ],
+      skip: page * size,
+      take: size
+    })
+  ]);
+
+  return {
+    content: rows,
+    totalElements,
+    totalPages: Math.ceil(totalElements / size),
+    page,
+    size
+  };
 }
 
 export async function linkFuneralToTask(funeralId: number, taskId: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    getDb().run(
-      'UPDATE scraped_funeral SET task_id = ? WHERE id = ?',
-      [taskId, funeralId],
-      (err) => { if (err) reject(err); else resolve(); }
-    );
+  await prisma.funeralEvent.update({
+    where: {
+      id: funeralId
+    },
+    data: {
+      taskId
+    }
   });
 }
 
 function mapRow(row: any) {
   return {
     id: row.id,
-    funeralHomeName: row.funeral_home_name,
-    funeralHomeUrl: row.funeral_home_url,
-    region: row.region,
-    deceasedName: row.deceased_name,
-    roomNumber: row.room_number,
-    chiefMourner: row.chief_mourner,
-    funeralDate: row.funeral_date,
-    burialDate: row.burial_date,
-    burialPlace: row.burial_place,
+    funeralHomeName: row.funeralHome?.name,
+    funeralHomeUrl: row.funeralHome?.homeUrl,
+    region: row.funeralHome?.region,
+    deceasedName: row.deceasedName,
+    roomNumber: row.roomNumber,
+    chiefMourner: row.chiefMourner,
+    funeralDate: row.funeralDate,
+    burialDate: row.burialDate,
+    burialPlace: row.burialPlace,
     religion: row.religion,
-    rawData: row.raw_data,
-    scrapedAt: row.scraped_at,
-    taskId: row.task_id,
-    createdAt: row.created_at
+    rawData: row.rawData,
+    scrapedAt: row.scrapedAt,
+    taskId: row.taskId,
+    createdAt: row.createdAt
   };
+}
+
+function parseDateOrNow(value: string): Date {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date();
+  }
+  return parsed;
+}
+
+function buildSourceHash(funeralHomeId: number, funeral: ScrapedFuneral): string {
+  const normalized = [
+    funeralHomeId,
+    normalize(funeral.deceasedName),
+    normalize(funeral.roomNumber),
+    normalize(funeral.chiefMourner),
+    normalize(funeral.funeralDate),
+    normalize(funeral.burialDate),
+    normalize(funeral.burialPlace),
+    normalize(funeral.religion)
+  ].join('|');
+
+  return crypto.createHash('sha256').update(normalized).digest('hex');
+}
+
+function normalize(value?: string): string {
+  return (value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function isValidScrapedFuneral(funeral: ScrapedFuneral): boolean {
+  const name = (funeral.deceasedName ?? '').trim();
+  if (!name) {
+    return false;
+  }
+
+  const blockedKeywords = [
+    '고인명',
+    '이름',
+    '명함',
+    '앞면',
+    '뒷면',
+    '이미지',
+    '빈소',
+    '상주'
+  ];
+
+  const normalizedName = normalize(name);
+  if (blockedKeywords.some((keyword) => normalizedName.includes(keyword))) {
+    return false;
+  }
+
+  if (/^\d+호$/.test(name) || /^\d+$/.test(name)) {
+    return false;
+  }
+
+  // Typical Korean names: 2~4 Hangul characters.
+  if (!/^[가-힣]{2,4}$/.test(name)) {
+    return false;
+  }
+
+  return true;
 }

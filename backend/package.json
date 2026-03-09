@@ -14,7 +14,8 @@
     "test": "jest",
     "collect:dart": "ts-node -r tsconfig-paths/register src/modules/investand/batch/collectDartData.ts",
     "collect:krx": "ts-node -r tsconfig-paths/register src/modules/investand/batch/collectKrxData.ts",
-    "test:external": "ts-node -r tsconfig-paths/register src/modules/investand/tests/external-interface-test.ts"
+    "test:external": "ts-node -r tsconfig-paths/register src/modules/investand/tests/external-interface-test.ts",
+    "scrape:workschd:funerals": "ts-node --transpile-only -r tsconfig-paths/register src/modules/workschd/scraper/run-scrape.ts"
   },
   "keywords": [],
   "author": "",

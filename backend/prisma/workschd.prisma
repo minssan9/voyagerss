@@ -133,6 +133,7 @@ model Task {
   shop               Shop           @relation(fields: [shopId], references: [id])
   taskEmployees      TaskEmployee[]
   notifications      Notification[]
+  funeralEvents      FuneralEvent[]
   creator            Account        @relation("TaskCreator", fields: [createdBy], references: [accountId])
 
   createdAt          DateTime @default(now()) @map("created_at")
@@ -176,4 +177,52 @@ model Notification {
   createdAt DateTime  @default(now()) @map("created_at")
 
   @@map("notification")
+}
+
+model FuneralHome {
+  id            Int      @id @default(autoincrement())
+  name          String   @map("name") @db.VarChar(255)
+  homeUrl       String   @map("home_url") @db.VarChar(512)
+  listingUrl    String   @map("listing_url") @db.VarChar(512)
+  region        String   @map("region") @db.VarChar(20) // INCHEON, BUCHEON
+  isActive      Boolean  @default(true) @map("is_active")
+  lastScrapedAt DateTime? @map("last_scraped_at")
+
+  funeralEvents FuneralEvent[]
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, region], map: "uq_funeral_home_name_region")
+  @@unique([listingUrl], map: "uq_funeral_home_listing_url")
+  @@index([region], map: "idx_funeral_home_region")
+  @@map("funeral_home")
+}
+
+model FuneralEvent {
+  id             Int       @id @default(autoincrement())
+  funeralHomeId  Int       @map("funeral_home_id")
+  deceasedName   String    @map("deceased_name") @db.VarChar(100)
+  roomNumber     String?   @map("room_number") @db.VarChar(100)
+  chiefMourner   String?   @map("chief_mourner") @db.VarChar(255)
+  funeralDate    String?   @map("funeral_date") @db.VarChar(255)
+  burialDate     String?   @map("burial_date") @db.VarChar(255)
+  burialPlace    String?   @map("burial_place") @db.VarChar(255)
+  religion       String?   @map("religion") @db.VarChar(50)
+  rawData        String?   @map("raw_data") @db.Text
+  scrapedAt      DateTime  @map("scraped_at")
+  sourceHash     String    @map("source_hash") @db.VarChar(64)
+  taskId         Int?      @map("task_id")
+
+  funeralHome    FuneralHome @relation(fields: [funeralHomeId], references: [id])
+  task           Task?       @relation(fields: [taskId], references: [id])
+
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@unique([sourceHash], map: "uq_funeral_event_source_hash")
+  @@index([funeralHomeId], map: "idx_funeral_event_funeral_home_id")
+  @@index([scrapedAt], map: "idx_funeral_event_scraped_at")
+  @@index([taskId], map: "idx_funeral_event_task_id")
+  @@map("funeral_event")
 }

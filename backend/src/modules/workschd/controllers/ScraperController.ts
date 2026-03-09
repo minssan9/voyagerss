@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
-import { runAllScrapers, getScraperStatus } from '../scraper/index';
-import { queryFunerals, linkFuneralToTask } from '../scraper/db';
+import { runAllScrapers, getScraperStatus, syncScraperFuneralHomes } from '../scraper/index';
+import { queryFunerals, linkFuneralToTask, queryFuneralHomes } from '../scraper/db';
 
 export class ScraperController {
   /**
@@ -48,6 +48,27 @@ export class ScraperController {
   }
 
   /**
+   * GET /api/workschd/funeral-homes
+   * List funeral homes stored in DB.
+   * Query params: region (INCHEON|BUCHEON), isActive (true|false), page, size
+   */
+  async getFuneralHomes(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const region = req.query.region as 'INCHEON' | 'BUCHEON' | undefined;
+      const isActiveRaw = req.query.isActive as string | undefined;
+      const isActive = isActiveRaw === undefined ? undefined : isActiveRaw === 'true';
+      const page = parseInt(req.query.page as string) || 0;
+      const size = parseInt(req.query.size as string) || 50;
+
+      const result = await queryFuneralHomes({ region, isActive, page, size });
+      res.json(result);
+    } catch (error: any) {
+      console.error('[ScraperController] Funeral homes query failed:', error);
+      res.status(500).json({ message: 'Failed to fetch funeral homes', error: error.message });
+    }
+  }
+
+  /**
    * GET /api/workschd/scraper/status
    * Returns scraper configuration info (available sites, DB path).
    */
@@ -57,6 +78,20 @@ export class ScraperController {
       res.json(status);
     } catch (error: any) {
       res.status(500).json({ message: 'Failed to get scraper status', error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/workschd/scraper/funeral-homes/sync
+   * Sync scraper source list into DB funeral_home table.
+   */
+  async syncFuneralHomes(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const result = await syncScraperFuneralHomes();
+      res.json({ success: true, ...result });
+    } catch (error: any) {
+      console.error('[ScraperController] Funeral home sync failed:', error);
+      res.status(500).json({ message: 'Failed to sync funeral homes', error: error.message });
     }
   }
 

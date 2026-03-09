@@ -8,3 +8,4 @@ backend/package-lock.json
 _bmad
 .claude
 .agent
+node_modules
