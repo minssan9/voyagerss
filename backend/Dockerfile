@@ -3,19 +3,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and Prisma schemas first for better layer caching
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma
 
-# Install dependencies
-RUN npm install
+# Install all dependencies (including dev for build)
+RUN npm ci
 
 # Copy source code
 COPY src ./src
 
 # Generate Prisma clients for all schemas
-RUN npm run generate || echo "Prisma generate skipped or failed"
+RUN npm run generate
 
 # Build the application
 RUN npm run build
@@ -25,11 +25,23 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built assets and production dependencies
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+# Copy package files
 COPY --from=builder /app/package*.json ./
 
-EXPOSE 6172
+# Install only production dependencies
+RUN npm ci --omit=dev
 
-CMD ["npm", "run", "start"]
+# Copy Prisma schemas and generated clients
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+EXPOSE 9002
+
+CMD ["node", "dist/app.js"]

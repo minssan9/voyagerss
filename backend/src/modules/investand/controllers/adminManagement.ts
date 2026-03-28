@@ -1300,7 +1300,7 @@ router.put('/system-config', requireAdmin, requireAdminRole, async (req: Authent
     // Validate Fear & Greed weights if provided
     if (config.fearGreedCalculator?.componentWeights) {
       const weights = config.fearGreedCalculator.componentWeights
-      const totalWeight = Object.values(weights).reduce((sum: number, weight: any) => sum + (Number(weight) || 0), 0 as number)
+      const totalWeight = Object.values(weights).reduce((sum: number, weight: any) => sum + (Number(weight) || 0), 0 as number) as number
 
       if (Math.abs(totalWeight - 100) > 0.1) {
         return res.status(400).json({
