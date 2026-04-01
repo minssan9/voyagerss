@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql:*)",
+      "Bash(net start)",
+      "Bash(findstr:*)",
+      "Bash(if [ -d \"node_modules\" ])",
+      "Bash(then echo \"Backend dependencies already installed\")",
+      "Bash(else echo \"Backend dependencies not installed\")",
+      "Bash(fi)"
+    ]
+  }
+}

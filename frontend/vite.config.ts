@@ -117,5 +117,12 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
+    envDir: '../',
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.ts',
+      include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+    },
   }
 })

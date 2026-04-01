@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { statisticsService } from '../services/StatisticsService';
+import { workschdPrisma as prisma } from '../../../config/prisma';
 import { AuthRequest } from '../middleware/authMiddleware';
 
 export class StatisticsController {
@@ -14,7 +15,7 @@ export class StatisticsController {
             }
 
             // Check if user is admin or team leader
-            if (req.user.role !== 'ADMIN' && req.user.role !== 'TEAM_LEADER') {
+            if (!req.user.roles.includes('ADMIN') && !req.user.roles.includes('TEAM_LEADER')) {
                 res.status(403).json({ message: 'Forbidden: Admin or Team Leader access required' });
                 return;
             }
@@ -46,9 +47,21 @@ export class StatisticsController {
 
             // Check if user has access to this team
             // Team leaders can only view their own team stats, admins can view all
-            if (req.user.role === 'TEAM_LEADER' && req.user.teamId !== teamId) {
-                res.status(403).json({ message: 'Forbidden: Cannot view other team statistics' });
-                return;
+            // Check if user has access to this team
+            // Team leaders can only view their own team stats, admins can view all
+            if (req.user.roles.includes('TEAM_LEADER') && !req.user.roles.includes('ADMIN')) {
+                const teamMember = await prisma.teamMember.findFirst({
+                    where: {
+                        teamId,
+                        accountId: req.user.accountId,
+                        role: 'LEADER'
+                    }
+                });
+
+                if (!teamMember) {
+                    res.status(403).json({ message: 'Forbidden: Cannot view other team statistics' });
+                    return;
+                }
             }
 
             const statistics = await statisticsService.getTeamStatistics(teamId);
@@ -77,9 +90,12 @@ export class StatisticsController {
             }
 
             // Workers can view their own stats, team leaders and admins can view their team members' stats
-            if (req.user.role === 'HELPER' && req.user.accountId !== workerId) {
-                res.status(403).json({ message: 'Forbidden: Cannot view other worker statistics' });
-                return;
+            // Workers can view their own stats, team leaders and admins can view their team members' stats
+            if (req.user.roles.includes('HELPER') && !req.user.roles.includes('ADMIN') && !req.user.roles.includes('TEAM_LEADER')) {
+                if (req.user.accountId !== workerId) {
+                    res.status(403).json({ message: 'Forbidden: Cannot view other worker statistics' });
+                    return;
+                }
             }
 
             const statistics = await statisticsService.getWorkerStatistics(workerId);

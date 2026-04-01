@@ -6,112 +6,91 @@ const routes: RouteRecordRaw[] = [
     path: '/investand',
     name: 'Investand',
     component: () => import('@/layout/RouteView.vue'),
-    meta: { icon: 'show_chart' },
+    meta: { icon: 'show_chart', project: 'investand' },
     redirect: { name: 'investand-landing' },
     children: [
       {
         path: '',
         name: 'investand-landing',
-        component: () => import('@/views/investand/Landing.vue'),
-        meta: { title: 'Investand Landing', icon: 'home' }
-      },
-      {
-        path: 'home',
-        name: 'investand-home',
         component: () => import('@/views/investand/IndexPage.vue'),
         meta: { title: 'Investand Home', icon: 'home' }
       },
       {
-        path: 'history',
-        name: 'investand-history',
-        component: () => import('@/views/investand/HistoryPage.vue'),
-        meta: { title: 'History', icon: 'history' }
+        path: 'market-lab',
+        name: 'investand-market-lab',
+        component: () => import('@/views/investand/MarketLab.vue'),
+        meta: { title: '마켓 랩 (Market Lab)', icon: 'science' }
       },
       {
-        path: 'dart-data',
-        name: 'investand-dart-data',
+        path: 'sector',
+        name: 'investand-sector',
+        component: () => import('@/views/investand/SectorComparison.vue'),
+        meta: { title: '섹터 분석 (Sector)', icon: 'assessment' }
+      },
+      {
+        path: 'global',
+        name: 'investand-global',
+        component: () => import('@/views/investand/GlobalAssetComparison.vue'),
+        meta: { title: '글로벌 자산 (Global)', icon: 'public' }
+      },
+      {
+        path: 'dart',
+        name: 'investand-dart',
         component: () => import('@/views/investand/DartDataPage.vue'),
-        meta: { title: 'DART Data', icon: 'view_list' }
+        meta: { title: 'DART 기업공시', icon: 'view_list' }
       },
       {
-        path: 'dart-manage',
-        name: 'investand-dart-manage',
-        component: () => import('@/views/investand/DartManagePage.vue'),
-        meta: { title: 'DART Management', icon: 'manage_search' }
+        path: 'bok',
+        name: 'investand-bok',
+        component: () => import('@/views/investand/EconomicPage.vue'),
+        meta: { title: 'BOK 경제지표', icon: 'account_balance' }
       },
       {
-        path: 'findash',
-        name: 'investand-findash',
-        component: () => import('@/views/investand/FindashLayout.vue'),
-        meta: { icon: 'analytics' },
+        path: 'settings',
+        name: 'investand-settings',
+        component: () => import('@/views/investand/Settings.vue'),
+        meta: { title: '설정 (Settings)', icon: 'settings' }
+      },
+      // Admin Routes - using wrapper component
+      {
+        path: 'admin',
+        name: 'Admin',
+        component: () => import('@/layout/RouteView.vue'),
+        meta: { icon: 'admin_panel_settings' }, // requiresAuth: true, 
+        redirect: { name: 'admin-dashboard' },
         children: [
+          // Admin Login
           {
-            path: '',
-            redirect: { name: 'FindashMarketLab' }
+            path: 'login',
+            name: 'admin-login',
+            component: () => import('@/views/common/auth/AdminLogin.vue'),
+            meta: { title: 'Admin Login' } // , requiresGuest: true
           },
           {
-            path: 'settings',
-            name: 'FindashSettings',
-            component: () => import('@/views/investand/Settings.vue'),
-            meta: { icon: 'settings' }
+            path: 'dashboard',
+            name: 'admin-dashboard',
+            component: () => import('@/views/investand/admin/DashboardPage.vue'),
+            meta: { title: 'Admin Dashboard', icon: 'dashboard' }
           },
           {
-            path: 'market-lab',
-            name: 'FindashMarketLab',
-            component: () => import('@/views/investand/MarketLab.vue'),
-            meta: { icon: 'science' }
+            path: 'dart',
+            name: 'admin-dart',
+            component: () => import('@/views/investand/admin/DartAdminPage.vue'),
+            meta: { title: 'DART Data Management', icon: 'description' }
           },
           {
-            path: 'sector-comparison',
-            name: 'FindashSectorComparison',
-            component: () => import('@/views/investand/SectorComparison.vue'),
-            meta: { icon: 'assessment', title: 'Sector Comparison' }
+            path: 'fear-greed',
+            name: 'admin-fear-greed',
+            component: () => import('@/views/investand/admin/FearGreedAdminPage.vue'),
+            meta: { title: 'Fear & Greed Index Management', icon: 'psychology' }
           },
-          {
-            path: 'global-assets',
-            name: 'FindashGlobalAssets',
-            component: () => import('@/views/investand/GlobalAssetComparison.vue'),
-            meta: { icon: 'public', title: 'Global Assets' }
-          }
         ]
       }
     ],
   },
 
 
-  // Admin Routes - using wrapper component
-  {
-    path: '/investand/admin',
-    name: 'Admin',
-    meta: { icon: 'admin_panel_settings' }, // requiresAuth: true, 
-    children: [
-      // Admin Login
-      {
-        path: 'login',
-        name: 'admin-login',
-        component: () => import('@/views/common/auth/AdminLogin.vue'),
-        meta: { title: 'Admin Login' } // , requiresGuest: true
-      },
-      {
-        path: 'dashboard',
-        name: 'admin-dashboard',
-        component: () => import('@/views/investand/admin/DashboardPage.vue'),
-        meta: { title: 'Admin Dashboard', icon: 'dashboard' }
-      },
-      {
-        path: 'dart',
-        name: 'admin-dart',
-        component: () => import('@/views/investand/admin/DartAdminPage.vue'),
-        meta: { title: 'DART Data Management', icon: 'description' }
-      },
-      {
-        path: 'fear-greed',
-        name: 'admin-fear-greed',
-        component: () => import('@/views/investand/admin/FearGreedAdminPage.vue'),
-        meta: { title: 'Fear & Greed Index Management', icon: 'psychology' }
-      },
-    ]
-  },
+
 
 
   // NotFound handler inside investand? 

@@ -12,15 +12,6 @@
         "allowJs": true,
         "baseUrl": ".",
         "paths": {
-            "@prisma/client-workschd": [
-                "node_modules/@prisma/client-workschd"
-            ],
-            "@prisma/client-investand": [
-                "node_modules/@prisma/client-investand"
-            ],
-            "@prisma/client-aviation": [
-                "node_modules/@prisma/client-aviation"
-            ],
             "@investand/*": [
                 "src/modules/investand/*"
             ]

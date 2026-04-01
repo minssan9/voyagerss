@@ -29,7 +29,7 @@ export function useWebSocket() {
       return;
     }
 
-    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:6172';
+    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:9002';
 
     socket.value = io(socketUrl, {
       path: '/socket.io',

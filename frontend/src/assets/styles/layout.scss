@@ -58,7 +58,10 @@ body {
 // Mobile Overlay
 .mobile-overlay {
   position: fixed;
-  inset: 0;
+  top: $header-height;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba($gray-900, 0.6);
   z-index: $z-modal-backdrop;
   backdrop-filter: blur(4px);
@@ -67,10 +70,10 @@ body {
 // Sidebar (Custom Modern Sidebar)
 .sidebar {
   position: fixed;
-  top: 0;
+  top: $header-height;
   left: 0;
-  z-index: $z-fixed;
-  height: 100vh;
+  z-index: $z-modal;
+  height: calc(100vh - $header-height);
   width: $sidebar-width;
   background: linear-gradient(180deg, $gray-800 0%, $gray-900 100%);
   color: $white;
@@ -136,8 +139,14 @@ body {
 
     .close-btn {
       color: $gray-400;
-      &:hover { color: $white; }
-      @media (min-width: $breakpoint-lg) { display: none; }
+
+      &:hover {
+        color: $white;
+      }
+
+      @media (min-width: $breakpoint-lg) {
+        display: none;
+      }
     }
   }
 
@@ -162,7 +171,9 @@ body {
       text-transform: uppercase;
       letter-spacing: 0.05em;
 
-      &:first-child { margin-top: 0; }
+      &:first-child {
+        margin-top: 0;
+      }
     }
 
     .nav-item {
@@ -190,7 +201,9 @@ body {
         color: $primary-light;
         font-weight: $font-medium;
 
-        .nav-icon { color: $primary-light; }
+        .nav-icon {
+          color: $primary-light;
+        }
       }
 
       .nav-icon {

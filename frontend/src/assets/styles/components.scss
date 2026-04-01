@@ -577,3 +577,100 @@
         font-size: 1.5rem;
     }
 }
+
+// --------------------------------------------
+// Application Cards (Landing Page)
+// --------------------------------------------
+.app-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &__header {
+        padding: 2rem;
+        text-align: center;
+        color: $white;
+        border-radius: $border-radius-xl $border-radius-xl 0 0;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+// Application Gradient Classes
+.investand-gradient {
+    background: linear-gradient(145deg, #4361ee, #3a0ca3);
+}
+
+.workschd-gradient {
+    background: linear-gradient(145deg, #4cc9f0, #4361ee);
+}
+
+.aviation-gradient {
+    background: linear-gradient(145deg, #06d6a0, #118ab2);
+}
+
+// Modern Button Variants (extended)
+.modern-button {
+    &--secondary {
+        background: linear-gradient(145deg, #4cc9f0, #4361ee);
+    }
+
+    &--tertiary {
+        background: linear-gradient(145deg, #06d6a0, #118ab2);
+    }
+}
+
+// --------------------------------------------
+// Table Overrides
+// --------------------------------------------
+.holdings-table {
+    .q-table__top {
+        padding: 0;
+    }
+}
+
+// --------------------------------------------
+// Fear & Greed Index Colors (Investand)
+// --------------------------------------------
+.fear-extreme {
+    color: #d32f2f;
+    background-color: rgba(211, 47, 47, 0.1);
+}
+
+.fear {
+    color: #f57c00;
+    background-color: rgba(245, 124, 0, 0.1);
+}
+
+.neutral {
+    color: #fbc02d;
+    background-color: rgba(251, 192, 45, 0.1);
+}
+
+.greed {
+    color: #689f38;
+    background-color: rgba(104, 159, 56, 0.1);
+}
+
+.greed-extreme {
+    color: #388e3c;
+    background-color: rgba(56, 142, 60, 0.1);
+}
+
+// --------------------------------------------
+// Chart Container
+// --------------------------------------------
+.chart-container {
+    position: relative;
+    height: 300px;
+
+    canvas {
+        max-height: 100%;
+    }
+}

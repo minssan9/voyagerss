@@ -1,344 +1,292 @@
 <template>
-  <q-page class="modern-page page-container">
-    <div class="modern-bg__pattern absolute-full"></div>
-
+  <div class="landing-page">
     <!-- Hero Section -->
-    <div class="modern-page__header fade-in">
-      <div class="row justify-center items-center q-py-xl q-px-md">
-        <div class="col-12 col-md-10 text-center">
-          <h1 class="modern-text__title q-mb-md text-h2 text-weight-bold">
-            VoyagerSS Platform
-          </h1>
-          <p class="modern-text__subtitle q-mb-xl text-h5">
-            Your All-in-One Solution for Investment Analysis, Schedule Management, and Aviation Data
+    <section class="landing-hero">
+      <div class="landing-hero__content">
+        <h1 class="landing-hero__title">VoyagerSS</h1>
+        <p class="landing-hero__subtitle">프리미엄 투자 데이터 구독 서비스</p>
+        <p class="landing-hero__description">
+          전문가가 큐레이션한 고퀄리티 편집 데이터로<br />
+          더 스마트한 투자 인사이트를 경험하세요
+        </p>
+        <div class="landing-hero__actions">
+          <router-link :to="{ name: 'investand-landing' }" class="landing-btn landing-btn--primary">
+            구독 시작하기
+          </router-link>
+          <a href="#features" class="landing-btn landing-btn--secondary">
+            더 알아보기
+          </a>
+        </div>
+      </div>
+      <div class="landing-hero__scroll-indicator">
+        <q-icon name="keyboard_arrow_down" size="32px" color="white" />
+      </div>
+    </section>
+
+    <!-- Data Excellence Section -->
+    <section id="features" class="landing-section landing-section--gray">
+      <div class="landing-section__container">
+        <div class="landing-section__header fade-up">
+          <h2 class="landing-section__title">데이터의 차이를 경험하세요</h2>
+          <p class="landing-section__subtitle">
+            VoyagerSS는 원본 데이터를 넘어, 전문가가 검증하고 편집한 프리미엄 데이터를 제공합니다
           </p>
-          <div class="text-body1 text-grey-7 q-mb-xl">
-            Explore our comprehensive suite of applications designed to streamline your professional workflow
+        </div>
+
+        <div class="landing-stats fade-up">
+          <div class="landing-stats__item">
+            <div class="landing-stats__value">99.9%</div>
+            <div class="landing-stats__label">데이터 정확도</div>
+            <div class="landing-stats__description">전문가 검증 완료</div>
+          </div>
+          <div class="landing-stats__item">
+            <div class="landing-stats__value">실시간</div>
+            <div class="landing-stats__label">업데이트 주기</div>
+            <div class="landing-stats__description">시장 데이터 반영</div>
+          </div>
+          <div class="landing-stats__item">
+            <div class="landing-stats__value">24/7</div>
+            <div class="landing-stats__label">전문가 큐레이션</div>
+            <div class="landing-stats__description">지속적인 품질 관리</div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Applications Grid -->
-    <div class="modern-page__content q-pt-xl q-px-md">
-      <div class="row q-col-gutter-xl justify-center">
-        <!-- Investand Application Card -->
-        <div class="col-12 col-md-4">
-          <div class="modern-card slide-up stagger-1 app-card" style="height: 100%;">
-            <div class="modern-card__header app-card__header investand-gradient">
-              <q-icon name="show_chart" size="64px" class="q-mb-md" />
-              <h2 class="modern-text__title text-h4 q-mb-md">Investand</h2>
-              <div class="text-subtitle1">Financial Intelligence Platform</div>
-            </div>
-            <div class="modern-card__body q-pa-lg">
-              <p class="text-body1 q-mb-lg">
-                Advanced investment analysis platform with real-time market data, DART integration,
-                and AI-powered insights for smarter financial decisions.
-              </p>
-
-              <q-list dense class="q-mb-lg">
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="primary" name="analytics" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Market Lab & Analysis</q-item-label>
-                    <q-item-label caption>Real-time market insights</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="primary" name="description" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>DART Data Integration</q-item-label>
-                    <q-item-label caption>Korean corporate disclosures</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="primary" name="psychology" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Fear & Greed Index</q-item-label>
-                    <q-item-label caption>Market sentiment analysis</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <div class="row q-col-gutter-sm">
-                <div class="col-12">
-                  <q-btn
-                    class="modern-button full-width"
-                    label="Launch Investand"
-                    icon-right="arrow_forward"
-                    :to="{ name: 'investand-landing' }"
-                    no-caps
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Products Section -->
+    <section class="landing-section landing-section--dark">
+      <div class="landing-section__container">
+        <div class="landing-section__header fade-up">
+          <h2 class="landing-section__title">우리의 솔루션</h2>
+          <p class="landing-section__subtitle">
+            각 분야 전문가가 설계한 통합 플랫폼
+          </p>
         </div>
 
-        <!-- WorkSchd Application Card -->
-        <div class="col-12 col-md-4">
-          <div class="modern-card slide-up stagger-2 app-card" style="height: 100%;">
-            <div class="modern-card__header app-card__header workschd-gradient">
-              <q-icon name="schedule" size="64px" class="q-mb-md" />
-              <h2 class="modern-text__title text-h4 q-mb-md">WorkSchd</h2>
-              <div class="text-subtitle1">Work Schedule Automation</div>
-            </div>
-            <div class="modern-card__body q-pa-lg">
-              <p class="text-body1 q-mb-lg">
-                Intelligent work schedule management system that automates team scheduling,
-                task assignment, and attendance tracking for optimal productivity.
+        <div class="landing-products fade-up">
+          <!-- Investand -->
+          <router-link
+            :to="{ name: 'investand-landing' }"
+            class="landing-products__card landing-products__card--investand"
+          >
+            <div class="landing-products__content">
+              <q-icon name="show_chart" class="landing-products__icon" />
+              <h3 class="landing-products__title">Investand</h3>
+              <p class="landing-products__description">
+                고급 투자 분석 플랫폼. 실시간 시장 데이터, DART 공시 통합,
+                AI 기반 인사이트로 더 현명한 투자 결정을 내리세요.
               </p>
-
-              <q-list dense class="q-mb-lg">
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="accent" name="auto_awesome" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Automated Scheduling</q-item-label>
-                    <q-item-label caption>AI-powered schedule generation</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="accent" name="groups" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Team Management</q-item-label>
-                    <q-item-label caption>Collaborative workspace</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="accent" name="task_alt" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Task Tracking</q-item-label>
-                    <q-item-label caption>Real-time progress monitoring</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <div class="row q-col-gutter-sm">
-                <div class="col-12">
-                  <q-btn
-                    class="modern-button modern-button--secondary full-width"
-                    label="Launch WorkSchd"
-                    icon-right="arrow_forward"
-                    :to="{ name: 'workschd-home' }"
-                    no-caps
-                  />
-                </div>
-              </div>
+              <span class="landing-products__link">
+                시작하기 <q-icon name="arrow_forward" size="18px" />
+              </span>
             </div>
-          </div>
+          </router-link>
+
+          <!-- WorkSchd -->
+          <router-link
+            :to="{ name: 'workschd-home' }"
+            class="landing-products__card landing-products__card--workschd"
+          >
+            <div class="landing-products__content">
+              <q-icon name="schedule" class="landing-products__icon" />
+              <h3 class="landing-products__title">WorkSchd</h3>
+              <p class="landing-products__description">
+                지능형 근무 일정 관리 시스템. AI 기반 자동 스케줄링,
+                팀 협업, 출퇴근 관리로 생산성을 극대화하세요.
+              </p>
+              <span class="landing-products__link">
+                시작하기 <q-icon name="arrow_forward" size="18px" />
+              </span>
+            </div>
+          </router-link>
+
+          <!-- Aviation -->
+          <router-link
+            :to="{ name: 'aviation-dashboard' }"
+            class="landing-products__card landing-products__card--aviation"
+          >
+            <div class="landing-products__content">
+              <q-icon name="flight" class="landing-products__icon" />
+              <h3 class="landing-products__title">Aviation</h3>
+              <p class="landing-products__description">
+                종합 항공 데이터 플랫폼. 실시간 기상 정보, 토픽 관리,
+                안전한 백업 솔루션을 제공합니다.
+              </p>
+              <span class="landing-products__link">
+                시작하기 <q-icon name="arrow_forward" size="18px" />
+              </span>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="landing-section landing-section--light">
+      <div class="landing-section__container">
+        <div class="landing-section__header fade-up">
+          <h2 class="landing-section__title">왜 VoyagerSS인가?</h2>
+          <p class="landing-section__subtitle">
+            구독형 서비스로 언제 어디서나 프리미엄 데이터에 접근하세요
+          </p>
         </div>
 
-        <!-- Aviation Application Card -->
-        <div class="col-12 col-md-4">
-          <div class="modern-card slide-up stagger-3 app-card" style="height: 100%;">
-            <div class="modern-card__header app-card__header aviation-gradient">
-              <q-icon name="flight" size="64px" class="q-mb-md" />
-              <h2 class="modern-text__title text-h4 q-mb-md">Aviation</h2>
-              <div class="text-subtitle1">Aviation Data Management</div>
-            </div>
-            <div class="modern-card__body q-pa-lg">
-              <p class="text-body1 q-mb-lg">
-                Comprehensive aviation data platform providing weather information,
-                topic management, and secure backup solutions for aviation professionals.
-              </p>
-
-              <q-list dense class="q-mb-lg">
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="info" name="wb_cloudy" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Weather Data</q-item-label>
-                    <q-item-label caption>Real-time aviation weather</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="info" name="topic" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Topics Management</q-item-label>
-                    <q-item-label caption>Organized information hub</q-item-label>
-                  </q-item-section>
-                </q-item>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-icon color="info" name="backup" />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label>Secure Backups</q-item-label>
-                    <q-item-label caption>Data protection & recovery</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-
-              <div class="row q-col-gutter-sm">
-                <div class="col-12">
-                  <q-btn
-                    class="modern-button modern-button--tertiary full-width"
-                    label="Launch Aviation"
-                    icon-right="arrow_forward"
-                    :to="{ name: 'aviation-dashboard' }"
-                    no-caps
-                  />
-                </div>
-              </div>
-            </div>
+        <div class="landing-features fade-up" style="background: transparent;">
+          <div class="landing-features__item" style="background: #f5f5f7;">
+            <q-icon name="verified" class="landing-features__icon" color="primary" />
+            <h4 class="landing-features__title">검증된 데이터</h4>
+            <p class="landing-features__text">
+              모든 데이터는 전문가 팀의 검증을 거쳐 제공됩니다.
+              신뢰할 수 있는 정보로 의사결정하세요.
+            </p>
+          </div>
+          <div class="landing-features__item" style="background: #f5f5f7;">
+            <q-icon name="update" class="landing-features__icon" color="accent" />
+            <h4 class="landing-features__title">실시간 업데이트</h4>
+            <p class="landing-features__text">
+              시장 변화에 즉각 대응. 실시간으로 업데이트되는
+              최신 데이터를 확인하세요.
+            </p>
+          </div>
+          <div class="landing-features__item" style="background: #f5f5f7;">
+            <q-icon name="support_agent" class="landing-features__icon" color="positive" />
+            <h4 class="landing-features__title">전문가 지원</h4>
+            <p class="landing-features__text">
+              데이터 해석부터 활용까지. 전문가 팀이
+              여러분의 성공을 지원합니다.
+            </p>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Platform Features Section -->
-      <div class="row justify-center q-mt-xl q-py-xl">
-        <div class="col-12 col-md-10">
-          <div class="modern-bg__glass q-pa-xl" style="border-radius: 24px;">
-            <h2 class="modern-text__title text-center q-mb-lg text-h4">Why Choose VoyagerSS?</h2>
+    <!-- Pricing Section -->
+    <section class="landing-section landing-section--gray">
+      <div class="landing-section__container">
+        <div class="landing-section__header fade-up">
+          <h2 class="landing-section__title">구독 플랜</h2>
+          <p class="landing-section__subtitle">
+            필요에 맞는 플랜을 선택하세요
+          </p>
+        </div>
 
-            <div class="row q-col-gutter-lg q-mt-md">
-              <div class="col-12 col-md-4 text-center">
-                <q-icon name="security" size="48px" color="primary" class="q-mb-md" />
-                <h5 class="text-weight-bold q-mb-sm">Secure & Reliable</h5>
-                <p class="text-body2">Enterprise-grade security with encrypted data storage and reliable uptime</p>
-              </div>
-              <div class="col-12 col-md-4 text-center">
-                <q-icon name="speed" size="48px" color="accent" class="q-mb-md" />
-                <h5 class="text-weight-bold q-mb-sm">Fast & Efficient</h5>
-                <p class="text-body2">Optimized performance for real-time data processing and analysis</p>
-              </div>
-              <div class="col-12 col-md-4 text-center">
-                <q-icon name="devices" size="48px" color="info" class="q-mb-md" />
-                <h5 class="text-weight-bold q-mb-sm">Multi-Platform</h5>
-                <p class="text-body2">Access from any device - desktop, tablet, or mobile with responsive design</p>
-              </div>
-            </div>
+        <div class="landing-pricing fade-up">
+          <div class="landing-pricing__card">
+            <div class="landing-pricing__name">Basic</div>
+            <div class="landing-pricing__price">₩29,000<span>/월</span></div>
+            <ul class="landing-pricing__features">
+              <li>기본 시장 데이터 접근</li>
+              <li>일간 리포트</li>
+              <li>이메일 지원</li>
+            </ul>
+            <button class="landing-btn landing-btn--dark" style="width: 100%;">
+              시작하기
+            </button>
+          </div>
+
+          <div class="landing-pricing__card landing-pricing__card--featured">
+            <div class="landing-pricing__name">Pro</div>
+            <div class="landing-pricing__price">₩79,000<span>/월</span></div>
+            <ul class="landing-pricing__features">
+              <li>전체 프리미엄 데이터</li>
+              <li>실시간 알림</li>
+              <li>API 접근</li>
+              <li>우선 지원</li>
+            </ul>
+            <button class="landing-btn landing-btn--dark" style="width: 100%;">
+              시작하기
+            </button>
+          </div>
+
+          <div class="landing-pricing__card">
+            <div class="landing-pricing__name">Enterprise</div>
+            <div class="landing-pricing__price">문의<span></span></div>
+            <ul class="landing-pricing__features">
+              <li>맞춤형 데이터 솔루션</li>
+              <li>전용 계정 매니저</li>
+              <li>SLA 보장</li>
+              <li>온사이트 교육</li>
+            </ul>
+            <button class="landing-btn landing-btn--dark" style="width: 100%;">
+              문의하기
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Footer -->
-    <div class="modern-page__footer q-mt-xl">
-      <div class="row justify-center">
-        <div class="col-12 col-md-10">
-          <q-separator dark class="q-mb-lg" />
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <h5 class="text-weight-bold q-mb-sm">VoyagerSS Platform</h5>
-              <p class="text-caption">
-                Empowering professionals with integrated solutions for investment analysis,
-                schedule management, and aviation data.
-              </p>
-            </div>
-            <div class="col-12 col-md-3">
-              <h6 class="text-weight-bold q-mb-sm">Applications</h6>
-              <q-list dense>
-                <q-item clickable :to="{ name: 'investand-landing' }">
-                  <q-item-section>Investand</q-item-section>
-                </q-item>
-                <q-item clickable :to="{ name: 'workschd-home' }">
-                  <q-item-section>WorkSchd</q-item-section>
-                </q-item>
-                <q-item clickable :to="{ name: 'aviation-dashboard' }">
-                  <q-item-section>Aviation</q-item-section>
-                </q-item>
-              </q-list>
-            </div>
-            <div class="col-12 col-md-3">
-              <h6 class="text-weight-bold q-mb-sm">Resources</h6>
-              <q-list dense>
-                <q-item clickable>
-                  <q-item-section>Documentation</q-item-section>
-                </q-item>
-                <q-item clickable>
-                  <q-item-section>Support</q-item-section>
-                </q-item>
-                <q-item clickable>
-                  <q-item-section>Privacy Policy</q-item-section>
-                </q-item>
-              </q-list>
-            </div>
+    <footer class="landing-footer">
+      <div class="landing-footer__container">
+        <div class="landing-footer__grid">
+          <div class="landing-footer__brand">
+            <h3>VoyagerSS</h3>
+            <p>
+              투자 분석, 일정 관리, 항공 데이터를 위한 통합 솔루션.
+              프리미엄 데이터로 여러분의 성공을 지원합니다.
+            </p>
           </div>
-          <div class="row q-mt-lg">
-            <div class="col-12 text-center">
-              <p class="text-caption q-mb-none">© 2024 VoyagerSS Platform. All rights reserved.</p>
-            </div>
+
+          <div class="landing-footer__column">
+            <h4>서비스</h4>
+            <ul>
+              <li><router-link :to="{ name: 'investand-landing' }">Investand</router-link></li>
+              <li><router-link :to="{ name: 'workschd-home' }">WorkSchd</router-link></li>
+              <li><router-link :to="{ name: 'aviation-dashboard' }">Aviation</router-link></li>
+            </ul>
+          </div>
+
+          <div class="landing-footer__column">
+            <h4>리소스</h4>
+            <ul>
+              <li><a href="#">문서</a></li>
+              <li><a href="#">API 레퍼런스</a></li>
+              <li><a href="#">블로그</a></li>
+            </ul>
+          </div>
+
+          <div class="landing-footer__column">
+            <h4>회사</h4>
+            <ul>
+              <li><a href="#">소개</a></li>
+              <li><a href="#">연락처</a></li>
+              <li><a href="#">개인정보처리방침</a></li>
+            </ul>
           </div>
         </div>
+
+        <div class="landing-footer__bottom">
+          <p>© 2024 VoyagerSS Platform. All rights reserved.</p>
+        </div>
       </div>
-    </div>
-  </q-page>
+    </footer>
+  </div>
 </template>
 
 <script setup lang="ts">
-// No additional logic needed for static landing page
+import { onMounted, onUnmounted } from 'vue'
+
+// Scroll animation observer
+let observer: IntersectionObserver | null = null
+
+onMounted(() => {
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+        }
+      })
+    },
+    { threshold: 0.1 }
+  )
+
+  document.querySelectorAll('.fade-up').forEach((el) => {
+    observer?.observe(el)
+  })
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
+})
 </script>
-
-<style scoped lang="scss">
-.app-card {
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  &__header {
-    padding: 2rem;
-    text-align: center;
-    color: white;
-    border-radius: 16px 16px 0 0;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-.investand-gradient {
-  background: linear-gradient(145deg, #4361ee, #3a0ca3);
-}
-
-.workschd-gradient {
-  background: linear-gradient(145deg, #4cc9f0, #4361ee);
-}
-
-.aviation-gradient {
-  background: linear-gradient(145deg, #06d6a0, #118ab2);
-}
-
-.modern-button {
-  &--secondary {
-    background: linear-gradient(145deg, #4cc9f0, #4361ee);
-  }
-
-  &--tertiary {
-    background: linear-gradient(145deg, #06d6a0, #118ab2);
-  }
-}
-
-// Animation stagger delays
-.stagger-1 {
-  animation-delay: 0.1s;
-}
-
-.stagger-2 {
-  animation-delay: 0.2s;
-}
-
-.stagger-3 {
-  animation-delay: 0.3s;
-}
-</style>

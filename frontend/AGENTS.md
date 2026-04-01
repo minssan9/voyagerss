@@ -23,7 +23,14 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
 - **Script Setup**: Always use `<script setup lang="ts">`.
 - **Functional Patterns**: Use functional and declarative programming patterns; avoid classes.
 - **VueUse**: Leverage **VueUse** functions where applicable.
-- **Styling**: Standardize styles in `src/assets/styles`. Avoid scoped styles if they can be global tokens.
+- **Styling**: 
+  - **STRICT ENFORCEMENT**: **All `.vue` files MUST use global stylesheets** located in `src/assets/styles`.
+  - **FORBIDDEN**: Do NOT use `<style scoped>`. All styles must be extracted to the global SCSS files.
+  - **Structure**:
+    - Use `components.scss` for reusable component styles.
+    - Use `utilities.scss` for helper classes.
+    - Create/Use module files in `src/assets/styles/views/` or `src/assets/styles/layout/` for specific page/layout styles and import them in `index.scss`.
+    - Use BEM naming convention to prevent collisions (e.g., `.page-market-lab__header`).
 - **API Handling**: response should follow the structure:
   - `const response = await api.get(...)`
   - `rows.value = response.data.content;`
@@ -39,3 +46,18 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
 - Optimize Web Vitals (LCP, CLS, FID).
 - Use dynamic loading for non-critical components.
 - Optimize images using WebP format where possible.
+
+## Design System Standards
+- **Global Styles Directory**: `src/assets/styles/`
+  - `components.scss`: Reusable UI components (Cards, Buttons, Inputs, Tables).
+  - `utilities.scss`: Helper classes (Margins, Padding, Animations, Responsive).
+  - `variables.scss`: Global styling tokens (Colors, Spacing, Fonts).
+- **Module Identity**: Use defined gradient classes for branding:
+  - Investand: `.investand-gradient` (Blue/Purple)
+  - WorkSchd: `.workschd-gradient` (Cyan/Blue)
+  - Aviation: `.aviation-gradient` (Green/Teal)
+- **Component Patterns**:
+  - **Cards**: Use `.app-card` or `.modern-card` for consistent elevation, headers, and hover effects.
+  - **Buttons**: Use `.modern-button` with `--secondary` or `--tertiary` modifiers.
+  - **Animations**: Use `.fade-in`, `.slide-up`, and `.stagger-{1-10}` classes for consistent entry effects.
+- **Responsiveness**: Use `.mobile-hide` and `.desktop-hide` for visibility control.

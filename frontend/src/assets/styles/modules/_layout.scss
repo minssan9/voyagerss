@@ -1,0 +1,39 @@
+.nav-item {
+    border-radius: 8px;
+    margin: 4px 8px;
+    color: #64748b;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-height: 48px;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.05);
+        color: #4f46e5;
+    }
+
+    &.active {
+        background: linear-gradient(90deg, #4f46e5 0%, #6366f1 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+
+        .q-icon {
+            color: white;
+        }
+    }
+}
+
+.nav-expansion-header {
+    border-radius: 8px;
+    margin: 4px 8px;
+    font-weight: 500;
+    color: #64748b;
+
+    &:hover {
+        background: rgba(99, 102, 241, 0.05);
+        color: #4f46e5;
+    }
+}
+
+.q-expansion-item__content {
+    padding-left: 15px;
+}

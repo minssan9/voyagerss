@@ -1,0 +1,20 @@
+{
+    "name": "voyagerss",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Voyagerss monorepo - backend & frontend",
+    "scripts": {
+        "setup": "npm install --prefix backend && npm install --prefix frontend",
+        "predev": "npx kill-port 9002 9003",
+        "dev": "concurrently -n be,fe -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+        "build:backend": "npm run build --prefix backend",
+        "build:frontend": "npm run build --prefix frontend",
+        "build:all": "npm run build:backend && npm run build:frontend",
+        "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
+        "format": "npm run format --prefix backend && npm run format --prefix frontend"
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.2",
+        "kill-port": "^2.0.1"
+    }
+}

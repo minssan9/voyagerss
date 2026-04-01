@@ -19,9 +19,37 @@ router.get('/', async (req: Request, res: Response) => {
         );
 
         if (!assets || assets.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No asset data available. Please trigger data collection first.'
+            // Mock data for development
+            const mockAssets = [
+                { assetCode: 'GC=F', assetName: 'Gold', category: 'commodity', closePrice: 2050.50, changePercent: 0.5 },
+                { assetCode: 'BTC-USD', assetName: 'Bitcoin', category: 'crypto', closePrice: 42000.00, changePercent: 2.1 },
+                { assetCode: '^GSPC', assetName: 'S&P 500', category: 'index', closePrice: 4800.25, changePercent: 0.8 },
+                { assetCode: 'CL=F', assetName: 'Crude Oil', category: 'commodity', closePrice: 75.20, changePercent: -1.2 },
+                { assetCode: 'EURUSD=X', assetName: 'EUR/USD', category: 'forex', closePrice: 1.09, changePercent: 0.1 },
+            ];
+
+            const formattedData = mockAssets.map(asset => ({
+                assetCode: asset.assetCode,
+                assetName: asset.assetName,
+                category: asset.category,
+                date: new Date(),
+                closePrice: asset.closePrice,
+                change: asset.closePrice * (asset.changePercent / 100),
+                changePercent: asset.changePercent,
+                volume: '1000000',
+                yearToDateReturn: asset.changePercent * 10,
+                oneMonthReturn: asset.changePercent * 2,
+                threeMonthReturn: asset.changePercent * 5,
+                sixMonthReturn: asset.changePercent * 8,
+                oneYearReturn: asset.changePercent * 12,
+                volatility: 15.5,
+            }));
+
+            return res.json({
+                success: true,
+                data: formattedData,
+                timestamp: new Date().toISOString(),
+                isMock: true
             });
         }
 
@@ -171,9 +199,57 @@ router.get('/normalized/:period', async (req: Request, res: Response) => {
         );
 
         if (!normalizedData || normalizedData.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No normalized data available. Please trigger data collection first.'
+            // Mock data fallback for development
+            console.log(`No normalized data found for ${period}, generating mock data...`);
+
+            const mockAssets = [
+                { assetCode: 'GC=F', assetName: 'Gold', category: 'commodity' },
+                { assetCode: 'BTC-USD', assetName: 'Bitcoin', category: 'crypto' },
+                { assetCode: '^GSPC', assetName: 'S&P 500', category: 'index' },
+                { assetCode: 'CL=F', assetName: 'Crude Oil', category: 'commodity' },
+                { assetCode: 'EURUSD=X', assetName: 'EUR/USD', category: 'forex' }
+            ];
+
+            const daysMap: Record<string, number> = { '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+            const daysCount = daysMap[period] || 30;
+            const mockBaseDate = new Date();
+            mockBaseDate.setDate(mockBaseDate.getDate() - daysCount);
+
+            const mockGroupedData = mockAssets.map(asset => {
+                let currentValue = 100;
+                let currentPrice = 1000; // Arbitrary start price
+
+                const dataPoints = Array.from({ length: daysCount }, (_, i) => {
+                    const date = new Date(mockBaseDate);
+                    date.setDate(date.getDate() + i);
+
+                    const change = (Math.random() - 0.48) * 2; // Slight upward bias
+                    currentValue = currentValue * (1 + change / 100);
+                    currentPrice = currentPrice * (1 + change / 100);
+
+                    return {
+                        date: date.toISOString().split('T')[0],
+                        normalizedValue: currentValue,
+                        actualPrice: currentPrice,
+                        percentChange: change
+                    };
+                });
+
+                return {
+                    assetCode: asset.assetCode,
+                    assetName: asset.assetName,
+                    category: asset.category,
+                    data: dataPoints
+                };
+            });
+
+            return res.json({
+                success: true,
+                data: mockGroupedData,
+                baseDate: mockBaseDate.toISOString(),
+                period,
+                timestamp: new Date().toISOString(),
+                isMock: true
             });
         }
 

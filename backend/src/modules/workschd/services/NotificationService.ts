@@ -277,7 +277,7 @@ export class NotificationService {
         channel: NotificationChannel.KAKAO,
         status: 'PENDING',
         message,
-        metadata: metadata ? JSON.stringify(metadata) : null
+        metadata: metadata || null
       }
     });
 
@@ -536,7 +536,7 @@ export class NotificationService {
     // Parse metadata JSON string to object
     const parsedNotifications = notifications.map(n => ({
       ...n,
-      metadata: n.metadata ? JSON.parse(n.metadata as string) : null
+      metadata: n.metadata
     }));
 
     return {

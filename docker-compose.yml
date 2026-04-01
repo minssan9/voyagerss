@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: voyagerss-backend
     ports:
-      - "6172:6172"
+      - "9002:9002"
     env_file:
       - .env.dev
     environment:
@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
     container_name: voyagerss-frontend
     ports:
-      - "6171:6171"
+      - "9003:9003"
     depends_on:
       - backend
     restart: always

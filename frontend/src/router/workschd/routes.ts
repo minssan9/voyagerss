@@ -6,16 +6,22 @@ const routes: RouteRecordRaw[] = [
         path: '/workschd',
         name: 'Workschd',
         component: () => import('@/layout/RouteView.vue'),
-        meta: { icon: 'business_center' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
-        redirect: { name: 'TeamManage (Manager)' },
+        meta: { icon: 'business_center', project: 'workschd' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
+        redirect: { name: 'workschd-home' },
         children: [
+            // Home page
+            {
+                path: '',
+                name: 'workschd-home',
+                component: () => import('@/views/workschd/main/Home.vue'),
+                meta: { icon: 'home', title: 'WorkSchd Home' }
+            },
             // Team routes - flattened to 1 depth
             {
                 path: 'team/join/:token', // :token
                 name: 'TeamJoin (Worker)',
                 component: () => import('@/views/workschd/team/TeamJoin.vue'),
-                meta: { icon: 'group_add' },
-                hidden: true
+                meta: { icon: 'group_add', hidden: true }
             },
             {
                 path: 'team/manage',
@@ -42,6 +48,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/workschd/task/TaskListMobile.vue'),
                 meta: { icon: 'work', }
             },
+            // Funeral board - scraped live ceremony listings (인천/부천)
+            {
+                path: 'funeral-board',
+                name: 'FuneralBoard',
+                component: () => import('@/views/workschd/FuneralBoardView.vue'),
+                meta: { icon: 'home' }
+            },
             // Admin routes
             {
                 path: 'admin/dashboard',
@@ -52,7 +65,7 @@ const routes: RouteRecordRaw[] = [
             // Auth callback
             {
                 path: 'auth/callback',
-                name: 'AuthCallback',
+                name: 'WorkschdAuthCallback',
                 component: () => import('@/views/common/auth/AuthCallback.vue'),
                 meta: { hidden: true }
             }

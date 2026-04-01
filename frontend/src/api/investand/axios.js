@@ -6,7 +6,7 @@ import { Notify } from 'quasar'
 
 // create an axios instance
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Access-Control-Allow-Credentials': true,
@@ -33,7 +33,7 @@ service.interceptors.request.use(
     }
     return config
   },
-  error => {  
+  error => {
     return Promise.reject(error)
   }
 )
@@ -48,13 +48,13 @@ service.interceptors.response.use(
       userStore.setAccessToken(response.headers.authorization)
     }
 
-    if (response.status < 200 || response.status >= 300) { 
+    if (response.status < 200 || response.status >= 300) {
       return Promise.reject(new Error(response.statusText || 'Error'))
     } else {
       return response
     }
   },
-  error => { 
+  error => {
     errLogic(error)
     return Promise.reject(error)
   }
@@ -69,12 +69,12 @@ const ServerError = 500
 
 export const requestFile = (method, url, data) => {
   return service({
-      method,
-      url: url,
-      data,
-      processData: false,
-      contentType: 'Content-Type: Multipart-file'
-    })
+    method,
+    url: url,
+    data,
+    processData: false,
+    contentType: 'Content-Type: Multipart-file'
+  })
     .then(result => result)
     .catch(err => errLogic(err))
     .catch(err => {
@@ -89,13 +89,12 @@ export const requestFile = (method, url, data) => {
 
 function errLogic(err) {
   const userStore = useUserStore()
-  
+
   if (err.response && err.response.status === Unauthorized) {
     userStore.logout()
       .catch(() => apiError.onUnauthorized(err))
       .finally(() => {
-        router.replace('/')
-        router.go()
+        // window.location.href = '/'
       })
   }
   else if (err.response && (err.response.status === Forbidden || err.response.status === MethodNotAllowed)) return apiError.onForbidden(err)
@@ -128,7 +127,7 @@ const apiError = {
     return Promise.reject(err)
   },
   onBadRequest(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' +`\n 잘못된 요청입니다. \n   `
+    err.message = err.response.data.message ? err.response.data.message : '' + `\n 잘못된 요청입니다. \n   `
     return Promise.reject(err)
   },
   onNotFound(err) {

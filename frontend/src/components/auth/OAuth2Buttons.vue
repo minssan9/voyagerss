@@ -39,16 +39,16 @@ import { ref } from 'vue'
 
 const isLoading = ref(false)
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 
 const loginWithGoogle = () => {
   isLoading.value = true
-  window.location.href = `${API_BASE}/api/workschd/auth/google`
+  window.location.href = `${API_BASE}/workschd/auth/google`
 }
 
 const loginWithKakao = () => {
   isLoading.value = true
-  window.location.href = `${API_BASE}/api/workschd/auth/kakao`
+  window.location.href = `${API_BASE}/workschd/auth/kakao`
 }
 </script>
 

@@ -6,6 +6,7 @@ import { TaskController } from './controllers/TaskController';
 import { ShopController } from './controllers/ShopController';
 import { NotificationController } from './controllers/NotificationController';
 import { StatisticsController } from './controllers/StatisticsController';
+import { ScraperController } from './controllers/ScraperController';
 import {
     authenticate,
     isTeamLeader,
@@ -22,6 +23,7 @@ const taskController = new TaskController();
 const shopController = new ShopController();
 const notificationController = new NotificationController();
 const statisticsController = new StatisticsController();
+const scraperController = new ScraperController();
 
 // ===== Auth Routes (Public) =====
 router.post('/auth/login', authController.authenticateUser.bind(authController));
@@ -102,5 +104,19 @@ router.get('/statistics/dashboard', authenticate, statisticsController.getDashbo
 router.get('/statistics/team/:teamId', authenticate, statisticsController.getTeamStatistics.bind(statisticsController));
 router.get('/statistics/worker/:workerId', authenticate, statisticsController.getWorkerStatistics.bind(statisticsController));
 router.get('/statistics/tasks/date-range', authenticate, statisticsController.getTaskStatisticsByDateRange.bind(statisticsController));
+
+// ===== Scraper Routes =====
+// Trigger a fresh scrape (team leaders / admins only)
+router.post('/scrape', authenticate, isTeamLeader, scraperController.triggerScrape.bind(scraperController));
+// List scraped funeral ceremonies (any authenticated user)
+router.get('/scraped-funerals', authenticate, scraperController.getScrapedFunerals.bind(scraperController));
+// List stored funeral homes catalog
+router.get('/funeral-homes', authenticate, scraperController.getFuneralHomes.bind(scraperController));
+// Scraper metadata / available sites
+router.get('/scraper/status', authenticate, scraperController.getStatus.bind(scraperController));
+// Sync scraper source list to funeral_home table
+router.post('/scraper/funeral-homes/sync', authenticate, isTeamLeader, scraperController.syncFuneralHomes.bind(scraperController));
+// Link a scraped funeral record to a Task record
+router.post('/scraped-funerals/:funeralId/link-task', authenticate, isTeamLeader, scraperController.linkToTask.bind(scraperController));
 
 export default router;

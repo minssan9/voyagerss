@@ -1,81 +1,49 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { MarketApi } from '@/api/investand/api-market';
+import { GlobalAssetApi, type NormalizedAssetData, type TimePeriod } from '@/api/investand/globalAssetApi';
 
 export interface Asset {
     id: string;
     name: string;
     color: string;
     category: string;
-    volatility: number;
 }
 
 export const ASSETS: Asset[] = [
-    { id: 'gold', name: 'Gold', color: '#D4AF37', category: 'Commodity', volatility: 0.8 },
-    { id: 'silver', name: 'Silver', color: '#C0C0C0', category: 'Commodity', volatility: 1.2 },
-    { id: 'copper', name: 'Copper', color: '#B87333', category: 'Commodity', volatility: 1.0 },
-    { id: 'wti', name: 'WTI Oil', color: '#000000', category: 'Energy', volatility: 1.5 },
-    { id: 'usdkrw', name: 'USD/KRW', color: '#2b6cb0', category: 'Forex', volatility: 0.4 },
-    { id: 'snp500', name: 'S&P 500', color: '#2f855a', category: 'Index', volatility: 0.9 },
-    { id: 'kospi', name: 'KOSPI', color: '#c53030', category: 'Index', volatility: 1.1 },
-    { id: 'nikkei', name: 'Nikkei 225', color: '#805ad5', category: 'Index', volatility: 1.0 }
+    // Commodities
+    { id: 'GOLD', name: 'Gold', color: '#FFD700', category: 'commodity' },
+    { id: 'SILVER', name: 'Silver', color: '#C0C0C0', category: 'commodity' },
+    { id: 'WTI', name: 'WTI Oil', color: '#000000', category: 'commodity' },
+    // Indices
+    { id: 'SPX', name: 'S&P 500', color: '#2563EB', category: 'index' },
+    { id: 'NDX', name: 'Nasdaq 100', color: '#10B981', category: 'index' },
+    { id: 'KOSPI', name: 'KOSPI', color: '#DC2626', category: 'index' },
+    // Crypto
+    { id: 'BTC', name: 'Bitcoin', color: '#F7931A', category: 'crypto' },
+    // Forex
+    { id: 'USDKRW', name: 'USD/KRW', color: '#3B82F6', category: 'forex' },
+    { id: 'DXY', name: 'Dollar Index', color: '#059669', category: 'dollar_index' }
 ];
 
 export const useMarketLabStore = defineStore('marketlab', () => {
     // State
-    const activeAssets = ref<string[]>(['gold', 'usdkrw', 'snp500']);
-    const timeRange = ref<'1M' | '3M' | '6M' | '1Y'>('1Y');
-    const marketData = ref<{ labels: string[], datasets: Record<string, number[]> } | null>(null);
+    const activeAssets = ref<string[]>(['GOLD', 'SPX', 'USDKRW']);
+    const timeRange = ref<TimePeriod>('1Y');
+    const marketData = ref<NormalizedAssetData[]>([]);
+    const loading = ref(false);
 
     // Actions
     async function generateMarketData() {
-        const totalDays = 365;
-        // Reset data
-        const labels: string[] = [];
-        const datasets: Record<string, number[]> = {};
-
-        // Initialize datasets
-        activeAssets.value.forEach(id => datasets[id] = []);
-
+        loading.value = true;
         try {
-            // Fetch data for all active assets
-            const promises = activeAssets.value.map(id => MarketApi.getHistory(id, totalDays));
-            const results = await Promise.all(promises);
-
-            // Process results
-            const dateSet = new Set<string>();
-            const dataMap: Record<string, Record<string, number>> = {};
-
-            results.forEach((res, index) => {
-                const assetId = activeAssets.value[index];
-                const cleanData = res.data.data || [];
-
-                dataMap[assetId] = {};
-                cleanData.forEach(item => {
-                    const d = item.date.split('T')[0];
-                    dateSet.add(d);
-                    dataMap[assetId][d] = item.close;
-                });
-            });
-
-            // Sort dates
-            labels.push(...Array.from(dateSet).sort());
-
-            // Fill datasets (handle missing data for gaps)
-            labels.forEach(date => {
-                activeAssets.value.forEach(assetId => {
-                    const val = dataMap[assetId]?.[date];
-                    const dataset = datasets[assetId];
-                    // Simple gap filling: use last pushed value or 0
-                    const lastVal = dataset.length > 0 ? dataset[dataset.length - 1] : 0;
-                    dataset.push(val || lastVal);
-                });
-            });
-
-            marketData.value = { labels, datasets };
-
+            const response = await GlobalAssetApi.getNormalizedData(timeRange.value);
+            if (response.data.success) {
+                marketData.value = response.data.data;
+            }
         } catch (e) {
             console.error('Failed to fetch market data', e);
+        } finally {
+            loading.value = false;
         }
     }
 
@@ -89,71 +57,75 @@ export const useMarketLabStore = defineStore('marketlab', () => {
         }
     }
 
-    function setTimeRange(range: '1M' | '3M' | '6M' | '1Y') {
+    function setTimeRange(range: TimePeriod) {
         timeRange.value = range;
+        generateMarketData();
     }
 
     function resetAll() {
-        activeAssets.value = ['gold', 'usdkrw', 'snp500'];
+        activeAssets.value = ['GOLD', 'SPX', 'USDKRW'];
         timeRange.value = '1Y';
         generateMarketData();
     }
 
     // Getters
     const normalizedData = computed(() => {
-        if (!marketData.value) return null;
+        if (marketData.value.length === 0) return null;
 
-        let daysToKeep = 365;
-        if (timeRange.value === '1M') daysToKeep = 30;
-        if (timeRange.value === '3M') daysToKeep = 90;
-        if (timeRange.value === '6M') daysToKeep = 180;
+        const selectedData = marketData.value.filter(asset =>
+            activeAssets.value.includes(asset.assetCode)
+        );
 
-        const startIndex = Math.max(0, marketData.value.labels.length - daysToKeep);
-        const slicedLabels = marketData.value.labels.slice(startIndex);
+        if (selectedData.length === 0) return null;
 
-        const datasets = ASSETS
-            .filter(asset => activeAssets.value.includes(asset.id))
-            .map(asset => {
-                const rawValues = marketData.value!.datasets[asset.id].slice(startIndex);
-                // Avoid division by zero
-                const baseValue = rawValues.length > 0 ? rawValues[0] || 100 : 100;
-                const normalizedValues = rawValues.map(v => (v / baseValue) * 100);
+        // Get all dates
+        const allDates = new Set<string>();
+        selectedData.forEach(asset => {
+            asset.data.forEach(d => allDates.add(d.date));
+        });
 
-                return {
-                    label: asset.name,
-                    data: normalizedValues,
-                    borderColor: asset.color,
-                    backgroundColor: asset.color,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    tension: 0.1,
-                    fill: false
-                };
-            });
+        const labels = Array.from(allDates).sort();
 
-        return {
-            labels: slicedLabels,
-            datasets
-        };
-    });
-
-    const assetDetails = computed(() => {
-        if (!marketData.value) return [];
-
-        return ASSETS.map(asset => {
-            const rawData = marketData.value!.datasets[asset.id] || [];
-            if (rawData.length === 0) return { ...asset, currentValue: 0, changePercent: 0, sparkline: [] };
-
-            const current = rawData[rawData.length - 1];
-            const prev = rawData.length > 1 ? rawData[rawData.length - 2] : current;
-            const changePercent = prev !== 0 ? ((current - prev) / prev) * 100 : 0;
+        const datasets = selectedData.map(asset => {
+            const dataMap = new Map(asset.data.map(d => [d.date, d.normalizedValue]));
 
             return {
-                ...asset,
+                label: asset.assetName,
+                data: labels.map(label => dataMap.get(label) || null),
+                borderColor: getAssetColor(asset.assetCode),
+                backgroundColor: getAssetColor(asset.assetCode) + '20',
+                borderWidth: 2,
+                tension: 0.1,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                fill: false
+            };
+        });
+
+        return { labels, datasets };
+    });
+
+    function getAssetColor(assetCode: string): string {
+        return ASSETS.find(a => a.id === assetCode)?.color || '#6B7280';
+    }
+
+    const assetDetails = computed(() => {
+        return marketData.value.map(asset => {
+            const lastData = asset.data.length > 0 ? asset.data[asset.data.length - 1] : null;
+            const prevData = asset.data.length > 1 ? asset.data[asset.data.length - 2] : lastData;
+
+            const current = lastData?.normalizedValue || 100;
+            const prev = prevData?.normalizedValue || 100;
+            const changePercent = ((current - prev) / prev) * 100;
+
+            return {
+                id: asset.assetCode,
+                name: asset.assetName,
+                category: asset.category,
                 currentValue: current,
                 changePercent,
-                sparkline: rawData.slice(-30)
+                sparkline: asset.data.slice(-30).map(d => d.normalizedValue),
+                color: getAssetColor(asset.assetCode)
             };
         });
     });
@@ -161,6 +133,7 @@ export const useMarketLabStore = defineStore('marketlab', () => {
     return {
         activeAssets,
         timeRange,
+        loading,
         generateMarketData,
         toggleAsset,
         setTimeRange,

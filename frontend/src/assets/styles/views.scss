@@ -325,3 +325,559 @@
         margin-top: $spacing-xs;
     }
 }
+
+// ============================================
+// Premium Landing Page (Tesla/Apple Inspired)
+// ============================================
+
+// Landing Page Container
+.landing {
+    --section-padding: clamp(120px, 15vh, 200px);
+
+    &-page {
+        background-color: $white;
+        overflow-x: hidden;
+    }
+}
+
+// Full-Viewport Hero Section
+.landing-hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: clamp(100px, 12vh, 160px) 0;
+    position: relative;
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: $white;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(ellipse at 50% 0%, rgba(67, 97, 238, 0.15) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    &__content {
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    &__title {
+        font-family: $font-secondary;
+        font-size: clamp(3rem, 8vw, 6rem);
+        font-weight: $font-extrabold;
+        line-height: 1.05;
+        margin-bottom: $spacing-lg;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, $white 0%, rgba(255, 255, 255, 0.8) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    &__subtitle {
+        font-size: clamp(1.25rem, 3vw, 1.75rem);
+        font-weight: $font-medium;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: $spacing-md;
+        line-height: 1.4;
+    }
+
+    &__description {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: rgba(255, 255, 255, 0.6);
+        max-width: 700px;
+        margin: 0 auto $spacing-2xl;
+        line-height: 1.6;
+    }
+
+    &__actions {
+        display: flex;
+        gap: $spacing-md;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    &__scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: bounce 2s infinite;
+        opacity: 0.6;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+.landing-section {
+    padding: clamp(100px, 12vh, 160px) 0;
+    position: relative;
+
+    &--light {
+        background-color: $white;
+        color: $text-dark;
+    }
+
+    &--dark {
+        background-color: #0a0a0a;
+        color: $white;
+    }
+
+    &--gray {
+        background-color: #f5f5f7;
+        color: $text-dark;
+    }
+
+    &__container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 $spacing-lg;
+    }
+
+    &__header {
+        text-align: center;
+        margin-bottom: $spacing-3xl + $spacing-xl;
+    }
+
+    &__title {
+        font-family: $font-secondary;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: $font-bold;
+        margin-bottom: $spacing-md;
+        letter-spacing: -0.02em;
+    }
+
+    &__subtitle {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        opacity: 0.7;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+}
+
+// Value Proposition Stats
+.landing-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-2xl;
+    text-align: center;
+
+    &__item {
+        padding: $spacing-lg;
+    }
+
+    &__value {
+        font-family: $font-secondary;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: $font-bold;
+        background: $gradient-primary;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__label {
+        font-size: $text-lg;
+        font-weight: $font-medium;
+        opacity: 0.8;
+    }
+
+    &__description {
+        font-size: $text-sm;
+        opacity: 0.6;
+        margin-top: $spacing-xs;
+    }
+}
+
+// Product Showcase Grid (Apple Style)
+.landing-products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-lg;
+
+    @media (max-width: $breakpoint-lg) {
+        grid-template-columns: 1fr;
+        gap: $spacing-xl;
+    }
+
+    &__card {
+        position: relative;
+        border-radius: $border-radius-2xl;
+        overflow: hidden;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: $spacing-2xl;
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+            box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        cursor: pointer;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 1;
+        }
+
+        &:hover {
+            transform: scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        &--investand {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        }
+
+        &--workschd {
+            background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);
+        }
+
+        &--aviation {
+            background: linear-gradient(135deg, #06d6a0 0%, #118ab2 100%);
+        }
+    }
+
+    &__content {
+        position: relative;
+        z-index: 2;
+        color: $white;
+    }
+
+    &__icon {
+        font-size: 3rem;
+        margin-bottom: $spacing-md;
+        opacity: 0.9;
+    }
+
+    &__title {
+        font-family: $font-secondary;
+        font-size: $text-2xl;
+        font-weight: $font-bold;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__description {
+        font-size: $text-base;
+        opacity: 0.85;
+        margin-bottom: $spacing-lg;
+        line-height: 1.6;
+    }
+
+    &__link {
+        display: inline-flex;
+        align-items: center;
+        gap: $spacing-xs;
+        color: $white;
+        font-weight: $font-semibold;
+        text-decoration: none;
+        transition: gap 0.3s ease;
+
+        &:hover {
+            gap: $spacing-sm;
+        }
+    }
+}
+
+// Feature Grid
+.landing-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-xl;
+
+    &__item {
+        text-align: center;
+        padding: $spacing-xl;
+        border-radius: $border-radius-xl;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease, background 0.3s ease;
+
+        &:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    &__icon {
+        font-size: 2.5rem;
+        margin-bottom: $spacing-md;
+        display: inline-block;
+    }
+
+    &__title {
+        font-size: $text-xl;
+        font-weight: $font-bold;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__text {
+        font-size: $text-base;
+        opacity: 0.7;
+        line-height: 1.6;
+    }
+}
+
+// Premium CTA Button
+.landing-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-base $spacing-2xl;
+    font-size: $text-lg;
+    font-weight: $font-semibold;
+    border-radius: $border-radius-pill;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: pointer;
+    border: none;
+
+    &--primary {
+        background: $white;
+        color: #0a0a0a;
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    &--secondary {
+        background: transparent;
+        color: $white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+
+        &:hover {
+            border-color: $white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    &--dark {
+        background: #0a0a0a;
+        color: $white;
+
+        &:hover {
+            background: #1a1a1a;
+            transform: translateY(-2px);
+        }
+    }
+}
+
+// Pricing Section
+.landing-pricing {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-xl;
+    max-width: 1000px;
+    margin: 0 auto;
+
+    &__card {
+        background: $white;
+        border-radius: $border-radius-2xl;
+        padding: $spacing-2xl;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+
+        &:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        &--featured {
+            border: 2px solid $modern-primary;
+
+            &::before {
+                content: 'POPULAR';
+                position: absolute;
+                top: -12px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: $gradient-primary;
+                color: $white;
+                padding: $spacing-xs $spacing-md;
+                border-radius: $border-radius-pill;
+                font-size: $text-xs;
+                font-weight: $font-bold;
+                letter-spacing: 0.05em;
+            }
+        }
+    }
+
+    &__name {
+        font-size: $text-xl;
+        font-weight: $font-bold;
+        color: $text-dark;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__price {
+        font-family: $font-secondary;
+        font-size: $text-4xl;
+        font-weight: $font-extrabold;
+        color: $modern-primary;
+        margin-bottom: $spacing-md;
+
+        span {
+            font-size: $text-base;
+            font-weight: $font-normal;
+            color: $text-light;
+        }
+    }
+
+    &__features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 $spacing-xl;
+        text-align: left;
+
+        li {
+            padding: $spacing-sm 0;
+            border-bottom: 1px solid $gray-100;
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+
+            &::before {
+                content: '✓';
+                color: $success-color;
+                font-weight: $font-bold;
+            }
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+// Footer
+.landing-footer {
+    background: #0a0a0a;
+    color: $white;
+    padding: $spacing-3xl $spacing-lg $spacing-xl;
+
+    &__container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: 2fr repeat(3, 1fr);
+        gap: $spacing-2xl;
+        margin-bottom: $spacing-2xl;
+
+        @media (max-width: $breakpoint-md) {
+            grid-template-columns: 1fr;
+            gap: $spacing-xl;
+        }
+    }
+
+    &__brand {
+        h3 {
+            font-size: $text-2xl;
+            font-weight: $font-bold;
+            margin-bottom: $spacing-md;
+        }
+
+        p {
+            opacity: 0.6;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+    }
+
+    &__column {
+        h4 {
+            font-size: $text-sm;
+            font-weight: $font-bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: $spacing-md;
+            opacity: 0.5;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+                margin-bottom: $spacing-sm;
+            }
+
+            a {
+                color: rgba(255, 255, 255, 0.8);
+                text-decoration: none;
+                transition: color 0.2s ease;
+
+                &:hover {
+                    color: $white;
+                }
+            }
+        }
+    }
+
+    &__bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: $spacing-xl;
+        text-align: center;
+        opacity: 0.5;
+        font-size: $text-sm;
+    }
+}
+
+// Scroll Animations
+.fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+
+    &.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    40% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    60% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}

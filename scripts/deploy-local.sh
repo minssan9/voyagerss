@@ -10,5 +10,5 @@ echo "Building and starting containers in detached mode..."
 docker-compose up -d --build
 
 echo "Deployment complete."
-echo "Frontend: http://localhost:6171"
-echo "Backend: http://localhost:6172"
+echo "Frontend: http://localhost:9003"
+echo "Backend: http://localhost:9002"
