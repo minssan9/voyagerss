@@ -17,7 +17,7 @@ export class IncheonMedicalScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // PHP-based site — table or div layout
-    $('table tbody tr').each((_, el) => {
+    $('table tbody tr').each((_: any, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
 
