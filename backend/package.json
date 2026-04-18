@@ -9,7 +9,7 @@
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
-    "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/investand.prisma && prisma generate --schema=./prisma/aviation.prisma",
+    "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/investand.prisma && prisma generate --schema=./prisma/aviation.prisma && prisma generate --schema=./prisma/autodev.prisma",
     "postinstall": "npm run generate",
     "test": "jest",
     "collect:dart": "ts-node -r tsconfig-paths/register src/modules/investand/batch/collectDartData.ts",
