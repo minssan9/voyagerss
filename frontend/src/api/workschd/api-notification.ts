@@ -61,7 +61,7 @@ const markAsRead = (id: number): Promise<AxiosResponse<void>> => {
 
 // 모든 알림 읽음 처리
 const markAllAsRead = (): Promise<AxiosResponse<void>> => {
-  return service.put('/workschd/notifications/read-all')
+  return service.put('/workschd/notifications/mark-all-read')
 }
 
 // 알림 삭제
@@ -71,7 +71,7 @@ const deleteNotification = (id: number): Promise<AxiosResponse<void>> => {
 
 // 읽지 않은 알림 개수 조회
 const getUnreadCount = (): Promise<AxiosResponse<{ count: number }>> => {
-  return service.get('/workschd/notifications/unread-count')
+  return service.get('/workschd/notifications/unread/count')
 }
 
 export default {

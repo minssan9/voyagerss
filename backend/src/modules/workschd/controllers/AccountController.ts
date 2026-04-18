@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
 import { AccountService } from '../services/AccountService';
+import { AccountScheduleService } from '../services/AccountScheduleService';
 import { AuthRequest } from '../middleware/authMiddleware';
 
 export class AccountController {
     private accountService: AccountService;
+    private scheduleService: AccountScheduleService;
 
     constructor() {
         this.accountService = new AccountService();
+        this.scheduleService = new AccountScheduleService();
     }
 
     getAccount = async (req: Request, res: Response) => {
@@ -48,6 +51,62 @@ export class AccountController {
         } catch (error: any) {
             console.error('Update profile error:', error);
             return res.status(500).json({ message: error.message || 'Error updating profile' });
+        }
+    };
+
+    getTaskRequests = async (req: AuthRequest, res: Response) => {
+        try {
+            const accountId = parseInt(req.params.id);
+            if (isNaN(accountId)) return res.status(400).json({ message: 'Invalid account ID' });
+            const { page = '0', size = '10' } = req.query as any;
+            const result = await this.scheduleService.getTaskRequests(accountId, {
+                page: parseInt(page),
+                size: parseInt(size)
+            });
+            return res.json(result);
+        } catch (error: any) {
+            return res.status(500).json({ message: error.message || 'Error' });
+        }
+    };
+
+    getSchedulePreferences = async (req: Request, res: Response) => {
+        try {
+            const accountId = parseInt(req.params.id);
+            if (isNaN(accountId)) return res.status(400).json({ message: 'Invalid account ID' });
+            return res.json(await this.scheduleService.getSchedulePreferences(accountId));
+        } catch (error: any) {
+            return res.status(500).json({ message: error.message });
+        }
+    };
+
+    saveSchedulePreferences = async (req: Request, res: Response) => {
+        try {
+            const accountId = parseInt(req.params.id);
+            if (isNaN(accountId)) return res.status(400).json({ message: 'Invalid account ID' });
+            return res.json(await this.scheduleService.saveSchedulePreferences(accountId, req.body));
+        } catch (error: any) {
+            return res.status(500).json({ message: error.message });
+        }
+    };
+
+    getUnavailableDates = async (req: Request, res: Response) => {
+        try {
+            const accountId = parseInt(req.params.id);
+            if (isNaN(accountId)) return res.status(400).json({ message: 'Invalid account ID' });
+            return res.json(await this.scheduleService.getUnavailableDates(accountId));
+        } catch (error: any) {
+            return res.status(500).json({ message: error.message });
+        }
+    };
+
+    saveUnavailableDates = async (req: Request, res: Response) => {
+        try {
+            const accountId = parseInt(req.params.id);
+            if (isNaN(accountId)) return res.status(400).json({ message: 'Invalid account ID' });
+            const { dates } = req.body;
+            return res.json(await this.scheduleService.saveUnavailableDates(accountId, dates || []));
+        } catch (error: any) {
+            return res.status(500).json({ message: error.message });
         }
     };
 

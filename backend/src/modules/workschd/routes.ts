@@ -42,17 +42,22 @@ router.put('/accounts/profile', authenticate, accountController.updateProfile.bi
 router.post('/accounts/change-password', authenticate, accountController.changePassword.bind(accountController));
 
 // ===== Team Routes =====
-router.get('/team', authenticate, (req, res) => {
-    // Return empty paginated response for now
-    res.json({
-        content: [],
-        totalElements: 0,
-        totalPages: 0,
-        size: parseInt(req.query.size as string) || 10,
-        number: parseInt(req.query.page as string) || 0
-    });
-});
+router.get('/team', authenticate, teamController.getTeams.bind(teamController));
+router.post('/team', authenticate, isTeamLeader, teamController.createTeam.bind(teamController));
+router.post('/team/generate-invite', authenticate, isTeamLeader, teamController.generateInviteLink.bind(teamController));
+router.get('/team/join/:hash', authenticate, teamController.joinByInvite.bind(teamController));
+router.get('/team/:teamId/members', authenticate, teamController.getTeamMembers.bind(teamController));
+router.post('/team/:teamId/approve/:requestId', authenticate, isTeamLeader, teamController.approveJoinRequest.bind(teamController));
+router.get('/team/:teamId/schedule-config', authenticate, teamController.getScheduleConfig.bind(teamController));
+router.post('/team/:teamId/schedule-config', authenticate, isTeamLeader, teamController.saveScheduleConfig.bind(teamController));
 router.get('/teams/:id', authenticate, teamController.getTeam.bind(teamController));
+
+// ===== Account Schedule Routes =====
+router.get('/account/:id/task-requests', authenticate, accountController.getTaskRequests.bind(accountController));
+router.get('/account/:id/schedule-preferences', authenticate, accountController.getSchedulePreferences.bind(accountController));
+router.post('/account/:id/schedule-preferences', authenticate, accountController.saveSchedulePreferences.bind(accountController));
+router.get('/account/:id/unavailable-dates', authenticate, accountController.getUnavailableDates.bind(accountController));
+router.post('/account/:id/unavailable-dates', authenticate, accountController.saveUnavailableDates.bind(accountController));
 
 // ===== Task Routes =====
 // 생성 (팀장만)
