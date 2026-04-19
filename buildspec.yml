@@ -1,0 +1,52 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DATABASE_URL: /voyagerss/prod/DATABASE_URL
+    DATABASE_URL_AVIATION: /voyagerss/prod/DATABASE_URL_AVIATION
+    DATABASE_URL_INVESTAND: /voyagerss/prod/DATABASE_URL_INVESTAND
+    DATABASE_URL_WORKSCHD: /voyagerss/prod/DATABASE_URL_WORKSCHD
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - echo "Installing backend dependencies..."
+      - cd backend
+      - npm ci
+
+  pre_build:
+    commands:
+      - echo "Generating Prisma clients..."
+      - npm run generate
+      - echo "Prisma clients generated"
+
+  build:
+    commands:
+      - echo "Building backend..."
+      - npm run build
+      - echo "Backend build complete"
+
+  post_build:
+    commands:
+      - echo "Preparing deployment artifact..."
+      - cd ..
+      - mkdir -p deploy/backend
+      - cp -r backend/dist deploy/backend/
+      - cp -r backend/node_modules deploy/backend/
+      - cp backend/package.json deploy/backend/
+      - cp -r backend/prisma deploy/backend/
+      - cp appspec.yml deploy/
+      - cp -r scripts/aws deploy/scripts
+      - echo "Artifact ready"
+
+artifacts:
+  files:
+    - "**/*"
+  base-directory: deploy
+  discard-paths: no
+
+cache:
+  paths:
+    - backend/node_modules/**/*

@@ -7,20 +7,33 @@ services:
       dockerfile: Dockerfile
     container_name: voyagerss-backend
     ports:
-      - "9002:9002"
+      - "${BACKEND_PORT:-9002}:9002"
     env_file:
       - .env.dev
     environment:
       - NODE_ENV=production
+      - BACKEND_PORT=9002
+    volumes:
+      - backend-logs:/app/logs
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: voyagerss-frontend
     ports:
-      - "9003:9003"
+      - "${FRONTEND_PORT:-9003}:9003"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: always
+
+volumes:
+  backend-logs:
