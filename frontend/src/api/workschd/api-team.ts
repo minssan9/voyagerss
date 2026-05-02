@@ -52,11 +52,6 @@ export { DEFAULT_PAGE_DTO };
 export type { PageDTO, PageResponseDTO };
 
 const apiTeam = {
-  // TeamApproveDialog APIs
-  approveRequest: (teamId: number, joinRequest: TeamDTO): Promise<AxiosResponse> => {
-    return service.post(`/workschd/team/${teamId}/approve`, joinRequest);
-  },
-
   // TeamRegistrationDialog APIs
   registerTeam: (teamData: TeamDTO): Promise<AxiosResponse<TeamDTO>> => {
     return service.post('/workschd/team', teamData);
@@ -97,12 +92,12 @@ const apiTeam = {
 
   // TeamJoin APIs
   joinTeamByInvitation: (invitationHash: string, accountId: string): Promise<AxiosResponse<TeamDTO>> => {
-    return service.get(`/workschd/team/join/${invitationHash}`, { accountId });
+    return service.get(`/workschd/team/join/${invitationHash}`, { params: { accountId } });
   },
 
   // TeamScheduleConfig APIs
-  saveScheduleConfig: (config: ScheduleConfig): Promise<AxiosResponse> => {
-    return service.post('/workschd/schedule-config', config);
+  saveScheduleConfig: (teamId: number, config: ScheduleConfig): Promise<AxiosResponse> => {
+    return service.post(`/workschd/team/${teamId}/schedule-config`, config);
   },
 
   approveJoinRequest: (teamId: number, requestId: number): Promise<AxiosResponse<any>> => {

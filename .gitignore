@@ -1,4 +1,4 @@
-﻿*/node_modules
+*/node_modules
 */dist
 */dev-dist
 *.zip
@@ -11,3 +11,4 @@ _bmad-output
 .agent
 .claude
 .idea
+.omc

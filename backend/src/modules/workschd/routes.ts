@@ -92,6 +92,7 @@ router.post('/task-employee/:taskEmployeeId/check-out', authenticate, taskContro
 // ===== Notification Routes =====
 router.get('/notifications', authenticate, notificationController.getNotifications.bind(notificationController));
 router.get('/notifications/unread/count', authenticate, notificationController.getUnreadCount.bind(notificationController));
+router.get('/notifications/:id', authenticate, notificationController.getNotificationById.bind(notificationController));
 router.put('/notifications/:id/read', authenticate, notificationController.markAsRead.bind(notificationController));
 router.put('/notifications/mark-all-read', authenticate, notificationController.markAllAsRead.bind(notificationController));
 router.delete('/notifications/:id', authenticate, notificationController.deleteNotification.bind(notificationController));
