@@ -5,6 +5,7 @@ Complete guide for setting up and running Voyagerss in local development and pro
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Local Development Setup](#local-development-setup)
+- [AI Platform (optional)](#ai-platform-optional)
 - [Production Deployment](#production-deployment)
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
@@ -22,6 +23,7 @@ Complete guide for setting up and running Voyagerss in local development and pro
 ### Optional Tools
 - **Docker**: For containerized deployment
 - **PM2**: For production process management
+- **pnpm**: v9+ (only if you work on `ai-platform/`)
 
 ---
 
@@ -144,6 +146,35 @@ npm run local
 ```
 
 Frontend will be available at: `http://localhost:5173`
+
+### AI Platform (optional)
+
+The repo includes **`ai-platform/`**, a separate pnpm workspace (Auto-PR / voyager-auto-pr apps: API, worker, admin UI, widgets). It does not use the root `npm` install.
+
+**Requirements:** Node.js **20+**, **pnpm 9+** (`corepack enable` then `corepack prepare pnpm@latest --activate`, or install pnpm globally).
+
+**Install and run from repository root:**
+
+```bash
+pnpm install --dir ai-platform
+# or: npm run install:ai
+pnpm --dir ai-platform dev
+# or: npm run dev:ai
+```
+
+**Build / test / lint:**
+
+```bash
+npm run build:ai
+npm run test:ai
+npm run lint:ai
+```
+
+Copy **`ai-platform/.env.sample`** to `.env` (or follow docs under `ai-platform/docs`) and configure MySQL/Redis as needed for those apps.
+
+**Windows / `pnpm install` symlink errors:** If install fails with `EISDIR` or symlink errors when linking workspace packages (`@repo/db`, etc.), enable **Developer Mode** in Windows (Settings → Privacy & security → For developers → Developer Mode) so symlinks work without elevation, then delete `ai-platform/node_modules` and any `ai-platform/apps/*/node_modules` and run `npm run install:ai` again. The repo includes [`ai-platform/.npmrc`](ai-platform/.npmrc) with hoisted + copy settings to reduce symlink issues on Windows.
+
+**Docker (Adminer only):** From `ai-platform/`, `docker compose -f docker-compose.dev.yml up -d` exposes Adminer at **`http://localhost:18080`** (mapped to 18080 on the host so it does not collide with the main frontend dev server if that uses port 8080).
 
 ### 4. Verify Installation
 

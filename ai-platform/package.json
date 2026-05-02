@@ -1,0 +1,23 @@
+{
+  "name": "voyager-auto-pr-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Auto-PR Feedback Platform — monorepo root",
+  "author": "Mike",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter './apps/*' run dev",
+    "build": "pnpm --filter './apps/*' run build",
+    "test": "pnpm --filter './apps/*' run test",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "db:migrate": "pnpm --filter @repo/db run migrate",
+    "db:seed": "pnpm --filter @repo/db run seed"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

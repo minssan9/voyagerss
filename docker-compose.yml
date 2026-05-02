@@ -9,18 +9,13 @@ services:
     ports:
       - "9002:9002"
     env_file:
-      - .env.dev
+      - .env
     environment:
       - NODE_ENV=production
+    volumes:
+      - backend-data:/app/data
     restart: always
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: voyagerss-frontend
-    ports:
-      - "9003:9003"
-    depends_on:
-      - backend
-    restart: always
+volumes:
+  backend-data:
+    driver: local

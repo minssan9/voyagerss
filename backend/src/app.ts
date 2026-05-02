@@ -22,7 +22,27 @@ const httpServer = http.createServer(app);
 webSocketService.initialize(httpServer);
 startWorkschdScraperScheduler();
 
-app.use(cors());
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:9003')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // server-to-server / curl
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin);
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin "${origin}" not allowed`));
+      }
+    },
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(express.json());
 
