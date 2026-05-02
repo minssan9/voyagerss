@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum IssueStatus {
+  NEW
+  TRIAGED
+  QUEUED
+  PLAN_READY
+  BUILDING
+  PR_OPEN
+  MERGED
+  CLOSED
+  FAILED
+}
+
+enum RunKind {
+  PLAN
+  BUILD
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum LogStream {
+  stdout
+  stderr
+  event
+}
+
+enum PrState {
+  open
+  merged
+  closed
+}
+
+enum AdminRole {
+  SUPER
+  ADMIN
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Issue {
+  id             String      @id @default(uuid()) @db.Char(36)
+  status         IssueStatus @default(NEW)
+  title          String      @db.Text
+  body           String      @db.LongText
+  reporterEmail  String?     @db.VarChar(255)
+  reporterUserId String?     @db.Char(36)
+  sourceUrl      String?     @db.Text
+  userAgent      String?     @db.Text
+  repoFullName   String?     @db.VarChar(255)
+  baseBranch     String      @default("main") @db.VarChar(100)
+  labels         Json?       // JSON array of strings
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  attachments  Attachment[]
+  planningDocs PlanningDoc[]
+  runs         Run[]
+  pullRequests PullRequest[]
+  auditLogs    AuditLog[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("issues")
+}
+
+model Attachment {
+  id       String @id @default(uuid()) @db.Char(36)
+  issueId  String @db.Char(36)
+  s3Key    String @db.VarChar(512)
+  mime     String @db.VarChar(100)
+  size     Int
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("attachments")
+}
+
+model PlanningDoc {
+  id        String   @id @default(uuid()) @db.Char(36)
+  issueId   String   @db.Char(36)
+  version   Int      @default(1)
+  content   String   @db.LongText
+  createdBy String?  @db.Char(36)
+  createdAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("planning_docs")
+}
+
+model Run {
+  id             String    @id @default(uuid()) @db.Char(36)
+  issueId        String    @db.Char(36)
+  kind           RunKind
+  status         RunStatus @default(PENDING)
+  startedAt      DateTime?
+  finishedAt     DateTime?
+  branchName     String?   @db.VarChar(255)
+  commitSha      String?   @db.Char(40)
+  prNumber       Int?
+  prUrl          String?   @db.Text
+  claudeSessionId String?  @db.VarChar(255)
+  costUsd        Decimal?  @db.Decimal(10, 4)
+  errorSummary   String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  issue   Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  runLogs RunLog[]
+
+  @@index([issueId])
+  @@index([status])
+  @@map("runs")
+}
+
+model RunLog {
+  id      String    @id @default(uuid()) @db.Char(36)
+  runId   String    @db.Char(36)
+  seq     Int
+  stream  LogStream
+  content String    @db.Text
+  ts      DateTime  @default(now())
+
+  run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, seq])
+  @@map("run_logs")
+}
+
+model PullRequest {
+  id          String   @id @default(uuid()) @db.Char(36)
+  issueId     String   @db.Char(36)
+  prNumber    Int
+  prUrl       String   @db.Text
+  state       PrState  @default(open)
+  author      String?  @db.VarChar(255)
+  headSha     String?  @db.Char(40)
+  mergedAt    DateTime?
+  lastEventAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("pull_requests")
+}
+
+model Admin {
+  id           String    @id @default(uuid()) @db.Char(36)
+  email        String    @unique @db.VarChar(255)
+  role         AdminRole @default(ADMIN)
+  passwordHash String    @db.VarChar(255)
+  createdAt    DateTime  @default(now())
+
+  auditLogs AuditLog[]
+
+  @@map("admins")
+}
+
+model FeedbackRate {
+  ip    String   @db.VarChar(45)
+  day   DateTime @db.Date
+  count Int      @default(1)
+
+  @@id([ip, day])
+  @@map("feedback_rate")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Char(36)
+  adminId   String   @db.Char(36)
+  action    String   @db.VarChar(100)
+  target    String?  @db.VarChar(255)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  admin Admin  @relation(fields: [adminId], references: [id])
+  issue Issue? @relation(fields: [target], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+model AllowedOrigin {
+  id        String   @id @default(uuid()) @db.Char(36)
+  origin    String   @unique @db.VarChar(255)
+  appId     String   @db.Char(36)
+  createdAt DateTime @default(now())
+
+  @@map("allowed_origins")
+}

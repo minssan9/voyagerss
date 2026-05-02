@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feedback Widget — Vanilla Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      background: #f7f7f8; color: #111; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px; padding: 40px;
+    }
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.04em; }
+    p  { color: #6e6e73; font-size: 15px; max-width: 480px; text-align: center; }
+    .card {
+      background: #fff; border-radius: 16px; padding: 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06); max-width: 480px; width: 100%;
+    }
+    .card h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    pre {
+      background: #f7f7f8; border-radius: 8px; padding: 16px;
+      font-size: 13px; overflow-x: auto; line-height: 1.6;
+      border: 1px solid #e5e5e7;
+    }
+    .btn-row { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+    button {
+      padding: 9px 18px; border: none; border-radius: 8px;
+      font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary   { background: #0A84FF; color: #fff; }
+    .btn-secondary { background: #e5e5e7; color: #111; }
+    .btn-primary:hover   { background: #0071e3; }
+    .btn-secondary:hover { background: #d1d1d6; }
+  </style>
+</head>
+<body>
+
+  <h1>Feedback Widget</h1>
+  <p>Auto-PR Feedback Platform 위젯 데모 — Vanilla HTML</p>
+
+  <div class="card">
+    <h2>설치 코드</h2>
+    <pre><code>&lt;script
+  src="http://localhost:4174/embed.umd.js"
+  data-app-id="demo-app"
+  data-locale="ko"
+  data-accent="#0A84FF"
+  data-position="bottom-right"
+&gt;&lt;/script&gt;</code></pre>
+    <div class="btn-row">
+      <button class="btn-primary"   onclick="Feedback.open()">위젯 열기</button>
+      <button class="btn-secondary" onclick="Feedback.close()">닫기</button>
+      <button class="btn-secondary" onclick="Feedback.toggle()">토글</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>JS API 예제</h2>
+    <pre><code>// 사용자 정보 주입
+Feedback.identify({ email: 'user@example.com', name: 'Mike' });
+
+// 이벤트 리스닝
+Feedback.on('submitted', (payload) => {
+  console.log('Issue created:', payload.issueId);
+});
+
+// 큐 패턴 (로드 전 호출 가능)
+window.FeedbackQueue = [
+  ['identify', { email: 'pre@example.com' }],
+];</code></pre>
+  </div>
+
+  <!-- Feedback Widget -->
+  <script
+    src="../dist/embed.umd.js"
+    data-app-id="demo-app"
+    data-locale="ko"
+    data-accent="#0A84FF"
+    data-position="bottom-right"
+    data-offset-x="24"
+    data-offset-y="24"
+  ></script>
+
+  <script>
+    // Event logging
+    window.addEventListener('load', () => {
+      if (typeof Feedback === 'undefined') {
+        console.warn('Run `pnpm --filter @repo/widget-embed build` first');
+        return;
+      }
+      Feedback.on('open',      ()  => console.log('[Feedback] open'));
+      Feedback.on('close',     ()  => console.log('[Feedback] close'));
+      Feedback.on('submitted', (p) => console.log('[Feedback] submitted', p));
+    });
+  </script>
+</body>
+</html>

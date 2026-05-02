@@ -1,6 +1,10 @@
 ﻿*/node_modules
+**/node_modules/
 */dist
-*/dev-dist
+**/dist/
+**/dev-dist/
+**/coverage/
+**/.output/
 *.zip
 backend/package-lock.json
 
