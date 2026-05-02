@@ -1,4 +1,4 @@
-name: Dev Deployment (Self-hosted)
+name: Deploy Backend (Docker Compose)
 
 on:
   workflow_run:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: self-hosted
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
@@ -20,15 +20,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Create .env.dev file from Secret
+    - name: Write .env from Secret
       shell: powershell
       env:
-        DOTENV_CONTENT: ${{ secrets.DOTENV_DEV }}
+        DOTENV_CONTENT: ${{ secrets.DOTENV_PROD }}
       run: |
-        $content = $env:DOTENV_CONTENT
-        [System.IO.File]::WriteAllText(".env.dev", $content, [System.Text.Encoding]::UTF8)
+        $path = Join-Path $env:GITHUB_WORKSPACE ".env"
+        [System.IO.File]::WriteAllText($path, $env:DOTENV_CONTENT, [System.Text.Encoding]::UTF8)
 
     - name: Deploy with Docker Compose
-      run: |
-        docker compose down
-        docker compose up -d --build
+      run: docker compose up -d --build backend

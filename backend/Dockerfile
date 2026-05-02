@@ -30,6 +30,8 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-EXPOSE 6172
+RUN mkdir -p /app/data
+
+EXPOSE 9002
 
 CMD ["npm", "run", "start"]

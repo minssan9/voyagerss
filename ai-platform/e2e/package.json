@@ -1,0 +1,19 @@
+{
+  "name": "@repo/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.14.9",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "nock": "^13.5.4"
+  }
+}

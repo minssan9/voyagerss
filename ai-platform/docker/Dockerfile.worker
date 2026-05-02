@@ -1,0 +1,42 @@
+FROM node:20-slim AS base
+WORKDIR /app
+
+# Install system deps: git + claude-code CLI prerequisites
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI globally
+RUN npm install -g @anthropic-ai/claude-code
+
+# ── deps layer ──────────────────────────────────────────────────────────────
+FROM base AS deps
+COPY package.json pnpm-workspace.yaml ./
+COPY packages/config/package.json  packages/config/
+COPY packages/db/package.json      packages/db/
+COPY apps/worker/package.json      apps/worker/
+
+RUN npm install -g pnpm && pnpm install --frozen-lockfile --prod
+
+# ── build layer ─────────────────────────────────────────────────────────────
+FROM deps AS builder
+COPY packages/ packages/
+COPY apps/worker/ apps/worker/
+
+RUN pnpm --filter @repo/db generate && \
+    pnpm --filter @repo/worker build
+
+# ── runtime ──────────────────────────────────────────────────────────────────
+FROM base AS runner
+WORKDIR /app
+
+COPY --from=builder /app/node_modules         ./node_modules
+COPY --from=builder /app/packages/db          ./packages/db
+COPY --from=builder /app/apps/worker/dist     ./apps/worker/dist
+COPY --from=builder /app/apps/worker/package.json ./apps/worker/
+
+ENV NODE_ENV=production
+
+CMD ["node", "apps/worker/dist/main.js"]
