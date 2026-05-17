@@ -7,13 +7,14 @@
 
 ## 1. Project Overview
 
-**Voyagerss** is a unified multi-domain platform consisting of three domain modules:
+**Voyagerss** is a unified multi-domain platform consisting of four domain modules:
 
 | Module | Purpose |
 |--------|---------|
 | `workschd` | Funeral home worker scheduling (상조 서비스) — team/task/notification management + live scraper |
 | `aviation` | Aviation quiz system, airport navigation, route data |
 | `investand` | Financial/investment analytics and stock market data |
+| `autodev` | Development automation — Jira/Slack webhook ingestion → Claude Code CLI implementation → Bitbucket PR |
 
 Each module has its own Prisma schema, database, controllers, services, and frontend views.
 
@@ -27,11 +28,12 @@ voyagerss/
 │   ├── prisma/
 │   │   ├── workschd.prisma         # MySQL schema for workschd
 │   │   ├── aviation.prisma         # MySQL schema for aviation
-│   │   └── investand.prisma        # MySQL schema for investand
+│   │   ├── investand.prisma        # MySQL schema for investand
+│   │   └── autodev.prisma          # MySQL schema for autodev
 │   ├── src/
 │   │   ├── app.ts                  # Express app entry point
 │   │   ├── config/
-│   │   │   └── prisma.ts           # Exports workschdPrisma, investandPrisma, aviationPrisma
+│   │   │   └── prisma.ts           # Exports workschdPrisma, investandPrisma, aviationPrisma, autodevPrisma
 │   │   └── modules/
 │   │       ├── workschd/           # Funeral/scheduling module
 │   │       │   ├── controllers/    # HTTP request handlers
@@ -428,11 +430,60 @@ chore(backend): add cheerio and puppeteer-core dependencies
 ```
 
 **Types**: `feat` · `fix` · `docs` · `style` · `refactor` · `perf` · `test` · `chore`
-**Scopes**: `workschd` · `aviation` · `investand` · `backend` · `frontend` · `root` · `api` · `scraper`
+**Scopes**: `workschd` · `aviation` · `investand` · `autodev` · `backend` · `frontend` · `root` · `api` · `scraper`
 
 ---
 
-## 11. Key Files Quick Reference
+## 11. Autodev Module
+
+### Overview
+Autodev is a development automation platform integrated as a voyagerss module. It ingests issues from Jira/Slack webhooks, runs Claude Code CLI to implement them automatically in a git worktree, and opens Bitbucket PRs.
+
+### Backend
+- **Path**: `backend/src/modules/autodev/`
+- **API Prefix**: `/api/autodev`
+- **Prisma Schema**: `backend/prisma/autodev.prisma` (MySQL, client: `@prisma/client-autodev`)
+- **Prisma Client**: `autodevPrisma` from `backend/src/config/prisma.ts`
+
+### Frontend
+- **Views**: `frontend/src/views/autodev/` (Dashboard, Issues, Jobs, Todos, Settings)
+- **Route Prefix**: `/autodev`
+- **API service**: `frontend/src/api/autodev/api-autodev.ts`
+- **Stores**: `frontend/src/stores/autodev/` (store_issue, store_job, store_todo)
+
+### Key Workflow
+```
+Webhook (Jira/Slack) → POST /api/autodev/webhooks/{jira|slack}
+  → WebhookParserService → upsert Issue in DB
+  → POST /api/autodev/jobs/trigger/:issueKey
+  → ClaudeRunnerService: spawn `claude -p "..." --allowedTools ... --bare`
+  → JobLog lines streamed to DB + SSE endpoint
+  → GET /api/autodev/jobs/:id/stream (SSE, text/event-stream)
+  → GitWorktreeService: git worktree + push branch
+  → BitbucketService: create PR
+  → Bitbucket webhook → POST /api/autodev/webhooks/bitbucket
+  → PrMergeService: update Issue→DONE, notify Jira + Slack
+```
+
+### SSE Streaming
+Jobs stream stdout/stderr via Server-Sent Events. `SseRegistry` holds an in-memory `Map<jobId, Response>`. Frontend uses `useJobStream.ts` composable which opens an `EventSource` connection.
+
+### Environment Variables
+All autodev env vars are prefixed `AUTODEV_`. See `.env.example` for the full list. Key vars:
+- `DATABASE_URL_AUTODEV` — MySQL connection for autodev schema
+- `AUTODEV_CLAUDE_BIN` — path to claude CLI binary
+- `AUTODEV_BITBUCKET_*` — Bitbucket workspace/repo/token/webhook-secret
+- `AUTODEV_SLACK_WEBHOOK_URL` — Slack notification webhook
+- `AUTODEV_JIRA_*` — Jira base URL, token, project key
+
+### Schedulers (node-cron)
+- `0 9 * * 1-5` — mark stale RUNNING jobs as FAILED
+- `0 8 * * *` — Jira sync (placeholder)
+- `0 2 * * *` — worktree cleanup (placeholder)
+
+---
+
+## 13. Key Files Quick Reference
 
 | File | Purpose |
 |------|---------|
@@ -455,7 +506,7 @@ chore(backend): add cheerio and puppeteer-core dependencies
 
 ---
 
-## 12. Common Pitfalls
+## 14. Common Pitfalls
 
 1. **Wrong Prisma client** — Always use `workschdPrisma` for the workschd module. Never use the default `PrismaClient` import.
 2. **Multiple Prisma schemas** — When modifying the schema, run `prisma generate` for the specific `.prisma` file, not the generic command.

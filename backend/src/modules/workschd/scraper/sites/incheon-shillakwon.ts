@@ -18,11 +18,11 @@ export class IncheonShillakwonScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // Gnuboard-based site — list rows
-    $('.bo_list table tbody tr, .board-list tbody tr, table tbody tr').each((_, el) => {
+    $('.bo_list table tbody tr, .board-list tbody tr, table tbody tr').each((_: any, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
-      const texts = cells.toArray().map(c => $(c).text().replace(/\s+/g, ' ').trim());
-      if (texts.some(t => ['번호', '고인명', '빈소', '상주'].includes(t))) return;
+      const texts = cells.toArray().map((c: any) => $(c).text().replace(/\s+/g, ' ').trim());
+      if (texts.some((t: any) => ['번호', '고인명', '빈소', '상주'].includes(t))) return;
 
       // Gnuboard: title column usually contains the name
       const titleCell = $(el).find('.td_subject, .bo_tit, td:nth-child(2)').first().text().trim();

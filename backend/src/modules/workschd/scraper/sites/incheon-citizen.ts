@@ -13,15 +13,15 @@ export class IncheonCitizenScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // PHP-based site; look for tables with 빈소 현황
-    $('table tr').each((_, el) => {
+    $('table tr').each((_: any, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
 
-      const texts = cells.toArray().map(c => $(c).text().trim());
+      const texts = cells.toArray().map((c: any) => $(c).text().trim());
       // Filter out header-like rows
-      if (texts.some(t => ['번호', '고인명', '빈소', '호실', '성명'].includes(t))) return;
+      if (texts.some((t: any) => ['번호', '고인명', '빈소', '호실', '성명'].includes(t))) return;
       // Find deceased name candidate (Korean characters, 2+ chars)
-      const deceasedName = texts.find(t => /[가-힣]{2,}/.test(t) && t.length <= 10);
+      const deceasedName = texts.find((t: any) => /[가-힣]{2,}/.test(t) && t.length <= 10);
       if (!deceasedName) return;
 
       results.push(this.makeRecord({

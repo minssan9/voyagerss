@@ -2,6 +2,7 @@
 import workschdRoutes from '@/router/workschd/routes';
 import aviationRoutes from '@/router/aviation/routes';
 import investandRoutes from '@/router/investand/routes';
+import { autodevRoutes } from '@/router/autodev/routes';
 
 // ─── Common Routes ───────────────────────────────────────────────
 const commonRoutes: RouteRecordRaw[] = [
@@ -43,6 +44,7 @@ export const routes: RouteRecordRaw[] = [
     ...aviationRoutes,
     ...investandRoutes,
     ...workschdRoutes,
+    ...autodevRoutes,
     ...errorRoutes,
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/common/error/404.vue'), meta: { icon: 'search_off', hidden: true } }
 ];

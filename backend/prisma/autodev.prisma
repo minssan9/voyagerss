@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-autodev"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL_AUTODEV")
+  relationMode = "prisma"
+}
+
+model Issue {
+  id           Int       @id @default(autoincrement())
+  issueKey     String    @unique @map("issue_key") @db.VarChar(50)
+  source       String    @db.VarChar(20)
+  summary      String    @db.Text
+  description  String?   @db.Text
+  status       String    @default("OPEN") @db.VarChar(20)
+  targetBranch String    @default("main") @map("target_branch") @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  completedAt  DateTime? @map("completed_at")
+  todos        Todo[]
+
+  @@map("autodev_issues")
+}
+
+model Todo {
+  id         Int       @id @default(autoincrement())
+  issueId    Int?      @map("issue_id")
+  issue      Issue?    @relation(fields: [issueId], references: [id])
+  content    String    @db.Text
+  date       DateTime  @db.Date
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime? @map("resolved_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("autodev_todos")
+}
+
+model Job {
+  id         Int       @id @default(autoincrement())
+  issueKey   String    @map("issue_key") @db.VarChar(50)
+  branch     String?   @db.VarChar(200)
+  status     String    @default("PENDING") @db.VarChar(20)
+  logPath    String?   @map("log_path")
+  prUrl      String?   @map("pr_url")
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  logs       JobLog[]
+
+  @@map("autodev_jobs")
+}
+
+model JobLog {
+  id        Int      @id @default(autoincrement())
+  jobId     Int      @map("job_id")
+  job       Job      @relation(fields: [jobId], references: [id])
+  line      String   @db.Text
+  stream    String   @default("stdout") @db.VarChar(6)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("autodev_job_logs")
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  channel   String    @db.VarChar(50)
+  message   String    @db.Text
+  success   Boolean   @default(false)
+  sentAt    DateTime? @map("sent_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("autodev_notifications")
+}
+
+model CompletionHistory {
+  id               Int       @id @default(autoincrement())
+  issueKey         String    @map("issue_key") @db.VarChar(50)
+  prId             Int?      @map("pr_id")
+  prTitle          String?   @map("pr_title") @db.VarChar(500)
+  mergedBy         String?   @map("merged_by") @db.VarChar(100)
+  mergedAt         DateTime? @map("merged_at")
+  jiraTransitioned Boolean   @default(false) @map("jira_transitioned")
+  slackNotified    Boolean   @default(false) @map("slack_notified")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@map("autodev_completion_history")
+}

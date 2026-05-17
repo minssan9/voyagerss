@@ -13,7 +13,7 @@ export class BucheonSoonchunhyangScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // funeralhow.com platform — look for funeral/빈소 listing sections
-    $('.funeral-item, .deceased-item, table tbody tr, .obitu-list li').each((_, el) => {
+    $('.funeral-item, .deceased-item, table tbody tr, .obitu-list li').each((_: any, el: any) => {
       const name = $(el).find('.name, .deceased-name, td:nth-child(2), .title').first().text().trim();
       const room = $(el).find('.room, .binso, td:first-child').first().text().trim();
       const mourner = $(el).find('.mourner, .chief, td:nth-child(3)').first().text().trim();
@@ -33,11 +33,11 @@ export class BucheonSoonchunhyangScraper extends BaseScraper {
 
     // Also try generic table parsing
     if (results.length === 0) {
-      $('table tbody tr').each((_, el) => {
+      $('table tbody tr').each((_: any, el: any) => {
         const cells = $(el).find('td');
         if (cells.length < 2) return;
-        const texts = cells.toArray().map(c => $(c).text().trim());
-        const deceasedName = texts.find(t => /[가-힣]{2,4}/.test(t) && t.length <= 8);
+        const texts = cells.toArray().map((c: any) => $(c).text().trim());
+        const deceasedName = texts.find((t: any) => /[가-힣]{2,4}/.test(t) && t.length <= 8);
         if (!deceasedName) return;
         if (['고인명', '빈소', '상주'].includes(deceasedName)) return;
         results.push(this.makeRecord({

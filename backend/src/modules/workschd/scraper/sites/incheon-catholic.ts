@@ -17,14 +17,14 @@ export class IncheonCatholicScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // Java/.do based site (Spring MVC) — standard table layout
-    $('table.funeral-table tbody tr, table tbody tr, .mourning-list tr').each((_, el) => {
+    $('table.funeral-table tbody tr, table tbody tr, .mourning-list tr').each((_: any, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
 
-      const texts = cells.toArray().map(c => $(c).text().trim());
-      if (texts.some(t => ['고인명', '빈소', '호실', '상주'].includes(t))) return;
+      const texts = cells.toArray().map((c: any) => $(c).text().trim());
+      if (texts.some((t: any) => ['고인명', '빈소', '호실', '상주'].includes(t))) return;
 
-      const deceasedName = texts.find(t => /[가-힣]{2,4}/.test(t) && t.length <= 8);
+      const deceasedName = texts.find((t: any) => /[가-힣]{2,4}/.test(t) && t.length <= 8);
       if (!deceasedName) return;
 
       const roomNumber = texts[0];

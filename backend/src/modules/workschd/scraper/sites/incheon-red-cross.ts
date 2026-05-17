@@ -13,12 +13,12 @@ export class IncheonRedCrossScraper extends BaseScraper {
     const results: ScrapedFuneral[] = [];
 
     // Look for mourning room status table on main page
-    $('table tbody tr, .binso-list tr, .funeral-info tr').each((_, el) => {
+    $('table tbody tr, .binso-list tr, .funeral-info tr').each((_: any, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
 
-      const texts = cells.toArray().map(c => $(c).text().trim());
-      const deceasedName = texts.find(t => t.length >= 2 && !/^\d+$/.test(t) &&
+      const texts = cells.toArray().map((c: any) => $(c).text().trim());
+      const deceasedName = texts.find((t: any) => t.length >= 2 && !/^\d+$/.test(t) &&
         !['호실', '고인명', '상주', '발인일'].includes(t));
 
       if (!deceasedName) return;
