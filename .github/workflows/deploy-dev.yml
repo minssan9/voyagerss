@@ -1,32 +1,16 @@
-name: Deploy Backend (Docker Compose)
+# Deprecated: use deploy-production.yml
+# Kept with workflow_dispatch only to avoid duplicate auto-deploys on main.
+
+name: Deploy Backend (GHCR) [deprecated]
 
 on:
-  workflow_run:
-    workflows: ["Unified CI"]
-    types:
-      - completed
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  deploy-backend:
-    runs-on: self-hosted
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+  deprecated:
+    runs-on: ubuntu-latest
     steps:
-    - name: Fix Git Safe Directory
-      run: git config --global --add safe.directory '*'
-
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Write .env from Secret
-      shell: powershell
-      env:
-        DOTENV_CONTENT: ${{ secrets.DOTENV_PROD }}
-      run: |
-        $path = Join-Path $env:GITHUB_WORKSPACE ".env"
-        [System.IO.File]::WriteAllText($path, $env:DOTENV_CONTENT, [System.Text.Encoding]::UTF8)
-
-    - name: Deploy with Docker Compose
-      run: docker compose up -d --build backend
+      - name: Use deploy-production.yml
+        run: |
+          echo "This workflow is deprecated. Use 'Deploy Production (GHCR)' instead." >&2
+          exit 1

@@ -1,3 +1,7 @@
+# Local development: build backend from source.
+# Production (DigitalOcean): /data/voyagerss/docker-compose.yml from deploy/docker-compose.api.yml
+# Images: ghcr.io/<owner>/voyagerss-{backend,frontend} — see .github/workflows/deploy-production.yml
+
 version: '3.8'
 
 services:

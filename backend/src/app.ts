@@ -5,6 +5,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import http from 'http';
 import routes from './routes';
+import { registerHealthRoute } from './health.route';
+import {
+  resolveBackendHost,
+  resolveBackendPort,
+  TRUST_PROXY_HOPS,
+} from './server-config';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 
@@ -13,7 +19,10 @@ dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || 9002;
+const PORT = resolveBackendPort();
+const HOST = resolveBackendHost();
+
+app.set('trust proxy', TRUST_PROXY_HOPS);
 
 // Create HTTP server
 const httpServer = http.createServer(app);
@@ -48,11 +57,13 @@ app.use(express.json());
 
 app.use('/api', routes);
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+registerHealthRoute(app);
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+if (require.main === module) {
+  httpServer.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT}`);
     console.log(`WebSocket server initialized on port ${PORT}`);
-});
+  });
+}
+
+export { app, httpServer };
