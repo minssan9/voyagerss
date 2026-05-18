@@ -118,7 +118,7 @@ router.post('/knowledge/validate', async (req, res) => {
     try {
         await initServices();
         const topics = await topicService.getAllTopics();
-        const missing = [];
+        const missing: number[] = [];
         for (let d = 1; d <= 31; d++) {
             if (!topics.find((t: any) => t.day_of_month === d)) missing.push(d);
         }
