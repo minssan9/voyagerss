@@ -60,7 +60,7 @@ export abstract class BaseScraper {
     const utf8 = buffer.toString('utf-8');
 
     // Detect EUC-KR by looking for charset in meta or HTTP header
-    const contentType = response.headers['content-type'] || '';
+    const contentType = String(response.headers['content-type'] ?? '');
     const isEucKr =
       contentType.toLowerCase().includes('euc-kr') ||
       utf8.toLowerCase().includes('euc-kr') ||

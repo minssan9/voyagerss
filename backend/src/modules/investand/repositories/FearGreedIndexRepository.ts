@@ -278,7 +278,11 @@ export class FearGreedIndexRepository extends BaseRepository {
         }
       })
 
-      const movingAverages = []
+      const movingAverages: Array<{
+        date: Date;
+        value: number;
+        movingAverage: number;
+      }> = [];
 
       for (let i = 0; i < Math.min(data.length - days + 1, limit); i++) {
         const slice = data.slice(i, i + days)
@@ -323,7 +327,12 @@ export class FearGreedIndexRepository extends BaseRepository {
       }
 
       // 일간 변화량 계산
-      const dailyChanges = []
+      const dailyChanges: Array<{
+        date: Date;
+        change: number;
+        previousValue: number;
+        currentValue: number;
+      }> = [];
       for (let i = 1; i < data.length; i++) {
         const change = data[i]?.value! - data[i - 1]?.value!
         dailyChanges.push({

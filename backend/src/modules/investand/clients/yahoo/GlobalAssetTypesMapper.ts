@@ -197,8 +197,8 @@ export class GlobalAssetTypesMapper {
         const minLength = Math.min(asset1Data.length, asset2Data.length);
         if (minLength < 2) return 0;
 
-        const returns1 = [];
-        const returns2 = [];
+        const returns1: number[] = [];
+        const returns2: number[] = [];
 
         for (let i = 1; i < minLength; i++) {
             returns1.push(
