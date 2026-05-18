@@ -78,10 +78,14 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: self-hosted
+    # Droplet runner must have label `linux` (Ubuntu), not Windows.
+    runs-on: [self-hosted, linux]
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Fix Git safe directory
@@ -95,7 +99,7 @@ jobs:
       - name: Prepare runtime directory
         run: |
           sudo mkdir -p "${{ env.DATA_DIR }}/data" "${{ env.DATA_DIR }}/nginx"
-          sudo chown -R "$USER:$USER" "${{ env.DATA_DIR }}" || true
+          sudo chown -R "${USER}:${USER}" "${{ env.DATA_DIR }}" || true
 
       - name: Write production .env
         env:
