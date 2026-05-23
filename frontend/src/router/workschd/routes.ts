@@ -1,68 +1,61 @@
 import { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
-    // Workschd parent route - 1 depth tree structure
     {
         path: '/workschd',
         name: 'Workschd',
         component: () => import('@/layout/RouteView.vue'),
-        meta: { icon: 'business_center', project: 'workschd' }, // requiresAuth: true,  roles: ['WORKER', 'MANAGER', 'SCHEDULER'],
+        meta: { icon: 'business_center', project: 'workschd' },
         redirect: { name: 'workschd-home' },
         children: [
-            // Home page
             {
                 path: '',
                 name: 'workschd-home',
                 component: () => import('@/views/workschd/main/Home.vue'),
-                meta: { icon: 'home', title: 'WorkSchd Home' }
+                meta: { icon: 'home', title: 'WorkSchd 홈' }
             },
-            // Team routes - flattened to 1 depth
             {
-                path: 'team/join/:token', // :token
-                name: 'TeamJoin (Worker)',
+                path: 'team/join/:token',
+                name: 'TeamJoin',
                 component: () => import('@/views/workschd/team/TeamJoin.vue'),
                 meta: { icon: 'group_add', hidden: true }
             },
             {
                 path: 'team/manage',
-                name: 'TeamManage (Manager)',
+                name: 'TeamManage',
                 component: () => import('@/views/workschd/team/TeamManage.vue'),
-                meta: { icon: 'manage_accounts' }
+                meta: { icon: 'manage_accounts', title: '팀 관리' }
             },
-            // Task routes - flattened to 1 depth
             {
                 path: 'task/manage',
-                name: 'TaskManage (Manager)',
+                name: 'TaskManage',
                 component: () => import('@/views/workschd/task/TaskManage.vue'),
-                meta: { icon: 'list' }
+                meta: { icon: 'list_alt', title: '업무 관리' }
             },
             {
                 path: 'task/manage-mobile',
-                name: 'TaskManageMobile (Manager)',
+                name: 'TaskManageMobile',
                 component: () => import('@/views/workschd/task/TaskManageMobile.vue'),
-                meta: { icon: 'assignment' }
+                meta: { icon: 'assignment', title: '업무 관리 (모바일)' }
             },
             {
                 path: 'task/list-mobile',
-                name: 'TaskListMobile (Worker)',
+                name: 'TaskListMobile',
                 component: () => import('@/views/workschd/task/TaskListMobile.vue'),
-                meta: { icon: 'work', }
+                meta: { icon: 'work_outline', title: '업무 목록' }
             },
-            // Funeral board - scraped live ceremony listings (인천/부천)
             {
                 path: 'funeral-board',
                 name: 'FuneralBoard',
                 component: () => import('@/views/workschd/FuneralBoardView.vue'),
-                meta: { icon: 'home' }
+                meta: { icon: 'local_hospital', title: '장례 현황판' }
             },
-            // Admin routes
             {
                 path: 'admin/dashboard',
                 name: 'AdminDashboard',
                 component: () => import('@/views/workschd/admin/AdminDashboard.vue'),
-                meta: { icon: 'dashboard', requiresAuth: true, roles: ['ADMIN'] }
+                meta: { icon: 'admin_panel_settings', title: '관리자 대시보드', requiresAuth: true, roles: ['ADMIN'] }
             },
-            // Auth callback
             {
                 path: 'auth/callback',
                 name: 'WorkschdAuthCallback',

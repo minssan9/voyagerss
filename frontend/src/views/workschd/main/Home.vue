@@ -35,8 +35,7 @@
               <q-list separator>
                 <q-item v-for="i in 3" :key="`feature${i}`" class="q-py-md">
                   <q-item-section avatar>
-                    <q-avatar :style="`background: ${['#4361ee', '#3a0ca3', '#4cc9f0'][i - 1]}`" text-color="white"
-                      icon="check" />
+                    <q-avatar color="primary" text-color="white" icon="check" />
                   </q-item-section>
                   <q-item-section>
                     <div class="text-weight-medium">{{ t(`home.overview.feature${i}.title`, ['직관적인 인터페이스', '실시간 동기화',
@@ -58,8 +57,7 @@
         <!-- Features -->
         <div class="col-12 col-md-4">
           <div class="modern-card slide-up stagger-2" style="height: 100%;">
-            <div class="modern-card__header"
-              style="background: linear-gradient(145deg, #4361ee, #3a0ca3); color: white;">
+            <div class="modern-card__header home-card-header--primary">
               <h2 class="modern-text__title text-h5 q-mb-md">{{ t('home.features.title', '주요 기능') }}</h2>
             </div>
             <div class="modern-card__body">
@@ -88,8 +86,7 @@
         <!-- Usage Guide -->
         <div class="col-12 col-md-4">
           <div class="modern-card slide-up stagger-3" style="height: 100%;">
-            <div class="modern-card__header"
-              style="background: linear-gradient(145deg, #4cc9f0, #4361ee); color: white;">
+            <div class="modern-card__header home-card-header--secondary">
               <h2 class="modern-text__title text-h5 q-mb-md">{{ t('home.usage.title', '사용 방법') }}</h2>
             </div>
             <div class="modern-card__body">
@@ -201,3 +198,15 @@ const webUrl = computed(() => baseUrl.value);
 const privacyUrl = computed(() => `${baseUrl.value}/company/privacy-policy`);
 const termsUrl = computed(() => `${baseUrl.value}/company/use-term`);
 </script>
+
+<style scoped lang="scss">
+.home-card-header--primary {
+  background: linear-gradient(135deg, var(--voy-primary, #0037EB), var(--voy-accent, #7850FA));
+  color: white;
+}
+
+.home-card-header--secondary {
+  background: linear-gradient(135deg, var(--voy-secondary, #00D2BA), var(--voy-primary, #0037EB));
+  color: white;
+}
+</style>

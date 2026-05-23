@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <!-- Mobile Overlay -->
   <div v-if="sidebarOpen && isMobile" class="mobile-overlay" @click="closeSidebar" />
 
@@ -19,45 +19,44 @@
 
     <q-scroll-area class="sidebar-nav-wrapper">
       <nav class="sidebar-nav">
-        <!-- Common Section (always visible) -->
-        <div class="nav-section-title">Platform</div>
-        <sidebar-item v-for="route in commonFilteredRoutes" :key="route.path" :item="route" :base-path="route.path" />
+        <!-- Common Section -->
+        <div class="nav-section-label">Platform</div>
+        <sidebar-item
+          v-for="route in commonFilteredRoutes"
+          :key="route.path"
+          :item="route"
+          :base-path="route.path"
+        />
 
-        <q-separator class="q-my-sm" />
+        <div class="nav-divider" />
 
-        <!-- Project Sections -->
-        <template v-for="proj in projectSections" :key="proj.key">
-          <div
-            :class="['nav-section-title', 'project-section', { 'active-project': currentProject === proj.key }]"
-          >
-            <q-icon :name="proj.icon" size="18px" class="q-mr-xs" />
-            {{ proj.label }}
-          </div>
-          <!-- Show children only if this project is active -->
-          <template v-if="currentProject === proj.key">
+        <!-- Project Sections — all collapsible -->
+        <q-expansion-item
+          v-for="proj in projectSections"
+          :key="proj.key"
+          :default-opened="currentProject === proj.key"
+          :header-class="['nav-project-header', { 'nav-project-header--active': currentProject === proj.key }]"
+          expand-icon-class="nav-project-expand"
+          dense
+        >
+          <template #header>
+            <q-item-section avatar>
+              <q-icon :name="proj.icon" size="18px" />
+            </q-item-section>
+            <q-item-section>
+              <span class="nav-project-label">{{ proj.label }}</span>
+            </q-item-section>
+          </template>
+
+          <div class="nav-project-children">
             <sidebar-item
               v-for="child in proj.children"
               :key="child.path"
               :item="child"
               :base-path="resolveSectionPath(proj.basePath, child.path)"
             />
-          </template>
-          <!-- Collapsed: show entry link -->
-          <q-item
-            v-else
-            clickable v-ripple
-            class="nav-item project-entry-link"
-            @click="navigateTo(proj.basePath)"
-          >
-            <q-item-section avatar>
-              <q-icon :name="proj.icon" />
-            </q-item-section>
-            <q-item-section>{{ proj.label }} 바로가기</q-item-section>
-            <q-item-section side>
-              <q-icon name="arrow_forward" size="16px" />
-            </q-item-section>
-          </q-item>
-        </template>
+          </div>
+        </q-expansion-item>
       </nav>
     </q-scroll-area>
   </aside>
@@ -80,7 +79,6 @@ const route = useRoute()
 const sidebarOpen = ref(drawerLeft.value)
 const isMobile = ref(window.innerWidth < 1024)
 
-// ─── Detect current active project from route path ───────────────
 const currentProject = computed(() => {
   const path = route.path
   if (path.startsWith('/aviation')) return 'aviation'
@@ -89,7 +87,6 @@ const currentProject = computed(() => {
   return null
 })
 
-// ─── Project section definitions ─────────────────────────────────
 interface ProjectSection {
   key: string
   label: string
@@ -100,25 +97,22 @@ interface ProjectSection {
 
 const projectSections = computed<ProjectSection[]>(() => {
   const allRoutes = [...router.options.routes]
-  const projectNames: Record<string, { label: string; icon: string }> = {
-    aviation: { label: 'Aviation', icon: 'flight' },
-    investand: { label: 'Investand', icon: 'show_chart' },
-    workschd: { label: 'WorkSchd', icon: 'business_center' },
+  const projectMeta: Record<string, { label: string; icon: string }> = {
+    aviation:  { label: 'Aviation',  icon: 'flight'           },
+    investand: { label: 'Investand', icon: 'show_chart'       },
+    workschd:  { label: 'WorkSchd',  icon: 'business_center'  },
   }
 
   const sections: ProjectSection[] = []
 
   for (const r of allRoutes) {
     const project = (r.meta as any)?.project as string | undefined
-    if (project && projectNames[project]) {
-      const info = projectNames[project]
-      // Get visible children
+    if (project && projectMeta[project]) {
+      const info = projectMeta[project]
       const visibleChildren = (r.children || []).filter((child: any) => {
-        if (child.hidden) return false
-        if (child.meta?.hidden) return false
-        if (child.path === '' && child.redirect) return false // skip redirect-only
-        // Role check
-        if (child.meta?.roles && child.meta.roles.length > 0) {
+        if (child.hidden || child.meta?.hidden) return false
+        if (child.path === '' && child.redirect) return false
+        if (child.meta?.roles?.length) {
           if (!userStore.user?.accountRoles) return false
           const hasRole = child.meta.roles.some((role: string) =>
             userStore.user.accountRoles.some((ar: any) => ar.roleType === role)
@@ -140,7 +134,6 @@ const projectSections = computed<ProjectSection[]>(() => {
   return sections
 })
 
-// ─── Common routes (non-project, non-hidden) ─────────────────────
 const commonFilteredRoutes = computed(() => {
   const allRoutes = [...router.options.routes]
   const excludedNames = [
@@ -152,38 +145,27 @@ const commonFilteredRoutes = computed(() => {
 
   return allRoutes.filter((r: any) => {
     if (excludedNames.includes(r.name as string)) return false
-    if (r.hidden) return false
-    if (r.meta?.hidden) return false
-    if (r.meta?.project) return false // sub-project routes handled separately
+    if (r.hidden || r.meta?.hidden) return false
+    if (r.meta?.project) return false
     return true
   })
 })
 
-// ─── Helpers ─────────────────────────────────────────────────────
 function resolveSectionPath(basePath: string, childPath: string) {
   if (childPath.startsWith('/')) return childPath
   const base = basePath.endsWith('/') ? basePath : basePath + '/'
   return (base + childPath).replace(/\/+/g, '/')
 }
 
-function navigateTo(path: string) {
-  router.push(path).catch(err => {
-    if (err.name !== 'NavigationDuplicated') console.error(err)
-  })
-}
-
-// Handle window resize
 const handleResize = () => {
   isMobile.value = window.innerWidth < 1024
 }
 
-// Close sidebar (for mobile)
 const closeSidebar = () => {
   sidebarOpen.value = false
   layoutStore.setLeftDrawer(false)
 }
 
-// Watch drawer state from store
 const unwatchDrawer = layoutStore.$subscribe(() => {
   sidebarOpen.value = drawerLeft.value
 })
@@ -197,7 +179,6 @@ onUnmounted(() => {
   unwatchDrawer()
 })
 
-// Expose method to toggle sidebar (can be called from parent)
 defineExpose({
   toggle: () => {
     sidebarOpen.value = !sidebarOpen.value
@@ -207,29 +188,51 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-.project-section {
-  cursor: default;
-  display: flex;
-  align-items: center;
-  padding: 8px 16px 4px;
-  font-size: 11px;
+// Project section header inside q-expansion-item
+:deep(.nav-project-header) {
+  color: var(--voy-sidebar-text-muted);
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.4);
-  transition: color 0.2s ease;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  transition: color var(--voy-transition-fast, 150ms);
 
-  &.active-project {
-    color: rgba(255, 255, 255, 0.85);
+  &:hover {
+    background: var(--voy-sidebar-hover-bg);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  &.nav-project-header--active {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .q-icon {
+    color: inherit;
   }
 }
 
-.project-entry-link {
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+:deep(.nav-project-expand) {
+  color: var(--voy-sidebar-text-muted) !important;
+  font-size: 16px !important;
+}
 
-  &:hover {
-    opacity: 1;
-  }
+.nav-project-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.nav-project-children {
+  padding-left: 8px;
+}
+
+.nav-divider {
+  height: 1px;
+  background: var(--voy-sidebar-section-border);
+  margin: 8px 12px;
 }
 </style>
