@@ -226,3 +226,18 @@ model FuneralEvent {
   @@index([taskId], map: "idx_funeral_event_task_id")
   @@map("funeral_event")
 }
+
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(255)
+  value       String   @db.Text
+  isEncrypted Boolean  @default(false) @map("is_encrypted")
+  description String?  @db.VarChar(500)
+  category    String   @default("general") @db.VarChar(100)
+  updatedBy   String?  @map("updated_by") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category], map: "idx_system_config_category")
+  @@map("system_config")
+}

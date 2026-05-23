@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
 import { ScrapedFuneral, ScrapeResult } from '../types';
+import { configService } from '../../../../config/config-service';
 
 export abstract class BaseScraper {
   abstract readonly funeralHomeName: string;
@@ -150,7 +151,7 @@ export abstract class BaseScraper {
   }
 
   private getListingUrlOverrides(): Record<string, string> {
-    const raw = process.env.WORKSCHD_SCRAPER_LISTING_URL_OVERRIDES_JSON;
+    const raw = configService.get('WORKSCHD_SCRAPER_LISTING_URL_OVERRIDES_JSON');
     if (!raw) {
       return {};
     }

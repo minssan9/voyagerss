@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { krxStockData, InvestorTradingData, OptionData } from '@investand/interfaces/krxTypes'
+import { configService } from '../../../../config/config-service'
 
 /**
  * KRX API 클라이언트
@@ -12,8 +13,8 @@ export class KrxApiClient {
   // ================================
 
   private static readonly BASE_URL = 'https://openapi.koreainvestment.com:9443'
-  private static readonly APP_KEY = process.env.KIS_API_KEY || ''
-  private static readonly APP_SECRET = process.env.KIS_API_SECRET || ''
+  private static get APP_KEY(): string { return configService.get('KIS_API_KEY', '')! }
+  private static get APP_SECRET(): string { return configService.get('KIS_API_SECRET', '')! }
   private static readonly TIMEOUT = 10000
   private static readonly CUSTOMER_TYPE = 'P' // 개인
   private static readonly RATE_LIMIT_DELAY = 100 // 100ms between requests

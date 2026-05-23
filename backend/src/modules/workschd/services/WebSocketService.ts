@@ -1,5 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
+import { configService } from '../../../config/config-service';
 
 export class WebSocketService {
   private io: SocketIOServer | null = null;
@@ -11,7 +12,7 @@ export class WebSocketService {
   initialize(httpServer: HttpServer): void {
     this.io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+        origin: configService.get('FRONTEND_URL', 'http://localhost:8080')!,
         credentials: true
       },
       path: '/socket.io'

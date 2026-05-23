@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AccountService } from '../services/AccountService';
 import { AuthService } from '../services/AuthService';
 import { OAuth2Service } from '../services/OAuth2Service';
+import { configService } from '../../../config/config-service';
 
 export class AuthController {
     private accountService: AccountService;
@@ -90,7 +91,7 @@ export class AuthController {
             const result = await this.oauth2Service.handleGoogleCallback(code);
 
             // 프론트엔드로 리다이렉트 (토큰 포함)
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+            const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:8080')!;
             res.redirect(
                 `${frontendUrl}/auth/callback?` +
                 `accessToken=${result.accessToken}&` +
@@ -98,7 +99,7 @@ export class AuthController {
             );
         } catch (error) {
             console.error('Google callback error:', error);
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+            const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:8080')!;
             res.redirect(`${frontendUrl}/login?error=oauth_failed`);
         }
     };
@@ -130,7 +131,7 @@ export class AuthController {
             const result = await this.oauth2Service.handleKakaoCallback(code);
 
             // 프론트엔드로 리다이렉트 (토큰 포함)
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+            const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:8080')!;
             res.redirect(
                 `${frontendUrl}/auth/callback?` +
                 `accessToken=${result.accessToken}&` +
@@ -138,7 +139,7 @@ export class AuthController {
             );
         } catch (error) {
             console.error('Kakao callback error:', error);
-            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+            const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:8080')!;
             res.redirect(`${frontendUrl}/login?error=oauth_failed`);
         }
     };
