@@ -3,6 +3,7 @@ import { KrxCollectionService } from '@investand/collectors/krxCollectionService
 import { FearGreedCalculator } from '@investand/services/core/fearGreedCalculator'
 import { DatabaseService } from '@investand/services/core/databaseService'
 import { logger } from '@investand/utils/common/logger'
+import { configService } from '../../../../config/config-service'
 import { formatDate } from '@investand/utils/common/dateUtils'
 
 /**
@@ -224,12 +225,12 @@ export class DataCollectionService {
     const issues: string[] = []
 
     // DART API 키 검증
-    if (!process.env.DART_API_KEY) {
+    if (!configService.get('DART_API_KEY')) {
       issues.push('DART_API_KEY가 설정되지 않았습니다')
     }
 
     // KRX API 키 검증
-    if (!process.env.KIS_API_KEY || !process.env.KIS_API_SECRET) {
+    if (!configService.get('KIS_API_KEY') || !configService.get('KIS_API_SECRET')) {
       issues.push('KRX API 키가 설정되지 않았습니다 (KIS_API_KEY, KIS_API_SECRET)')
     }
 

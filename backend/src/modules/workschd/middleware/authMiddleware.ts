@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { workschdPrisma as prisma } from '../../../config/prisma';
+import { configService } from '../../../config/config-service';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -35,7 +36,7 @@ export const authenticate = async (
     }
 
     // JWT 토큰 검증
-    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
+    const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
     const decoded = jwt.verify(token, jwtSecret) as any;
 
     if (!decoded.accountId) {
