@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'investand-landing',
         component: () => import('@/views/investand/IndexPage.vue'),
-        meta: { title: 'Investand Home', icon: 'home' }
+        meta: { title: 'Investand 홈', icon: 'home' }
       },
       {
         path: 'market-lab',

@@ -191,6 +191,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { fearGreedApi, marketApi, type FearGreedIndex, type MarketData, type FearGreedHistoryItem } from '@/api/investand/api'
 import { Chart, registerables } from 'chart.js'
+import PageHeader from '@/components/common/PageHeader.vue'
 
 Chart.register(...registerables)
 
@@ -208,13 +209,7 @@ const currentIndex = ref<FearGreedIndex>({
   value: 0,
   level: '',
   date: '',
-  components: {
-    priceMomentum: 0,
-    investorSentiment: 0,
-    putCallRatio: 0,
-    volatilityIndex: 0,
-    safeHavenDemand: 0
-  }
+  components: { priceMomentum: 0, investorSentiment: 0, putCallRatio: 0, volatilityIndex: 0, safeHavenDemand: 0 }
 })
 
 const historicalData = ref<FearGreedHistoryItem[]>([])
@@ -300,7 +295,7 @@ function renderChart() {
   chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels,
+      labels: sorted.map(d => d.date),
       datasets: [{
         label: 'Fear & Greed',
         data: values,
@@ -384,4 +379,13 @@ onMounted(() => loadData())
   font-size: 10px;
   color: #86868b;
 }
+
+// Fear/Greed color scheme
+.fg--extreme-fear  { color: #ef4444; }
+.fg--fear          { color: #f97316; }
+.fg--neutral       { color: #eab308; }
+.fg--greed         { color: #84cc16; }
+.fg--extreme-greed { color: #10b981; }
+
+.error-banner { border: 1px solid rgba(239,68,68,0.2); }
 </style>
