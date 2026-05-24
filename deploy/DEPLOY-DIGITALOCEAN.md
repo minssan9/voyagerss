@@ -7,14 +7,14 @@
 | `/data/voyagerss/docker-compose.yml` | BE + FE services (from `deploy/docker-compose.api.yml`) |
 | `/data/voyagerss/.env` | Backend secrets (`DOTENV_PROD` GitHub secret) |
 | `/data/voyagerss/data/` | Persistent backend data (SQLite scraper, etc.) |
-| `/data/voyagerss/nginx/*.conf` | Reference snippets for gateway merge |
+| `/data/voyagerss/nginx/voyagerss.conf` | Rendered gateway config (from `deploy/nginx/voyagerss.conf`) |
 
 Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.github/workflows/deploy-production.yml). The droplet only runs `docker compose pull && up -d`.
 
 ## Architecture
 
 - **TLS**: DigitalOcean Load Balancer (HTTPS:443 → HTTP:80)
-- **Gateway nginx** (existing): merge snippets — do **not** overwrite; see [`deploy/nginx/GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md)
+- **Gateway nginx** (existing): merge from single source [`deploy/nginx/voyagerss.conf`](nginx/voyagerss.conf) — do **not** overwrite other vhosts; see [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md)
 - **Backend**: `127.0.0.1:9002` — `api.voyagerss.com`
 - **Frontend**: `127.0.0.1:9003` — `voyagerss.com` (Vue SPA in Docker)
 
@@ -38,10 +38,22 @@ Merge gateway nginx using the prompt in [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/
 
 Register a **self-hosted** GitHub Actions runner, set `DOTENV_PROD`, then run **Deploy Production (GHCR)** on `main`.
 
+Render reference config (default upstream `127.0.0.1`):
+
+```bash
+DATA_DIR=/data/voyagerss bash deploy/scripts/install-nginx-site.sh
+```
+
 Fresh install without existing gateway:
 
 ```bash
 INSTALL_MODE=standalone DATA_DIR=/data/voyagerss bash deploy/scripts/install-nginx-site.sh
+```
+
+Gateway nginx in Docker (upstream via host):
+
+```bash
+VOYAGERSS_UPSTREAM_HOST=host.docker.internal DATA_DIR=/data/voyagerss bash deploy/scripts/install-nginx-site.sh
 ```
 
 ## Environment

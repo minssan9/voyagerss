@@ -2,6 +2,16 @@
 
 Copy everything inside the fenced block below into Cursor/Claude **after** pasting your current gateway nginx config (`nginx -T` or `sites-enabled/*`).
 
+**Single source in repo:** [`voyagerss.conf`](voyagerss.conf) — map, upstreams, `api.voyagerss.com` + `voyagerss.com` server blocks. Do not duplicate upstream definitions elsewhere.
+
+Render for reference on droplet:
+
+```bash
+bash deploy/scripts/install-nginx-site.sh   # → /data/voyagerss/nginx/voyagerss.conf
+# Docker gateway upstream:
+VOYAGERSS_UPSTREAM_HOST=host.docker.internal bash deploy/scripts/install-nginx-site.sh
+```
+
 ---
 
 ```
@@ -13,9 +23,10 @@ Copy everything inside the fenced block below into Cursor/Claude **after** pasti
 - TLS 종료: DigitalOcean Load Balancer (클라이언트 HTTPS:443 → droplet HTTP:80)
 - Docker Compose 런타임: /data/voyagerss/docker-compose.yml
 - 이미지: GHCR (GitHub Actions에서 build/push, droplet에서는 pull만)
-- 백엔드(Express): 127.0.0.1:9002 — /api/*, /health, /socket.io/*
-- 프론트(Vue SPA, 컨테이너 nginx): 127.0.0.1:9003 — 정적 파일만 (API 프록시 없음)
+- 백엔드(Express): :9002 — /api/*, /health, /socket.io/*
+- 프론트(Vue SPA, 컨테이너 nginx): :9003 — 정적 파일만 (API 프록시 없음)
 - FE 빌드 시 API URL: https://api.voyagerss.com (브라우저가 직접 API 호출)
+- 설정 단일 원본: deploy/nginx/voyagerss.conf (upstream host는 install 시 치환)
 
 ## 내가 제공할 것 (먼저 붙여넣기)
 1) 현재 gateway nginx 전체 또는 관련 파일
@@ -25,37 +36,17 @@ Copy everything inside the fenced block below into Cursor/Claude **after** pasti
 ## 병합 규칙 (필수)
 1. 기존 upstream/server/location/ssl/listen 설정은 그대로 두고, Voyagerss용만 추가.
 2. 동일 server_name 블록이 이미 있으면 새 server를 만들지 말고, 해당 server 안에 location만 추가/수정.
-3. 포트 9002, 9003은 127.0.0.1에만 바인딩 — 외부 방화벽에 열지 않음.
+3. 포트 9002, 9003은 Compose에서 127.0.0.1에만 바인딩 — 외부 방화벽에 열지 않음.
 4. gateway에서 certbot/SSL 추가하지 않음 (TLS는 DO LB).
 5. 변경 후: sudo nginx -t && sudo systemctl reload nginx
 
-## http {} 블록에 추가할 upstream (이름 충돌 시 접두사 조정)
-upstream voyagerss_api {
-    server 127.0.0.1:9002;
-    keepalive 32;
-}
-upstream voyagerss_fe {
-    server 127.0.0.1:9003;
-    keepalive 16;
-}
-
-## X-Forwarded-Proto (기존 map이 없을 때만)
-map $http_x_forwarded_proto $voyagerss_forwarded_proto {
-    default $http_x_forwarded_proto;
-    ''      $scheme;
-}
-
-## server_name api.voyagerss.com
-참고 스니펫: deploy/nginx/api.voyagerss.com.conf
-- location = /health → voyagerss_api/health
-- location /api/ → voyagerss_api
-- location /socket.io/ → voyagerss_api (WebSocket upgrade)
-- location / → return 404
-
-## server_name voyagerss.com
-참고 스니펫: deploy/nginx/voyagerss.com.conf
-- location / → voyagerss_fe (SPA)
-- /api 를 FE로 프록시하지 말 것
+## 병합할 내용
+deploy/nginx/voyagerss.conf 전체 또는 다음을 http {} / server 블록에 맞게 분리 삽입:
+- map $http_x_forwarded_proto $voyagerss_forwarded_proto { ... }
+- upstream voyagerss_api → __VOYAGERSS_UPSTREAM_HOST__:9002 (droplet: 127.0.0.1)
+- upstream voyagerss_fe → __VOYAGERSS_UPSTREAM_HOST__:9003
+- server api.voyagerss.com (health, /api/, /socket.io/, / → 404)
+- server voyagerss.com (location / → voyagerss_fe only)
 
 ## 검증
 curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health
@@ -68,7 +59,8 @@ curl -fsS -o /dev/null -w "FE %{http_code}\n" -H "Host: voyagerss.com" http://12
 4. 롤백 방법
 ```
 
-Reference files in this repo:
+Fresh droplet without existing gateway:
 
-- [`api.voyagerss.com.conf`](api.voyagerss.com.conf)
-- [`voyagerss.com.conf`](voyagerss.com.conf)
+```bash
+INSTALL_MODE=standalone DATA_DIR=/data/voyagerss bash deploy/scripts/install-nginx-site.sh
+```
