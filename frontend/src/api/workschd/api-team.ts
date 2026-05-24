@@ -52,9 +52,9 @@ export { DEFAULT_PAGE_DTO };
 export type { PageDTO, PageResponseDTO };
 
 const apiTeam = {
-  // TeamApproveDialog APIs
-  approveRequest: (teamId: number, joinRequest: TeamDTO): Promise<AxiosResponse> => {
-    return service.post(`/workschd/team/${teamId}/approve`, joinRequest);
+  // TeamApproveDialog APIs — requestId must be in the URL path per backend route
+  approveRequest: (teamId: number, requestId: number): Promise<AxiosResponse> => {
+    return service.post(`/workschd/team/${teamId}/approve/${requestId}`);
   },
 
   // TeamRegistrationDialog APIs
@@ -95,14 +95,15 @@ const apiTeam = {
     return service.get('/workschd/team', { params: queryParams });
   },
 
-  // TeamJoin APIs
-  joinTeamByInvitation: (invitationHash: string, accountId: string): Promise<AxiosResponse<TeamDTO>> => {
-    return service.get(`/workschd/team/join/${invitationHash}`, { accountId });
+  // TeamJoin APIs — accountId is derived from JWT on the backend, not needed as param
+  joinTeamByInvitation: (invitationHash: string): Promise<AxiosResponse<TeamDTO>> => {
+    return service.get(`/workschd/team/join/${invitationHash}`);
   },
 
-  // TeamScheduleConfig APIs
-  saveScheduleConfig: (config: ScheduleConfig): Promise<AxiosResponse> => {
-    return service.post('/workschd/schedule-config', config);
+  // Use api-team-schedule.ts saveTeamScheduleConfig(teamId, config) instead
+  // Kept here for backward compatibility but delegates correctly with teamId
+  saveScheduleConfig: (teamId: number, config: ScheduleConfig): Promise<AxiosResponse> => {
+    return service.post(`/workschd/team/${teamId}/schedule-config`, config);
   },
 
   approveJoinRequest: (teamId: number, requestId: number): Promise<AxiosResponse<any>> => {

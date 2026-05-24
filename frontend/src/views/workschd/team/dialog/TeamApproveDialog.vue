@@ -50,7 +50,7 @@ const handleApprove = async (request: JoinRequest) => {
   try {
     if (!props.selectedTeam) return
 
-    await apiTeam.approveRequest(props.selectedTeam.id, request)
+    await apiTeam.approveRequest(props.selectedTeam.id, request.id)
 
     emit('request-approved', { teamId: props.selectedTeam.id, request })
     $q.notify({ type: 'positive', message: 'Request approved successfully' })

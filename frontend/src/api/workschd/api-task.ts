@@ -70,6 +70,7 @@ const checkOut = (taskEmployeeId: number): Promise<AxiosResponse<TaskEmployee>> 
 export default {
   fetchTasks,
   fetchTasksForWorker,
+  getUserTaskRequests,
   createTaskEmployeeRequest,
   createTask,
   updateTask,
