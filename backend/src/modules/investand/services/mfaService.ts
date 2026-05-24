@@ -1,5 +1,6 @@
 import * as crypto from 'crypto'
 import { PrismaClient } from '@prisma/client-investand'
+import { configService } from '../../../config/config-service'
 
 const prisma = new PrismaClient()
 
@@ -384,7 +385,7 @@ export class MfaService {
    */
   private static encryptBackupCode(code: string): string {
     // Simple encryption for backup codes (in production, use proper encryption)
-    const cipher = crypto.createCipher('aes-256-cbc', process.env.MFA_ENCRYPTION_KEY || 'default-key-change-in-production')
+    const cipher = crypto.createCipher('aes-256-cbc', configService.get('MFA_ENCRYPTION_KEY', 'default-key-change-in-production')!)
     let encrypted = cipher.update(code, 'utf8', 'hex')
     encrypted += cipher.final('hex')
     return encrypted
@@ -395,7 +396,7 @@ export class MfaService {
    */
   private static decryptBackupCode(encryptedCode: string): string {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', process.env.MFA_ENCRYPTION_KEY || 'default-key-change-in-production')
+      const decipher = crypto.createDecipher('aes-256-cbc', configService.get('MFA_ENCRYPTION_KEY', 'default-key-change-in-production')!)
       let decrypted = decipher.update(encryptedCode, 'hex', 'utf8')
       decrypted += decipher.final('utf8')
       return decrypted

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { configService } from '../../../config/config-service';
 
 export interface OAuth2Result {
   accessToken: string;
@@ -20,8 +21,8 @@ export class OAuth2Service {
   getGoogleAuthUrl(): string {
     const baseUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID || '',
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI || '',
+      client_id: configService.get('GOOGLE_CLIENT_ID', '')!,
+      redirect_uri: configService.get('GOOGLE_REDIRECT_URI', '')!,
       response_type: 'code',
       scope: 'openid profile email',
       access_type: 'offline',
@@ -41,9 +42,9 @@ export class OAuth2Service {
         'https://oauth2.googleapis.com/token',
         {
           code,
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+          client_id: configService.get('GOOGLE_CLIENT_ID'),
+          client_secret: configService.get('GOOGLE_CLIENT_SECRET'),
+          redirect_uri: configService.get('GOOGLE_REDIRECT_URI'),
           grant_type: 'authorization_code'
         }
       );
@@ -91,8 +92,8 @@ export class OAuth2Service {
       }
 
       // 4. JWT 생성
-      const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
-      const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+      const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
+      const jwtRefreshSecret = configService.get('JWT_REFRESH_SECRET', 'your-refresh-secret')!;
 
       const jwtAccessToken = jwt.sign(
         {
@@ -136,8 +137,8 @@ export class OAuth2Service {
   getKakaoAuthUrl(): string {
     const baseUrl = 'https://kauth.kakao.com/oauth/authorize';
     const params = new URLSearchParams({
-      client_id: process.env.KAKAO_REST_API_KEY || '',
-      redirect_uri: process.env.KAKAO_REDIRECT_URI || '',
+      client_id: configService.get('KAKAO_REST_API_KEY', '')!,
+      redirect_uri: configService.get('KAKAO_REDIRECT_URI', '')!,
       response_type: 'code',
       scope: 'profile_nickname,profile_image,account_email'
     });
@@ -155,9 +156,9 @@ export class OAuth2Service {
         'https://kauth.kakao.com/oauth/token',
         new URLSearchParams({
           grant_type: 'authorization_code',
-          client_id: process.env.KAKAO_REST_API_KEY || '',
-          client_secret: process.env.KAKAO_CLIENT_SECRET || '',
-          redirect_uri: process.env.KAKAO_REDIRECT_URI || '',
+          client_id: configService.get('KAKAO_REST_API_KEY', '')!,
+          client_secret: configService.get('KAKAO_CLIENT_SECRET', '')!,
+          redirect_uri: configService.get('KAKAO_REDIRECT_URI', '')!,
           code
         }),
         {
@@ -208,8 +209,8 @@ export class OAuth2Service {
       }
 
       // 4. JWT 생성
-      const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
-      const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+      const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
+      const jwtRefreshSecret = configService.get('JWT_REFRESH_SECRET', 'your-refresh-secret')!;
 
       const jwtAccessToken = jwt.sign(
         {

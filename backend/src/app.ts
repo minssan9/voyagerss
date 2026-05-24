@@ -13,6 +13,7 @@ import {
 } from './server-config';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
+import { configService } from './config/config-service';
 
 // Load environment variables from .env.local (priority) or .env (fallback)
 dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
@@ -27,19 +28,13 @@ app.set('trust proxy', TRUST_PROXY_HOPS);
 // Create HTTP server
 const httpServer = http.createServer(app);
 
-// Initialize WebSocket service
-webSocketService.initialize(httpServer);
-startWorkschdScraperScheduler();
-
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:9003')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
+// CORS origin is read at request time from configService (supports runtime updates)
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true); // server-to-server / curl
+      const rawOrigins = configService.get('ALLOWED_ORIGINS', 'http://localhost:9003')!;
+      const allowedOrigins = rawOrigins.split(',').map((o) => o.trim()).filter(Boolean);
       const isAllowed =
         allowedOrigins.includes(origin) ||
         /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin);
@@ -59,11 +54,25 @@ app.use('/api', routes);
 
 registerHealthRoute(app);
 
-if (require.main === module) {
-  httpServer.listen(PORT, HOST, () => {
-    console.log(`Server running on ${HOST}:${PORT}`);
-    console.log(`WebSocket server initialized on port ${PORT}`);
-  });
+async function bootstrap() {
+  // Load all config from DB before starting services
+  await configService.initialize();
+
+  // Initialize services that depend on config
+  webSocketService.initialize(httpServer);
+  startWorkschdScraperScheduler();
+
+  if (require.main === module) {
+    httpServer.listen(PORT, HOST, () => {
+      console.log(`Server running on ${HOST}:${PORT}`);
+      console.log(`WebSocket server initialized on port ${PORT}`);
+    });
+  }
 }
+
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed:', err);
+  process.exit(1);
+});
 
 export { app, httpServer };
