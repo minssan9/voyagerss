@@ -10,7 +10,25 @@
       "Bash(fi)",
       "Bash(sed 's/\"\"\"\"//g')",
       "Bash(sed 's/`//g')",
-      "Bash(grep -o \"\\\\`/workschd/[^\\\\`]*\\\\`\" /f/repository/voyagerss/frontend/src/api/workschd/*.ts)"
+      "Bash(grep -o \"\\\\`/workschd/[^\\\\`]*\\\\`\" /f/repository/voyagerss/frontend/src/api/workschd/*.ts)",
+      "Bash(npm run *)",
+      "Read(//tmp/**)",
+      "Bash(npx vue-tsc *)",
+      "Bash(npx vite *)",
+      "Bash(pnpm --version)",
+      "PowerShell(pnpm *)",
+      "PowerShell(Get-Command *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\minss\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\F--repository-voyagerss\\\\9d832150-b3ba-4d5c-8e57-f95f88860bf9\\\\tasks\\\\bu20ur4w9.output\" -Wait)",
+      "Bash(Select-String --line-buffered \"Attempt|SUCCESS|Failed|EISDIR|EPERM|done|added \\\\d+$\")",
+      "Bash(Get-ChildItem -Path \"F:\\\\repository\\\\voyagerss\\\\backend\" -Recurse -Name)",
+      "Bash(Get-ChildItem -Path \"F:\\\\repository\\\\voyagerss\\\\frontend\\\\src\\\\views\\\\workschd\" -Recurse -File -Filter \"*.vue\")",
+      "Bash(Select-Object FullName)",
+      "Bash(ConvertTo-Json)",
+      "Bash(dir F:\\\\repository\\\\voyagerss\\\\backend\\\\src)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

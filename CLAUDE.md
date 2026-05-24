@@ -1,6 +1,6 @@
 # CLAUDE.md — Voyagerss Codebase Guide
 
-**Last updated**: 2026-03-08
+**Last updated**: 2026-05-13
 **Stack**: Node.js · Express · TypeScript · Prisma · Vue 3 · Quasar · Pinia
 
 ---
@@ -14,8 +14,9 @@
 | `workschd` | Funeral home worker scheduling (상조 서비스) — team/task/notification management + live scraper |
 | `aviation` | Aviation quiz system, airport navigation, route data |
 | `investand` | Financial/investment analytics and stock market data |
+| `aipr` | Auto-PR feedback platform (Nest API + BullMQ worker + Nuxt admin/widgets) — separate pnpm workspaces under `backend/aipr` and `frontend/aipr` |
 
-Each module has its own Prisma schema, database, controllers, services, and frontend views.
+Each domain module has its own Prisma schema, database, controllers, services, and frontend views. **aipr** uses NestJS (not Express) and runs as separate processes from the main backend.
 
 ---
 
@@ -27,11 +28,15 @@ voyagerss/
 │   ├── prisma/
 │   │   ├── workschd.prisma         # MySQL schema for workschd
 │   │   ├── aviation.prisma         # MySQL schema for aviation
-│   │   └── investand.prisma        # MySQL schema for investand
+│   │   ├── investand.prisma        # MySQL schema for investand
+│   │   └── aipr.prisma             # MySQL schema for Auto-PR
+│   ├── aipr/                       # Nest API + worker (pnpm workspace)
+│   │   ├── apps/api/
+│   │   └── apps/worker/
 │   ├── src/
 │   │   ├── app.ts                  # Express app entry point
 │   │   ├── config/
-│   │   │   └── prisma.ts           # Exports workschdPrisma, investandPrisma, aviationPrisma
+│   │   │   └── prisma.ts           # workschdPrisma, investandPrisma, aviationPrisma, aiprPrisma
 │   │   └── modules/
 │   │       ├── workschd/           # Funeral/scheduling module
 │   │       │   ├── controllers/    # HTTP request handlers
@@ -50,6 +55,10 @@ voyagerss/
 │   └── package.json
 │
 ├── frontend/                       # Vue 3 / Quasar / Pinia SPA
+│   ├── aipr/                       # Auto-PR pnpm workspace (Nuxt admin + widgets)
+│   │   ├── apps/admin-web/         # Admin UI (dev port 3011)
+│   │   ├── apps/widget-app/
+│   │   └── apps/widget-embed/
 │   └── src/
 │       ├── api/workschd/
 │       │   ├── api-task.ts         # Task CRUD + employee management
@@ -140,7 +149,17 @@ npx prisma generate --schema=./prisma/workschd.prisma
 npx prisma migrate dev --name <name> --schema=./prisma/workschd.prisma
 npx prisma migrate deploy --schema=./prisma/workschd.prisma   # production
 npx prisma studio --schema=./prisma/workschd.prisma
+
+# Auto-PR (from repo root — separate pnpm workspaces)
+npm run install:aipr
+npm run dev:aipr:api       # Nest API (port 3010)
+npm run dev:aipr:worker
+npm run dev:aipr:admin     # Nuxt admin (port 3011)
+npm run build:aipr
+npm run test:aipr
 ```
+
+See [backend/aipr/README.md](backend/aipr/README.md) and [frontend/aipr/README.md](frontend/aipr/README.md).
 
 ---
 
@@ -153,6 +172,9 @@ Copy `.env.example` to `.env` at repo root. Key variables:
 DATABASE_URL_WORKSCHD=mysql://user:pass@localhost:3306/workschd
 DATABASE_URL_INVESTAND=mysql://user:pass@localhost:3306/investand
 DATABASE_URL_AVIATION=mysql://user:pass@localhost:3306/aviation
+DATABASE_URL_AIPR=mysql://user:pass@localhost:3306/aipr
+REDIS_HOST=localhost
+REDIS_PORT=6379
 SCRAPER_DB_PATH=./data/scraper.db   # SQLite path for scraped funeral data
 
 # Auth
