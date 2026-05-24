@@ -1,0 +1,21 @@
+{
+  "name": "@repo/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "migrate": "prisma migrate dev --schema=../../../prisma/aipr.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=../../../prisma/aipr.prisma",
+    "generate": "prisma generate --schema=../../../prisma/aipr.prisma",
+    "seed": "tsx ../../../prisma/seed-aipr.ts",
+    "studio": "prisma studio --schema=../../../prisma/aipr.prisma"
+  },
+  "dependencies": {
+    "@prisma/client-aipr": "file:../../../node_modules/@prisma/client-aipr"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.1",
+    "tsx": "^4.11.0"
+  }
+}
