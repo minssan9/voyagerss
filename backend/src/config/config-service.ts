@@ -27,7 +27,7 @@ const SENSITIVE_KEYS = new Set([
   'MFA_ENCRYPTION_KEY',
 ]);
 
-class ConfigService {
+export class ConfigService {
   private static instance: ConfigService;
   private cache: Map<string, string> = new Map();
   private _initialized = false;
