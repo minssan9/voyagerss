@@ -1,54 +1,49 @@
-﻿import service, { requestFile } from "@/api/common/axios-voyagerss.js";
+import service, { requestFile } from "@/api/common/axios-voyagerss.js";
 
-const baesURL = `account`
 const apiAccount = {
   getUser() {
-    return service.get(`${baesURL}`)
+    return service.get('/workschd/account')
   },
-  getUserById(acconutId) {
-    return service.get(`${baesURL}/${acconutId}`)
+  getUserById(accountId) {
+    return service.get(`/workschd/accounts/${accountId}`)
   },
   putUser(account) {
-    return service.put(`${baesURL}`, account)
+    return service.put('/workschd/accounts/profile', account)
   },
   putUserById(account) {
-    return service.put(`${baesURL}/${account.accountId}`, account)
+    return service.put(`/workschd/accounts/${account.accountId}`, account)
   },
 
-
   getTeamsByAccountId(accountId) {
-    return service.get(`${baesURL}/${accountId}/team`)
+    return service.get('/workschd/team')
   },
 
   getSocialLoginUrl(socialType) {
-    return `${import.meta.env.VITE_API_URL}/oauth2/authorization/${socialType}?redirect_uri=${import.meta.env.VITE_API_REDIRECT_URL}/auth/redirect`
+    return `/api/workschd/auth/${socialType}`
   },
   getSocialConnect(socialType) {
-    return `${import.meta.env.VITE_API_URL}/oauth2/auth-url/${socialType}`
+    return service.get(`/workschd/auth-url/${socialType}`)
   },
   saveAccountSns(providerType, oauth2Info) {
-    return service.post(`/oauth2/save/${providerType}`, oauth2Info)
+    return service.post(`/workschd/oauth2/save/${providerType}`, oauth2Info)
   },
 
   saveAccountInfo(account) {
-    return service.post(`${baesURL}/info`, account)
+    return service.post('/workschd/accounts/info', account)
   },
   getAccountInfo(accountId) {
-    return service.get(`${baesURL}/${accountId}/info`)
+    return service.get(`/workschd/accounts/${accountId}/info`)
   },
 
   saveProfileImg(accountId, profileImage) {
     const formData = new FormData();
     formData.append('file', profileImage);
-    return requestFile('post', `${baesURL}/${accountId}/image`, formData)
+    return requestFile('post', `/workschd/accounts/${accountId}/image`, formData)
   },
-
-
-
 
   login(data) {
     return service({
-      url: '/auth/login',
+      url: '/workschd/auth/login',
       method: 'post',
       data: {
         email: data.email,
@@ -59,7 +54,7 @@ const apiAccount = {
 
   signup(data) {
     return service({
-      url: '/auth/signup',
+      url: '/workschd/auth/signup',
       method: 'post',
       data: {
         email: data.email,
@@ -72,5 +67,3 @@ const apiAccount = {
 }
 
 export default apiAccount
-
-
