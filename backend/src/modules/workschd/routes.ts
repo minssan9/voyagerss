@@ -38,6 +38,9 @@ router.get('/auth/google/callback', authController.googleCallback.bind(authContr
 router.get('/auth/kakao', authController.kakaoAuth.bind(authController));
 router.get('/auth/kakao/callback', authController.kakaoCallback.bind(authController));
 
+// Current user profile (used by frontend fetchUser after OAuth callback)
+router.get('/account', authenticate, authController.getUserByAuth.bind(authController));
+
 // ===== Account Routes =====
 router.get('/accounts/:id', authenticate, accountController.getAccount.bind(accountController));
 router.post('/accounts', accountController.createAccount.bind(accountController));

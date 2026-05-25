@@ -117,21 +117,25 @@ export const useUserStore = defineStore('user', {
       if (!this.user.accountId) {
         try {
           const res = await apiAccount.getUser()
-          Cookies.set('refreshToken', res.data.refreshToken, { expires: 7 })
           Cookies.set('accountId', res.data.accountId, { expires: 7 })
           Cookies.set('username', res.data.username, { expires: 7 })
           Cookies.set('email', res.data.email, { expires: 7 })
           Cookies.set('role', res.data.accountRoles, { expires: 7 })
-          this.user = res.data
+          this.user = { ...this.user, ...res.data }
 
-          const accountInfo = await apiAccount.getAccountInfo(res.data.accountId)
-          if (accountInfo.accountId) {
-            this.user = { ...this.user, ...accountInfo }
+          try {
+            const accountInfoRes = await apiAccount.getAccountInfo(res.data.accountId)
+            if (accountInfoRes.data?.accountId) {
+              this.user = { ...this.user, ...accountInfoRes.data }
+            }
+          } catch {
+            // account info is optional — don't block login
           }
 
-          // Fetch teams after user data is loaded
-          if (this.user.accountId) {
-            await this.fetchTeams()
+          try {
+            if (this.user.accountId) await this.fetchTeams()
+          } catch {
+            // teams load is optional — don't block login
           }
 
           return res.data
@@ -231,6 +235,7 @@ export const useUserStore = defineStore('user', {
         status: null,
         profileImageUrl: '',
         profileVideoUrl: '',
+        teamId: null,
       }
       // Reset any other state properties if needed
       this.accountInfo = []

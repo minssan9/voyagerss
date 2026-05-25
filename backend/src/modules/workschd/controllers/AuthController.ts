@@ -17,11 +17,10 @@ export class AuthController {
 
     getUserByAuth = async (req: Request, res: Response) => {
         try {
-            // Assuming middleware populates req.user
-            const userId = (req as any).user?.userId;
-            if (!userId) return res.status(401).json({ message: 'Unauthorized' });
+            const accountId = (req as any).user?.accountId;
+            if (!accountId) return res.status(401).json({ message: 'Unauthorized' });
 
-            const account = await this.accountService.getAccountById(userId);
+            const account = await this.accountService.getAccountById(accountId);
             return res.json(account);
         } catch (error) {
             console.error(error);

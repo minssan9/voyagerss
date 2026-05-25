@@ -84,7 +84,7 @@ export class OAuth2Service {
             socialProviderId: googleUser.id,
             profileImageUrl: googleUser.picture,
             accountRoles: {
-              create: [{ roleType: 'USER' }]
+              create: [{ roleType: 'HELPER' }]
             }
           },
           include: { accountRoles: true }
@@ -201,7 +201,7 @@ export class OAuth2Service {
             socialProviderId: kakaoUser.id.toString(),
             profileImageUrl: kakaoUser.properties?.profile_image,
             accountRoles: {
-              create: [{ roleType: 'USER' }]
+              create: [{ roleType: 'HELPER' }]
             }
           },
           include: { accountRoles: true }
