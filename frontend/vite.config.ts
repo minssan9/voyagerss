@@ -101,6 +101,7 @@ export default defineConfig(({ mode }) => {
       port: parseInt(env.FRONTEND_PORT || '9003'), // 개발 서버 포트 설정
       open: true, // 브라우저 자동 열기
       host: true, // 0.0.0.0 — allow external/LAN access
+      allowedHosts: ['local.voyagerss.com'],
       // https: false, // HTTPS 사용 여부
       cors: true, // CORS 활성화
       proxy: {
