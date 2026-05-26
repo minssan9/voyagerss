@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { SolapiProvider } from './notification/SolapiProvider';
 import { EmailProvider } from './notification/EmailProvider';
@@ -28,6 +29,7 @@ export enum NotificationChannel {
  * - 참여 신청/승인/거절 알림
  * - 인원 마감 알림
  */
+@Injectable()
 export class NotificationService {
   private solapiProvider: SolapiProvider;
   private emailProvider: EmailProvider;

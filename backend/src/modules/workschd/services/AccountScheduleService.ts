@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 
+@Injectable()
 export class AccountScheduleService {
     async getTaskRequests(accountId: number, params: { page?: number; size?: number }) {
         const { page = 0, size = 10 } = params;

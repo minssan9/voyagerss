@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import bcrypt from 'bcrypt';
@@ -14,6 +15,7 @@ export interface OAuth2Result {
  * OAuth2 인증 서비스
  * Google, Kakao 로그인 지원
  */
+@Injectable()
 export class OAuth2Service {
   /**
    * Google OAuth2 로그인 URL 생성

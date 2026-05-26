@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService, ConfigSetOptions } from '../../../config/config-service';
 
@@ -15,6 +16,7 @@ export interface ConfigDetailItem extends ConfigListItem {
   value: string;
 }
 
+@Injectable()
 export class SystemConfigService {
   async listConfigs(category?: string): Promise<ConfigListItem[]> {
     const rows = await prisma.systemConfig.findMany({

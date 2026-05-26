@@ -1,14 +1,10 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { configService } from './config/config-service';
-import workschdRoutes from './modules/workschd/routes';
-import investandRoutes from './modules/investand/routes';
-import aviationRoutes from './modules/aviation/routes';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
@@ -41,12 +37,9 @@ async function bootstrap() {
   });
   app.use(helmet());
 
-  // Mount legacy Express routers — these handle all existing routes while NestJS modules
-  // are migrated incrementally. As each module is converted to @Controller() classes,
-  // its corresponding line below is removed.
-  expressInstance.use('/api/workschd', workschdRoutes);
-  expressInstance.use('/api/investand', investandRoutes);
-  expressInstance.use('/api/aviation', aviationRoutes);
+  // workschd: migrated to NestJS WorkschdModule
+  // investand: migrated to NestJS InvestandModule
+  // aviation: migrated to NestJS AviationModule
 
   expressInstance.get('/health', (_: any, res: any) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

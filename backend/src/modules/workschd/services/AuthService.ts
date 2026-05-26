@@ -1,8 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { configService } from '../../../config/config-service';
 
+@Injectable()
 export class AuthService {
     async login(email: string, pass: string) {
         const account = await prisma.account.findFirst({

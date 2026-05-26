@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { Server as HttpServer } from 'http';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { configService } from '../../../config/config-service';
 
+@Injectable()
 export class WebSocketService {
   private io: SocketIOServer | null = null;
   private connectedClients: Map<number, string[]> = new Map(); // accountId -> socket IDs
