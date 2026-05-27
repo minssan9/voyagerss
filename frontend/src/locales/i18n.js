@@ -2,44 +2,49 @@
 import axios from "axios";
 import apiSys from "@/api/system/api-sys";
 
-const userLocale = navigator.languages ? navigator.languages[0] : navigator.language || navigator.userLanguage;
+const STORAGE_KEY_LOCALE = 'voy-locale';
+const DEFAULT_LOCALE = import.meta.env.VITE_I18N_LOCALE || 'ko';
 
-export const i18n = new createI18n ({
+const savedLocale = localStorage.getItem(STORAGE_KEY_LOCALE) || DEFAULT_LOCALE;
+
+export const i18n = new createI18n({
   legacy: false,
-  locale: import.meta.env.VITE_I18N_LOCALE || 'ko',
-  fallbackLocale: userLocale,
+  locale: savedLocale,
+  fallbackLocale: DEFAULT_LOCALE,
   messages: {},
 });
 
 const loadedLanguages = [];
 
-export function loadLanaguageAsync(lang) {
-    if(!lang) lang = import.meta.env.VITE_I18N_LOCALE || 'ko'
+function setI18nLanguage(lang) {
+  axios.defaults.headers.common['Accept-Language'] = lang;
+  document.querySelector('html').setAttribute('lang', lang);
+  i18n.global.locale.value = lang;
+  localStorage.setItem(STORAGE_KEY_LOCALE, lang);
+  return lang;
+}
 
-  function setI18nLanguage (lang) {
-    axios.defaults.headers.common['Accept-Language'] = lang
-    document.querySelector('html').setAttribute('lang', lang)
-      i18n.global.locale.value = lang
-    return lang
-  }
+export function loadLanaguageAsync(lang) {
+  if (!lang) lang = savedLocale;
 
   if (loadedLanguages.includes(lang)) {
-    if (i18n.locale !== lang) setI18nLanguage(lang)
-    return Promise.resolve()
-  }
- 
-  if (i18n.locale === lang) {
+    setI18nLanguage(lang);
     return Promise.resolve(lang);
   }
 
   return apiSys.getSysI18n(lang)
-      .then(response => {
-        let msgs = response.ko
-        loadedLanguages.push(lang)
-        i18n.setLocaleMessage(lang, msgs)
-        setI18nLanguage(lang)
-      })
-
+    .then(response => {
+      const msgs = response.data;
+      if (msgs && typeof msgs === 'object') {
+        loadedLanguages.push(lang);
+        i18n.global.setLocaleMessage(lang, msgs);
+        setI18nLanguage(lang);
+      }
+      return lang;
+    })
+    .catch(() => {
+      // silently fallback — keep previous locale
+    });
 }
 
 
