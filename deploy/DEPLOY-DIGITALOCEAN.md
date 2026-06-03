@@ -4,10 +4,25 @@
 
 | Path | Purpose |
 |------|---------|
-| `/data/voyagerss/docker-compose.yml` | BE + FE services (from `deploy/docker-compose.api.yml`) |
+| `/data/voyagerss/docker-compose.yml` | BE + FE services (from `deploy/docker-compose.prod.yml`) |
 | `/data/voyagerss/.env` | Backend secrets (`DOTENV_PROD` GitHub secret) |
 | `/data/voyagerss/data/` | Persistent backend data (SQLite scraper, etc.) |
 | `/data/voyagerss/nginx/voyagerss.conf` | Rendered gateway config (from `deploy/nginx/voyagerss.conf`) |
+
+
+## Compose files (repository)
+
+| File | Purpose |
+|------|---------|
+| [`deploy/docker-compose.yml`](docker-compose.yml) | Local dev: build from source |
+| [`deploy/docker-compose.prod.yml`](docker-compose.prod.yml) | Production: GHCR images only (no `build:`) |
+| [`deploy/.env.prod.example`](.env.prod.example) | `GITHUB_OWNER`, `IMAGE_TAG` for production compose |
+
+### Local Docker (from repo root)
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file .env up -d --build
+```
 
 Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.github/workflows/deploy-production.yml). The droplet only runs `docker compose pull && up -d`.
 
@@ -76,3 +91,4 @@ On droplet (after gateway merge):
 curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health
 curl -fsS -o /dev/null -w "%{http_code}\n" -H "Host: voyagerss.com" http://127.0.0.1/
 ```
+

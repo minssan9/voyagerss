@@ -982,11 +982,13 @@ npm install --save-dev cypress
 
 #### 6.4 배포
 ```bash
-# Docker 빌드
-docker-compose build
+# Docker 빌드 (로컬)
+docker compose -f deploy/docker-compose.yml --env-file .env build
 
-# 프로덕션 실행
-docker-compose up -d
+# 로컬 실행
+docker compose -f deploy/docker-compose.yml --env-file .env up -d
+
+# 프로덕션 (드롭릿): deploy/docker-compose.prod.yml → CI가 /data/voyagerss/docker-compose.yml 로 배포
 ```
 
 **체크리스트:**

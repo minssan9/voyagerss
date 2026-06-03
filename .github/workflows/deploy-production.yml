@@ -113,7 +113,7 @@ jobs:
 
       - name: Sync deploy bundle
         run: |
-          cp deploy/docker-compose.api.yml "${{ env.DATA_DIR }}/docker-compose.yml"
+          cp deploy/docker-compose.prod.yml "${{ env.DATA_DIR }}/docker-compose.yml"
           cp deploy/nginx/*.conf "${{ env.DATA_DIR }}/nginx/"
 
       - name: Log in to GHCR

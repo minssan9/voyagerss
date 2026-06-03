@@ -218,7 +218,7 @@ JWT_SECRET="strong-production-secret-key"
 JWT_EXPIRES_IN="7d"
 
 # Security
-CORS_ORIGINS="https://yourdomain.com"
+CORS_ORIGINS="https://voyagerss.com"
 HELMET_ENABLED=true
 
 # Logging
@@ -295,7 +295,7 @@ Create a `.env.production` file:
 
 ```bash
 # API Endpoints
-VITE_API_URL=https://api.yourdomain.com
+VITE_API_URL=https://api.voyagerss.com
 VITE_API_TIMEOUT=30000
 
 # Environment
@@ -325,7 +325,7 @@ This creates an optimized production build in the `dist` directory.
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name voyagerss.com;
 
     root /var/www/voyagerss/frontend/dist;
     index index.html;

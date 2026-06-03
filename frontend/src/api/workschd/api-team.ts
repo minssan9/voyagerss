@@ -1,4 +1,4 @@
-﻿import { ScheduleConfig } from '@/types/workschd/schedule';
+import { ScheduleConfig } from '@/types/workschd/schedule';
 import { AxiosResponse } from 'axios';
 import service from '@/api/common/axios-voyagerss';
 import { PageDTO, PageResponseDTO, DEFAULT_PAGE_DTO, parseSortParam } from '@/api/common/api-common';
@@ -52,11 +52,6 @@ export { DEFAULT_PAGE_DTO };
 export type { PageDTO, PageResponseDTO };
 
 const apiTeam = {
-  // TeamApproveDialog APIs — requestId must be in the URL path per backend route
-  approveRequest: (teamId: number, requestId: number): Promise<AxiosResponse> => {
-    return service.post(`/workschd/team/${teamId}/approve/${requestId}`);
-  },
-
   // TeamRegistrationDialog APIs
   registerTeam: (teamData: TeamDTO): Promise<AxiosResponse<TeamDTO>> => {
     return service.post('/workschd/team', teamData);

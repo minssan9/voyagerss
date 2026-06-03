@@ -550,6 +550,22 @@ export class NotificationService {
   }
 
   /**
+   * 알림 단건 조회
+   */
+  async getNotificationById(notificationId: number, accountId: number): Promise<any | null> {
+    const notification = await prisma.notification.findUnique({
+      where: { id: notificationId },
+      include: { task: { include: { shop: true } } }
+    });
+
+    if (!notification || notification.accountId !== accountId) {
+      return null;
+    }
+
+    return notification;
+  }
+
+  /**
    * 알림 읽음 처리
    */
   async markAsRead(notificationId: number, accountId: number): Promise<boolean> {

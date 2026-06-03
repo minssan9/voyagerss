@@ -36,6 +36,34 @@ export class NotificationController {
     }
 
     /**
+     * 알림 단건 조회
+     */
+    async getNotificationById(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ message: 'Unauthorized' });
+                return;
+            }
+
+            const notificationId = parseInt(req.params.id);
+            const notification = await notificationService.getNotificationById(
+                notificationId,
+                req.user.accountId
+            );
+
+            if (!notification) {
+                res.status(404).json({ message: 'Notification not found or unauthorized' });
+                return;
+            }
+
+            res.status(200).json(notification);
+        } catch (error: any) {
+            console.error('Get notification by id error:', error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+
+    /**
      * 알림 읽음 처리
      */
     async markAsRead(req: AuthRequest, res: Response): Promise<void> {
