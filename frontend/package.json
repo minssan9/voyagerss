@@ -34,7 +34,8 @@
     "vue": "^3.4.21",
     "vue-chartjs": "^5.3.2",
     "vue-i18n": "^9.14.0",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.7.0",

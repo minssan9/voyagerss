@@ -128,7 +128,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
-import { useTeamStore } from '@/stores/workschd/store_team'
+import { useTeamStore } from '@/modules/workschd/store/store_team'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'

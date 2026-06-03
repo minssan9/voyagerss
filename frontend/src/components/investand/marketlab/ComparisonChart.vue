@@ -23,7 +23,7 @@ import {
   Legend
 } from 'chart.js';
 import { Line } from 'vue-chartjs';
-import { useMarketLabStore } from '@/stores/investand/store_marketlab';
+import { useMarketLabStore } from '@/modules/investand/store/store_marketlab';
 
 ChartJS.register(
   CategoryScale,

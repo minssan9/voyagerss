@@ -232,7 +232,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { adminApi, type SignupRequest } from '@/api/investand/adminApi'
+import { adminApi, type SignupRequest } from '@/modules/investand/api/adminApi'
 
 const router = useRouter()
 const $q = useQuasar()

@@ -9,8 +9,8 @@ import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 import { i18n, loadLanaguageAsync } from "@/locales/i18n";
 // Module Styles
-import '@/views/aviation/styles/app.sass'
-import '@/views/investand/styles/app.scss'
+import '@/modules/aviation/views/styles/app.sass'
+import '@/modules/investand/views/styles/app.scss'
 
 // import { app as firebaseApp } from './firebase/config'  // Import Firebase
 

@@ -72,8 +72,7 @@ const SEED_KEYS: SeedEntry[] = [
   { key: 'SWAGGER_PROD_URL',       category: 'docs',     description: 'Swagger 프로덕션 서버 URL' },
 ];
 
-async function seed() {
-  const force = process.argv.includes('--force');
+export async function seedConfig(force = false) {
   console.log(`[seed-config] Starting seed (force=${force})...`);
 
   // Initialize configService to connect to DB (no DB read needed for seeding)
@@ -111,10 +110,15 @@ async function seed() {
   }
 
   console.log(`\n[seed-config] Done. seeded=${seeded}, skipped=${skipped}`);
-  process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error('[seed-config] Failed:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  const force = process.argv.includes('--force');
+  seedConfig(force)
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('[seed-config] Failed:', err);
+      process.exit(1);
+    });
+}
+

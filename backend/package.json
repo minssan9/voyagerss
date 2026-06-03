@@ -18,7 +18,9 @@
     "test:external": "ts-node -r tsconfig-paths/register src/modules/investand/tests/external-interface-test.ts",
     "scrape:workschd:funerals": "ts-node --transpile-only -r tsconfig-paths/register src/modules/workschd/scraper/run-scrape.ts",
     "seed:config": "ts-node -r tsconfig-paths/register src/config/seed-config.ts",
-    "seed:config:force": "ts-node -r tsconfig-paths/register src/config/seed-config.ts --force"
+    "seed:config:force": "ts-node -r tsconfig-paths/register src/config/seed-config.ts --force",
+    "seed:local": "ts-node -r tsconfig-paths/register src/config/seed-local.ts",
+    "seed:local:force": "ts-node -r tsconfig-paths/register src/config/seed-local.ts --force"
   },
   "keywords": [],
   "author": "",
@@ -59,7 +61,16 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.11.0",
-    "yahoo-finance2": "^3.10.2"
+    "yahoo-finance2": "^3.10.2",
+    "@anthropic-ai/sdk": "^0.27.3",
+    "@octokit/app": "^14.0.2",
+    "@octokit/rest": "^20.1.1",
+    "bullmq": "^5.12.12",
+    "ioredis": "^5.4.1",
+    "simple-git": "^3.25.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.48.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
+    "@opentelemetry/sdk-node": "^0.52.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.21",
