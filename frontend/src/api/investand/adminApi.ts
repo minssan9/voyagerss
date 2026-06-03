@@ -415,11 +415,11 @@ export const adminApi = {
   },
 
   // 시스템 관리 기능
-  async restartService(service: string): Promise<any> {
+  async restartService(serviceName: string): Promise<any> {
     try {
       const response = await service.post<{ success: boolean; data: any }>(
         '/investand/admin/restart-service',
-        { service }
+        { service: serviceName }
       )
       return response.data.data
     } catch (error: any) {
@@ -470,6 +470,21 @@ export const adminApi = {
         throw new Error(error.response.data.message)
       }
       throw new Error('시스템 설정 업데이트에 실패했습니다.')
+    }
+  },
+
+  // 데이터 수집 현황 조회 (domain API)
+  async getCollectionStatus(days: number = 7): Promise<any[]> {
+    try {
+      const response = await service.get<{ success: boolean; data: any[] }>(
+        `/investand/collection-status?days=${days}`
+      )
+      return response.data.data ?? []
+    } catch (error: any) {
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message)
+      }
+      throw new Error('데이터 수집 현황 조회에 실패했습니다.')
     }
   }
 }

@@ -8,6 +8,7 @@
     "local": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "firebase:deploy": "firebase deploy --config .devops/firebase.json"
@@ -15,7 +16,6 @@
   "dependencies": {
     "@channel.io/channel-web-sdk-loader": "^1.1.7",
     "@quasar/extras": "^1.16.12",
-    "@rollup/rollup-win32-x64-msvc": "^4.55.1",
     "@types/leaflet": "^1.9.18",
     "ag-grid-community": "^32.1.0",
     "ag-grid-vue3": "^32.3.3",

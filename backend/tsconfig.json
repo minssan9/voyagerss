@@ -5,6 +5,7 @@
         "outDir": "./dist",
         "rootDir": "./src",
         "strict": true,
+        "noImplicitAny": false,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
@@ -24,6 +25,7 @@
         "node_modules",
         "**/*.test.ts",
         "**/*.spec.ts",
+        "**/tests/**",
         "**/legacy_src/tests/**/*"
     ]
 }

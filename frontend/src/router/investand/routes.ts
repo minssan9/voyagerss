@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'investand-landing',
         component: () => import('@/views/investand/IndexPage.vue'),
-        meta: { title: 'Investand Home', icon: 'home' }
+        meta: { title: 'Investand 홈', icon: 'home' }
       },
       {
         path: 'market-lab',
@@ -64,25 +64,25 @@ const routes: RouteRecordRaw[] = [
             path: 'login',
             name: 'admin-login',
             component: () => import('@/views/common/auth/AdminLogin.vue'),
-            meta: { title: 'Admin Login' } // , requiresGuest: true
+            meta: { title: 'Admin Login', public: true }
           },
           {
             path: 'dashboard',
             name: 'admin-dashboard',
             component: () => import('@/views/investand/admin/DashboardPage.vue'),
-            meta: { title: 'Admin Dashboard', icon: 'dashboard' }
+            meta: { title: 'Admin Dashboard', icon: 'dashboard', adminAuth: true }
           },
           {
             path: 'dart',
             name: 'admin-dart',
             component: () => import('@/views/investand/admin/DartAdminPage.vue'),
-            meta: { title: 'DART Data Management', icon: 'description' }
+            meta: { title: 'DART Data Management', icon: 'description', adminAuth: true }
           },
           {
             path: 'fear-greed',
             name: 'admin-fear-greed',
             component: () => import('@/views/investand/admin/FearGreedAdminPage.vue'),
-            meta: { title: 'Fear & Greed Index Management', icon: 'psychology' }
+            meta: { title: 'Fear & Greed Index Management', icon: 'psychology', adminAuth: true }
           },
         ]
       }

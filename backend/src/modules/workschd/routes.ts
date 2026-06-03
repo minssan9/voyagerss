@@ -7,11 +7,13 @@ import { ShopController } from './controllers/ShopController';
 import { NotificationController } from './controllers/NotificationController';
 import { StatisticsController } from './controllers/StatisticsController';
 import { ScraperController } from './controllers/ScraperController';
+import { SystemConfigController } from './controllers/SystemConfigController';
 import {
     authenticate,
     isTeamLeader,
     isHelper,
-    isTaskOwner
+    isTaskOwner,
+    isAdmin,
 } from './middleware/authMiddleware';
 
 const router = Router();
@@ -24,6 +26,7 @@ const shopController = new ShopController();
 const notificationController = new NotificationController();
 const statisticsController = new StatisticsController();
 const scraperController = new ScraperController();
+const systemConfigController = new SystemConfigController();
 
 // ===== Auth Routes (Public) =====
 router.post('/auth/login', authController.authenticateUser.bind(authController));
@@ -124,5 +127,13 @@ router.get('/scraper/status', authenticate, scraperController.getStatus.bind(scr
 router.post('/scraper/funeral-homes/sync', authenticate, isTeamLeader, scraperController.syncFuneralHomes.bind(scraperController));
 // Link a scraped funeral record to a Task record
 router.post('/scraped-funerals/:funeralId/link-task', authenticate, isTeamLeader, scraperController.linkToTask.bind(scraperController));
+
+// ===== System Config Routes (ADMIN only) =====
+router.get('/admin/config/categories', authenticate, isAdmin, systemConfigController.getCategories.bind(systemConfigController));
+router.get('/admin/config', authenticate, isAdmin, systemConfigController.listConfigs.bind(systemConfigController));
+router.post('/admin/config/reload', authenticate, isAdmin, systemConfigController.reloadConfigs.bind(systemConfigController));
+router.get('/admin/config/:key', authenticate, isAdmin, systemConfigController.getConfig.bind(systemConfigController));
+router.put('/admin/config/:key', authenticate, isAdmin, systemConfigController.upsertConfig.bind(systemConfigController));
+router.delete('/admin/config/:key', authenticate, isAdmin, systemConfigController.deleteConfig.bind(systemConfigController));
 
 export default router;

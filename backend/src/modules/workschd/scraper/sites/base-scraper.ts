@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
 import { ScrapedFuneral, ScrapeResult } from '../types';
+import { configService } from '../../../../config/config-service';
 
 export abstract class BaseScraper {
   abstract readonly funeralHomeName: string;
@@ -60,7 +61,7 @@ export abstract class BaseScraper {
     const utf8 = buffer.toString('utf-8');
 
     // Detect EUC-KR by looking for charset in meta or HTTP header
-    const contentType = response.headers['content-type'] || '';
+    const contentType = String(response.headers['content-type'] ?? '');
     const isEucKr =
       contentType.toLowerCase().includes('euc-kr') ||
       utf8.toLowerCase().includes('euc-kr') ||
@@ -150,7 +151,7 @@ export abstract class BaseScraper {
   }
 
   private getListingUrlOverrides(): Record<string, string> {
-    const raw = process.env.WORKSCHD_SCRAPER_LISTING_URL_OVERRIDES_JSON;
+    const raw = configService.get('WORKSCHD_SCRAPER_LISTING_URL_OVERRIDES_JSON');
     if (!raw) {
       return {};
     }

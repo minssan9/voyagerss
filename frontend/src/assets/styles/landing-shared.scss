@@ -1,0 +1,398 @@
+// Shared landing page styles — used by all three module landing pages
+// Workschd / Aviation / Investand
+
+.lp-page {
+  background: #f5f5f7;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+}
+
+.lp-container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+// ─── Hero ──────────────────────────────────────────────────────────────────
+
+.lp-hero {
+  text-align: center;
+  padding: 72px 0 56px;
+}
+
+.lp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  margin-bottom: 24px;
+}
+
+.lp-title {
+  font-size: 52px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  margin: 0 0 18px;
+
+  @media (max-width: 600px) {
+    font-size: 36px;
+    letter-spacing: -0.8px;
+  }
+}
+
+.lp-subtitle {
+  font-size: 18px;
+  color: #6e6e73;
+  line-height: 1.6;
+  margin: 0 auto 40px;
+  max-width: 520px;
+
+  @media (max-width: 600px) {
+    font-size: 15px;
+  }
+}
+
+.lp-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.lp-btn-primary {
+  background: #1d1d1f !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  padding: 0 28px !important;
+  height: 46px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+
+  &:hover { opacity: 0.85; }
+}
+
+.lp-btn-secondary {
+  background: transparent !important;
+  color: #1d1d1f !important;
+  border-color: rgba(0,0,0,0.18) !important;
+  border-radius: 12px !important;
+  padding: 0 28px !important;
+  height: 46px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+
+  &:hover { background: rgba(0,0,0,0.04) !important; }
+}
+
+// ─── Stats Strip ───────────────────────────────────────────────────────────
+
+.lp-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(0,0,0,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lp-stat {
+  background: #fff;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.lp-stat__icon {
+  margin-bottom: 8px;
+}
+
+.lp-stat__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.lp-stat__label {
+  font-size: 12px;
+  color: #86868b;
+  font-weight: 500;
+}
+
+// ─── Cards ─────────────────────────────────────────────────────────────────
+
+.lp-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  padding: 28px;
+}
+
+.lp-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.lp-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+// ─── Feature cards ─────────────────────────────────────────────────────────
+
+.lp-feature-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.lp-feature-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.lp-feature-desc {
+  font-size: 13.5px;
+  color: #6e6e73;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.lp-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6e6e73;
+  }
+}
+
+// ─── Schedule list ─────────────────────────────────────────────────────────
+
+.lp-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lp-schedule__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+
+  &:last-child { border-bottom: none; }
+}
+
+.lp-schedule__day {
+  font-size: 12px;
+  font-weight: 600;
+  color: #86868b;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.lp-schedule__name {
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.lp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 0;
+  color: #86868b;
+  font-size: 13px;
+}
+
+// ─── Quick Navigation ──────────────────────────────────────────────────────
+
+.lp-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lp-nav-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: rgba(0,0,0,0.1);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+.lp-nav-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.lp-nav-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+}
+
+.lp-nav-card__desc {
+  font-size: 12px;
+  color: #86868b;
+  line-height: 1.4;
+}
+
+.lp-nav-card__arrow {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  color: #c7c7cc;
+}
+
+// ─── Inline data cards (investand) ─────────────────────────────────────────
+
+.lp-data-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  padding: 24px;
+  text-align: center;
+}
+
+.lp-data-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.lp-data-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1d1d1f;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.lp-data-sub {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.lp-chart-container {
+  height: 260px;
+  position: relative;
+}
+
+.lp-chart-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.8);
+  z-index: 1;
+}
+
+.lp-index-value {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -2px;
+
+  @media (max-width: 600px) {
+    font-size: 56px;
+  }
+}
+
+.lp-component-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lp-component-item {
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+}
+
+.lp-component-name {
+  font-size: 11px;
+  color: #86868b;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.lp-component-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.lp-market-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,10 +4,10 @@
 # This script mimics the GitHub Action behavior locally.
 
 echo "Stopping existing containers..."
-docker-compose down
+docker compose down
 
 echo "Building and starting containers in detached mode..."
-docker-compose up -d --build
+docker compose up -d --build
 
 echo "Deployment complete."
 echo "Frontend: http://localhost:9003"

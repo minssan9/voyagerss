@@ -1,8 +1,15 @@
 ﻿import { Router, RouteLocationNormalized } from 'vue-router'
+import Cookies from 'js-cookie'
 import { useUserStore } from '@/stores/common/store_user'
 import { LoadingService } from '@/utils/loading'
+import {
+  decideRouteAccess,
+  getEffectiveMeta,
+  hasMainAccessToken,
+  isWhitelisted
+} from './route-access'
 
-// Whitelist routes that don't require authentication
+/** Paths that never run RBAC (exact or prefix*). */
 const whiteList = [
   '/',
   '/login',
@@ -14,62 +21,69 @@ const whiteList = [
   '/terms',
   '/401',
   '/403',
-  '/404'
+  '/404',
+  '/workschd/login',
+  '/auth/callback',
+  '/workschd/auth/callback',
+  '/investand/admin/login'
 ]
 
 export function setupRouterGuards(router: Router) {
-  router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: any) => {
-    // Start progress bar
+  router.beforeEach(async (to: RouteLocationNormalized) => {
     LoadingService.start()
+    try {
+      const userStore = useUserStore()
+      const cookieToken = Cookies.get('accessToken') ?? null
+      const storeToken = userStore.accessToken
 
-    // Authentication and role checks disabled
+      const quickMeta = getEffectiveMeta(to.matched)
 
-    // const userStore = useUserStore()
-    // const hasToken = userStore.accessToken
+      if (quickMeta.public || isWhitelisted(to.path, whiteList)) {
+        return true
+      }
 
-    // // Allow access to whitelisted routes
-    // if (whiteList.includes(to.path) || whiteList.some(path => path.endsWith('*') && to.path.startsWith(path.slice(0, -1)))) {
-    //   next()
-    //   return
-    // }
+      const hasMain = hasMainAccessToken(storeToken, cookieToken)
+      const shouldHydrateProfile =
+        hasMain &&
+        quickMeta.requiresAuth &&
+        (!quickMeta.adminAuth || quickMeta.requiresAuth) &&
+        !userStore.user.accountRoles?.length
 
-    // // Check if user is authenticated
-    // if (!hasToken) {
-    //   next(`/401?redirect=${to.path}`)
-    //   return
-    // }
+      if (shouldHydrateProfile) {
+        try {
+          await userStore.fetchUser()
+        } catch (e) {
+          console.error('Navigation guard: fetchUser failed', e)
+          await userStore.logout()
+        }
+      }
 
-    // try {
-    //   // Check route permissions
-    //   const userRole = userStore.role
-    //   const requiredRoles = to.meta?.roles as string[] | undefined
+      const decision = decideRouteAccess({
+        path: to.path,
+        fullPath: to.fullPath,
+        whiteList,
+        matched: to.matched,
+        storeAccessToken: userStore.accessToken,
+        cookieAccessToken: cookieToken,
+        accountRoles: userStore.user.accountRoles
+      })
 
-    //   // If route requires specific roles
-    //   if (requiredRoles && requiredRoles.length > 0) {
-    //     if (!requiredRoles.includes(userRole)) {
-    //       next('/403')
-    //       return
-    //     }
-    //   }
-
-    next()
-    // } catch (error) {
-    //   // Handle any errors during authentication check
-    //   console.error('Navigation guard error:', error)
-    //   userStore.resetUserState()
-    //   next(`/401?redirect=${to.path}`)
-    // }
+      if (decision.action === 'allow') {
+        return true
+      }
+      return { path: decision.path, query: decision.query }
+    } catch (error) {
+      console.error('Navigation guard error:', error)
+      return { path: '/401', query: { redirect: to.fullPath } }
+    }
   })
 
   router.afterEach(() => {
-    // Complete progress bar
     LoadingService.done()
   })
 
   router.onError((e) => {
-    // Ensure progress bar is completed on error
     LoadingService.done()
     console.error('Navigation guard error:', e)
   })
 }
-

@@ -1,7 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
-
-const BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000';
-const API_PREFIX = '/api/workschd';
+import { AxiosResponse } from 'axios';
+import service from '@/api/common/axios-voyagerss';
 
 export interface DashboardStatistics {
     totalTasks: number;
@@ -76,52 +74,22 @@ export interface TaskStatisticsByDateRange {
     tasksByRegion: { [key: string]: number };
 }
 
-/**
- * Statistics API client
- */
 const apiStatistics = {
-    /**
-     * Get dashboard statistics (Admin/Team Leader only)
-     */
     getDashboardStatistics(): Promise<AxiosResponse<DashboardStatistics>> {
-        return axios.get(`${BASE_URL}${API_PREFIX}/statistics/dashboard`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        return service.get('/workschd/statistics/dashboard');
     },
 
-    /**
-     * Get team statistics
-     */
     getTeamStatistics(teamId: number): Promise<AxiosResponse<TeamStatistics>> {
-        return axios.get(`${BASE_URL}${API_PREFIX}/statistics/team/${teamId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        return service.get(`/workschd/statistics/team/${teamId}`);
     },
 
-    /**
-     * Get worker statistics
-     */
     getWorkerStatistics(workerId: number): Promise<AxiosResponse<WorkerStatistics>> {
-        return axios.get(`${BASE_URL}${API_PREFIX}/statistics/worker/${workerId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        });
+        return service.get(`/workschd/statistics/worker/${workerId}`);
     },
 
-    /**
-     * Get task statistics by date range
-     */
     getTaskStatisticsByDateRange(startDate: string, endDate: string): Promise<AxiosResponse<TaskStatisticsByDateRange>> {
-        return axios.get(`${BASE_URL}${API_PREFIX}/statistics/tasks/date-range`, {
-            params: { startDate, endDate },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+        return service.get('/workschd/statistics/tasks/date-range', {
+            params: { startDate, endDate }
         });
     }
 };

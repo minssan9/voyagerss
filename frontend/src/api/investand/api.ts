@@ -117,7 +117,7 @@ export const systemApi = {
   // 시스템 상태 조회
   async getSystemStatus(): Promise<SystemStatus> {
     try {
-      const response = await service.get<{ success: boolean; data: SystemStatus }>('/investand/system/status')
+      const response = await service.get<{ success: boolean; data: SystemStatus }>('/investand/status')
       return response.data.data
     } catch (error) {
       console.warn('Failed to fetch system status, using fallback')
@@ -138,7 +138,7 @@ export const systemApi = {
   // 데이터 수집 상태 조회
   async getCollectionStatus(days: number = 7): Promise<CollectionStatus[]> {
     try {
-      const response = await service.get<{ success: boolean; data: CollectionStatus[] }>(`/investand/system/collection-status?days=${days}`)
+      const response = await service.get<{ success: boolean; data: CollectionStatus[] }>(`/investand/collection-status?days=${days}`)
       return response.data.data
     } catch (error) {
       console.warn('Failed to fetch collection status, using fallback')

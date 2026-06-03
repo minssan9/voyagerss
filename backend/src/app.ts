@@ -5,32 +5,36 @@ import dotenv from 'dotenv';
 import path from 'path';
 import http from 'http';
 import routes from './routes';
+import { registerHealthRoute } from './health.route';
+import {
+  resolveBackendHost,
+  resolveBackendPort,
+  TRUST_PROXY_HOPS,
+} from './server-config';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
+import { configService } from './config/config-service';
 
 // Load environment variables from .env.local (priority) or .env (fallback)
 dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || 9002;
+const PORT = resolveBackendPort();
+const HOST = resolveBackendHost();
+
+app.set('trust proxy', TRUST_PROXY_HOPS);
 
 // Create HTTP server
 const httpServer = http.createServer(app);
 
-// Initialize WebSocket service
-webSocketService.initialize(httpServer);
-startWorkschdScraperScheduler();
-
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:9003')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
+// CORS origin is read at request time from configService (supports runtime updates)
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true); // server-to-server / curl
+      const rawOrigins = configService.get('ALLOWED_ORIGINS', 'http://localhost:9003')!;
+      const allowedOrigins = rawOrigins.split(',').map((o) => o.trim()).filter(Boolean);
       const isAllowed =
         allowedOrigins.includes(origin) ||
         /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin);
@@ -48,11 +52,27 @@ app.use(express.json());
 
 app.use('/api', routes);
 
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+registerHealthRoute(app);
+
+async function bootstrap() {
+  // Load all config from DB before starting services
+  await configService.initialize();
+
+  // Initialize services that depend on config
+  webSocketService.initialize(httpServer);
+  startWorkschdScraperScheduler();
+
+  if (require.main === module) {
+    httpServer.listen(PORT, HOST, () => {
+      console.log(`Server running on ${HOST}:${PORT}`);
+      console.log(`WebSocket server initialized on port ${PORT}`);
+    });
+  }
+}
+
+bootstrap().catch((err) => {
+  console.error('Bootstrap failed:', err);
+  process.exit(1);
 });
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`WebSocket server initialized on port ${PORT}`);
-});
+export { app, httpServer };

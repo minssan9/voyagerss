@@ -1,0 +1,20 @@
+# Production runtime — copied to /data/voyagerss/docker-compose.yml by GitHub Actions.
+# Requires: GITHUB_OWNER, IMAGE_TAG, .env (DOTENV_PROD)
+
+services:
+  backend:
+    image: ghcr.io/${GITHUB_OWNER}/voyagerss-backend:${IMAGE_TAG}
+    container_name: voyagerss-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:9002:9002"
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    image: ghcr.io/${GITHUB_OWNER}/voyagerss-frontend:${IMAGE_TAG}
+    container_name: voyagerss-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9003:80"

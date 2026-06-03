@@ -1,4 +1,4 @@
-﻿import { ScheduleConfig } from '@/types/workschd/schedule';
+import { ScheduleConfig } from '@/types/workschd/schedule';
 import { AxiosResponse } from 'axios';
 import service from '@/api/common/axios-voyagerss';
 import { PageDTO, PageResponseDTO, DEFAULT_PAGE_DTO, parseSortParam } from '@/api/common/api-common';
@@ -90,12 +90,13 @@ const apiTeam = {
     return service.get('/workschd/team', { params: queryParams });
   },
 
-  // TeamJoin APIs
-  joinTeamByInvitation: (invitationHash: string, accountId: string): Promise<AxiosResponse<TeamDTO>> => {
-    return service.get(`/workschd/team/join/${invitationHash}`, { params: { accountId } });
+  // TeamJoin APIs — accountId is derived from JWT on the backend, not needed as param
+  joinTeamByInvitation: (invitationHash: string): Promise<AxiosResponse<TeamDTO>> => {
+    return service.get(`/workschd/team/join/${invitationHash}`);
   },
 
-  // TeamScheduleConfig APIs
+  // Use api-team-schedule.ts saveTeamScheduleConfig(teamId, config) instead
+  // Kept here for backward compatibility but delegates correctly with teamId
   saveScheduleConfig: (teamId: number, config: ScheduleConfig): Promise<AxiosResponse> => {
     return service.post(`/workschd/team/${teamId}/schedule-config`, config);
   },

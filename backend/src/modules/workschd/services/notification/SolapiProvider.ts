@@ -1,5 +1,6 @@
 import axios from 'axios';
 import crypto from 'crypto';
+import { configService } from '../../../../config/config-service';
 
 export interface KakaoNotificationParams {
   to: string;         // 수신자 전화번호 (01012345678 형식)
@@ -22,37 +23,21 @@ export interface SMSParams {
  * - SOLAPI_KAKAO_PFID: 카카오톡 채널 ID
  */
 export class SolapiProvider {
-  private apiKey: string;
-  private apiSecret: string;
-  private senderPhone: string;
-  private kakaoPfId: string;
-  private baseUrl = 'https://api.solapi.com';
+  private readonly baseUrl = 'https://api.solapi.com';
 
-  constructor() {
-    this.apiKey = process.env.SOLAPI_API_KEY || '';
-    this.apiSecret = process.env.SOLAPI_API_SECRET || '';
-    this.senderPhone = process.env.SOLAPI_SENDER_PHONE || '';
-    this.kakaoPfId = process.env.SOLAPI_KAKAO_PFID || '';
+  private get apiKey() { return configService.get('SOLAPI_API_KEY', ''); }
+  private get apiSecret() { return configService.get('SOLAPI_API_SECRET', ''); }
+  private get senderPhone() { return configService.get('SOLAPI_SENDER_PHONE', ''); }
+  private get kakaoPfId() { return configService.get('SOLAPI_KAKAO_PFID', ''); }
 
-    if (!this.apiKey || !this.apiSecret) {
-      console.warn('Solapi credentials not configured');
-    }
-  }
-
-  /**
-   * HMAC-SHA256 서명 생성
-   */
   private generateSignature(timestamp: string, salt: string): string {
     const message = timestamp + salt;
     return crypto
-      .createHmac('sha256', this.apiSecret)
+      .createHmac('sha256', this.apiSecret!)
       .update(message)
       .digest('hex');
   }
 
-  /**
-   * 인증 헤더 생성
-   */
   private getAuthHeaders(): { [key: string]: string } {
     const timestamp = Date.now().toString();
     const salt = crypto.randomBytes(16).toString('hex');

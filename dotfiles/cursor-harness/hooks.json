@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "node ./hooks/harness.mjs sessionStart"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node ./hooks/harness.mjs stop",
+        "loop_limit": 2
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "node ./hooks/harness.mjs beforeSubmitPrompt"
+      }
+    ]
+  }
+}

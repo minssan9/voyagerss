@@ -74,7 +74,7 @@ const processInvitation = async () => {
   }
 
   try {
-    await apiTeam.joinTeamByInvitation(invitationHash, accountId)
+    await apiTeam.joinTeamByInvitation(invitationHash)
     success.value = true
     $q.notify({type: 'positive',message: t('team.join.success', 'Successfully joined the team!')})
   } catch (err) {

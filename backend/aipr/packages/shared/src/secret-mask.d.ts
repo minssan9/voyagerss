@@ -1,0 +1,13 @@
+/**
+ * Masks sensitive values in log strings before persisting or broadcasting.
+ *
+ * Patterns covered:
+ *  - Anthropic API keys  : sk-ant-...
+ *  - Generic sk- keys    : sk-...
+ *  - GitHub tokens       : ghp_... / gho_... / ghs_...
+ *  - AWS access keys     : AKIA...
+ *  - Bearer tokens       : Bearer <token>
+ *  - Email addresses
+ */
+export declare function maskSecrets(input: string): string;
+//# sourceMappingURL=secret-mask.d.ts.map

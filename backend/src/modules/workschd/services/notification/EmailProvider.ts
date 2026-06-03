@@ -1,145 +1,98 @@
 import nodemailer, { Transporter } from 'nodemailer';
+import { configService } from '../../../../config/config-service';
 
 export interface EmailParams {
-  to: string;      // 수신자 이메일
-  subject: string; // 이메일 제목
-  html: string;    // HTML 본문
-  text?: string;   // 텍스트 본문 (선택)
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
 }
 
-/**
- * Nodemailer를 사용한 이메일 발송 서비스
- *
- * 환경 변수:
- * - SMTP_HOST: SMTP 서버 호스트
- * - SMTP_PORT: SMTP 서버 포트
- * - SMTP_USER: SMTP 사용자명
- * - SMTP_PASS: SMTP 비밀번호
- * - SMTP_FROM: 발신자 이메일
- */
 export class EmailProvider {
   private transporter: Transporter | null = null;
-  private from: string;
+  private transporterConfigSnapshot = '';
 
-  constructor() {
-    this.from = process.env.SMTP_FROM || 'noreply@voyagerss.com';
+  private getSmtpConfig() {
+    return {
+      host: configService.get('SMTP_HOST'),
+      port: configService.get('SMTP_PORT', '587')!,
+      user: configService.get('SMTP_USER'),
+      pass: configService.get('SMTP_PASS'),
+      from: configService.get('SMTP_FROM', 'noreply@voyagerss.com')!,
+    };
+  }
 
-    if (this.isConfigured()) {
-      this.initializeTransporter();
-    } else {
-      console.warn('Email provider not configured');
+  private getOrCreateTransporter(): Transporter | null {
+    const cfg = this.getSmtpConfig();
+    if (!cfg.host || !cfg.user || !cfg.pass) return null;
+
+    const snapshot = JSON.stringify(cfg);
+    if (this.transporter && snapshot === this.transporterConfigSnapshot) {
+      return this.transporter;
     }
-  }
 
-  /**
-   * 이메일 설정이 완료되었는지 확인
-   */
-  private isConfigured(): boolean {
-    return !!(
-      process.env.SMTP_HOST &&
-      process.env.SMTP_PORT &&
-      process.env.SMTP_USER &&
-      process.env.SMTP_PASS
-    );
-  }
-
-  /**
-   * Nodemailer Transporter 초기화
-   */
-  private initializeTransporter(): void {
     try {
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_PORT === '465', // SSL 사용 여부
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        },
-        // 추가 옵션
-        tls: {
-          rejectUnauthorized: false // 자체 서명 인증서 허용
-        }
+        host: cfg.host,
+        port: parseInt(cfg.port),
+        secure: cfg.port === '465',
+        auth: { user: cfg.user, pass: cfg.pass },
+        tls: { rejectUnauthorized: false },
       });
-
+      this.transporterConfigSnapshot = snapshot;
       console.log('Email transporter initialized');
     } catch (error) {
       console.error('Failed to initialize email transporter:', error);
       this.transporter = null;
     }
+
+    return this.transporter;
   }
 
-  /**
-   * 이메일 발송
-   *
-   * @param params 이메일 파라미터
-   * @returns 성공 여부
-   */
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      if (!this.transporter) {
+      const transporter = this.getOrCreateTransporter();
+      if (!transporter) {
         console.warn('Email transporter not available, skipping email');
         return false;
       }
 
-      console.log('Sending email:', {
-        to: params.to,
-        subject: params.subject
-      });
+      const from = this.getSmtpConfig().from;
 
-      const result = await this.transporter.sendMail({
-        from: `"Workschd" <${this.from}>`,
+      console.log('Sending email:', { to: params.to, subject: params.subject });
+
+      const result = await transporter.sendMail({
+        from: `"Workschd" <${from}>`,
         to: params.to,
         subject: params.subject,
         html: params.html,
-        text: params.text || this.htmlToText(params.html)
+        text: params.text || this.htmlToText(params.html),
       });
 
-      console.log('Email sent successfully:', {
-        messageId: result.messageId,
-        to: params.to
-      });
-
+      console.log('Email sent successfully:', { messageId: result.messageId, to: params.to });
       return true;
     } catch (error: any) {
-      console.error('Email send error:', {
-        message: error.message,
-        to: params.to,
-        subject: params.subject
-      });
+      console.error('Email send error:', { message: error.message, to: params.to, subject: params.subject });
       return false;
     }
   }
 
-  /**
-   * 여러 수신자에게 동일한 이메일 발송
-   *
-   * @param recipients 수신자 목록
-   * @param subject 제목
-   * @param html HTML 본문
-   * @returns 발송 결과 목록
-   */
   async sendBulkEmails(
     recipients: string[],
     subject: string,
     html: string
   ): Promise<{ to: string; success: boolean }[]> {
-    const results = await Promise.all(
+    return Promise.all(
       recipients.map(async (to) => {
         const success = await this.sendEmail({ to, subject, html });
         return { to, success };
       })
     );
-
-    return results;
   }
 
-  /**
-   * 간단한 HTML to Text 변환
-   */
   private htmlToText(html: string): string {
     return html
-      .replace(/<[^>]*>/g, '') // HTML 태그 제거
+      .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
@@ -147,9 +100,6 @@ export class EmailProvider {
       .trim();
   }
 
-  /**
-   * 이메일 템플릿 생성 헬퍼
-   */
   createEmailTemplate(params: {
     title: string;
     content: string;
@@ -225,17 +175,14 @@ export class EmailProvider {
     `.trim();
   }
 
-  /**
-   * 연결 테스트
-   */
   async testConnection(): Promise<boolean> {
     try {
-      if (!this.transporter) {
+      const transporter = this.getOrCreateTransporter();
+      if (!transporter) {
         console.warn('Email transporter not available');
         return false;
       }
-
-      await this.transporter.verify();
+      await transporter.verify();
       console.log('Email connection test successful');
       return true;
     } catch (error) {

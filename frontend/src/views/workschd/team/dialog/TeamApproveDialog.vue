@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <q-dialog v-model="isOpen">
     <q-card class="dialog-card medium">
       <q-card-section class="dialog-title">

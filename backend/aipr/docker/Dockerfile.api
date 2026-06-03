@@ -1,0 +1,34 @@
+# Build from backend/: docker build -f aipr/docker/Dockerfile.api -t voyagerss-aipr-api .
+FROM node:20-slim AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY aipr/package.json aipr/pnpm-workspace.yaml ./
+COPY aipr/packages/config/package.json  aipr/packages/config/
+COPY aipr/packages/shared/package.json  aipr/packages/shared/
+COPY aipr/packages/db/package.json      aipr/packages/db/
+COPY aipr/apps/api/package.json         aipr/apps/api/
+COPY prisma/aipr.prisma                 prisma/aipr.prisma
+
+RUN npm install -g pnpm && cd aipr && pnpm install --frozen-lockfile --prod
+
+FROM deps AS builder
+COPY aipr/packages/ aipr/packages/
+COPY aipr/apps/api/  aipr/apps/api/
+COPY prisma/aipr.prisma prisma/aipr.prisma
+
+RUN cd aipr && pnpm --filter @repo/db run generate && pnpm --filter @repo/api build
+
+FROM base AS runner
+WORKDIR /app
+
+COPY --from=builder /app/aipr/node_modules              ./aipr/node_modules
+COPY --from=builder /app/aipr/packages/db                 ./aipr/packages/db
+COPY --from=builder /app/aipr/packages/shared             ./aipr/packages/shared
+COPY --from=builder /app/aipr/apps/api/dist               ./aipr/apps/api/dist
+COPY --from=builder /app/aipr/apps/api/package.json       ./aipr/apps/api/
+
+ENV NODE_ENV=production
+EXPOSE 3010
+
+CMD ["node", "aipr/apps/api/dist/main.js"]

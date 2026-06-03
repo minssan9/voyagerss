@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { configService } from '../../../../config/config-service'
 import type {
   DartDisclosureData,
   DartMajorStockResponse,
@@ -20,7 +21,7 @@ import { retryWithBackoff } from '@investand/utils/common/retryUtils'
 export class DartApiClient {
   // Static Configuration
   private static readonly BASE_URL = 'https://opendart.fss.or.kr/api'
-  private static readonly API_KEY = process.env.DART_API_KEY || ''
+  private static get API_KEY(): string { return configService.get('DART_API_KEY', '')! }
   private static readonly TIMEOUT = 30000 // 30초
   private static readonly RATE_LIMIT_DELAY = 100 // 100ms between requests
   private static readonly MAX_RETRIES = 3

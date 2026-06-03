@@ -1,0 +1,163 @@
+name: Deploy Production (GHCR)
+
+on:
+  workflow_run:
+    workflows: ["Unified CI"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: voyagerss-backend
+  FRONTEND_IMAGE: voyagerss-frontend
+  DATA_DIR: /data/voyagerss
+  VITE_API_BASE_URL: https://api.voyagerss.com/api
+  VITE_API_URL: https://api.voyagerss.com
+  VITE_API_WEB: https://api.voyagerss.com
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
+
+      - name: Resolve image tag
+        id: meta
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ env.VITE_API_BASE_URL }}
+            VITE_API_URL=${{ env.VITE_API_URL }}
+            VITE_API_WEB=${{ env.VITE_API_WEB }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE }}:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE }}:latest
+
+  deploy:
+    needs: build-and-push
+    # Droplet runner must have label `linux` (Ubuntu), not Windows.
+    runs-on: [self-hosted, linux]
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Fix Git safe directory
+        run: git config --global --add safe.directory '*'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
+
+      - name: Prepare runtime directory
+        run: |
+          sudo mkdir -p "${{ env.DATA_DIR }}/data" "${{ env.DATA_DIR }}/nginx"
+          sudo chown -R "${USER}:${USER}" "${{ env.DATA_DIR }}" || true
+
+      - name: Write production .env
+        env:
+          DOTENV_CONTENT: ${{ secrets.DOTENV_PROD }}
+        run: |
+          if [[ -z "${DOTENV_CONTENT}" ]]; then
+            echo "DOTENV_PROD secret is empty" >&2
+            exit 1
+          fi
+          printf '%s' "${DOTENV_CONTENT}" > "${{ env.DATA_DIR }}/.env"
+
+      - name: Sync deploy bundle
+        run: |
+          cp deploy/docker-compose.api.yml "${{ env.DATA_DIR }}/docker-compose.yml"
+          cp deploy/nginx/*.conf "${{ env.DATA_DIR }}/nginx/"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PULL_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Pull and start services
+        working-directory: ${{ env.DATA_DIR }}
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |
+          docker compose pull
+          docker compose up -d
+
+      - name: Sync nginx reference configs
+        env:
+          DATA_DIR: ${{ env.DATA_DIR }}
+          INSTALL_MODE: reference-only
+        run: bash deploy/scripts/install-nginx-site.sh
+
+      - name: Health check API (local gateway)
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health; then
+              echo ""
+              break
+            fi
+            if [[ "$i" -eq 5 ]]; then
+              echo "API health check failed after retries" >&2
+              exit 1
+            fi
+            sleep 3
+          done
+
+      - name: Health check frontend (local gateway)
+        run: |
+          code="$(curl -sS -o /dev/null -w "%{http_code}" -H "Host: voyagerss.com" http://127.0.0.1/ || echo "000")"
+          if [[ "${code}" != "200" && "${code}" != "304" ]]; then
+            echo "Frontend health check returned HTTP ${code} (expected 200 or 304)" >&2
+            echo "If gateway is not merged yet, merge deploy/nginx/*.conf using GATEWAY-NGINX-MERGE-PROMPT.md" >&2
+            exit 1
+          fi
+          echo "Frontend OK (HTTP ${code})"

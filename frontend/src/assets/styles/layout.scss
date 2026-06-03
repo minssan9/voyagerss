@@ -3,26 +3,12 @@
 body {
   font-family: $font-family;
   line-height: 1.6;
-  background-color: $background-color;
-  color: $text-color;
+  background-color: var(--voy-bg, $background-color);
+  color: var(--voy-text, $text-color);
 }
 
 .q-layout {
-  background-color: $background-color;
-}
-
-.q-header {
-  background: linear-gradient(135deg, $primary-color, $secondary-color);
-  color: white;
-  height: $header-height;
-
-  .q-toolbar {
-    height: $header-height;
-  }
-
-  .q-btn {
-    color: white;
-  }
+  background-color: var(--voy-bg, $background-color);
 }
 
 .q-drawer {
@@ -58,7 +44,7 @@ body {
 // Mobile Overlay
 .mobile-overlay {
   position: fixed;
-  top: $header-height;
+  top: var(--voy-header-height, 64px);
   left: 0;
   right: 0;
   bottom: 0;
@@ -70,15 +56,15 @@ body {
 // Sidebar (Custom Modern Sidebar)
 .sidebar {
   position: fixed;
-  top: $header-height;
+  top: var(--voy-header-height, 64px);
   left: 0;
   z-index: $z-modal;
-  height: calc(100vh - $header-height);
-  width: $sidebar-width;
-  background: linear-gradient(180deg, $gray-800 0%, $gray-900 100%);
-  color: $white;
+  height: calc(100vh - var(--voy-header-height, 64px));
+  width: var(--voy-sidebar-width, 260px);
+  background: linear-gradient(180deg, var(--voy-sidebar-bg-start, #{$gray-800}) 0%, var(--voy-sidebar-bg-end, #{$gray-900}) 100%);
+  color: var(--voy-sidebar-text, #{$white});
   transition: transform $transition-base, width $transition-base;
-  border-right: 1px solid rgba($gray-400, 0.2);
+  border-right: 1px solid var(--voy-sidebar-section-border, rgba(156, 163, 175, 0.2));
   display: flex;
   flex-direction: column;
   box-shadow: $shadow-xl;
@@ -247,8 +233,35 @@ body {
 
 // Misc Layout
 .q-page-container {
-  padding-top: $header-height;
+  padding-top: var(--voy-header-height, 64px);
   padding-bottom: $footer-height;
+}
+
+// Sidebar q-expansion-item global overrides
+.sidebar {
+  .q-expansion-item__container > .q-item {
+    border-radius: 8px;
+    margin: 0 8px;
+    min-height: 40px;
+    color: var(--voy-sidebar-text-muted, rgba(255,255,255,0.5));
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: background 150ms, color 150ms;
+
+    &:hover {
+      background: var(--voy-sidebar-hover-bg, rgba(255,255,255,0.06));
+      color: rgba(255,255,255,0.8);
+    }
+
+    .q-icon { color: inherit; }
+    .q-expansion-item__toggle-icon { color: inherit; opacity: 0.6; }
+  }
+
+  .q-expansion-item--expanded > .q-expansion-item__container > .q-item {
+    color: rgba(255,255,255,0.9);
+  }
 }
 
 .language-selector {
