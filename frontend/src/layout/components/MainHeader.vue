@@ -69,7 +69,7 @@ const filteredRoutes = computed(() => {
   const excludedNames = [
     'PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup',
     'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden',
-    'NotFound', 'Aviation', 'Investand', 'Workschd', 'Admin', 'Dashboard'
+    'NotFound', 'Aviation', 'Investand', 'Workschd', 'Aipr', 'Admin', 'Dashboard'
   ]
   return router.options.routes
     .filter((r: any) => !excludedNames.includes(r.name as string) && !r.hidden && !r.meta?.hidden)
@@ -77,7 +77,7 @@ const filteredRoutes = computed(() => {
 })
 
 const moduleRoutes = computed(() => {
-  const moduleNames = ['Aviation', 'Investand', 'Workschd']
+  const moduleNames = ['Aviation', 'Investand', 'Workschd', 'Aipr']
   return router.options.routes.filter((r: any) => moduleNames.includes(r.name as string))
 })
 
@@ -87,7 +87,9 @@ function isModuleActive(modulePath: string) {
 
 function formatRouteName(name: string | symbol | undefined | null) {
   if (!name) return ''
-  return String(name).replace(/([A-Z])/g, ' $1').trim().replace(/^./, s => s.toUpperCase())
+  const str = String(name)
+  if (str === 'Aipr') return 'AI Operations'
+  return str.replace(/([A-Z])/g, ' $1').trim().replace(/^./, s => s.toUpperCase())
 }
 </script>
 

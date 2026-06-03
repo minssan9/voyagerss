@@ -84,6 +84,7 @@ const currentProject = computed(() => {
   if (path.startsWith('/aviation')) return 'aviation'
   if (path.startsWith('/investand')) return 'investand'
   if (path.startsWith('/workschd')) return 'workschd'
+  if (path.startsWith('/aipr')) return 'aipr'
   return null
 })
 
@@ -98,9 +99,10 @@ interface ProjectSection {
 const projectSections = computed<ProjectSection[]>(() => {
   const allRoutes = [...router.options.routes]
   const projectMeta: Record<string, { label: string; icon: string }> = {
-    aviation:  { label: 'Aviation',  icon: 'flight'           },
-    investand: { label: 'Investand', icon: 'show_chart'       },
-    workschd:  { label: 'WorkSchd',  icon: 'business_center'  },
+    aviation:  { label: 'Aviation',      icon: 'flight'           },
+    investand: { label: 'Investand',     icon: 'show_chart'       },
+    workschd:  { label: 'WorkSchd',      icon: 'business_center'  },
+    aipr:      { label: 'AI Operations', icon: 'settings_suggest' },
   }
 
   const sections: ProjectSection[] = []
@@ -140,7 +142,7 @@ const commonFilteredRoutes = computed(() => {
     'PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup',
     'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden',
     'NotFound', 'Aviation', 'Investand', 'Workschd', 'WorkschdLogin',
-    'AuthCallback', 'Dashboard'
+    'Aipr', 'AuthCallback', 'Dashboard'
   ]
 
   return allRoutes.filter((r: any) => {
