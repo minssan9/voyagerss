@@ -3,11 +3,7 @@ import jwt from 'jsonwebtoken';
 import { JwtPayload } from '../services/AuthService';
 
 export interface AiprRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
+  user?: any;
 }
 
 export function aiprAuthMiddleware(req: AiprRequest, res: Response, next: NextFunction) {
