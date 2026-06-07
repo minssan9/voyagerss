@@ -2,6 +2,26 @@
  * Configuration Manager
  * Centralized configuration management for the aviation quiz system
  */
+const { getConfig } = require('../../../../../../config/get-config');
+
+function parseDatabaseUrl(url) {
+  if (!url) {
+    return { host: 'localhost', port: 3306, user: 'root', password: '', database: 'aviation_quiz_dev' };
+  }
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port, 10) || 3306,
+      user: decodeURIComponent(parsed.username || 'root'),
+      password: decodeURIComponent(parsed.password || ''),
+      database: parsed.pathname.replace(/^\//, '') || 'aviation_quiz_dev',
+    };
+  } catch {
+    return { host: 'localhost', port: 3306, user: 'root', password: '', database: 'aviation_quiz_dev' };
+  }
+}
+
 class ConfigManager {
   constructor() {
     this.config = new Map();
@@ -49,14 +69,14 @@ class ConfigManager {
         providers: {
           gemini: {
             enabled: true,
-            apiKey: process.env.GEMINI_API_KEY,
+            apiKey: getConfig('GEMINI_API_KEY'),
             model: 'gemini-pro',
             maxTokens: 1000,
             temperature: 0.7
           },
           anthropic: {
             enabled: false,
-            apiKey: process.env.ANTHROPIC_API_KEY,
+            apiKey: getConfig('CLAUDE_API_KEY') || getConfig('ANTHROPIC_API_KEY'),
             model: 'claude-3-sonnet-20240229',
             maxTokens: 1000,
             temperature: 0.7
@@ -104,7 +124,7 @@ class ConfigManager {
       // Security configuration
       security: {
         jwt: {
-          secret: process.env.JWT_SECRET || 'your-secret-key',
+          secret: getConfig('JWT_SECRET', 'your-secret-key'),
           expiresIn: '24h'
         },
         bcrypt: {
@@ -125,17 +145,18 @@ class ConfigManager {
    * @private
    */
   _loadEnvironmentConfig() {
+    const dbFromUrl = parseDatabaseUrl(process.env.DATABASE_URL_AVIATION);
     const envConfig = {
       development: {
         database: {
-          host: process.env.DATABASE_HOST || 'localhost',
-          port: parseInt(process.env.DATABASE_PORT) || 3306,
-          user: process.env.DATABASE_USER || 'root',
-          password: process.env.DATABASE_PASSWORD || '',
-          database: process.env.DATABASE_NAME || 'aviation_quiz_dev'
+          host: dbFromUrl.host,
+          port: dbFromUrl.port,
+          user: dbFromUrl.user,
+          password: dbFromUrl.password,
+          database: dbFromUrl.database || 'aviation_quiz_dev'
         },
         api: {
-          port: parseInt(process.env.PORT) || 3010
+          port: parseInt(process.env.PORT, 10) || 3010
         },
         logging: {
           level: 'debug'
@@ -144,25 +165,25 @@ class ConfigManager {
       
       production: {
         database: {
-          host: process.env.DATABASE_HOST,
-          port: parseInt(process.env.DATABASE_PORT) || 3306,
-          user: process.env.DATABASE_USER,
-          password: process.env.DATABASE_PASSWORD,
-          database: process.env.DATABASE_NAME,
-          connectionLimit: parseInt(process.env.DATABASE_CONNECTION_LIMIT) || 20
+          host: dbFromUrl.host,
+          port: dbFromUrl.port,
+          user: dbFromUrl.user,
+          password: dbFromUrl.password,
+          database: dbFromUrl.database,
+          connectionLimit: parseInt(getConfig('DATABASE_CONNECTION_LIMIT', '20'), 10)
         },
         api: {
-          port: parseInt(process.env.PORT) || 3010
+          port: parseInt(process.env.PORT, 10) || 3010
         },
         logging: {
-          level: 'info'
+          level: getConfig('LOG_LEVEL', 'info')
         },
         cache: {
           enabled: true,
           type: 'redis',
           redis: {
             host: process.env.REDIS_HOST || 'localhost',
-            port: parseInt(process.env.REDIS_PORT) || 6379,
+            port: parseInt(process.env.REDIS_PORT, 10) || 6379,
             password: process.env.REDIS_PASSWORD
           }
         }
@@ -170,14 +191,14 @@ class ConfigManager {
       
       test: {
         database: {
-          host: process.env.DATABASE_HOST || 'localhost',
-          port: parseInt(process.env.DATABASE_PORT) || 3306,
-          user: process.env.DATABASE_USER || 'root',
-          password: process.env.DATABASE_PASSWORD || '',
-          database: process.env.DATABASE_NAME || 'aviation_quiz_test'
+          host: dbFromUrl.host,
+          port: dbFromUrl.port,
+          user: dbFromUrl.user,
+          password: dbFromUrl.password,
+          database: dbFromUrl.database || 'aviation_quiz_test'
         },
         api: {
-          port: parseInt(process.env.PORT) || 3001
+          port: parseInt(process.env.PORT, 10) || 3001
         },
         logging: {
           level: 'error'

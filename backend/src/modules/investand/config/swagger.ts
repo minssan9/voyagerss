@@ -1,7 +1,9 @@
 import swaggerJSDoc from 'swagger-jsdoc'
 import { SwaggerDefinition } from 'swagger-jsdoc'
+import { configService } from '../../../config/config-service'
 
-const swaggerDefinition: SwaggerDefinition = {
+function buildSwaggerDefinition(): SwaggerDefinition {
+  return {
   openapi: '3.0.0',
   info: {
     title: 'KOSPI Fear & Greed Index API',
@@ -35,11 +37,11 @@ const swaggerDefinition: SwaggerDefinition = {
   },
   servers: [
     {
-      url: process.env.SWAGGER_DEV_URL || 'http://localhost:3000',
+      url: configService.get('SWAGGER_DEV_URL', 'http://localhost:3000')!,
       description: 'Development server'
     },
     {
-      url: process.env.SWAGGER_PROD_URL || 'https://api.kospi-feargreed.com',
+      url: configService.get('SWAGGER_PROD_URL', 'https://api.kospi-feargreed.com')!,
       description: 'Production server'
     }
   ],
@@ -238,16 +240,21 @@ const swaggerDefinition: SwaggerDefinition = {
       description: 'Health checks and system information'
     }
   ]
+  }
 }
 
-const options = {
-  definition: swaggerDefinition,
-  apis: [
-    './src/routes/*.ts',
-    './src/routes/**/*.ts',
-    './src/middleware/*.ts'
-  ]
+const swaggerApis = [
+  './src/routes/*.ts',
+  './src/routes/**/*.ts',
+  './src/middleware/*.ts'
+]
+
+export function getSwaggerSpec() {
+  return swaggerJSDoc({
+    definition: buildSwaggerDefinition(),
+    apis: swaggerApis,
+  })
 }
 
-export const swaggerSpec = swaggerJSDoc(options)
+export const swaggerSpec = getSwaggerSpec()
 export default swaggerSpec

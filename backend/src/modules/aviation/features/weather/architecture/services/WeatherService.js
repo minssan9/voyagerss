@@ -21,9 +21,14 @@ class WeatherService {
     } else if (config && typeof config.get === 'function') {
       basePath = config.get('weather.basePath') || config.get('BASE_PATH');
     }
-    // Fallback to environment variable or default
+    // Fallback to DB config or default
     if (!basePath) {
-      basePath = process.env.BASE_PATH || '/Volumes/SSD-NVMe-2';
+      try {
+        const { getConfig } = require('../../../../../../config/get-config');
+        basePath = getConfig('BASE_PATH', '/Volumes/SSD-NVMe-2');
+      } catch {
+        basePath = '/Volumes/SSD-NVMe-2';
+      }
     }
     this.baseImageDir = path.join(basePath, 'weather-images');
     console.log(`📁 Weather images will be saved to: ${this.baseImageDir}`);
