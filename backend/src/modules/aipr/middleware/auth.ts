@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JwtPayload } from '../services/AuthService';
+import { aiprConfigService } from '../../../config/aipr-config-service';
 
 export interface AiprRequest extends Request {
   user?: any;
@@ -15,7 +16,7 @@ export function aiprAuthMiddleware(req: AiprRequest, res: Response, next: NextFu
 
   const token = authHeader.split(' ')[1];
   try {
-    const secret = process.env.JWT_SECRET ?? 'dev-secret';
+    const secret = aiprConfigService.get('JWT_SECRET', 'dev-secret')!;
     const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = {
       id: decoded.sub,

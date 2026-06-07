@@ -1,11 +1,6 @@
 import { Job } from 'bullmq';
 import { IssueStatus, RunStatus } from '@prisma/client-aipr';
-import {
-  cloneRepo,
-  createBranch,
-  pushAndCreatePR,
-  cleanupWorkdir,
-} from '../agent/github-client';
+import { getProviderClient } from '../agent/provider-client';
 import { runBuild } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
 import { logBroadcaster } from '../services/LogBroadcaster';
@@ -36,11 +31,17 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     await logBroadcaster.publish(runId, { type: 'log', data: entry });
   };
 
+  let client = getProviderClient(null); // default GitHub App; overridden below once issue is loaded
+
   try {
     const issue = await prisma.issue.findUniqueOrThrow({
       where:   { id: issueId },
-      include: { planningDocs: { orderBy: { createdAt: 'desc' }, take: 1 } },
+      include: {
+        planningDocs: { orderBy: { createdAt: 'desc' }, take: 1 },
+        repository: { include: { provider: true } },
+      },
     });
+    client = getProviderClient(issue.repository?.provider ?? null);
 
     if (!issue.repoFullName) throw new Error('repoFullName not set');
     if (!issue.planningDocs[0]) throw new Error('No planning doc found');
@@ -50,12 +51,16 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     const branchName = `feat/issue-${issueId.slice(0, 8)}-${slug}`;
 
     await emit('event', `[build] Cloning ${issue.repoFullName}…`);
-    const { workdir, git } = await cloneRepo(issue.repoFullName, runId);
+    const { workdir, git } = await client.cloneRepo(
+      issue.repoFullName!,
+      issue.repository?.webUrl ?? '',
+      runId,
+    );
 
     // Store branch name
     await prisma.run.update({ where: { id: runId }, data: { branchName } });
 
-    await createBranch(git, branchName);
+    await client.createBranch(git, branchName);
     await emit('event', `[build] Branch ${branchName} created.`);
 
     // Run Claude Code CLI
@@ -72,8 +77,10 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
 
     // Push + create PR
     await emit('event', '[build] Pushing branch and creating PR…');
-    const { prNumber, prUrl, headSha } = await pushAndCreatePR(
-      issue.repoFullName,
+    const { prNumber, prUrl, headSha } = await client.pushAndCreate(
+      workdir,
+      issue.repoFullName!,
+      issue.repository?.webUrl ?? '',
       branchName,
       issue.baseBranch,
       `[Auto-PR] ${issue.title}`,
@@ -103,7 +110,7 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     });
 
     await emit('event', `[build] ✅ PR created: ${prUrl}`);
-    await cleanupWorkdir(runId);
+    await client.cleanupWorkdir(runId);
 
   } catch (err: any) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -125,7 +132,7 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
       data:  { status: IssueStatus.FAILED },
     });
 
-    await cleanupWorkdir(runId).catch(() => {});
+    await client.cleanupWorkdir(runId).catch(() => {});
     throw err;
   } finally {
     await logBroadcaster.publishDone(runId);

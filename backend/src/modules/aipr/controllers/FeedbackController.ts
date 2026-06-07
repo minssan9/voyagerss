@@ -2,6 +2,13 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { feedbackService } from '../services/FeedbackService';
 import { aiprPrisma as prisma } from '../../../config/prisma';
+import { aiprConfigService } from '../../../config/aipr-config-service';
+
+function buildS3Url(s3Key: string): string {
+  const endpoint = aiprConfigService.get('S3_ENDPOINT', 'http://localhost:9000')!;
+  const bucket = aiprConfigService.get('S3_BUCKET', 'voyagerss')!;
+  return `${endpoint}/${bucket}/${s3Key}`;
+}
 
 const CreateFeedbackSchema = z.object({
   title:         z.string().min(1),
@@ -66,7 +73,7 @@ export class FeedbackController {
       const { filename, mime } = parsed.data;
       const s3Key = `uploads/${Date.now()}-${filename}`;
       res.json({
-        uploadUrl: `${process.env.S3_ENDPOINT || 'http://localhost:9000'}/${process.env.S3_BUCKET || 'voyagerss'}/${s3Key}`,
+        uploadUrl: buildS3Url(s3Key),
         s3Key,
         mime,
         fields: {},
@@ -79,7 +86,7 @@ export class FeedbackController {
   async getAttachment(req: Request, res: Response) {
     try {
       const { s3Key } = req.params;
-      const s3Url = `${process.env.S3_ENDPOINT || 'http://localhost:9000'}/${process.env.S3_BUCKET || 'voyagerss'}/${s3Key}`;
+      const s3Url = buildS3Url(s3Key);
       res.redirect(s3Url);
     } catch (err: any) {
       res.status(404).json({ message: 'Attachment not found' });

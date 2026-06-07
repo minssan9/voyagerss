@@ -52,28 +52,36 @@ enum AdminRole {
   ADMIN
 }
 
+enum ProviderType {
+  GITHUB
+  GITLAB
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Issue {
-  id             String      @id @default(uuid()) @db.Char(36)
-  status         IssueStatus @default(NEW)
-  title          String      @db.Text
-  body           String      @db.LongText
-  reporterEmail  String?     @db.VarChar(255)
-  reporterUserId String?     @db.Char(36)
-  sourceUrl      String?     @db.Text
-  userAgent      String?     @db.Text
-  repoFullName   String?     @db.VarChar(255)
-  baseBranch     String      @default("main") @db.VarChar(100)
-  labels         Json?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id                String      @id @default(uuid()) @db.Char(36)
+  status            IssueStatus @default(NEW)
+  title             String      @db.Text
+  body              String      @db.LongText
+  reporterEmail     String?     @db.VarChar(255)
+  reporterUserId    String?     @db.Char(36)
+  sourceUrl         String?     @db.Text
+  userAgent         String?     @db.Text
+  repoFullName      String?     @db.VarChar(255)
+  baseBranch        String      @default("main") @db.VarChar(100)
+  labels            Json?
+  repositoryId      Int?
+  sourceIssueNumber Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   attachments  Attachment[]
   planningDocs PlanningDoc[]
   runs         Run[]
   pullRequests PullRequest[]
   auditLogs    AuditLog[]
+  repository   Repository?  @relation(fields: [repositoryId], references: [id])
 
   @@index([status])
   @@index([createdAt])
@@ -207,4 +215,52 @@ model AllowedOrigin {
   createdAt DateTime @default(now())
 
   @@map("allowed_origins")
+}
+
+model GitProvider {
+  id           Int          @id @default(autoincrement())
+  type         ProviderType
+  displayName  String       @db.VarChar(100)
+  baseUrl      String       @db.VarChar(255)
+  token        String       @db.Text
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  repositories Repository[]
+
+  @@map("git_providers")
+}
+
+model Repository {
+  id            Int         @id @default(autoincrement())
+  providerId    Int
+  remoteId      String      @db.VarChar(100)
+  fullName      String      @db.VarChar(255)
+  defaultBranch String      @default("main") @db.VarChar(100)
+  isPrivate     Boolean     @default(false)
+  description   String?     @db.Text
+  webUrl        String      @db.Text
+  syncedAt      DateTime?
+  createdAt     DateTime    @default(now())
+
+  provider      GitProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  issues        Issue[]
+
+  @@unique([providerId, remoteId])
+  @@map("repositories")
+}
+
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(255)
+  value       String   @db.Text
+  isEncrypted Boolean  @default(false) @map("is_encrypted")
+  description String?  @db.VarChar(500)
+  category    String   @default("general") @db.VarChar(100)
+  updatedBy   String?  @map("updated_by") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category], map: "idx_aipr_system_config_category")
+  @@map("system_config")
 }

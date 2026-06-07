@@ -1,6 +1,7 @@
 import { aiprPrisma as prisma } from '../../../config/prisma';
 import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { aiprConfigService } from '../../../config/aipr-config-service';
 
 export interface JwtPayload {
   sub: string;   // admin id
@@ -18,10 +19,10 @@ export class AuthService {
 
     const payload: JwtPayload = { sub: admin.id, email: admin.email, role: admin.role };
 
-    const secret = process.env.JWT_SECRET ?? 'dev-secret';
+    const secret = aiprConfigService.get('JWT_SECRET', 'dev-secret')!;
     const accessToken = jwt.sign(payload, secret, { expiresIn: '1h' as any });
     const refreshToken = jwt.sign(payload, secret + '-refresh', {
-      expiresIn: (process.env.JWT_REFRESH_TTL ?? '7d') as any,
+      expiresIn: (aiprConfigService.get('JWT_REFRESH_TTL', '7d')!) as any,
     });
 
     return { accessToken, refreshToken };
@@ -29,7 +30,7 @@ export class AuthService {
 
   async refresh(token: string) {
     try {
-      const secret = process.env.JWT_SECRET ?? 'dev-secret';
+      const secret = aiprConfigService.get('JWT_SECRET', 'dev-secret')!;
       const payload = jwt.verify(token, secret + '-refresh') as JwtPayload;
       const newPayload: JwtPayload = { sub: payload.sub, email: payload.email, role: payload.role };
       const accessToken = jwt.sign(newPayload, secret, { expiresIn: '1h' as any });

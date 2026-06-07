@@ -3,6 +3,7 @@ import { Octokit } from '@octokit/rest';
 import { simpleGit, type SimpleGit } from 'simple-git';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { aiprConfigService } from '../../../config/aipr-config-service';
 
 // ── Installation token cache (1h TTL) ────────────────────────────────────────
 interface CachedToken { token: string; expiresAt: number; }
@@ -10,10 +11,10 @@ const tokenCache = new Map<number, CachedToken>();
 
 function getAppAuth() {
   return createAppAuth({
-    appId:      process.env.GITHUB_APP_ID!,
-    privateKey: Buffer.from(process.env.GITHUB_APP_PRIVATE_KEY_BASE64!, 'base64').toString('utf8'),
-    clientId:   process.env.GITHUB_APP_CLIENT_ID,
-    clientSecret: process.env.GITHUB_APP_CLIENT_SECRET,
+    appId:      aiprConfigService.getRequired('GITHUB_APP_ID'),
+    privateKey: Buffer.from(aiprConfigService.getRequired('GITHUB_APP_PRIVATE_KEY_BASE64'), 'base64').toString('utf8'),
+    clientId:   aiprConfigService.get('GITHUB_APP_CLIENT_ID'),
+    clientSecret: aiprConfigService.get('GITHUB_APP_CLIENT_SECRET'),
   });
 }
 

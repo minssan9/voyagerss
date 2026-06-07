@@ -1,11 +1,6 @@
 import { Job } from 'bullmq';
 import { IssueStatus, RunStatus } from '@prisma/client-aipr';
-import {
-  cloneRepo,
-  cleanupWorkdir,
-  getRepoTree,
-  getRecentLog,
-} from '../agent/github-client';
+import { getProviderClient } from '../agent/provider-client';
 import { runPlan } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
 import { logBroadcaster } from '../services/LogBroadcaster';
@@ -37,18 +32,28 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
     await logBroadcaster.publish(runId, { type: 'log', data: entry });
   };
 
+  let client = getProviderClient(null); // default GitHub App; overridden once issue is loaded
+
   try {
     // 2. Fetch issue details
-    const issue = await prisma.issue.findUniqueOrThrow({ where: { id: issueId } });
+    const issue = await prisma.issue.findUniqueOrThrow({
+      where: { id: issueId },
+      include: { repository: { include: { provider: true } } },
+    });
     if (!issue.repoFullName) throw new Error('repoFullName is not set on issue');
 
+    client = getProviderClient(issue.repository?.provider ?? null);
     await emit('event', `[plan] Cloning ${issue.repoFullName}…`);
 
     // 3. Clone repo
-    const { workdir } = await cloneRepo(issue.repoFullName, runId);
+    const { workdir } = await client.cloneRepo(
+      issue.repoFullName,
+      issue.repository?.webUrl ?? '',
+      runId,
+    );
 
-    const repoTree   = await getRepoTree(workdir);
-    const recentLog  = await getRecentLog(workdir);
+    const repoTree   = await client.getRepoTree(workdir);
+    const recentLog  = await client.getRecentLog(workdir);
 
     await emit('event', `[plan] Repo cloned. ${repoTree.split('\n').length} files.`);
 
@@ -84,7 +89,7 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
     await emit('event', '[plan] ✅ Plan ready — awaiting admin approval.');
 
     // 7. Cleanup
-    await cleanupWorkdir(runId);
+    await client.cleanupWorkdir(runId);
 
   } catch (err: any) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -106,7 +111,7 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
       data:  { status: IssueStatus.FAILED },
     });
 
-    await cleanupWorkdir(runId).catch(() => {});
+    await client.cleanupWorkdir(runId).catch(() => {});
     throw err; // let BullMQ handle retry backoff
   } finally {
     await logBroadcaster.publishDone(runId);

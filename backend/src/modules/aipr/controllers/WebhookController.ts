@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { webhookService } from '../services/WebhookService';
+import { aiprConfigService } from '../../../config/aipr-config-service';
 
 export function githubHmacMiddleware(req: Request, res: Response, next: NextFunction) {
   const sig256 = req.headers['x-hub-signature-256'] as string | undefined;
@@ -9,7 +10,7 @@ export function githubHmacMiddleware(req: Request, res: Response, next: NextFunc
     return;
   }
 
-  const secret = process.env.GITHUB_WEBHOOK_SECRET;
+  const secret = aiprConfigService.get('GITHUB_WEBHOOK_SECRET');
   if (!secret) {
     res.status(401).json({ message: 'Webhook secret not configured' });
     return;
@@ -33,6 +34,23 @@ export function githubHmacMiddleware(req: Request, res: Response, next: NextFunc
   next();
 }
 
+export function gitlabTokenMiddleware(req: Request, res: Response, next: NextFunction) {
+  const token = req.headers['x-gitlab-token'] as string | undefined;
+  const secret = aiprConfigService.get('GITLAB_WEBHOOK_SECRET');
+
+  if (!secret) {
+    res.status(401).json({ message: 'GitLab webhook secret not configured' });
+    return;
+  }
+
+  if (!token || token !== secret) {
+    res.status(401).json({ message: 'Invalid GitLab webhook token' });
+    return;
+  }
+
+  next();
+}
+
 export class WebhookController {
   async handleGithub(req: Request, res: Response) {
     try {
@@ -41,6 +59,21 @@ export class WebhookController {
 
       if (event === 'pull_request') {
         await webhookService.handlePullRequest(payload);
+      }
+
+      res.status(204).send();
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+  async handleGitlab(req: Request, res: Response) {
+    try {
+      const event = req.headers['x-gitlab-event'] as string;
+      const payload = req.body;
+
+      if (event === 'Merge Request Hook') {
+        await webhookService.handleMergeRequest(payload);
       }
 
       res.status(204).send();

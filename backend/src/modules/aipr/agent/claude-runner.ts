@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { type ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { aiprConfigService } from '../../../config/aipr-config-service';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface PlanResult {
@@ -23,8 +24,9 @@ export type LogLine = {
 
 export type LogCallback = (line: LogLine) => void;
 
-// ── Anthropic client ──────────────────────────────────────────────────────────
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getAnthropicClient(): Anthropic {
+  return new Anthropic({ apiKey: aiprConfigService.getRequired('ANTHROPIC_API_KEY') });
+}
 
 const PLAN_SYSTEM = `You are a senior software engineer. Given a user's feedback/issue and the repository context, write a concrete implementation plan in Markdown.
 
@@ -37,7 +39,7 @@ The plan must include:
 
 Ref actual file paths and function names where possible.`;
 
-// ── Plan job (Anthropic Messages API) ────────────────────────────────────────
+// ── Plan job (Anthropic streaming Messages API) ───────────────────────────────
 export async function runPlan(
   issue: { title: string; body: string },
   repoTree: string,
@@ -68,26 +70,33 @@ ${recentLog}
 
 Write the implementation plan now.`;
 
-  const response = await anthropic.messages.create({
-    model:      'claude-opus-4-6',
+  const contentParts: string[] = [];
+
+  const stream = getAnthropicClient().messages.stream({
+    model:      'claude-opus-4-8',
     max_tokens: 4096,
     system:     PLAN_SYSTEM,
     messages:   [{ role: 'user', content: userMessage }],
   });
 
-  const content = response.content
-    .filter((b) => b.type === 'text')
-    .map((b) => (b as Anthropic.TextBlock).text)
-    .join('\n');
+  for await (const event of stream) {
+    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+      contentParts.push(event.delta.text);
+      onLog({ stream: 'stdout', content: event.delta.text });
+    }
+  }
 
-  const inputTokens  = response.usage.input_tokens;
-  const outputTokens = response.usage.output_tokens;
-  // Rough cost estimate: Opus input $15/M, output $75/M
+  const finalMsg = await stream.finalMessage();
+  const content = contentParts.join('');
+
+  const inputTokens  = finalMsg.usage.input_tokens;
+  const outputTokens = finalMsg.usage.output_tokens;
+  // Opus 4: input $15/M, output $75/M
   const costUsd = (inputTokens * 15 + outputTokens * 75) / 1_000_000;
 
   onLog({ stream: 'event', content: `[plan] Done — ${inputTokens}in/${outputTokens}out tokens, $${costUsd.toFixed(4)}` });
 
-  return { content, costUsd, sessionId: response.id };
+  return { content, costUsd, sessionId: finalMsg.id };
 }
 
 // ── Build job (Claude Code CLI headless) ──────────────────────────────────────
