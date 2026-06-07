@@ -1,0 +1,96 @@
+name: Gemini Code Review
+
+on:
+  pull_request:
+    branches: [main, dev]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gemini-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git diff origin/${{ github.base_ref }}...HEAD | head -c 100000 > pr_diff.txt
+          echo "Diff size: $(wc -c < pr_diff.txt) bytes"
+
+      - name: Review with Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python3 - << 'EOF'
+          import json, urllib.request, os, sys
+
+          diff = open('pr_diff.txt').read().strip()
+          if not diff:
+              open('review.txt', 'w').write('변경사항이 없습니다.')
+              sys.exit(0)
+
+          prompt = (
+              "You are an expert code reviewer for a TypeScript monorepo (NestJS backend + Vue 3 frontend).\n"
+              "Review the following git diff and provide concise, actionable feedback in Korean.\n"
+              "Use markdown formatting. Focus on:\n"
+              "1. 🐛 잠재적 버그 또는 로직 오류\n"
+              "2. 🔒 보안 취약점\n"
+              "3. ✨ 코드 품질 및 모범 사례\n"
+              "4. ⚡ 성능 문제\n"
+              "5. 🔧 누락된 에러 처리\n\n"
+              "변경사항이 문제없으면 간단히 확인해주세요.\n\n"
+              f"```diff\n{diff}\n```"
+          )
+
+          payload = {
+              'contents': [{'parts': [{'text': prompt}]}],
+              'generationConfig': {'temperature': 0.1, 'maxOutputTokens': 2048}
+          }
+
+          url = (
+              'https://generativelanguage.googleapis.com/v1beta/models/'
+              f'gemini-1.5-flash:generateContent?key={os.environ["GEMINI_API_KEY"]}'
+          )
+          req = urllib.request.Request(
+              url, json.dumps(payload).encode(), {'Content-Type': 'application/json'}, method='POST'
+          )
+          try:
+              with urllib.request.urlopen(req) as r:
+                  data = json.loads(r.read())
+              review = data['candidates'][0]['content']['parts'][0]['text']
+          except Exception as e:
+              review = f'Gemini 리뷰 실패: {e}'
+
+          open('review.txt', 'w').write(review)
+          print('리뷰 완료')
+          EOF
+
+      - name: Post Review Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('review.txt', 'utf8');
+            const body = [
+              '## 🤖 Gemini Code Review',
+              '',
+              review,
+              '',
+              '---',
+              '*Powered by Google Gemini 1.5 Flash*'
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
