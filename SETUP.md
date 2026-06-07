@@ -5,6 +5,7 @@ Complete guide for setting up and running Voyagerss in local development and pro
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Local Development Setup](#local-development-setup)
+- [Boot env vs DB config](#boot-env-vs-db-config)
 - [Auto-PR / aipr (optional)](#auto-pr--aipr-optional)
 - [Production Deployment](#production-deployment)
 - [Testing](#testing)
@@ -108,6 +109,42 @@ npm start
 
 Backend will be available at: `http://localhost:3000`
 
+## Boot env vs DB config
+
+Runtime settings (JWT, OAuth, SMTP, API keys, CORS, schedulers, etc.) are stored in MySQL — not in `.env`.
+
+| Storage | Scope | Examples |
+|---------|-------|----------|
+| `.env` (boot only) | Required before DB connects | `DATABASE_URL*`, `BACKEND_PORT`, `CONFIG_ENCRYPTION_KEY`, `REDIS_*` |
+| `workschd.system_config` | Shared backend modules | JWT, OAuth, BOK/KIS/DART keys, CORS, scraper |
+| `aipr.system_config` | Auto-PR module | GitHub App, Anthropic, S3, AIPR JWT |
+
+**First-time setup (migrate from a full `.env`):**
+
+```bash
+cd backend
+
+# 1. Apply AIPR system_config table (once)
+npm run migrate:aipr-config
+
+# 2. Seed DB from current .env (idempotent)
+npm run seed:config
+npm run seed:aipr-config
+
+# 3. Slim .env to boot-only keys (see .env.example), restart server
+npm run dev
+```
+
+**Change settings in production:**
+
+- Workschd/shared: `GET/PUT /api/workschd/admin/config` (ADMIN role)
+- AIPR: `/aipr/admin/config` (AIPR admin JWT)
+- Reload cache: `POST /api/workschd/admin/config/reload`
+
+**Important:** `CONFIG_ENCRYPTION_KEY` encrypts secrets in both `system_config` tables. Changing it without re-seeding will break decryption of existing rows.
+
+Frontend build-time vars stay in `.env` — only `VITE_API_*` (see `.env.frontend.example`). Client-side API keys (Gemini, Kakao, etc.) are not stored in frontend env; use backend APIs instead.
+
 ### 3. Frontend Setup
 
 #### Install Dependencies
@@ -170,7 +207,13 @@ npm run test:aipr
 npm run lint:aipr
 ```
 
-Copy variables from **`backend/aipr/.env.sample`** into the repo root `.env` (see **`DATABASE_URL_AIPR`**, Redis, GitHub App, Anthropic keys in `.env.example`).
+Copy boot-time variables from **`.env.example`** (see [Boot env vs DB config](#boot-env-vs-db-config)). Seed AIPR settings:
+
+```bash
+cd backend
+npm run migrate:aipr-config
+npm run seed:aipr-config
+```
 
 **Windows / `pnpm install`:** Use the `.npmrc` in `backend/aipr` and `frontend/aipr` (hoisted + copy). If Nuxt `admin-web` build fails with symlink/`EISDIR` errors, enable **Developer Mode** or build on WSL/Linux CI; `widget-embed` typically builds on Windows.
 

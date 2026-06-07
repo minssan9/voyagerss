@@ -9,6 +9,8 @@
 backend/package-lock.json
 
 .env
+.env.local
+.env.*.local
 
 _bmad
 _bmad-output
