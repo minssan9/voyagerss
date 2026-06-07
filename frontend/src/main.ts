@@ -20,31 +20,7 @@ const savedDark = localStorage.getItem(STORAGE_KEY_DARK);
 const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
 const initialDark = savedDark !== null ? savedDark === 'true' : prefersDark;
 
-const app = createApp(App)
-const pinia = createPinia()
-
-app.use(i18n);
-app.use(pinia)
-app.use(router)
-
-app.use(Quasar, {
-  plugins: { Notify, Dialog, Loading, Dark },
-  config: {
-    dark: initialDark,
-    notify: {
-      position: 'top-right',
-      timeout: 2500,
-      textColor: 'white'
-    }
-  }
-})
-
-// Load initial translations after Quasar/i18n are set up
-loadLanaguageAsync(i18n.global.locale.value);
-
-
-// Make Firebase available throughout the app
-// app.config.globalProperties.$firebase = firebaseApp 
+import { useAppConfigStore } from '@/stores/common/store_app_config'
 
 declare global {
   interface Window {
@@ -52,8 +28,35 @@ declare global {
   }
 }
 
-// window.Kakao.init(import.meta.env.VITE_KAKAO_CLIENT_ID);
+async function bootstrap() {
+  const app = createApp(App)
+  const pinia = createPinia()
 
-app.mount('#app')
+  app.use(i18n)
+  app.use(pinia)
+  app.use(router)
+
+  app.use(Quasar, {
+    plugins: { Notify, Dialog, Loading, Dark },
+    config: {
+      dark: initialDark,
+      notify: {
+        position: 'top-right',
+        timeout: 2500,
+        textColor: 'white'
+      }
+    }
+  })
+
+  loadLanaguageAsync(i18n.global.locale.value)
+
+  await useAppConfigStore().load()
+
+  // window.Kakao.init(useAppConfigStore().get('VITE_KAKAO_CLIENT_ID'))
+
+  app.mount('#app')
+}
+
+bootstrap()
 
 

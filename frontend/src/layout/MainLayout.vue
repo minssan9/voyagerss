@@ -54,7 +54,7 @@ onMounted(() => {
   
   // ChannelService.loadScript()
   // ChannelService.boot({
-  //   "pluginKey": import.meta.env.VITE_CHANNEL_TALK_PLUGIN_KEY
+  //   "pluginKey": useAppConfigStore().get('VITE_CHANNEL_TALK_PLUGIN_KEY')
   // })
 })
 </script>
