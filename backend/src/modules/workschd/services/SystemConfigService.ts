@@ -64,7 +64,7 @@ export class SystemConfigService {
   }
 
   async deleteConfig(key: string): Promise<void> {
-    await prisma.systemConfig.delete({ where: { key } });
+    await configService.delete(key);
   }
 
   async reloadAll(): Promise<void> {
@@ -78,5 +78,15 @@ export class SystemConfigService {
       orderBy: { category: 'asc' },
     });
     return rows.map((r) => r.category);
+  }
+
+  async getPublicFrontendConfig(): Promise<Record<string, string>> {
+    const rows = await prisma.systemConfig.findMany({
+      where: { category: 'frontend' },
+      select: { key: true },
+    });
+    return Object.fromEntries(
+      rows.map((r) => [r.key, configService.get(r.key) ?? ''])
+    );
   }
 }

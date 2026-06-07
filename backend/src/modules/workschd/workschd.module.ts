@@ -21,6 +21,7 @@ import { ShopNestController } from './nest-controllers/shop.controller';
 import { StatisticsNestController } from './nest-controllers/statistics.controller';
 import { ScraperNestController } from './nest-controllers/scraper.controller';
 import { SystemConfigNestController } from './nest-controllers/system-config.controller';
+import { PublicConfigNestController } from './nest-controllers/public-config.controller';
 
 @Module({
   imports: [WorkschdAuthModule],
@@ -34,6 +35,7 @@ import { SystemConfigNestController } from './nest-controllers/system-config.con
     StatisticsNestController,
     ScraperNestController,
     SystemConfigNestController,
+    PublicConfigNestController,
   ],
   providers: [
     AccountService,
