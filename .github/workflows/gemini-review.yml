@@ -24,12 +24,22 @@ jobs:
           git diff origin/${{ github.base_ref }}...HEAD | head -c 100000 > pr_diff.txt
           echo "Diff size: $(wc -c < pr_diff.txt) bytes"
 
+      - name: Check API key
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::GEMINI_API_KEY secret이 설정되지 않았습니다. GitHub 저장소 Settings → Secrets and variables → Actions에서 추가해주세요."
+            exit 1
+          fi
+          echo "API key confirmed."
+
       - name: Review with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python3 - << 'EOF'
-          import json, urllib.request, os, sys
+          import json, urllib.request, urllib.error, os, sys
 
           diff = open('pr_diff.txt').read().strip()
           if not diff:
@@ -56,7 +66,7 @@ jobs:
 
           url = (
               'https://generativelanguage.googleapis.com/v1beta/models/'
-              f'gemini-1.5-flash:generateContent?key={os.environ["GEMINI_API_KEY"]}'
+              f'gemini-2.0-flash:generateContent?key={os.environ["GEMINI_API_KEY"]}'
           )
           req = urllib.request.Request(
               url, json.dumps(payload).encode(), {'Content-Type': 'application/json'}, method='POST'
@@ -65,6 +75,18 @@ jobs:
               with urllib.request.urlopen(req) as r:
                   data = json.loads(r.read())
               review = data['candidates'][0]['content']['parts'][0]['text']
+          except urllib.error.HTTPError as e:
+              body = e.read().decode('utf-8', errors='replace')
+              try:
+                  err_data = json.loads(body)
+                  err_msg = err_data.get('error', {}).get('message', body)
+              except Exception:
+                  err_msg = body
+              review = (
+                  f'**Gemini API 오류 ({e.code})**\n\n'
+                  f'{err_msg}\n\n'
+                  f'API 키 확인: 저장소 Settings → Secrets → `GEMINI_API_KEY`'
+              )
           except Exception as e:
               review = f'Gemini 리뷰 실패: {e}'
 
