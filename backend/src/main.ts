@@ -5,9 +5,13 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { configService } from './config/config-service';
+import { aiprConfigService } from './config/aipr-config-service';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
+import { configureLoggerFromConfig } from './modules/investand/utils/common/logger';
+import aiprRouter from './modules/aipr/routes';
+import { initWorkers } from './modules/aipr/worker/worker-setup';
 
 dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
@@ -18,6 +22,8 @@ async function bootstrap() {
   // Load config from DB before CORS setup (CORS reads ALLOWED_ORIGINS at request time,
   // but initialize() ensures the cache is populated first)
   await configService.initialize();
+  await aiprConfigService.initialize();
+  configureLoggerFromConfig();
 
   const expressInstance = app.getHttpAdapter().getInstance();
   expressInstance.set('trust proxy', TRUST_PROXY_HOPS);
@@ -35,7 +41,10 @@ async function bootstrap() {
     },
     credentials: true,
   });
-  app.use(helmet());
+
+  if (configService.get('HELMET_ENABLED', 'true') !== 'false') {
+    app.use(helmet());
+  }
 
   // workschd: migrated to NestJS WorkschdModule
   // investand: migrated to NestJS InvestandModule
@@ -45,6 +54,9 @@ async function bootstrap() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Mount aipr Express router at /api/aipr
+  expressInstance.use('/api/aipr', aiprRouter);
+
   // Global prefix applies to future NestJS @Controller() routes
   app.setGlobalPrefix('api');
 
@@ -53,6 +65,7 @@ async function bootstrap() {
   webSocketService.initialize(httpServer);
 
   startWorkschdScraperScheduler();
+  initWorkers();
 
   const PORT = resolveBackendPort();
   const HOST = resolveBackendHost();

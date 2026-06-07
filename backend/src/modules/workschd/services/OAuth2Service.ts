@@ -11,242 +11,148 @@ export interface OAuth2Result {
   user: any;
 }
 
-/**
- * OAuth2 인증 서비스
- * Google, Kakao 로그인 지원
- */
 @Injectable()
 export class OAuth2Service {
-  /**
-   * Google OAuth2 로그인 URL 생성
-   */
   getGoogleAuthUrl(): string {
-    const baseUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const params = new URLSearchParams({
       client_id: configService.get('GOOGLE_CLIENT_ID', '')!,
       redirect_uri: configService.get('GOOGLE_REDIRECT_URI', '')!,
       response_type: 'code',
       scope: 'openid profile email',
       access_type: 'offline',
-      prompt: 'consent'
+      prompt: 'consent',
     });
-
-    return `${baseUrl}?${params.toString()}`;
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   }
 
-  /**
-   * Google OAuth2 콜백 처리
-   */
   async handleGoogleCallback(code: string): Promise<OAuth2Result> {
     try {
-      // 1. 액세스 토큰 교환
-      const tokenResponse = await axios.post(
-        'https://oauth2.googleapis.com/token',
-        {
-          code,
-          client_id: configService.get('GOOGLE_CLIENT_ID'),
-          client_secret: configService.get('GOOGLE_CLIENT_SECRET'),
-          redirect_uri: configService.get('GOOGLE_REDIRECT_URI'),
-          grant_type: 'authorization_code'
-        }
-      );
-
-      const { access_token } = tokenResponse.data;
-
-      // 2. 사용자 정보 가져오기
-      const userInfoResponse = await axios.get(
-        'https://www.googleapis.com/oauth2/v2/userinfo',
-        {
-          headers: { Authorization: `Bearer ${access_token}` }
-        }
-      );
-
-      const googleUser = userInfoResponse.data;
-
-      // 3. 계정 찾기 또는 생성
-      let account = await prisma.account.findFirst({
-        where: {
-          socialProvider: 'GOOGLE',
-          socialProviderId: googleUser.id
-        },
-        include: { accountRoles: true }
+      const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
+        code,
+        client_id: configService.get('GOOGLE_CLIENT_ID'),
+        client_secret: configService.get('GOOGLE_CLIENT_SECRET'),
+        redirect_uri: configService.get('GOOGLE_REDIRECT_URI'),
+        grant_type: 'authorization_code',
       });
 
-      if (!account) {
-        // 신규 계정 생성
-        const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
-
-        account = await prisma.account.create({
-          data: {
-            username: googleUser.name || googleUser.email,
-            email: googleUser.email,
-            password: randomPassword,
-            status: 'ACTIVE',
-            socialProvider: 'GOOGLE',
-            socialProviderId: googleUser.id,
-            profileImageUrl: googleUser.picture,
-            accountRoles: {
-              create: [{ roleType: 'USER' }]
-            }
-          },
-          include: { accountRoles: true }
-        });
-      }
-
-      // 4. JWT 생성
-      const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
-      const jwtRefreshSecret = configService.get('JWT_REFRESH_SECRET', 'your-refresh-secret')!;
-
-      const jwtAccessToken = jwt.sign(
-        {
-          accountId: account.accountId,
-          email: account.email,
-          roles: account.accountRoles.map(r => r.roleType)
-        },
-        jwtSecret,
-        { expiresIn: '1h' }
-      );
-
-      const jwtRefreshToken = jwt.sign(
-        { accountId: account.accountId },
-        jwtRefreshSecret,
-        { expiresIn: '7d' }
-      );
-
-      // 5. 토큰 저장
-      await prisma.account.update({
-        where: { accountId: account.accountId },
-        data: {
-          accessToken: jwtAccessToken,
-          refreshToken: jwtRefreshToken
-        }
+      const userRes = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: { Authorization: `Bearer ${tokenRes.data.access_token}` },
       });
 
-      return {
-        accessToken: jwtAccessToken,
-        refreshToken: jwtRefreshToken,
-        user: account
-      };
+      const googleUser = userRes.data;
+      return this.resolveOAuthAccount('GOOGLE', googleUser.id, {
+        email: googleUser.email,
+        username: googleUser.name || googleUser.email,
+        profileImageUrl: googleUser.picture,
+      });
     } catch (error: any) {
       console.error('Google OAuth2 error:', error.response?.data || error.message);
       throw new Error('Google 로그인에 실패했습니다');
     }
   }
 
-  /**
-   * Kakao OAuth2 로그인 URL 생성
-   */
   getKakaoAuthUrl(): string {
-    const baseUrl = 'https://kauth.kakao.com/oauth/authorize';
     const params = new URLSearchParams({
       client_id: configService.get('KAKAO_REST_API_KEY', '')!,
       redirect_uri: configService.get('KAKAO_REDIRECT_URI', '')!,
       response_type: 'code',
-      scope: 'profile_nickname,profile_image,account_email'
+      scope: 'profile_nickname,profile_image,account_email',
     });
-
-    return `${baseUrl}?${params.toString()}`;
+    return `https://kauth.kakao.com/oauth/authorize?${params}`;
   }
 
-  /**
-   * Kakao OAuth2 콜백 처리
-   */
   async handleKakaoCallback(code: string): Promise<OAuth2Result> {
     try {
-      // 1. 액세스 토큰 교환
-      const tokenResponse = await axios.post(
+      const tokenRes = await axios.post(
         'https://kauth.kakao.com/oauth/token',
         new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: configService.get('KAKAO_REST_API_KEY', '')!,
           client_secret: configService.get('KAKAO_CLIENT_SECRET', '')!,
           redirect_uri: configService.get('KAKAO_REDIRECT_URI', '')!,
-          code
+          code,
         }),
-        {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-        }
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
 
-      const { access_token } = tokenResponse.data;
-
-      // 2. 사용자 정보 가져오기
-      const userInfoResponse = await axios.get(
-        'https://kapi.kakao.com/v2/user/me',
-        {
-          headers: { Authorization: `Bearer ${access_token}` }
-        }
-      );
-
-      const kakaoUser = userInfoResponse.data;
-
-      // 3. 계정 찾기 또는 생성
-      let account = await prisma.account.findFirst({
-        where: {
-          socialProvider: 'KAKAO',
-          socialProviderId: kakaoUser.id.toString()
-        },
-        include: { accountRoles: true }
+      const userRes = await axios.get('https://kapi.kakao.com/v2/user/me', {
+        headers: { Authorization: `Bearer ${tokenRes.data.access_token}` },
       });
 
-      if (!account) {
-        // 신규 계정 생성
-        const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
-
-        account = await prisma.account.create({
-          data: {
-            username: kakaoUser.properties?.nickname || `kakao_${kakaoUser.id}`,
-            email: kakaoUser.kakao_account?.email,
-            password: randomPassword,
-            status: 'ACTIVE',
-            socialProvider: 'KAKAO',
-            socialProviderId: kakaoUser.id.toString(),
-            profileImageUrl: kakaoUser.properties?.profile_image,
-            accountRoles: {
-              create: [{ roleType: 'USER' }]
-            }
-          },
-          include: { accountRoles: true }
-        });
-      }
-
-      // 4. JWT 생성
-      const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
-      const jwtRefreshSecret = configService.get('JWT_REFRESH_SECRET', 'your-refresh-secret')!;
-
-      const jwtAccessToken = jwt.sign(
-        {
-          accountId: account.accountId,
-          email: account.email,
-          roles: account.accountRoles.map(r => r.roleType)
-        },
-        jwtSecret,
-        { expiresIn: '1h' }
-      );
-
-      const jwtRefreshToken = jwt.sign(
-        { accountId: account.accountId },
-        jwtRefreshSecret,
-        { expiresIn: '7d' }
-      );
-
-      // 5. 토큰 저장
-      await prisma.account.update({
-        where: { accountId: account.accountId },
-        data: {
-          accessToken: jwtAccessToken,
-          refreshToken: jwtRefreshToken
-        }
+      const kakaoUser = userRes.data;
+      return this.resolveOAuthAccount('KAKAO', kakaoUser.id.toString(), {
+        email: kakaoUser.kakao_account?.email,
+        username: kakaoUser.properties?.nickname || `kakao_${kakaoUser.id}`,
+        profileImageUrl: kakaoUser.properties?.profile_image,
       });
-
-      return {
-        accessToken: jwtAccessToken,
-        refreshToken: jwtRefreshToken,
-        user: account
-      };
     } catch (error: any) {
       console.error('Kakao OAuth2 error:', error.response?.data || error.message);
       throw new Error('Kakao 로그인에 실패했습니다');
     }
+  }
+
+  private async resolveOAuthAccount(
+    provider: string,
+    providerId: string,
+    profile: { email?: string; username: string; profileImageUrl?: string }
+  ): Promise<OAuth2Result> {
+    // 1. Check if this OAuth identity is already linked
+    const existingOAuth = await prisma.accountOAuth.findUnique({
+      where: { provider_providerId: { provider, providerId } },
+      include: { account: { include: { accountRoles: true } } },
+    });
+
+    let account: any;
+
+    if (existingOAuth) {
+      account = existingOAuth.account;
+    } else {
+      // 2. Check if email account exists → link
+      if (profile.email) {
+        account = await prisma.account.findFirst({
+          where: { email: profile.email },
+          include: { accountRoles: true },
+        });
+      }
+
+      // 3. Create new account if no email match
+      if (!account) {
+        const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
+        account = await prisma.account.create({
+          data: {
+            username: profile.username,
+            email: profile.email,
+            password: randomPassword,
+            status: 'ACTIVE',
+            profileImageUrl: profile.profileImageUrl,
+            accountRoles: { create: [{ roleType: 'USER' }] },
+          },
+          include: { accountRoles: true },
+        });
+      }
+
+      // 4. Create the OAuth link
+      await prisma.accountOAuth.create({
+        data: { accountId: account.accountId, provider, providerId },
+      });
+    }
+
+    const jwtSecret = configService.get('JWT_SECRET', 'your-secret-key')!;
+    const jwtRefreshSecret = configService.get('JWT_REFRESH_SECRET', 'your-refresh-secret')!;
+
+    const accessToken = jwt.sign(
+      { accountId: account.accountId, email: account.email, roles: account.accountRoles.map((r: any) => r.roleType) },
+      jwtSecret,
+      { expiresIn: '1h' }
+    );
+
+    const refreshToken = jwt.sign({ accountId: account.accountId }, jwtRefreshSecret, { expiresIn: '7d' });
+
+    await prisma.account.update({
+      where: { accountId: account.accountId },
+      data: { accessToken, refreshToken },
+    });
+
+    return { accessToken, refreshToken, user: account };
   }
 }

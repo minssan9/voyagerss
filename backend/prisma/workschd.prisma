@@ -19,15 +19,11 @@ model Account {
   email           String?   @map("email") @db.VarChar(512)
   phone           String?   @map("phone") @db.VarChar(20)
   password        String    @map("password")
-  status          String    @map("status") // Enum string
+  status          String    @map("status")
   accessToken     String?   @map("access_token") @db.Text
   refreshToken    String?   @map("refresh_token") @db.Text
   profileImageUrl String?   @map("profile_image_url")
   profileVideoUrl String?   @map("profile_video_url")
-
-  // OAuth2 fields
-  socialProvider   String?   @map("social_provider") // GOOGLE, KAKAO
-  socialProviderId String?   @map("social_provider_id")
 
   // Relations
   accountRoles    AccountRole[]
@@ -36,12 +32,26 @@ model Account {
   taskEmployees   TaskEmployee[]
   notifications   Notification[]
   createdTasks    Task[]        @relation("TaskCreator")
+  oauthAccounts   AccountOAuth[]
 
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  @@unique([socialProvider, socialProviderId])
   @@map("account")
+}
+
+model AccountOAuth {
+  id         Int      @id @default(autoincrement())
+  accountId  Int      @map("account_id")
+  provider   String   @map("provider")
+  providerId String   @map("provider_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  account    Account  @relation(fields: [accountId], references: [accountId])
+
+  @@unique([provider, providerId])
+  @@index([accountId])
+  @@map("account_oauth")
 }
 
 model AccountRole {

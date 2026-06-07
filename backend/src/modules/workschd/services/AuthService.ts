@@ -39,4 +39,28 @@ export class AuthService {
 
         return { accessToken, refreshToken };
     }
+
+    async signup(email: string, password: string, username: string) {
+        const existing = await prisma.account.findFirst({ where: { email } });
+        if (existing) {
+            const err: any = new Error('Email already registered');
+            err.status = 409;
+            throw err;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        return prisma.account.create({
+            data: {
+                email,
+                username,
+                password: hashedPassword,
+                status: 'ACTIVE',
+                accountRoles: {
+                    create: [{ roleType: 'USER' }],
+                },
+            },
+            include: { accountRoles: true },
+        });
+    }
 }

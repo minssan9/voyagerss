@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query, Req, Res, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Req, Res, HttpCode, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from '../services/AuthService';
 import { AccountService } from '../services/AccountService';
@@ -13,6 +13,18 @@ export class AuthNestController {
     private readonly oauth2Service: OAuth2Service,
     private readonly configService: ConfigService,
   ) {}
+
+  @Post('signup')
+  @HttpCode(HttpStatus.CREATED)
+  async signup(@Body() body: { email: string; password: string; username: string }, @Res() res: Response) {
+    try {
+      const account = await this.authService.signup(body.email, body.password, body.username);
+      return res.status(201).json({ accountId: account.accountId, email: account.email });
+    } catch (err: any) {
+      if (err.status === 409) return res.status(409).json({ message: err.message });
+      return res.status(500).json({ message: '회원가입에 실패했습니다' });
+    }
+  }
 
   @Post('login')
   @HttpCode(200)
