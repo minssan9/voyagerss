@@ -21,7 +21,8 @@ const authRoutes: RouteRecordRaw[] = [
     { path: '/signup', name: 'Signup', component: () => import('@/views/common/auth/Signup.vue'), meta: { icon: 'person_add', requiresAuth: false, hidden: true } },
     { path: '/account/profile', name: 'AccountProfile', component: () => import('@/views/common/account/AccountProfile.vue'), meta: { icon: 'person', hidden: true, requiresAuth: true, loginPath: '/login' } },
     { path: '/account/schedule', name: 'AccountSchedule', component: () => import('@/views/common/account/AccountSchedule.vue'), meta: { icon: 'calendar_today', hidden: true, requiresAuth: true, loginPath: '/login' } },
-    { path: '/workschd/login', name: 'WorkschdLogin', component: () => import('@/modules/workschd/views/WorkschdLogin.vue'), meta: { icon: 'login', hidden: true } },
+    { path: '/workschd/login', name: 'WorkschdLogin', redirect: () => ({ path: '/login', query: { service: 'workschd' } }) },
+    { path: '/workschd/signup', name: 'WorkschdSignup', component: () => import('@/modules/workschd/views/WorkschdSignup.vue'), meta: { icon: 'person_add', hidden: true } },
     { path: '/auth/callback', name: 'AuthCallback', component: () => import('@/views/common/auth/AuthCallback.vue'), meta: { icon: 'refresh', hidden: true } },
 ];
 

@@ -23,9 +23,10 @@ const whiteList = [
   '/403',
   '/404',
   '/workschd/login',
+  '/aipr/login',
+  '/investand/admin/login',
   '/auth/callback',
-  '/workschd/auth/callback',
-  '/investand/admin/login'
+  '/workschd/auth/callback'
 ]
 
 export function setupRouterGuards(router: Router) {

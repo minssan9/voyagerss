@@ -63,8 +63,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'login',
             name: 'admin-login',
-            component: () => import('@/views/common/auth/AdminLogin.vue'),
-            meta: { title: 'Admin Login', public: true }
+            redirect: () => ({ path: '/login', query: { service: 'investand' } })
           },
           {
             path: 'dashboard',

@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
                 path: 'team/join/:token',
                 name: 'TeamJoin',
                 component: () => import('@/modules/workschd/views/team/TeamJoin.vue'),
-                meta: { icon: 'group_add', hidden: true, requiresAuth: true, loginPath: '/workschd/login' }
+                meta: { icon: 'group_add', hidden: true, requiresAuth: true, loginPath: '/login?service=workschd' }
             },
             {
                 path: 'team/manage',
@@ -27,7 +27,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     icon: 'manage_accounts',
                     requiresAuth: true,
-                    loginPath: '/workschd/login',
+                    loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
@@ -38,7 +38,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     icon: 'list',
                     requiresAuth: true,
-                    loginPath: '/workschd/login',
+                    loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
@@ -49,7 +49,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     icon: 'assignment',
                     requiresAuth: true,
-                    loginPath: '/workschd/login',
+                    loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
@@ -60,7 +60,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     icon: 'work',
                     requiresAuth: true,
-                    loginPath: '/workschd/login',
+                    loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER', 'HELPER', 'USER', 'ROLE_USER']
                 }
             },
@@ -68,7 +68,7 @@ const routes: RouteRecordRaw[] = [
                 path: 'funeral-board',
                 name: 'FuneralBoard',
                 component: () => import('@/modules/workschd/views/FuneralBoardView.vue'),
-                meta: { icon: 'home', requiresAuth: true, loginPath: '/workschd/login' }
+                meta: { icon: 'home', requiresAuth: true, loginPath: '/login?service=workschd' }
             },
             {
                 path: 'admin/dashboard',
@@ -77,7 +77,7 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     icon: 'dashboard',
                     requiresAuth: true,
-                    loginPath: '/workschd/login',
+                    loginPath: '/login?service=workschd',
                     roles: ['ADMIN']
                 }
             },

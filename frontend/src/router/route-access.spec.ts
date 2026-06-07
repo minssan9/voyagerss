@@ -198,8 +198,8 @@ describe('decideRouteAccess', () => {
     })
     expect(d).toEqual({
       action: 'redirect',
-      path: '/investand/admin/login',
-      query: { redirect: '/investand/admin/dashboard' }
+      path: '/login',
+      query: { service: 'investand', redirect: '/investand/admin/dashboard' }
     })
   })
 

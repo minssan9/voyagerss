@@ -58,6 +58,6 @@ onMounted(async () => {
 })
 
 function goLogin() {
-  router.replace('/workschd/login')
+  router.replace('/login?service=workschd')
 }
 </script>

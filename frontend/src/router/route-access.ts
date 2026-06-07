@@ -113,8 +113,8 @@ export function decideRouteAccess(input: {
     if (!adminTok || !adminTok.trim()) {
       return {
         action: 'redirect',
-        path: '/investand/admin/login',
-        query: { redirect: input.fullPath }
+        path: '/login',
+        query: { service: 'investand', redirect: input.fullPath }
       }
     }
     if (meta.requiresAuth && !hasMain) {
