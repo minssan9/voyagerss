@@ -1,33 +1,27 @@
-import { workschdPrisma } from './prisma';
+import { aiprPrisma } from './prisma';
 import { BaseDbConfigService, ConfigRow } from './base-db-config-service';
-import { WORKSCHD_SENSITIVE_KEYS } from './sensitive-keys';
+import { ConfigSetOptions } from './config-service';
+import { AIPR_SENSITIVE_KEYS } from './sensitive-keys';
 
-export interface ConfigSetOptions {
-  isEncrypted?: boolean;
-  description?: string;
-  category?: string;
-  updatedBy?: string;
-}
+export class AiprConfigService extends BaseDbConfigService {
+  private static instance: AiprConfigService;
 
-export class ConfigService extends BaseDbConfigService {
-  private static instance: ConfigService;
-
-  protected readonly serviceName = 'ConfigService';
-  protected readonly sensitiveKeys = WORKSCHD_SENSITIVE_KEYS;
+  protected readonly serviceName = 'AiprConfigService';
+  protected readonly sensitiveKeys = AIPR_SENSITIVE_KEYS;
 
   private constructor() {
     super();
   }
 
-  static getInstance(): ConfigService {
-    if (!ConfigService.instance) {
-      ConfigService.instance = new ConfigService();
+  static getInstance(): AiprConfigService {
+    if (!AiprConfigService.instance) {
+      AiprConfigService.instance = new AiprConfigService();
     }
-    return ConfigService.instance;
+    return AiprConfigService.instance;
   }
 
   protected async loadRows(): Promise<ConfigRow[]> {
-    const rows = await workschdPrisma.systemConfig.findMany();
+    const rows = await aiprPrisma.systemConfig.findMany();
     return rows.map((row) => ({
       key: row.key,
       value: row.value,
@@ -40,7 +34,7 @@ export class ConfigService extends BaseDbConfigService {
     storedValue: string,
     options: ConfigSetOptions & { isEncrypted: boolean }
   ): Promise<void> {
-    await workschdPrisma.systemConfig.upsert({
+    await aiprPrisma.systemConfig.upsert({
       where: { key },
       create: {
         key,
@@ -61,7 +55,7 @@ export class ConfigService extends BaseDbConfigService {
   }
 
   protected async deleteRow(key: string): Promise<void> {
-    await workschdPrisma.systemConfig.delete({ where: { key } });
+    await aiprPrisma.systemConfig.delete({ where: { key } });
   }
 
   async delete(key: string): Promise<void> {
@@ -70,4 +64,4 @@ export class ConfigService extends BaseDbConfigService {
   }
 }
 
-export const configService = ConfigService.getInstance();
+export const aiprConfigService = AiprConfigService.getInstance();

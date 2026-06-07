@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { workschdPrisma, investandPrisma, aiprPrisma } from './prisma';
 import { seedConfig } from './seed-config';
+import { seedAiprConfig } from './seed-aipr-config';
 import * as bcrypt from 'bcrypt';
 
 function isLocalhostDb(url?: string): boolean {
@@ -116,6 +117,9 @@ export async function seedLocalAll(force = false) {
           },
         });
         console.log('[seed-local] aipr database seeded.');
+
+        console.log('[seed-local] Seeding aipr system configs...');
+        await seedAiprConfig(force);
       } else {
         console.log('[seed-local] aipr database already contains data. Skipping.');
       }

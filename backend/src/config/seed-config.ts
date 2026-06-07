@@ -53,6 +53,10 @@ const SEED_KEYS: SeedEntry[] = [
   // App
   { key: 'FRONTEND_URL',           category: 'app',      description: '프론트엔드 기본 URL' },
   { key: 'ALLOWED_ORIGINS',        category: 'app',      description: '허용된 CORS origins (쉼표 구분)' },
+  { key: 'BACKEND_PUBLIC_URL',     category: 'app',      description: '공개 백엔드 URL' },
+  { key: 'CORS_ENABLED',           category: 'app',      description: 'CORS 활성화 (true/false)' },
+  { key: 'HELMET_ENABLED',         category: 'app',      description: 'Helmet 활성화 (true/false)' },
+  { key: 'BASE_PATH',              category: 'app',      description: '로컬 파일 저장 기본 경로 (aviation 등)' },
   // Scraper
   { key: 'WORKSCHD_SCRAPER_ENABLED',                     category: 'scraper', description: '스크래퍼 스케줄러 활성화 (true/false)' },
   { key: 'WORKSCHD_SCRAPER_CRON',                        category: 'scraper', description: '스크래퍼 cron 표현식' },
@@ -62,8 +66,21 @@ const SEED_KEYS: SeedEntry[] = [
   { key: 'TELEGRAM_WEBHOOK_URL',   category: 'telegram', description: 'Telegram 웹훅 URL' },
   // AI
   { key: 'GEMINI_API_KEY',         category: 'ai',       description: 'Google Gemini API 키' },
+  { key: 'CLAUDE_API_KEY',         category: 'ai',       description: 'Anthropic Claude API 키' },
   // Security
   { key: 'MFA_ENCRYPTION_KEY',     category: 'security', description: 'MFA 백업 코드 암호화 키' },
+  { key: 'API_RATE_LIMIT_WINDOW_MS', category: 'security', description: 'API rate limit window (ms)' },
+  { key: 'API_RATE_LIMIT_MAX_REQUESTS', category: 'security', description: 'API rate limit max requests per window' },
+  // Notifications
+  { key: 'SLACK_WEBHOOK_URL',      category: 'notifications', description: 'Slack incoming webhook URL' },
+  // Scheduler
+  { key: 'ENABLE_SCHEDULER',       category: 'scheduler', description: '데이터 수집 스케줄러 활성화' },
+  { key: 'SCHEDULER_TIMEZONE',     category: 'scheduler', description: '스케줄러 타임존' },
+  { key: 'DATA_COLLECTION_CRON',   category: 'scheduler', description: '데이터 수집 cron 표현식' },
+  { key: 'WEEKEND_DATA_COLLECTION', category: 'scheduler', description: '주말 데이터 수집 (true/false)' },
+  // Cache
+  { key: 'ENABLE_CACHE',           category: 'cache',    description: '캐시 활성화 (true/false)' },
+  { key: 'CACHE_TTL_MINUTES',      category: 'cache',    description: '캐시 TTL (분)' },
   // Logging
   { key: 'LOG_LEVEL',              category: 'logging',  description: '로그 레벨 (info/debug/warn/error)' },
   { key: 'LOG_FILE_PATH',          category: 'logging',  description: '로그 파일 경로' },
