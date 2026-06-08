@@ -116,6 +116,13 @@
           </q-item-section>
           <q-item-section>Feedback</q-item-section>
         </q-item>
+
+        <q-item v-if="isAdmin" clickable v-ripple :to="{ name: 'feedback-admin' }">
+          <q-item-section avatar>
+            <q-icon name="rate_review" />
+          </q-item-section>
+          <q-item-section>기능 개선 요청 관리</q-item-section>
+        </q-item>
       </q-list>
     </q-scroll-area>
 
@@ -125,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
 import { useTeamStore } from '@/modules/workschd/store/store_team'
@@ -145,6 +152,10 @@ const { drawerRight } = storeToRefs(layoutStore)
 const { teamOptions } = storeToRefs(userStore)
 const $q = useQuasar()
 const { locale } = useI18n()
+
+const isAdmin = computed(() =>
+  userStore.user.accountRoles?.map(ar => ar.roleType).includes('ADMIN') ?? false
+)
 
 // Team selection
 const selectedTeam = ref(userStore.user.teamId)

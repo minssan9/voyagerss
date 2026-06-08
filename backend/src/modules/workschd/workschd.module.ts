@@ -11,6 +11,7 @@ import { ShopService } from './services/ShopService';
 import { AccountScheduleService } from './services/AccountScheduleService';
 import { StatisticsService } from './services/StatisticsService';
 import { SystemConfigService } from './services/SystemConfigService';
+import { FeedbackService } from './services/FeedbackService';
 
 import { AuthNestController } from './nest-controllers/auth.controller';
 import { AccountNestController } from './nest-controllers/account.controller';
@@ -22,6 +23,7 @@ import { StatisticsNestController } from './nest-controllers/statistics.controll
 import { ScraperNestController } from './nest-controllers/scraper.controller';
 import { SystemConfigNestController } from './nest-controllers/system-config.controller';
 import { PublicConfigNestController } from './nest-controllers/public-config.controller';
+import { FeedbackNestController } from './nest-controllers/feedback.controller';
 
 @Module({
   imports: [WorkschdAuthModule],
@@ -36,6 +38,7 @@ import { PublicConfigNestController } from './nest-controllers/public-config.con
     ScraperNestController,
     SystemConfigNestController,
     PublicConfigNestController,
+    FeedbackNestController,
   ],
   providers: [
     AccountService,
@@ -46,6 +49,7 @@ import { PublicConfigNestController } from './nest-controllers/public-config.con
     AccountScheduleService,
     StatisticsService,
     SystemConfigService,
+    FeedbackService,
     TaskOwnerGuard,
     TeamOwnerGuard,
   ],
