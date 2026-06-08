@@ -17,13 +17,13 @@
             class="lp-btn-primary"
             label="이슈 등록하고 시작하기"
             no-caps unelevated
-            @click="router.push({ name: 'aipr-issues' })"
+            :to="{ name: 'aipr-issues' }"
           />
           <q-btn
             class="lp-btn-secondary"
             label="피드백 위젯 체험하기"
             no-caps outline
-            @click="router.push({ name: 'aipr-widget' })"
+            :to="{ name: 'aipr-widget' }"
           />
         </div>
       </section>
@@ -151,30 +151,30 @@
 
       <!-- Quick Navigation -->
       <div class="lp-nav-grid">
-        <div class="lp-nav-card" @click="router.push({ name: 'aipr-issues' })">
+        <router-link :to="{ name: 'aipr-issues' }" class="lp-nav-card">
           <div class="lp-nav-card__icon" style="background: rgba(0,113,227,0.08); color: #0071e3;">
             <q-icon name="list" size="24px" />
           </div>
           <div class="lp-nav-card__title">이슈 관리</div>
           <div class="lp-nav-card__desc">등록된 피드백과 진행 상황 확인</div>
           <q-icon name="arrow_forward_ios" size="14px" class="lp-nav-card__arrow" />
-        </div>
-        <div class="lp-nav-card" @click="router.push({ name: 'aipr-repos' })">
+        </router-link>
+        <router-link :to="{ name: 'aipr-repos' }" class="lp-nav-card">
           <div class="lp-nav-card__icon" style="background: rgba(52,168,83,0.08); color: #34a853;">
             <q-icon name="folder_open" size="24px" />
           </div>
           <div class="lp-nav-card__title">저장소 연동</div>
           <div class="lp-nav-card__desc">GitHub·GitLab 저장소와 Provider 설정</div>
           <q-icon name="arrow_forward_ios" size="14px" class="lp-nav-card__arrow" />
-        </div>
-        <div class="lp-nav-card" @click="router.push({ name: 'aipr-settings' })">
+        </router-link>
+        <router-link :to="{ name: 'aipr-settings' }" class="lp-nav-card">
           <div class="lp-nav-card__icon" style="background: rgba(251,188,5,0.08); color: #f5a623;">
             <q-icon name="settings" size="24px" />
           </div>
           <div class="lp-nav-card__title">운영 설정</div>
           <div class="lp-nav-card__desc">권한, 알림, 자동화 옵션 관리</div>
           <q-icon name="arrow_forward_ios" size="14px" class="lp-nav-card__arrow" />
-        </div>
+        </router-link>
       </div>
 
     </div>
@@ -182,13 +182,16 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
 </script>
 
 <style scoped lang="scss">
 @import '@/assets/styles/landing-shared';
+
+.lp-nav-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
 
 .lp-section-header {
   text-align: center;
