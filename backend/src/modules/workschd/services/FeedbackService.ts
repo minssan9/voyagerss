@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService } from '../../../config/config-service';
@@ -19,9 +19,25 @@ export interface FeedbackListParams {
   pageSize?: number;
 }
 
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+const ALLOWED_STATUSES = ['OPEN', 'IN_PROGRESS', 'DONE', 'REJECTED'];
+const SAFE_URL_PATTERN = /^https?:\/\//i;
+
 @Injectable()
 export class FeedbackService {
   async create(accountId: number, input: CreateFeedbackInput): Promise<Feedback> {
+    if (input.pageUrl && !SAFE_URL_PATTERN.test(input.pageUrl)) {
+      throw new BadRequestException('pageUrl must start with http:// or https://');
+    }
+
+    let fileData: Buffer | undefined;
+    if (input.fileBase64) {
+      fileData = Buffer.from(input.fileBase64, 'base64');
+      if (fileData.length > MAX_ATTACHMENT_BYTES) {
+        throw new BadRequestException('Attachment exceeds the 5MB size limit');
+      }
+    }
+
     const feedback = await prisma.feedback.create({
       data: {
         accountId,
@@ -30,11 +46,11 @@ export class FeedbackService {
         pageUrl: input.pageUrl,
         fileName: input.fileName,
         fileMime: input.fileMime,
-        fileData: input.fileBase64 ? Buffer.from(input.fileBase64, 'base64') : undefined,
+        fileData,
       },
     });
 
-    await this.notifySlack(feedback);
+    void this.notifySlack(feedback);
 
     return feedback;
   }
@@ -51,7 +67,19 @@ export class FeedbackService {
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: { account: { select: { accountId: true, username: true, email: true } } },
+        select: {
+          id: true,
+          accountId: true,
+          title: true,
+          content: true,
+          pageUrl: true,
+          status: true,
+          fileName: true,
+          fileMime: true,
+          createdAt: true,
+          updatedAt: true,
+          account: { select: { accountId: true, username: true, email: true } },
+        },
       }),
       prisma.feedback.count({ where }),
     ]);
@@ -60,6 +88,10 @@ export class FeedbackService {
   }
 
   async updateStatus(id: number, status: string): Promise<Feedback> {
+    if (!ALLOWED_STATUSES.includes(status)) {
+      throw new BadRequestException(`Invalid status: ${status}`);
+    }
+
     const existing = await prisma.feedback.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException('Feedback not found');
 

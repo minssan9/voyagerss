@@ -31,6 +31,7 @@
             dense
             clearable
             accept="image/*,.pdf,.zip"
+            :rules="[val => !val || val.size <= 5242880 || '파일 크기는 5MB를 초과할 수 없습니다']"
           >
             <template v-slot:prepend>
               <q-icon name="attach_file" />

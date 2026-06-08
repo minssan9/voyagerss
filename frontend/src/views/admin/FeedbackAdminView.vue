@@ -62,7 +62,13 @@
 
           <template v-slot:body-cell-pageUrl="props">
             <q-td :props="props">
-              <a v-if="props.row.pageUrl" :href="props.row.pageUrl" target="_blank" rel="noopener">{{ props.row.pageUrl }}</a>
+              <a
+                v-if="isSafeUrl(props.row.pageUrl)"
+                :href="props.row.pageUrl"
+                target="_blank"
+                rel="noopener"
+              >{{ props.row.pageUrl }}</a>
+              <span v-else-if="props.row.pageUrl">{{ props.row.pageUrl }}</span>
               <span v-else>-</span>
             </q-td>
           </template>
@@ -157,6 +163,10 @@ function statusColor(status: string): string {
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleString()
+}
+
+function isSafeUrl(url?: string | null): boolean {
+  return !!url && /^https?:\/\//i.test(url)
 }
 
 async function load() {
