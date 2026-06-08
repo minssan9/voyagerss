@@ -289,6 +289,27 @@
         </q-card>
       </div>
     </div>
+
+    <!-- Admin Quick Links -->
+    <div class="row q-col-gutter-md q-mb-lg">
+      <div class="col-12">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6 q-mb-md">관리 메뉴</div>
+            <div class="row q-gutter-sm">
+              <q-btn
+                outline color="primary" icon="admin_panel_settings" label="RBAC 권한 관리"
+                @click="router.push('/workschd/admin/rbac')"
+              />
+              <q-btn
+                outline color="grey-7" icon="settings" label="시스템 설정"
+                @click="router.push('/workschd/admin/config')"
+              />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 

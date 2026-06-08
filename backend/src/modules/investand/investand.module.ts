@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { RbacModule } from '../rbac/rbac.module';
 import { InvestandAdminGuard } from './guards/investand-admin.guard';
 import { InvestandPermissionGuard } from './guards/investand-permission.guard';
 import { MarketDataNestController } from './nest-controllers/market-data.controller';
@@ -19,6 +20,7 @@ import { DartNestController } from './nest-controllers/dart.controller';
     AdminNestController,
     DartNestController,
   ],
+  imports: [RbacModule],
   providers: [InvestandAdminGuard, InvestandPermissionGuard],
 })
 export class InvestandModule {}
