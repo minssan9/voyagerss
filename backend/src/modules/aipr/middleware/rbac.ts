@@ -9,11 +9,14 @@ export interface AiprRbacRequest extends Request {
 async function checkRbacPermission(subjectId: string, permCode: string): Promise<boolean> {
   const subjectRoles = await rbacPrisma.subjectRole.findMany({
     where: { module: 'aipr', subjectId },
-    select: { roleId: true },
+    include: { role: true },
   });
   if (subjectRoles.length === 0) return false;
 
-  const roleIds = subjectRoles.map((r) => r.roleId);
+  // SUPER_ADMIN bypasses all explicit permission checks
+  if (subjectRoles.some((sr: any) => sr.role.code === 'SUPER_ADMIN')) return true;
+
+  const roleIds = subjectRoles.map((r: any) => r.roleId);
   const targetPerm = await rbacPrisma.permission.findUnique({
     where: { code: permCode },
     select: { id: true },

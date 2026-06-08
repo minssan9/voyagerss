@@ -25,9 +25,11 @@ export class RbacGuard implements CanActivate {
     if (!permCode) return true;
 
     const req = context.switchToHttp().getRequest();
-    const { module, subjectId } = this.resolveSubject(req);
+    // Derive module from the permission code prefix (e.g. "workschd:api:...")
+    const module = permCode.split(':')[0];
+    const subjectId = this.resolveSubjectId(req, module);
 
-    if (!module || !subjectId) {
+    if (!subjectId) {
       throw new UnauthorizedException('Authentication required for RBAC check');
     }
 
@@ -39,19 +41,23 @@ export class RbacGuard implements CanActivate {
     return true;
   }
 
-  private resolveSubject(req: any): { module?: string; subjectId?: string } {
-    // workschd: JwtStrategy populates req.user with accountId
-    if (req.user?.accountId) {
-      return { module: 'workschd', subjectId: String(req.user.accountId) };
+  private resolveSubjectId(req: any, module: string): string | undefined {
+    switch (module) {
+      case 'workschd':
+        return req.user?.accountId ? String(req.user.accountId) : undefined;
+      case 'investand':
+        return req.admin?.id ? String(req.admin.id) : undefined;
+      case 'aipr':
+        return req.user?.id ? String(req.user.id) : undefined;
+      default:
+        // Fallback: try all known identity slots
+        return req.user?.accountId
+          ? String(req.user.accountId)
+          : req.admin?.id
+          ? String(req.admin.id)
+          : req.user?.id
+          ? String(req.user.id)
+          : undefined;
     }
-    // investand: InvestandAdminGuard populates req.admin with id
-    if (req.admin?.id) {
-      return { module: 'investand', subjectId: String(req.admin.id) };
-    }
-    // aipr: aiprAuthMiddleware populates req.user with id (sub from JWT)
-    if (req.user?.id) {
-      return { module: 'aipr', subjectId: String(req.user.id) };
-    }
-    return {};
   }
 }

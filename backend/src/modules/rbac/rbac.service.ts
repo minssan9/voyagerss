@@ -41,9 +41,12 @@ export class RbacService {
   async hasPermission(module: string, subjectId: string, permCode: string): Promise<boolean> {
     const subjectRoles = await this.rbac.subjectRole.findMany({
       where: { module, subjectId },
-      select: { roleId: true },
+      include: { role: true },
     });
     if (subjectRoles.length === 0) return false;
+
+    // SUPER_ADMIN bypasses all explicit permission checks
+    if (subjectRoles.some((sr) => sr.role.code === 'SUPER_ADMIN')) return true;
 
     const roleIds = subjectRoles.map((r) => r.roleId);
 
@@ -181,13 +184,23 @@ export class RbacService {
 
   async setRolePermissions(roleId: number, permissionIds: number[]) {
     await this.getRole(roleId);
-    await this.rbac.rolePermission.deleteMany({ where: { roleId } });
+
     if (permissionIds.length > 0) {
-      await this.rbac.rolePermission.createMany({
-        data: permissionIds.map((permissionId) => ({ roleId, permissionId })),
-        skipDuplicates: true,
-      });
+      const validCount = await this.rbac.permission.count({ where: { id: { in: permissionIds } } });
+      if (validCount !== permissionIds.length) {
+        throw new ConflictException('One or more permission IDs are invalid');
+      }
     }
+
+    await (this.rbac.$transaction as any)(async (tx: any) => {
+      await tx.rolePermission.deleteMany({ where: { roleId } });
+      if (permissionIds.length > 0) {
+        await tx.rolePermission.createMany({
+          data: permissionIds.map((permissionId) => ({ roleId, permissionId })),
+          skipDuplicates: true,
+        });
+      }
+    });
   }
 
   // ── Subject-Role assignments ──────────────────────────────────────────
@@ -224,12 +237,21 @@ export class RbacService {
   }
 
   async setSubjectRoles(module: string, subjectId: string, roleIds: number[]) {
-    await this.rbac.subjectRole.deleteMany({ where: { module, subjectId } });
     if (roleIds.length > 0) {
-      await this.rbac.subjectRole.createMany({
-        data: roleIds.map((roleId) => ({ module, subjectId, roleId })),
-        skipDuplicates: true,
-      });
+      const validCount = await this.rbac.role.count({ where: { id: { in: roleIds } } });
+      if (validCount !== roleIds.length) {
+        throw new ConflictException('One or more role IDs are invalid');
+      }
     }
+
+    await (this.rbac.$transaction as any)(async (tx: any) => {
+      await tx.subjectRole.deleteMany({ where: { module, subjectId } });
+      if (roleIds.length > 0) {
+        await tx.subjectRole.createMany({
+          data: roleIds.map((roleId) => ({ module, subjectId, roleId })),
+          skipDuplicates: true,
+        });
+      }
+    });
   }
 }

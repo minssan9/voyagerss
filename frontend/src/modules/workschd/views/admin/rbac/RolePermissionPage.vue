@@ -161,6 +161,10 @@ async function selectRole(role: RbacRole) {
   try {
     const res = await apiRbac.getRolePermissions(role.id)
     selectedPermIds.value = res.data.data.map((rp: any) => rp.permission.id)
+  } catch (e: any) {
+    selectedPermIds.value = []
+    selectedRole.value = null
+    $q.notify({ type: 'negative', message: e.response?.data?.message ?? '권한 목록을 불러오지 못했습니다.' })
   } finally {
     loadingPerms.value = false
   }
