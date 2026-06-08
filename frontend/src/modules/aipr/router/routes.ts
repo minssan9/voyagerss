@@ -6,8 +6,14 @@ const routes: RouteRecordRaw[] = [
         name: 'Aipr',
         component: () => import('@/layout/RouteView.vue'),
         meta: { icon: 'settings_suggest', project: 'aipr' },
-        redirect: { name: 'aipr-issues' },
+        redirect: { name: 'aipr-home' },
         children: [
+            {
+                path: '',
+                name: 'aipr-home',
+                component: () => import('../views/AiprHome.vue'),
+                meta: { icon: 'home', title: 'Aipr Home', public: true }
+            },
             {
                 path: 'login',
                 name: 'aipr-login',
