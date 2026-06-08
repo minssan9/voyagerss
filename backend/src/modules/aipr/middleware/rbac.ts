@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { rbacPrisma } from '../../../config/prisma';
 
+// Use any for user to avoid conflict with Passport's global User type declaration
 export interface AiprRbacRequest extends Request {
-  user?: { id: string; email: string; role: string };
+  user?: any;
 }
 
 async function checkRbacPermission(subjectId: string, permCode: string): Promise<boolean> {
