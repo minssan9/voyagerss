@@ -12,6 +12,7 @@ const commonRoutes: RouteRecordRaw[] = [
     { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true } },
     { path: '/terms', name: 'Terms', component: () => import('@/modules/workschd/views/main/Terms.vue'), meta: { icon: 'description', hidden: true } },
     { path: '/dashboard', name: 'Dashboard', component: () => import('@/modules/workschd/views/main/Dashboard.vue'), meta: { icon: 'dashboard', requiresAuth: true, loginPath: '/workschd/login' } },
+    { path: '/feedback-admin', name: 'feedback-admin', component: () => import('@/views/admin/FeedbackAdminView.vue'), meta: { icon: 'feedback', hidden: true, requiresAuth: true, roles: ['ADMIN'], loginPath: '/login', tabTitle: '기능 개선 요청 관리' } },
 ];
 
 // ─── Auth & Account Routes ───────────────────────────────────────

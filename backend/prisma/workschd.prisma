@@ -33,6 +33,7 @@ model Account {
   notifications   Notification[]
   createdTasks    Task[]        @relation("TaskCreator")
   oauthAccounts   AccountOAuth[]
+  feedbacks       Feedback[]
 
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -250,4 +251,23 @@ model SystemConfig {
 
   @@index([category], map: "idx_system_config_category")
   @@map("system_config")
+}
+
+model Feedback {
+  id          Int      @id @default(autoincrement())
+  accountId   Int?     @map("account_id")
+  title       String   @db.VarChar(200)
+  content     String   @db.Text
+  pageUrl     String?  @map("page_url") @db.VarChar(500)
+  status      String   @default("OPEN") @db.VarChar(20)
+  fileName    String?  @map("file_name") @db.VarChar(255)
+  fileMime    String?  @map("file_mime") @db.VarChar(100)
+  fileData    Bytes?   @map("file_data")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  account     Account? @relation(fields: [accountId], references: [accountId])
+
+  @@index([status], map: "idx_feedback_status")
+  @@map("feedback")
 }
