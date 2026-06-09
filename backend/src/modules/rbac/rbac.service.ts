@@ -1,8 +1,23 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { RbacPrismaService } from '../../prisma/rbac-prisma.service';
 
 export type PermissionType = 'PAGE' | 'API';
 export type ModuleScope = 'workschd' | 'investand' | 'aipr' | 'aviation' | 'ALL';
+
+export const VALID_MODULES: ReadonlySet<string> = new Set(['workschd', 'investand', 'aipr', 'aviation', 'ALL']);
+export const VALID_TYPES: ReadonlySet<string> = new Set(['PAGE', 'API']);
+
+function assertValidModule(module: string) {
+  if (!VALID_MODULES.has(module)) {
+    throw new BadRequestException(`Invalid module: "${module}". Allowed: ${[...VALID_MODULES].join(', ')}`);
+  }
+}
+
+function assertValidType(type: string) {
+  if (!VALID_TYPES.has(type)) {
+    throw new BadRequestException(`Invalid type: "${type}". Allowed: PAGE, API`);
+  }
+}
 
 export interface CreateRoleDto {
   code: string;
@@ -118,9 +133,11 @@ export class RbacService {
   async deleteRole(id: number) {
     const role = await this.getRole(id);
     if (role.isSystem) throw new ConflictException('Cannot delete a system role');
-    await this.rbac.rolePermission.deleteMany({ where: { roleId: id } });
-    await this.rbac.subjectRole.deleteMany({ where: { roleId: id } });
-    return this.rbac.role.delete({ where: { id } });
+    await (this.rbac.$transaction as any)(async (tx: any) => {
+      await tx.rolePermission.deleteMany({ where: { roleId: id } });
+      await tx.subjectRole.deleteMany({ where: { roleId: id } });
+      await tx.role.delete({ where: { id } });
+    });
   }
 
   // ── Permissions ───────────────────────────────────────────────────────
@@ -142,20 +159,26 @@ export class RbacService {
   }
 
   async createPermission(dto: CreatePermissionDto) {
+    assertValidType(dto.type);
+    assertValidModule(dto.module);
     const existing = await this.rbac.permission.findUnique({ where: { code: dto.code } });
     if (existing) throw new ConflictException(`Permission code "${dto.code}" already exists`);
     return this.rbac.permission.create({ data: dto });
   }
 
   async updatePermission(id: number, dto: UpdatePermissionDto) {
+    if (dto.type) assertValidType(dto.type);
+    if (dto.module) assertValidModule(dto.module);
     await this.getPermission(id);
     return this.rbac.permission.update({ where: { id }, data: dto });
   }
 
   async deletePermission(id: number) {
     await this.getPermission(id);
-    await this.rbac.rolePermission.deleteMany({ where: { permissionId: id } });
-    return this.rbac.permission.delete({ where: { id } });
+    await (this.rbac.$transaction as any)(async (tx: any) => {
+      await tx.rolePermission.deleteMany({ where: { permissionId: id } });
+      await tx.permission.delete({ where: { id } });
+    });
   }
 
   // ── Role-Permission assignments ───────────────────────────────────────
@@ -224,6 +247,7 @@ export class RbacService {
   }
 
   async assignRoleToSubject(module: string, subjectId: string, roleId: number) {
+    assertValidModule(module);
     await this.getRole(roleId);
     return this.rbac.subjectRole.upsert({
       where: { module_subjectId_roleId: { module, subjectId, roleId } },
@@ -237,6 +261,7 @@ export class RbacService {
   }
 
   async setSubjectRoles(module: string, subjectId: string, roleIds: number[]) {
+    assertValidModule(module);
     if (roleIds.length > 0) {
       const validCount = await this.rbac.role.count({ where: { id: { in: roleIds } } });
       if (validCount !== roleIds.length) {

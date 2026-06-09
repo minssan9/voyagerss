@@ -15,10 +15,12 @@ import {
 import { JwtAuthGuard } from '../../workschd/guards/jwt-auth.guard';
 import { RolesGuard } from '../../workschd/guards/roles.guard';
 import { Roles } from '../../workschd/decorators/roles.decorator';
+import { RbacGuard } from '../guards/rbac.guard';
+import { RequirePermission } from '../decorators/require-permission.decorator';
 import { RbacService, CreateRoleDto, UpdateRoleDto, CreatePermissionDto, UpdatePermissionDto } from '../rbac.service';
 
 @Controller('rbac')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, RbacGuard)
 @Roles('ADMIN')
 export class RbacAdminController {
   constructor(private readonly rbacService: RbacService) {}
@@ -36,17 +38,20 @@ export class RbacAdminController {
   }
 
   @Post('roles')
+  @RequirePermission('workschd:api:rbac:write')
   async createRole(@Body() dto: CreateRoleDto) {
     return { data: await this.rbacService.createRole(dto) };
   }
 
   @Put('roles/:id')
+  @RequirePermission('workschd:api:rbac:write')
   async updateRole(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRoleDto) {
     return { data: await this.rbacService.updateRole(id, dto) };
   }
 
   @Delete('roles/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission('workschd:api:rbac:write')
   async deleteRole(@Param('id', ParseIntPipe) id: number) {
     await this.rbacService.deleteRole(id);
   }
@@ -64,17 +69,20 @@ export class RbacAdminController {
   }
 
   @Post('permissions')
+  @RequirePermission('workschd:api:rbac:write')
   async createPermission(@Body() dto: CreatePermissionDto) {
     return { data: await this.rbacService.createPermission(dto) };
   }
 
   @Put('permissions/:id')
+  @RequirePermission('workschd:api:rbac:write')
   async updatePermission(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePermissionDto) {
     return { data: await this.rbacService.updatePermission(id, dto) };
   }
 
   @Delete('permissions/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission('workschd:api:rbac:write')
   async deletePermission(@Param('id', ParseIntPipe) id: number) {
     await this.rbacService.deletePermission(id);
   }
@@ -87,6 +95,7 @@ export class RbacAdminController {
   }
 
   @Post('roles/:roleId/permissions/:permissionId')
+  @RequirePermission('workschd:api:rbac:write')
   async assignPermission(
     @Param('roleId', ParseIntPipe) roleId: number,
     @Param('permissionId', ParseIntPipe) permissionId: number,
@@ -95,6 +104,7 @@ export class RbacAdminController {
   }
 
   @Put('roles/:roleId/permissions')
+  @RequirePermission('workschd:api:rbac:write')
   async setRolePermissions(
     @Param('roleId', ParseIntPipe) roleId: number,
     @Body() body: { permissionIds: number[] },
@@ -105,6 +115,7 @@ export class RbacAdminController {
 
   @Delete('roles/:roleId/permissions/:permissionId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission('workschd:api:rbac:write')
   async removePermission(
     @Param('roleId', ParseIntPipe) roleId: number,
     @Param('permissionId', ParseIntPipe) permissionId: number,
@@ -128,6 +139,7 @@ export class RbacAdminController {
   }
 
   @Post('subjects/:module/:subjectId/roles/:roleId')
+  @RequirePermission('workschd:api:rbac:write')
   async assignRole(
     @Param('module') module: string,
     @Param('subjectId') subjectId: string,
@@ -137,6 +149,7 @@ export class RbacAdminController {
   }
 
   @Put('subjects/:module/:subjectId/roles')
+  @RequirePermission('workschd:api:rbac:write')
   async setSubjectRoles(
     @Param('module') module: string,
     @Param('subjectId') subjectId: string,
@@ -148,6 +161,7 @@ export class RbacAdminController {
 
   @Delete('subjects/:module/:subjectId/roles/:roleId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @RequirePermission('workschd:api:rbac:write')
   async removeRole(
     @Param('module') module: string,
     @Param('subjectId') subjectId: string,

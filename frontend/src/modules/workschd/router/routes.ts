@@ -89,7 +89,8 @@ const routes: RouteRecordRaw[] = [
                     icon: 'admin_panel_settings',
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
-                    roles: ['ADMIN']
+                    roles: ['ADMIN'],
+                    rbacPermission: 'workschd:page:admin-rbac'
                 },
                 redirect: { name: 'RbacRoles' },
                 children: [

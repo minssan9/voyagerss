@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { WorkschdAuthModule } from './workschd-auth.module';
+import { RbacModule } from '../rbac/rbac.module';
 import { TaskOwnerGuard } from './guards/task-owner.guard';
 import { TeamOwnerGuard } from './guards/team-owner.guard';
 
@@ -26,7 +27,7 @@ import { PublicConfigNestController } from './nest-controllers/public-config.con
 import { FeedbackNestController } from './nest-controllers/feedback.controller';
 
 @Module({
-  imports: [WorkschdAuthModule],
+  imports: [WorkschdAuthModule, RbacModule],
   controllers: [
     AuthNestController,
     AccountNestController,

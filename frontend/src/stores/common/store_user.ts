@@ -1,5 +1,6 @@
 ﻿import apiAccount from '@/api/account/api-account'
 import apiTeam from '@/modules/workschd/api/api-team'
+import apiRbac from '@/modules/workschd/api/api-rbac'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 
@@ -48,6 +49,8 @@ interface UserState {
   accountInfo: any[] // Type this based on your accountInfo structure
   isAuthPhone: boolean
   teams: Team[]
+  /** RBAC page permission codes granted to the current user (workschd module) */
+  rbacPagePermissions: string[]
 }
 
 export const useUserStore = defineStore('user', {
@@ -87,7 +90,8 @@ export const useUserStore = defineStore('user', {
     },
     accountInfo: [],
     isAuthPhone: false,
-    teams: []
+    teams: [],
+    rbacPagePermissions: []
   }),
 
   getters: {
@@ -129,9 +133,10 @@ export const useUserStore = defineStore('user', {
             this.user = { ...this.user, ...accountInfo }
           }
 
-          // Fetch teams after user data is loaded
+          // Fetch teams and RBAC page permissions after user data is loaded
           if (this.user.accountId) {
             await this.fetchTeams()
+            await this.fetchRbacPagePermissions()
           }
 
           return res.data
@@ -152,6 +157,19 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         console.error('Error fetching teams:', error)
         throw error
+      }
+    },
+
+    async fetchRbacPagePermissions(): Promise<void> {
+      if (!this.user.accountId) return
+      try {
+        const res = await apiRbac.getSubjectPermissions('workschd', String(this.user.accountId))
+        this.rbacPagePermissions = res.data.data
+          .filter((p: any) => p.type === 'PAGE')
+          .map((p: any) => p.code as string)
+      } catch {
+        // Non-fatal: RBAC DB might not be set up yet
+        this.rbacPagePermissions = []
       }
     },
 
