@@ -33,6 +33,20 @@ export interface RbacSubjectRole {
   createdAt: string;
 }
 
+export interface DeclaredPermission extends RbacPermission {
+  inDb: boolean;
+  dbId: number | null;
+  defaultRoles?: string[];
+}
+
+export interface SyncResult {
+  message: string;
+  created: number;
+  updated: number;
+  rolesAssigned: number;
+  total: number;
+}
+
 const apiRbac = {
   // Roles
   listRoles(): Promise<AxiosResponse<{ data: RbacRole[] }>> {
@@ -88,6 +102,14 @@ const apiRbac = {
   },
   getSubjectPermissions(module: string, subjectId: string): Promise<AxiosResponse<{ data: RbacPermission[] }>> {
     return service.get(`/rbac/subjects/${module}/${subjectId}/permissions`);
+  },
+
+  // Sync — code-declared permissions
+  getDeclaredPermissions(): Promise<AxiosResponse<{ data: DeclaredPermission[] }>> {
+    return service.get('/rbac/permissions/declared');
+  },
+  syncPermissions(): Promise<AxiosResponse<SyncResult>> {
+    return service.post('/rbac/sync');
   },
 };
 

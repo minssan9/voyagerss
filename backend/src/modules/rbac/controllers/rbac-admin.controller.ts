@@ -18,12 +18,31 @@ import { Roles } from '../../workschd/decorators/roles.decorator';
 import { RbacGuard } from '../guards/rbac.guard';
 import { RequirePermission } from '../decorators/require-permission.decorator';
 import { RbacService, CreateRoleDto, UpdateRoleDto, CreatePermissionDto, UpdatePermissionDto } from '../rbac.service';
+import { RbacSyncService } from '../rbac-sync.service';
 
 @Controller('rbac')
 @UseGuards(JwtAuthGuard, RolesGuard, RbacGuard)
 @Roles('ADMIN')
 export class RbacAdminController {
-  constructor(private readonly rbacService: RbacService) {}
+  constructor(
+    private readonly rbacService: RbacService,
+    private readonly rbacSyncService: RbacSyncService,
+  ) {}
+
+  // ── Sync ───────────────────────────────────────────────────────────────
+
+  @Get('permissions/declared')
+  @RequirePermission('workschd:api:rbac:read')
+  async getDeclaredPermissions() {
+    return { data: await this.rbacSyncService.getDeclaredPermissionsWithStatus() };
+  }
+
+  @Post('sync')
+  @RequirePermission('workschd:api:rbac:write')
+  async syncPermissions() {
+    const result = await this.rbacSyncService.sync();
+    return { message: '동기화 완료', ...result };
+  }
 
   // ── Roles ──────────────────────────────────────────────────────────────
 

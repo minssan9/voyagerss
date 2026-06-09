@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Header row -->
     <div class="row items-center justify-between q-mb-md">
       <div class="row items-center q-gutter-sm">
         <div class="text-h6">권한 목록</div>
@@ -21,19 +22,51 @@
           style="min-width: 120px"
           @update:model-value="load"
         />
+        <q-toggle v-model="showDeclaredOnly" label="코드 선언만" dense />
       </div>
-      <q-btn color="primary" icon="add" label="권한 추가" @click="openCreateDialog" />
+      <div class="row q-gutter-sm">
+        <q-btn
+          outline color="teal" icon="sync" label="코드→DB 동기화"
+          :loading="syncing" @click="syncPermissions"
+        >
+          <q-tooltip>코드에 선언된 권한을 DB에 자동 반영하고 기본 역할을 할당합니다</q-tooltip>
+        </q-btn>
+        <q-btn color="primary" icon="add" label="권한 추가" @click="openCreateDialog" />
+      </div>
     </div>
+
+    <!-- Sync result banner -->
+    <q-banner v-if="lastSyncResult" class="q-mb-sm bg-teal-1 text-teal-9" rounded dense>
+      <template v-slot:avatar><q-icon name="check_circle" color="teal" /></template>
+      동기화 완료 — 신규: <strong>{{ lastSyncResult.created }}</strong>건,
+      업데이트: <strong>{{ lastSyncResult.updated }}</strong>건,
+      역할 할당 추가: <strong>{{ lastSyncResult.rolesAssigned }}</strong>건 /
+      전체 코드 선언: <strong>{{ lastSyncResult.total }}</strong>건
+      <template v-slot:action>
+        <q-btn flat dense icon="close" @click="lastSyncResult = null" />
+      </template>
+    </q-banner>
 
     <q-card flat bordered>
       <q-table
-        :rows="permissions"
+        :rows="filteredPermissions"
         :columns="columns"
         row-key="id"
         flat
         :loading="loading"
-        :pagination="{ rowsPerPage: 25 }"
+        :pagination="{ rowsPerPage: 30 }"
       >
+        <template v-slot:body-cell-code="props">
+          <q-td :props="props">
+            <span class="text-body2">{{ props.row.code }}</span>
+            <q-chip
+              v-if="declaredCodes.has(props.row.code)"
+              dense color="teal-1" text-color="teal-9" icon="code"
+              size="sm" class="q-ml-xs"
+            >코드 선언</q-chip>
+          </q-td>
+        </template>
+
         <template v-slot:body-cell-type="props">
           <q-td :props="props">
             <q-chip dense :color="props.row.type === 'PAGE' ? 'purple-2' : 'blue-2'"
@@ -65,7 +98,38 @@
             </q-btn>
           </q-td>
         </template>
+
+        <!-- Undeclared permissions panel -->
+        <template v-slot:top-row v-if="undeclaredInDb.length > 0 && !showDeclaredOnly">
+          <q-tr class="bg-orange-1">
+            <q-td colspan="100%">
+              <q-icon name="warning" color="orange-8" class="q-mr-xs" />
+              <span class="text-caption text-orange-9">
+                DB에만 존재 (코드 미선언): {{ undeclaredInDb.map(p => p.code).join(', ') }}
+              </span>
+            </q-td>
+          </q-tr>
+        </template>
       </q-table>
+    </q-card>
+
+    <!-- Declared-only unsynced list -->
+    <q-card v-if="declaredNotInDb.length > 0" flat bordered class="q-mt-md bg-blue-1">
+      <q-card-section>
+        <div class="row items-center justify-between">
+          <div>
+            <q-icon name="code" color="blue-8" class="q-mr-xs" />
+            <span class="text-subtitle2 text-blue-9">코드 선언 → DB 미동기화 권한 ({{ declaredNotInDb.length }}건)</span>
+          </div>
+          <q-btn flat dense color="blue-8" icon="sync" label="지금 동기화" :loading="syncing" @click="syncPermissions" />
+        </div>
+        <div class="row q-gutter-xs q-mt-sm">
+          <q-chip
+            v-for="p in declaredNotInDb" :key="p.code"
+            dense color="blue-2" text-color="blue-9" icon="add"
+          >{{ p.code }}</q-chip>
+        </div>
+      </q-card-section>
     </q-card>
 
     <!-- Create/Edit Dialog -->
@@ -103,7 +167,7 @@
             v-model="form.resource"
             label="리소스 경로 *"
             outlined dense
-            :hint="form.type === 'PAGE' ? '예: /workschd/admin/dashboard' : '예: GET:/workschd/admin/config'"
+            :hint="form.type === 'PAGE' ? '예: /workschd/admin/dashboard' : '예: GET:/api/workschd/admin/config'"
           />
           <q-input v-model="form.description" label="설명" outlined dense type="textarea" rows="2" />
         </q-card-section>
@@ -117,18 +181,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
-import apiRbac, { RbacPermission } from '@/modules/workschd/api/api-rbac'
+import apiRbac, { RbacPermission, DeclaredPermission, SyncResult } from '@/modules/workschd/api/api-rbac'
 
 const $q = useQuasar()
 const permissions = ref<RbacPermission[]>([])
+const declaredPerms = ref<DeclaredPermission[]>([])
 const loading = ref(false)
 const dialog = ref(false)
 const saving = ref(false)
+const syncing = ref(false)
 const editingPerm = ref<RbacPermission | null>(null)
 const filterModule = ref<string | null>(null)
 const filterType = ref<string | null>(null)
+const showDeclaredOnly = ref(false)
+const lastSyncResult = ref<SyncResult | null>(null)
 
 const form = ref<{
   code: string; name: string; type: 'PAGE' | 'API'; module: string; resource: string; description: string
@@ -156,16 +224,50 @@ const columns = [
   { name: 'actions', label: '', field: 'actions', align: 'right' as const },
 ]
 
+const declaredCodes = computed(() => new Set(declaredPerms.value.map((p) => p.code)))
+
+const declaredNotInDb = computed(() => declaredPerms.value.filter((p) => !p.inDb))
+
+const undeclaredInDb = computed(() =>
+  permissions.value.filter((p) => !declaredCodes.value.has(p.code))
+)
+
+const filteredPermissions = computed(() => {
+  let list = permissions.value
+  if (filterModule.value) list = list.filter((p) => p.module === filterModule.value)
+  if (filterType.value) list = list.filter((p) => p.type === filterType.value)
+  if (showDeclaredOnly.value) list = list.filter((p) => declaredCodes.value.has(p.code))
+  return list
+})
+
 async function load() {
   loading.value = true
   try {
-    const res = await apiRbac.listPermissions({
-      module: filterModule.value ?? undefined,
-      type: filterType.value ?? undefined,
-    })
-    permissions.value = res.data.data
+    const [permRes, declaredRes] = await Promise.all([
+      apiRbac.listPermissions({
+        module: filterModule.value ?? undefined,
+        type: filterType.value ?? undefined,
+      }),
+      apiRbac.getDeclaredPermissions().catch(() => ({ data: { data: [] } })),
+    ])
+    permissions.value = permRes.data.data
+    declaredPerms.value = declaredRes.data.data
   } finally {
     loading.value = false
+  }
+}
+
+async function syncPermissions() {
+  syncing.value = true
+  try {
+    const res = await apiRbac.syncPermissions()
+    lastSyncResult.value = res.data
+    $q.notify({ type: 'positive', message: `동기화 완료: ${res.data.created}건 신규, ${res.data.rolesAssigned}건 역할 할당` })
+    await load()
+  } catch (e: any) {
+    $q.notify({ type: 'negative', message: e.response?.data?.message ?? '동기화 실패' })
+  } finally {
+    syncing.value = false
   }
 }
 
