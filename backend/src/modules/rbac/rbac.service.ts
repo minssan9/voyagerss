@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { RbacPrismaService } from '../../prisma/rbac-prisma.service';
 
 export type PermissionType = 'PAGE' | 'API';
@@ -19,32 +20,32 @@ function assertValidType(type: string) {
   }
 }
 
-export interface CreateRoleDto {
-  code: string;
-  name: string;
-  description?: string;
+export class CreateRoleDto {
+  @IsString() @IsNotEmpty() code: string;
+  @IsString() @IsNotEmpty() name: string;
+  @IsString() @IsOptional() description?: string;
 }
 
-export interface UpdateRoleDto {
-  name?: string;
-  description?: string;
+export class UpdateRoleDto {
+  @IsString() @IsOptional() name?: string;
+  @IsString() @IsOptional() description?: string;
 }
 
-export interface CreatePermissionDto {
-  code: string;
-  name: string;
-  type: PermissionType;
-  module: ModuleScope;
-  resource: string;
-  description?: string;
+export class CreatePermissionDto {
+  @IsString() @IsNotEmpty() code: string;
+  @IsString() @IsNotEmpty() name: string;
+  @IsEnum(['PAGE', 'API']) type: PermissionType;
+  @IsEnum(['workschd', 'investand', 'aipr', 'aviation', 'ALL']) module: ModuleScope;
+  @IsString() @IsNotEmpty() resource: string;
+  @IsString() @IsOptional() description?: string;
 }
 
-export interface UpdatePermissionDto {
-  name?: string;
-  type?: PermissionType;
-  module?: ModuleScope;
-  resource?: string;
-  description?: string;
+export class UpdatePermissionDto {
+  @IsString() @IsOptional() name?: string;
+  @IsEnum(['PAGE', 'API']) @IsOptional() type?: PermissionType;
+  @IsEnum(['workschd', 'investand', 'aipr', 'aviation', 'ALL']) @IsOptional() module?: ModuleScope;
+  @IsString() @IsOptional() resource?: string;
+  @IsString() @IsOptional() description?: string;
 }
 
 @Injectable()
