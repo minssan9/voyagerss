@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-rbac"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL_RBAC")
+  relationMode = "prisma"
+}
+
+model Role {
+  id          Int    @id @default(autoincrement())
+  code        String @unique @db.VarChar(100)
+  name        String @db.VarChar(100)
+  description String? @db.VarChar(500)
+  isSystem    Boolean @default(false) @map("is_system")
+
+  rolePermissions RolePermission[]
+  subjectRoles    SubjectRole[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("role")
+}
+
+model Permission {
+  id          Int    @id @default(autoincrement())
+  code        String @unique @db.VarChar(200)
+  name        String @db.VarChar(100)
+  type        String @db.VarChar(10)  // PAGE | API
+  module      String @db.VarChar(50)  // workschd | investand | aipr | aviation | ALL
+  resource    String @db.VarChar(500) // frontend route path or HTTP METHOD:path pattern
+  description String? @db.VarChar(500)
+
+  rolePermissions RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([module], map: "idx_permission_module")
+  @@index([type], map: "idx_permission_type")
+  @@map("permission")
+}
+
+model RolePermission {
+  id           Int @id @default(autoincrement())
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permission")
+}
+
+model SubjectRole {
+  id        Int    @id @default(autoincrement())
+  module    String @db.VarChar(50)  // workschd | investand | aipr | aviation
+  subjectId String @db.VarChar(100) // numeric accountId or cuid admin id as string
+  roleId    Int    @map("role_id")
+
+  role Role @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([module, subjectId, roleId])
+  @@index([module, subjectId])
+  @@index([roleId])
+  @@map("subject_role")
+}

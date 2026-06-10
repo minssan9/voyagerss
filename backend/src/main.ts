@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
@@ -45,6 +46,8 @@ async function bootstrap() {
   if (configService.get('HELMET_ENABLED', 'true') !== 'false') {
     app.use(helmet());
   }
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // workschd: migrated to NestJS WorkschdModule
   // investand: migrated to NestJS InvestandModule

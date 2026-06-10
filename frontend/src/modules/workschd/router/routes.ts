@@ -82,6 +82,45 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'admin/rbac',
+                name: 'RbacAdmin',
+                component: () => import('@/modules/workschd/views/admin/rbac/RbacAdminLayout.vue'),
+                meta: {
+                    icon: 'admin_panel_settings',
+                    requiresAuth: true,
+                    loginPath: '/login?service=workschd',
+                    roles: ['ADMIN'],
+                    rbacPermission: 'workschd:page:admin-rbac'
+                },
+                redirect: { name: 'RbacRoles' },
+                children: [
+                    {
+                        path: 'roles',
+                        name: 'RbacRoles',
+                        component: () => import('@/modules/workschd/views/admin/rbac/RoleManagePage.vue'),
+                        meta: { icon: 'badge', title: '역할 관리', requiresAuth: true, roles: ['ADMIN'] }
+                    },
+                    {
+                        path: 'permissions',
+                        name: 'RbacPermissions',
+                        component: () => import('@/modules/workschd/views/admin/rbac/PermissionManagePage.vue'),
+                        meta: { icon: 'lock', title: '권한 관리', requiresAuth: true, roles: ['ADMIN'] }
+                    },
+                    {
+                        path: 'role-permissions',
+                        name: 'RbacRolePermissions',
+                        component: () => import('@/modules/workschd/views/admin/rbac/RolePermissionPage.vue'),
+                        meta: { icon: 'link', title: '역할-권한 매핑', requiresAuth: true, roles: ['ADMIN'] }
+                    },
+                    {
+                        path: 'subjects',
+                        name: 'RbacSubjects',
+                        component: () => import('@/modules/workschd/views/admin/rbac/SubjectRolePage.vue'),
+                        meta: { icon: 'manage_accounts', title: '대상-역할 매핑', requiresAuth: true, roles: ['ADMIN'] }
+                    }
+                ]
+            },
+            {
                 path: 'auth/callback',
                 name: 'WorkschdAuthCallback',
                 component: () => import('@/views/common/auth/AuthCallback.vue'),

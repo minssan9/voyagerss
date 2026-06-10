@@ -11,6 +11,8 @@ export interface EffectiveRouteMeta {
   requiredRoles: string[] | undefined
   /** Deepest `meta.loginPath` string, if any */
   loginPath: string | undefined
+  /** RBAC permission code required to access this page (e.g. 'workschd:page:admin-rbac') */
+  rbacPermission: string | undefined
 }
 
 export function normalizePathForAccess(path: string): string {
@@ -30,6 +32,7 @@ export function getEffectiveMeta(matched: readonly MatchedWithMeta[]): Effective
   let adminAuth = false
   let requiredRoles: string[] | undefined
   let loginPath: string | undefined
+  let rbacPermission: string | undefined
 
   for (const m of matched) {
     const meta = m.meta as Record<string, unknown> | undefined
@@ -44,9 +47,12 @@ export function getEffectiveMeta(matched: readonly MatchedWithMeta[]): Effective
     if (Array.isArray(roles) && roles.length > 0 && roles.every((r) => typeof r === 'string')) {
       requiredRoles = roles as string[]
     }
+    if (typeof meta.rbacPermission === 'string' && meta.rbacPermission.length > 0) {
+      rbacPermission = meta.rbacPermission
+    }
   }
 
-  return { public: publicMeta, requiresAuth, adminAuth, requiredRoles, loginPath }
+  return { public: publicMeta, requiresAuth, adminAuth, requiredRoles, loginPath, rbacPermission }
 }
 
 export function userRoleTypes(
@@ -98,6 +104,8 @@ export function decideRouteAccess(input: {
   storeAccessToken: string | null | undefined
   cookieAccessToken: string | null | undefined
   accountRoles: ReadonlyArray<{ roleType: string }> | null | undefined
+  /** RBAC page permission codes loaded from the server for the current user */
+  rbacPagePermissions?: readonly string[]
 }): RouteAccessDecision {
   const meta = getEffectiveMeta(input.matched)
   const wl = isWhitelisted(input.path, input.whiteList)
@@ -142,6 +150,13 @@ export function decideRouteAccess(input: {
 
   if (meta.requiresAuth && meta.requiredRoles?.length) {
     if (!userHasAnyRequiredRole(input.accountRoles, meta.requiredRoles)) {
+      return { action: 'redirect', path: '/403' }
+    }
+  }
+
+  // RBAC page permission check (when the route declares meta.rbacPermission)
+  if (meta.rbacPermission && input.rbacPagePermissions?.length) {
+    if (!input.rbacPagePermissions.includes(meta.rbacPermission)) {
       return { action: 'redirect', path: '/403' }
     }
   }

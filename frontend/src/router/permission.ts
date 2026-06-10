@@ -66,7 +66,8 @@ export function setupRouterGuards(router: Router) {
         matched: to.matched,
         storeAccessToken: userStore.accessToken,
         cookieAccessToken: cookieToken,
-        accountRoles: userStore.user.accountRoles
+        accountRoles: userStore.user.accountRoles,
+        rbacPagePermissions: userStore.rbacPagePermissions
       })
 
       if (decision.action === 'allow') {
