@@ -22,6 +22,12 @@ export class AccountNestController {
     return this.accountService.registerForWorkschd(body);
   }
 
+  @Get('account')
+  @UseGuards(JwtAuthGuard)
+  async getCurrentAccount(@CurrentUser() user: AuthUser) {
+    return this.accountService.getAccountById(user.accountId);
+  }
+
   @Get('accounts/:id')
   @UseGuards(JwtAuthGuard)
   async getAccount(@Param('id') id: string) {

@@ -125,7 +125,7 @@ export class OAuth2Service {
             password: randomPassword,
             status: 'ACTIVE',
             profileImageUrl: profile.profileImageUrl,
-            accountRoles: { create: [{ roleType: 'USER' }] },
+            accountRoles: { create: [{ roleType: 'HELPER' }] },
           },
           include: { accountRoles: true },
         });
