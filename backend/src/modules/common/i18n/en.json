@@ -1,0 +1,35 @@
+{
+  "login": {
+    "title": "Sign in",
+    "email": { "label": "Email" },
+    "password": { "label": "Password" },
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email address"
+    },
+    "form": {
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password"
+    },
+    "button": { "submit": "Sign in" },
+    "signup": {
+      "prompt": "Don't have an account?",
+      "link": "Sign up"
+    },
+    "success": "Signed in successfully.",
+    "error": {
+      "default": "An error occurred while signing in.",
+      "invalid": "Invalid email or password."
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you requested does not exist or may have been moved",
+    "button": { "home": "Back to home" }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "save": "Save"
+  }
+}

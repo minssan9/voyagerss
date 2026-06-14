@@ -167,7 +167,7 @@ async function reject(emp: any) {
   rejecting.value = emp.id;
   try {
     await fetch(
-      `${import.meta.env.VITE_API_URL}/workschd/task/request/${emp.id}/reject`,
+      `${import.meta.env.VITE_API_BASE_URL}/workschd/task/request/${emp.id}/reject`,
       { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` } }
     );
     emp.status = 'REJECTED';

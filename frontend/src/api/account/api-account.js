@@ -21,10 +21,12 @@ const apiAccount = {
   },
 
   getSocialLoginUrl(socialType) {
-    return `${import.meta.env.VITE_API_URL}/oauth2/authorization/${socialType}?redirect_uri=${import.meta.env.VITE_API_REDIRECT_URL}/auth/redirect`
+    const base = import.meta.env.VITE_API_BASE_URL || '/api'
+    return `${base}/oauth2/authorization/${socialType}?redirect_uri=${import.meta.env.VITE_API_REDIRECT_URL}/auth/redirect`
   },
   getSocialConnect(socialType) {
-    return `${import.meta.env.VITE_API_URL}/oauth2/auth-url/${socialType}`
+    const base = import.meta.env.VITE_API_BASE_URL || '/api'
+    return `${base}/oauth2/auth-url/${socialType}`
   },
   saveAccountSns(providerType, oauth2Info) {
     return service.post(`/oauth2/save/${providerType}`, oauth2Info)

@@ -73,7 +73,7 @@ const passwordConfirm = ref('');
 const loading = ref(false);
 const error = ref('');
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
 async function submit() {
   error.value = '';
@@ -85,7 +85,7 @@ async function submit() {
 
   loading.value = true;
   try {
-    await axios.post(`${API_URL}/api/workschd/auth/signup`, {
+    await axios.post(`${API_BASE}/workschd/auth/signup`, {
       email: email.value,
       password: password.value,
       username: username.value,

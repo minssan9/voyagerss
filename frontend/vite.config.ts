@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, path.resolve(process.cwd(), '../'), '')
+  const backendTarget = `http://127.0.0.1:${env.BACKEND_PORT || '9002'}`
 
   return {
     plugins: [
@@ -105,12 +106,16 @@ export default defineConfig(({ mode }) => {
       // https: false, // HTTPS 사용 여부
       cors: true, // CORS 활성화
       proxy: {
-        // API 프록시 설정 - handles ALL /api/* routes including aviation, investand, etc.
+        // API 프록시 — browser → FE :9003 → BE :9002 (no direct backend calls)
         '/api': {
-          target: env.VITE_API_URL || `http://localhost:${env.BACKEND_PORT || 14003}`,
-          changeOrigin: true
-          // NO rewrite needed - backend expects /api prefix
-        }
+          target: backendTarget,
+          changeOrigin: true,
+        },
+        '/socket.io': {
+          target: backendTarget,
+          changeOrigin: true,
+          ws: true,
+        },
       }
     },
     resolve: {
