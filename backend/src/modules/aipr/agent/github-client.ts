@@ -83,6 +83,7 @@ export async function pushAndCreatePR(
   baseBranch: string,
   title: string,
   body: string,
+  draft = false,
 ): Promise<{ prNumber: number; prUrl: string; headSha: string }> {
   const installationId = await getInstallationId(repoFullName);
   const token = await getInstallationToken(installationId);
@@ -103,6 +104,7 @@ export async function pushAndCreatePR(
     body,
     head: branchName,
     base: baseBranch,
+    draft,
   });
 
   return { prNumber: pr.number, prUrl: pr.html_url, headSha };

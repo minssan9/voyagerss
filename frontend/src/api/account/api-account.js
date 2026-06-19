@@ -19,10 +19,12 @@ const apiAccount = {
   },
 
   getSocialLoginUrl(socialType) {
-    return `/api/workschd/auth/${socialType}`
+    const base = import.meta.env.VITE_API_BASE_URL || '/api'
+    return `${base}/oauth2/authorization/${socialType}?redirect_uri=${import.meta.env.VITE_API_REDIRECT_URL}/auth/redirect`
   },
   getSocialConnect(socialType) {
-    return service.get(`/workschd/auth-url/${socialType}`)
+    const base = import.meta.env.VITE_API_BASE_URL || '/api'
+    return `${base}/oauth2/auth-url/${socialType}`
   },
   saveAccountSns(providerType, oauth2Info) {
     return service.post(`/workschd/oauth2/save/${providerType}`, oauth2Info)

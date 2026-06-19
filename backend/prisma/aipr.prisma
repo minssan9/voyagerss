@@ -57,6 +57,11 @@ enum ProviderType {
   GITLAB
 }
 
+enum RunnerMode {
+  CLI
+  SDK
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Issue {
@@ -194,13 +199,13 @@ model FeedbackRate {
 
 model AuditLog {
   id        String   @id @default(uuid()) @db.Char(36)
-  adminId   String   @db.Char(36)
+  adminId   String?  @db.Char(36)
   action    String   @db.VarChar(100)
   target    String?  @db.VarChar(255)
   metadata  Json?
   createdAt DateTime @default(now())
 
-  admin Admin  @relation(fields: [adminId], references: [id])
+  admin Admin? @relation(fields: [adminId], references: [id])
   issue Issue? @relation(fields: [target], references: [id])
 
   @@index([adminId])
@@ -240,6 +245,9 @@ model Repository {
   isPrivate     Boolean     @default(false)
   description   String?     @db.Text
   webUrl        String      @db.Text
+  autoPilot     Boolean     @default(false)
+  planRunner    RunnerMode  @default(SDK)
+  buildRunner   RunnerMode  @default(CLI)
   syncedAt      DateTime?
   createdAt     DateTime    @default(now())
 

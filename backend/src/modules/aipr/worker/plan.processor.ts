@@ -1,9 +1,10 @@
 import { Job } from 'bullmq';
-import { IssueStatus, RunStatus } from '@prisma/client-aipr';
+import { IssueStatus, RunStatus, RunnerMode } from '@prisma/client-aipr';
 import { getProviderClient } from '../agent/provider-client';
 import { runPlan } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
 import { logBroadcaster } from '../services/LogBroadcaster';
+import { adminService, AUDIT_ACTIONS } from '../services/AdminService';
 
 export interface PlanJobData {
   issueId: string;
@@ -59,9 +60,11 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
 
     // 4. Run plan agent
     const planResult = await runPlan(
+      issue.repository?.planRunner ?? RunnerMode.SDK,
       { title: issue.title, body: issue.body },
       repoTree,
       recentLog,
+      workdir,
       ({ stream, content }) => emit(stream, content),
     );
 
@@ -86,7 +89,25 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
       data:  { status: IssueStatus.PLAN_READY },
     });
 
-    await emit('event', '[plan] ✅ Plan ready — awaiting admin approval.');
+    if (issue.repository?.autoPilot) {
+      await emit('event', '[plan] ✅ Plan ready — auto-starting build (auto-pilot enabled).');
+
+      await prisma.issue.update({
+        where: { id: issueId },
+        data:  { status: IssueStatus.BUILDING },
+      });
+
+      const { runId: buildRunId } = await adminService.enqueueBuildRun(issueId);
+
+      await adminService.writeAuditLog({
+        adminId:  null,
+        action:   AUDIT_ACTIONS.AUTO_BUILD_CHAINED,
+        target:   issueId,
+        metadata: { planRunId: runId, buildRunId },
+      });
+    } else {
+      await emit('event', '[plan] ✅ Plan ready — awaiting admin approval.');
+    }
 
     // 7. Cleanup
     await client.cleanupWorkdir(runId);

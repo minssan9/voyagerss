@@ -24,7 +24,27 @@
 docker compose -f deploy/docker-compose.yml --env-file .env up -d --build
 ```
 
-Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.github/workflows/deploy-production.yml). The droplet only runs `docker compose pull && up -d`.
+Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.github/workflows/deploy-production.yml). The droplet receives files via **SSH/SCP** (appleboy) and runs `docker compose pull && up -d` — no self-hosted runner required.
+
+## CI/CD (main push)
+
+| Job | Runner | Action |
+|-----|--------|--------|
+| `backend-build` / `frontend-build` | `ubuntu-latest` | npm build gate |
+| `build-and-push` | `ubuntu-latest` | GHCR image push (BE + FE) |
+| `deploy` | `ubuntu-latest` | SSH to Droplet → compose pull/up + health check |
+
+**Trigger:** push to `main`, or manual `workflow_dispatch`.
+
+**GitHub Secrets** (same names as en9door if sharing a Droplet):
+
+| Secret | Purpose |
+|--------|---------|
+| `DROPLET_HOST` | Droplet IP or hostname |
+| `DROPLET_USERNAME` | SSH user |
+| `DROPLET_KEY` | SSH password (appleboy `password` field) |
+| `DOTENV_PROD` | Production backend `.env` (synced each deploy) |
+| `GHCR_PULL_TOKEN` | (optional) PAT with `read:packages` if images are private |
 
 ## Architecture
 
@@ -51,7 +71,7 @@ bash deploy/scripts/bootstrap-droplet.sh
 
 Merge gateway nginx using the prompt in [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md).
 
-Register a **self-hosted** GitHub Actions runner, set `DOTENV_PROD`, then run **Deploy Production (GHCR)** on `main`.
+Set GitHub secrets (`DROPLET_*`, `DOTENV_PROD`), then push to `main` — **Deploy Production (GHCR)** runs automatically.
 
 Render reference config (default upstream `127.0.0.1`):
 

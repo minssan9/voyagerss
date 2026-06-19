@@ -246,7 +246,7 @@ async function cancelApplication() {
   if (!myApplication.value?.id) return;
   try {
     // DELETE /task/request/:requestId
-    await fetch(`${import.meta.env.VITE_API_URL}/workschd/task/request/${myApplication.value.id}`, {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL}/workschd/task/request/${myApplication.value.id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${userStore.accessToken}` }
     });
