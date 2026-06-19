@@ -27,6 +27,7 @@
     "seed:aipr-config:force": "ts-node -r tsconfig-paths/register src/config/seed-aipr-config.ts --force",
     "migrate:aipr-config": "prisma db execute --file=./prisma/sql/aipr-system-config.sql --schema=./prisma/aipr.prisma",
     "migrate:aipr-autopilot": "prisma db execute --file=./prisma/sql/aipr-add-autopilot.sql --schema=./prisma/aipr.prisma",
+    "migrate:aipr-runner-mode": "prisma db execute --file=./prisma/sql/aipr-add-runner-mode.sql --schema=./prisma/aipr.prisma",
     "seed:local": "ts-node -r tsconfig-paths/register src/config/seed-local.ts",
     "seed:local:force": "ts-node -r tsconfig-paths/register src/config/seed-local.ts --force"
   },

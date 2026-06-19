@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { RunnerMode } from '@prisma/client-aipr';
 import { aiprPrisma as prisma } from '../../../config/prisma';
 import { gitProviderService } from './GitProviderService';
 
@@ -21,6 +22,13 @@ export class RepositoriesService {
     return prisma.repository.update({
       where: { id: repoId },
       data:  { autoPilot },
+    });
+  }
+
+  async updateRunnerMode(repoId: number, field: 'planRunner' | 'buildRunner', mode: RunnerMode) {
+    return prisma.repository.update({
+      where: { id: repoId },
+      data:  { [field]: mode },
     });
   }
 

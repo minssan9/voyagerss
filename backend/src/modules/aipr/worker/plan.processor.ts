@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { IssueStatus, RunStatus } from '@prisma/client-aipr';
+import { IssueStatus, RunStatus, RunnerMode } from '@prisma/client-aipr';
 import { getProviderClient } from '../agent/provider-client';
 import { runPlan } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
@@ -60,9 +60,11 @@ export async function planProcessor(job: Job<PlanJobData>): Promise<void> {
 
     // 4. Run plan agent
     const planResult = await runPlan(
+      issue.repository?.planRunner ?? RunnerMode.SDK,
       { title: issue.title, body: issue.body },
       repoTree,
       recentLog,
+      workdir,
       ({ stream, content }) => emit(stream, content),
     );
 

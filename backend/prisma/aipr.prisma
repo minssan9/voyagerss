@@ -57,6 +57,11 @@ enum ProviderType {
   GITLAB
 }
 
+enum RunnerMode {
+  CLI
+  SDK
+}
+
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model Issue {
@@ -241,6 +246,8 @@ model Repository {
   description   String?     @db.Text
   webUrl        String      @db.Text
   autoPilot     Boolean     @default(false)
+  planRunner    RunnerMode  @default(SDK)
+  buildRunner   RunnerMode  @default(CLI)
   syncedAt      DateTime?
   createdAt     DateTime    @default(now())
 

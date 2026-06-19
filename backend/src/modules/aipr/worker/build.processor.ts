@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { IssueStatus, RunStatus } from '@prisma/client-aipr';
+import { IssueStatus, RunStatus, RunnerMode } from '@prisma/client-aipr';
 import { getProviderClient } from '../agent/provider-client';
 import { runBuild } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
@@ -63,8 +63,9 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     await client.createBranch(git, branchName);
     await emit('event', `[build] Branch ${branchName} created.`);
 
-    // Run Claude Code CLI
+    // Run build agent
     const buildResult = await runBuild(
+      issue.repository?.buildRunner ?? RunnerMode.CLI,
       workdir,
       planContent,
       runId,
@@ -72,7 +73,7 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     );
 
     if (!buildResult.success) {
-      throw new Error(buildResult.errorSummary ?? 'Claude Code CLI failed');
+      throw new Error(buildResult.errorSummary ?? 'Build agent failed');
     }
 
     // Push + create PR. Auto-pilot-originated builds open as draft since no

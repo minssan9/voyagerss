@@ -14,6 +14,8 @@ interface Provider {
   baseUrl: string;
 }
 
+type RunnerMode = 'CLI' | 'SDK';
+
 interface Repo {
   id: number;
   fullName: string;
@@ -23,7 +25,14 @@ interface Repo {
   webUrl: string;
   syncedAt: string | null;
   autoPilot: boolean;
+  planRunner: RunnerMode;
+  buildRunner: RunnerMode;
 }
+
+const runnerModeOptions = [
+  { label: 'SDK (Anthropic API)', value: 'SDK' },
+  { label: 'CLI (Claude Code CLI)', value: 'CLI' },
+];
 
 const providers = ref<Provider[]>([]);
 const repos = ref<Repo[]>([]);
@@ -98,6 +107,19 @@ async function toggleAutoPilot(repo: Repo, value: boolean) {
   }
 }
 
+async function updateRunnerMode(repo: Repo, field: 'planRunner' | 'buildRunner', mode: RunnerMode) {
+  if (!selectedProviderId.value) return;
+  const previous = repo[field];
+  repo[field] = mode;
+  try {
+    await api.patch(`/admin/providers/${selectedProviderId.value}/repos/${repo.id}/runner-mode`, { field, mode });
+    $q.notify({ type: 'positive', message: `${repo.fullName}: ${field === 'planRunner' ? 'Plan' : 'Build'} 실행 방식이 ${mode}로 변경되었습니다.`, position: 'top-right' });
+  } catch (err: any) {
+    repo[field] = previous;
+    $q.notify({ type: 'negative', message: err.message || '실행 방식 변경 실패', position: 'top-right' });
+  }
+}
+
 onMounted(fetchProviders);
 </script>
 
@@ -142,6 +164,8 @@ onMounted(fetchProviders);
         { name: 'defaultBranch', label: 'Default Branch', field: 'defaultBranch', align: 'left' },
         { name: 'isPrivate', label: 'Private', field: 'isPrivate', align: 'center' },
         { name: 'autoPilot', label: 'Auto-pilot', field: 'autoPilot', align: 'center' },
+        { name: 'planRunner', label: 'Plan 실행 방식', field: 'planRunner', align: 'center' },
+        { name: 'buildRunner', label: 'Build 실행 방식', field: 'buildRunner', align: 'center' },
         { name: 'syncedAt', label: '동기화', field: 'syncedAt', align: 'right' },
         { name: 'actions', label: '', field: '', align: 'right' },
       ]"
@@ -168,6 +192,28 @@ onMounted(fetchProviders);
             :model-value="props.row.autoPilot"
             color="primary"
             @update:model-value="(val: boolean) => toggleAutoPilot(props.row, val)"
+          />
+        </q-td>
+      </template>
+      <template v-slot:body-cell-planRunner="props">
+        <q-td :props="props">
+          <q-select
+            :model-value="props.row.planRunner"
+            :options="runnerModeOptions"
+            emit-value map-options dense outlined
+            style="min-width: 170px"
+            @update:model-value="(val: RunnerMode) => updateRunnerMode(props.row, 'planRunner', val)"
+          />
+        </q-td>
+      </template>
+      <template v-slot:body-cell-buildRunner="props">
+        <q-td :props="props">
+          <q-select
+            :model-value="props.row.buildRunner"
+            :options="runnerModeOptions"
+            emit-value map-options dense outlined
+            style="min-width: 170px"
+            @update:model-value="(val: RunnerMode) => updateRunnerMode(props.row, 'buildRunner', val)"
           />
         </q-td>
       </template>
