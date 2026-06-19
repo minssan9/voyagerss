@@ -75,8 +75,11 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
       throw new Error(buildResult.errorSummary ?? 'Claude Code CLI failed');
     }
 
-    // Push + create PR
-    await emit('event', '[build] Pushing branch and creating PR…');
+    // Push + create PR. Auto-pilot-originated builds open as draft since no
+    // admin reviewed the plan before the build ran; manually-approved builds
+    // keep the existing non-draft behavior.
+    const draft = issue.repository?.autoPilot === true;
+    await emit('event', `[build] Pushing branch and creating ${draft ? 'draft ' : ''}PR…`);
     const { prNumber, prUrl, headSha } = await client.pushAndCreate(
       workdir,
       issue.repoFullName!,
@@ -85,6 +88,7 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
       issue.baseBranch,
       `[Auto-PR] ${issue.title}`,
       `Automated implementation via Auto-PR platform.\n\nIssue ID: ${issueId}\nRun ID: ${runId}`,
+      draft,
     );
 
     // Persist PR record

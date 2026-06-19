@@ -17,6 +17,13 @@ export class RepositoriesService {
     return { items, total, page, limit };
   }
 
+  async updateAutoPilot(repoId: number, autoPilot: boolean) {
+    return prisma.repository.update({
+      where: { id: repoId },
+      data:  { autoPilot },
+    });
+  }
+
   async syncRepositories(providerId: number) {
     const provider = await gitProviderService.getProviderWithToken(providerId);
     let remoteRepos: Array<{

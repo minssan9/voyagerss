@@ -24,6 +24,21 @@ export class RepositoriesController {
       res.status(400).json({ message: err.message });
     }
   }
+
+  async patchAutoPilot(req: AiprRequest, res: Response) {
+    const repoId = Number(req.params.repoId);
+    const { autoPilot } = req.body;
+    if (typeof autoPilot !== 'boolean') {
+      res.status(400).json({ message: 'autoPilot must be a boolean' });
+      return;
+    }
+    try {
+      const result = await repositoriesService.updateAutoPilot(repoId, autoPilot);
+      res.json(result);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  }
 }
 
 export const repositoriesController = new RepositoriesController();

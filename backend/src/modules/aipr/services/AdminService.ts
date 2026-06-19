@@ -10,6 +10,8 @@ export const AUDIT_ACTIONS = {
   CANCEL:           'CANCEL',             // any → CLOSED
   RETRY:            'RETRY',              // FAILED → QUEUED
   ISSUE_PATCH:      'ISSUE_PATCH',        // metadata-only edit
+  AUTO_ISSUE_IMPORTED: 'AUTO_ISSUE_IMPORTED', // webhook: issue auto-imported + queued (auto-pilot)
+  AUTO_BUILD_CHAINED:  'AUTO_BUILD_CHAINED',  // plan.processor: auto-chained PLAN_READY → BUILDING (auto-pilot)
 } as const;
 
 export class AdminService {
@@ -44,6 +46,22 @@ export class AdminService {
     });
   }
 
+  async enqueuePlanRun(issueId: string): Promise<{ runId: string }> {
+    const run = await prisma.run.create({
+      data: { issueId, kind: RunKind.PLAN, status: RunStatus.PENDING },
+    });
+    await planQueue.add('plan', { issueId, runId: run.id });
+    return { runId: run.id };
+  }
+
+  async enqueueBuildRun(issueId: string): Promise<{ runId: string }> {
+    const run = await prisma.run.create({
+      data: { issueId, kind: RunKind.BUILD, status: RunStatus.PENDING },
+    });
+    await buildQueue.add('build', { issueId, runId: run.id });
+    return { runId: run.id };
+  }
+
   async patchIssue(id: string, dto: { status?: string; title?: string; body?: string }, adminId: string) {
     if (dto.status) {
       const prevIssue = await prisma.issue.findUniqueOrThrow({ where: { id } });
@@ -54,19 +72,11 @@ export class AdminService {
 
       // Enqueue jobs
       if (dto.status === IssueStatus.QUEUED) {
-        const run = await prisma.run.create({
-          data: { issueId: id, kind: RunKind.PLAN, status: RunStatus.PENDING },
-        });
-        runId = run.id;
-        await planQueue.add('plan', { issueId: id, runId });
+        runId = (await this.enqueuePlanRun(id)).runId;
       }
 
       if (dto.status === IssueStatus.BUILDING) {
-        const run = await prisma.run.create({
-          data: { issueId: id, kind: RunKind.BUILD, status: RunStatus.PENDING },
-        });
-        runId = run.id;
-        await buildQueue.add('build', { issueId: id, runId });
+        runId = (await this.enqueueBuildRun(id)).runId;
       }
 
       await this.writeAuditLog({
@@ -107,11 +117,11 @@ export class AdminService {
     }
   }
 
-  private async writeAuditLog(data: {
-    adminId:  string;
-    action:   string;
-    target:   string;
-    metadata: Record<string, unknown>;
+  async writeAuditLog(data: {
+    adminId?:  string | null;
+    action:    string;
+    target:    string;
+    metadata:  Record<string, unknown>;
   }) {
     await prisma.auditLog.create({
       data: {

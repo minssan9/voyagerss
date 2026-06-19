@@ -59,6 +59,8 @@ export class WebhookController {
 
       if (event === 'pull_request') {
         await webhookService.handlePullRequest(payload);
+      } else if (event === 'issues' && payload.action === 'opened') {
+        await webhookService.handleIssueOpened(payload);
       }
 
       res.status(204).send();

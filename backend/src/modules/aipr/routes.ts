@@ -54,6 +54,7 @@ router.post('/admin/providers/:id/test', aiprAuthMiddleware, gitProviderControll
 // ===== Repositories =====
 router.get('/admin/providers/:providerId/repos', aiprAuthMiddleware, repositoriesController.list.bind(repositoriesController));
 router.post('/admin/providers/:providerId/repos/sync', aiprAuthMiddleware, repositoriesController.sync.bind(repositoriesController));
+router.patch('/admin/providers/:providerId/repos/:repoId/auto-pilot', aiprAuthMiddleware, repositoriesController.patchAutoPilot.bind(repositoriesController));
 
 // ===== Git Issues =====
 router.get('/admin/repos/:repoId/issues', aiprAuthMiddleware, gitIssuesController.listRemote.bind(gitIssuesController));
