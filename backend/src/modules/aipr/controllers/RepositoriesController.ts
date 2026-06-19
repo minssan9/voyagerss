@@ -27,6 +27,10 @@ export class RepositoriesController {
 
   async patchAutoPilot(req: AiprRequest, res: Response) {
     const repoId = Number(req.params.repoId);
+    if (isNaN(repoId)) {
+      res.status(400).json({ message: 'repoId must be a valid number' });
+      return;
+    }
     const { autoPilot } = req.body;
     if (typeof autoPilot !== 'boolean') {
       res.status(400).json({ message: 'autoPilot must be a boolean' });

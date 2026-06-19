@@ -187,12 +187,19 @@ export class WebhookService {
         sourceUrl:         issue.html_url,
         repositoryId:      repo.id,
         sourceIssueNumber: issue.number,
-        labels:            issue.labels.map((l) => l.name),
+        labels:            issue.labels?.map((l) => l.name) || [],
         status:            IssueStatus.QUEUED,
       },
     });
 
-    const { runId } = await adminService.enqueuePlanRun(created.id);
+    let runId: string;
+    try {
+      runId = (await adminService.enqueuePlanRun(created.id)).runId;
+    } catch (err) {
+      // Allow GitHub's webhook retry to re-attempt the whole import on the next delivery.
+      await prisma.issue.delete({ where: { id: created.id } }).catch(() => {});
+      throw err;
+    }
 
     await adminService.writeAuditLog({
       adminId:  null,
