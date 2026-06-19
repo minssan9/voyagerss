@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { IssueStatus, RunStatus } from '@prisma/client-aipr';
+import { IssueStatus, RunStatus, RunnerMode } from '@prisma/client-aipr';
 import { getProviderClient } from '../agent/provider-client';
 import { runBuild } from '../agent/claude-runner';
 import { aiprPrisma as prisma } from '../../../config/prisma';
@@ -63,8 +63,9 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     await client.createBranch(git, branchName);
     await emit('event', `[build] Branch ${branchName} created.`);
 
-    // Run Claude Code CLI
+    // Run build agent
     const buildResult = await runBuild(
+      issue.repository?.buildRunner ?? RunnerMode.CLI,
       workdir,
       planContent,
       runId,
@@ -72,11 +73,14 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
     );
 
     if (!buildResult.success) {
-      throw new Error(buildResult.errorSummary ?? 'Claude Code CLI failed');
+      throw new Error(buildResult.errorSummary ?? 'Build agent failed');
     }
 
-    // Push + create PR
-    await emit('event', '[build] Pushing branch and creating PR…');
+    // Push + create PR. Auto-pilot-originated builds open as draft since no
+    // admin reviewed the plan before the build ran; manually-approved builds
+    // keep the existing non-draft behavior.
+    const draft = issue.repository?.autoPilot === true;
+    await emit('event', `[build] Pushing branch and creating ${draft ? 'draft ' : ''}PR…`);
     const { prNumber, prUrl, headSha } = await client.pushAndCreate(
       workdir,
       issue.repoFullName!,
@@ -85,6 +89,7 @@ export async function buildProcessor(job: Job<BuildJobData>): Promise<void> {
       issue.baseBranch,
       `[Auto-PR] ${issue.title}`,
       `Automated implementation via Auto-PR platform.\n\nIssue ID: ${issueId}\nRun ID: ${runId}`,
+      draft,
     );
 
     // Persist PR record

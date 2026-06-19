@@ -1,5 +1,6 @@
 import { IssueStatus, PrState } from '@prisma/client-aipr';
 import { aiprPrisma as prisma } from '../../../config/prisma';
+import { adminService, AUDIT_ACTIONS } from './AdminService';
 
 interface PullRequestPayload {
   action: string;
@@ -11,6 +12,18 @@ interface PullRequestPayload {
     head:      { sha: string };
     user:      { login: string };
     merged_at: string | null;
+  };
+  repository: { full_name: string };
+}
+
+interface IssuesPayload {
+  action: string;
+  issue: {
+    number: number;
+    title:  string;
+    body:   string | null;
+    html_url: string;
+    labels: { name: string }[];
   };
   repository: { full_name: string };
 }
@@ -138,6 +151,64 @@ export class WebhookService {
     });
 
     console.log(`Issue ${existing.issueId} → ${issueStatus}`);
+  }
+
+  /**
+   * Auto-pilot entry point: GitHub `issues` webhook, action `opened`.
+   * Only repositories with `autoPilot=true` are imported and queued automatically;
+   * everything else keeps the existing manual import/approve flow untouched.
+   */
+  async handleIssueOpened(payload: IssuesPayload): Promise<void> {
+    const { issue, repository } = payload;
+
+    const repo = await prisma.repository.findFirst({
+      where: { fullName: repository.full_name, provider: { type: 'GITHUB' } },
+    });
+
+    if (!repo || !repo.autoPilot) {
+      console.log(`Auto-pilot disabled or repo not registered for ${repository.full_name}; skipping issue #${issue.number}`);
+      return;
+    }
+
+    const existing = await prisma.issue.findFirst({
+      where: { repositoryId: repo.id, sourceIssueNumber: issue.number },
+    });
+    if (existing) {
+      console.log(`Issue #${issue.number} in ${repository.full_name} already imported as ${existing.id}; skipping`);
+      return;
+    }
+
+    const created = await prisma.issue.create({
+      data: {
+        title:             issue.title,
+        body:              issue.body || '',
+        repoFullName:      repository.full_name,
+        baseBranch:        repo.defaultBranch,
+        sourceUrl:         issue.html_url,
+        repositoryId:      repo.id,
+        sourceIssueNumber: issue.number,
+        labels:            issue.labels?.map((l) => l.name) || [],
+        status:            IssueStatus.QUEUED,
+      },
+    });
+
+    let runId: string;
+    try {
+      runId = (await adminService.enqueuePlanRun(created.id)).runId;
+    } catch (err) {
+      // Allow GitHub's webhook retry to re-attempt the whole import on the next delivery.
+      await prisma.issue.delete({ where: { id: created.id } }).catch(() => {});
+      throw err;
+    }
+
+    await adminService.writeAuditLog({
+      adminId:  null,
+      action:   AUDIT_ACTIONS.AUTO_ISSUE_IMPORTED,
+      target:   created.id,
+      metadata: { repoFullName: repository.full_name, sourceIssueNumber: issue.number, runId },
+    });
+
+    console.log(`Auto-pilot: imported issue #${issue.number} from ${repository.full_name} as ${created.id}, plan run ${runId} queued`);
   }
 }
 

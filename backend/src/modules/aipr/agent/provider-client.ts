@@ -25,6 +25,7 @@ export interface ProviderClient {
     baseBranch: string,
     title: string,
     body: string,
+    draft?: boolean,
   ): Promise<{ prNumber: number; prUrl: string; headSha: string }>;
   cleanupWorkdir(runId: string): Promise<void>;
   getRepoTree(workdir: string): Promise<string>;
@@ -39,8 +40,8 @@ export function getProviderClient(
     return {
       cloneRepo:      (_fullName, webUrl, runId) => cloneGitlabRepo(webUrl, token, runId),
       createBranch:   (git, branch) => createGitlabBranch(git, branch),
-      pushAndCreate:  (workdir, fullName, webUrl, branch, base, title, body) =>
-                        pushAndCreateMR(workdir, webUrl, token, fullName, branch, base, title, body),
+      pushAndCreate:  (workdir, fullName, webUrl, branch, base, title, body, draft) =>
+                        pushAndCreateMR(workdir, webUrl, token, fullName, branch, base, title, body, draft),
       cleanupWorkdir: (runId) => cleanupGitlabWorkdir(runId),
       getRepoTree:    (workdir) => getRepoTree(workdir),
       getRecentLog:   (workdir) => getRecentLog(workdir),
@@ -51,8 +52,8 @@ export function getProviderClient(
   return {
     cloneRepo:      (fullName, _webUrl, runId) => githubClone(fullName, runId),
     createBranch:   (git, branch) => githubBranch(git, branch),
-    pushAndCreate:  (_workdir, fullName, _webUrl, branch, base, title, body) =>
-                      githubPushPR(fullName, branch, base, title, body),
+    pushAndCreate:  (_workdir, fullName, _webUrl, branch, base, title, body, draft) =>
+                      githubPushPR(fullName, branch, base, title, body, draft),
     cleanupWorkdir: (runId) => githubCleanup(runId),
     getRepoTree:    (workdir) => getRepoTree(workdir),
     getRecentLog:   (workdir) => getRecentLog(workdir),

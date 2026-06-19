@@ -41,6 +41,7 @@ export async function pushAndCreateMR(
   baseBranch: string,
   title: string,
   body: string,
+  draft = false,
 ): Promise<{ prNumber: number; prUrl: string; headSha: string }> {
   const repoGit = simpleGit(workdir);
   const authUrl = buildAuthUrl(webUrl, token);
@@ -54,12 +55,16 @@ export async function pushAndCreateMR(
   const baseUrl = `${parsed.protocol}//${parsed.host}`;
   const encodedPath = encodeURIComponent(repoFullName);
 
+  // GitLab has no dedicated draft flag for MRs; a "Draft: " title prefix is
+  // what the GitLab UI itself uses to mark a merge request as draft.
+  const mrTitle = draft ? `Draft: ${title}` : title;
+
   const { data: mr } = await axios.post(
     `${baseUrl}/api/v4/projects/${encodedPath}/merge_requests`,
     {
       source_branch: branchName,
       target_branch: baseBranch,
-      title,
+      title: mrTitle,
       description: body,
       remove_source_branch: true,
     },

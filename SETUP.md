@@ -188,6 +188,19 @@ Frontend will be available at: `http://localhost:5173`
 
 Auto-PR lives under **`backend/aipr/`** (Nest API + worker) and **`frontend/aipr/`** (Nuxt admin + widgets). It uses **pnpm** workspaces, not the root `npm install`.
 
+**Auto-pilot (issue → plan → draft PR with no manual approval):** each `Repository` row has an
+`autoPilot` toggle (flip it from the AIPR admin **Repositories** screen, or
+`PATCH /aipr/admin/providers/:providerId/repos/:repoId/auto-pilot`). When a repo has it enabled and
+a GitHub issue is opened on it, AIPR auto-imports the issue, runs the Claude plan step, and — if the
+plan succeeds — automatically chains into the build step and opens a **draft PR**, with no admin click
+in between. Repos with the toggle off keep the original manual Triage → Approve → Start Build flow,
+and manually-approved builds keep opening regular (non-draft) PRs.
+
+This requires the AIPR GitHub App's webhook to subscribe to the **Issues** event (in addition to the
+existing **Pull request** event) — check the App's Permissions & events settings. After that, apply the
+schema change once with `npm run migrate:aipr-autopilot` (adds `repositories.autoPilot` and makes
+`audit_log.adminId` nullable so automated transitions can be logged without an admin user).
+
 **Requirements:** Node.js **20+**, **pnpm 9+**.
 
 **Install and run from repository root:**
