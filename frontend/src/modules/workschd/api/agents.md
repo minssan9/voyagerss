@@ -394,4 +394,4 @@ export const apiWidget = {
 - **Frontend Views**: `../views/workschd/agents.md` - Components using these APIs
 - **Frontend Stores**: `../stores/workschd/agents.md` - State management with API calls
 - **Types**: `../types/workschd/` - TypeScript interfaces for API data
-- **Session Summary**: `docs/SESSION-SUMMARY.md` - API path synchronization details
+- **Setup guide**: `meta/docs/setup.md` — API path synchronization details

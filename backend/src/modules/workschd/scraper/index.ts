@@ -112,7 +112,7 @@ export async function runAllScrapers(): Promise<ScrapeReport> {
 export async function getScraperStatus(): Promise<{ sites: string[]; dbPath: string }> {
   return {
     sites: ALL_SCRAPERS.map(s => `${s.funeralHomeName} (${s.region})`),
-    dbPath: 'DATABASE_URL_WORKSCHD (Prisma)'
+    dbPath: 'DATABASE_URL (Prisma)'
   };
 }
 

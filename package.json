@@ -11,9 +11,14 @@
         "build:frontend": "npm run build --prefix frontend",
         "build:all": "npm run build:backend && npm run build:frontend",
         "lint": "npm run lint --prefix backend && npm run lint --prefix frontend",
-        "deploy:smoke": "bash deploy/scripts/smoke-api.sh",
-        "deploy:smoke:fe": "bash deploy/scripts/smoke-fe.sh",
-        "format": "npm run format --prefix backend && npm run format --prefix frontend"
+        "deploy:smoke": "bash meta/deploy/scripts/smoke-api.sh",
+        "deploy:smoke:fe": "bash meta/deploy/scripts/smoke-fe.sh",
+        "format": "npm run format --prefix backend && npm run format --prefix frontend",
+        "ci:runs": "gh run list --limit 15",
+        "ci:runs:deploy": "gh run list --workflow 'Deploy Production (GHCR)' --limit 10",
+        "ci:runs:ci": "gh run list --workflow 'Unified CI' --limit 10",
+        "ci:logs": "gh run view --log-failed",
+        "ci:watch": "gh run watch"
     },
     "devDependencies": {
         "concurrently": "^9.1.2",

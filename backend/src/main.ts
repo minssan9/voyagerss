@@ -1,23 +1,22 @@
+import './load-env';
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
-import path from 'path';
 import { configService } from './config/config-service';
 import { aiprConfigService } from './config/aipr-config-service';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
 import { configureLoggerFromConfig } from './modules/investand/utils/common/logger';
+import { bootstrapDatabase } from './config/bootstrap-database';
 import aiprRouter from './modules/aipr/routes';
 import { initWorkers } from './modules/aipr/worker/worker-setup';
 
-dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
-dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
-
 async function bootstrap() {
+  await bootstrapDatabase();
+
   const app = await NestFactory.create(AppModule, { logger: ['log', 'warn', 'error'] });
 
   // Load config from DB before CORS setup (CORS reads ALLOWED_ORIGINS at request time,

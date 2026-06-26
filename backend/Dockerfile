@@ -25,8 +25,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built assets and production dependencies
+# Copy built assets, prisma schemas, and production dependencies
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 

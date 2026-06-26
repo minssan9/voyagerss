@@ -47,24 +47,28 @@ class Config {
     return getConfig('GEMINI_API_KEY');
   }
 
+  get databaseUrl() {
+    return process.env.DATABASE_URL || process.env.DATABASE_URL_AVIATION;
+  }
+
   get DATABASE_HOST() {
-    return parseDatabaseUrl(process.env.DATABASE_URL_AVIATION).host;
+    return parseDatabaseUrl(this.databaseUrl).host;
   }
 
   get DATABASE_PORT() {
-    return parseDatabaseUrl(process.env.DATABASE_URL_AVIATION).port;
+    return parseDatabaseUrl(this.databaseUrl).port;
   }
 
   get DATABASE_USER() {
-    return parseDatabaseUrl(process.env.DATABASE_URL_AVIATION).user;
+    return parseDatabaseUrl(this.databaseUrl).user;
   }
 
   get DATABASE_PASSWORD() {
-    return parseDatabaseUrl(process.env.DATABASE_URL_AVIATION).password;
+    return parseDatabaseUrl(this.databaseUrl).password;
   }
 
   get DATABASE_NAME() {
-    return parseDatabaseUrl(process.env.DATABASE_URL_AVIATION).database;
+    return parseDatabaseUrl(this.databaseUrl).database;
   }
 
   get DATABASE_CONNECTION_LIMIT() {

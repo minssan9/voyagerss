@@ -61,11 +61,7 @@ function isLocalhostDb(url) {
         lowerUrl.includes('sqlite'));
 }
 function isLocalEnvironment() {
-    return (isLocalhostDb(process.env.DATABASE_URL) ||
-        isLocalhostDb(process.env.DATABASE_URL_WORKSCHD) ||
-        isLocalhostDb(process.env.DATABASE_URL_INVESTAND) ||
-        isLocalhostDb(process.env.DATABASE_URL_AIPR) ||
-        process.env.NODE_ENV === 'development');
+    return isLocalhostDb(process.env.DATABASE_URL) || process.env.NODE_ENV === 'development';
 }
 function parseSqlFile(filePath) {
     const content = fs_1.default.readFileSync(filePath, 'utf-8');

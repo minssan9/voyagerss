@@ -296,7 +296,7 @@ After integration:
 
 For questions or issues:
 - Review [README.md](./README.md) for architecture details
-- Check [PRD](../../../docs/PRD_INCHEON_AIRPORT_NAVIGATION.md) for requirements
+- Check `meta/docs/prd/PRD-aviation.md` for requirements
 - See code comments for implementation details
 
 ## License

@@ -145,7 +145,7 @@ class ConfigManager {
    * @private
    */
   _loadEnvironmentConfig() {
-    const dbFromUrl = parseDatabaseUrl(process.env.DATABASE_URL_AVIATION);
+    const dbFromUrl = parseDatabaseUrl(process.env.DATABASE_URL || process.env.DATABASE_URL_AVIATION);
     const envConfig = {
       development: {
         database: {

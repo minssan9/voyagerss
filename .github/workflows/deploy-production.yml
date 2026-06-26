@@ -145,7 +145,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_KEY }}
-          source: deploy/docker-compose.prod.yml
+          source: meta/deploy/docker-compose.prod.yml
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 1
 
@@ -164,7 +164,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_KEY }}
-          source: deploy/nginx/voyagerss.conf
+          source: meta/deploy/nginx/voyagerss.conf
           target: ${{ env.DEPLOY_ROOT }}/nginx
           strip_components: 2
 
@@ -174,7 +174,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_KEY }}
-          source: deploy/scripts/install-nginx-site.sh
+          source: meta/deploy/scripts/install-nginx-site.sh
           target: ${{ env.DEPLOY_ROOT }}/scripts
           strip_components: 2
 
@@ -246,7 +246,7 @@ jobs:
             code="$(curl -sS -o /dev/null -w "%{http_code}" -H "Host: voyagerss.com" http://127.0.0.1/ || echo "000")"
             if [[ "${code}" != "200" && "${code}" != "304" ]]; then
               echo "Frontend health check returned HTTP ${code} (expected 200 or 304)" >&2
-              echo "If gateway is not merged yet, merge deploy/nginx/*.conf using GATEWAY-NGINX-MERGE-PROMPT.md" >&2
+              echo "If gateway is not merged yet, merge meta/deploy/nginx/*.conf using GATEWAY-NGINX-MERGE-PROMPT.md" >&2
               exit 1
             fi
             echo "Frontend OK (HTTP ${code})"

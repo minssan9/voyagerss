@@ -5,12 +5,13 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "node dist/main.js",
-    "dev": "nodemon --exec ts-node --transpile-only -r tsconfig-paths/register src/main.ts",
-    "build": "tsc",
+    "dev": "nodemon --exec ts-node --transpile-only -r tsconfig-paths/register -r ./src/load-env.ts src/main.ts",
+    "build": "tsc && tsc-alias -p tsconfig.json",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/investand.prisma && prisma generate --schema=./prisma/aviation.prisma && prisma generate --schema=./prisma/aipr.prisma && prisma generate --schema=./prisma/rbac.prisma",
     "generate:rbac": "prisma generate --schema=./prisma/rbac.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=./prisma/workschd.prisma",
     "migrate:rbac": "prisma migrate dev --schema=./prisma/rbac.prisma",
     "migrate:rbac:deploy": "prisma migrate deploy --schema=./prisma/rbac.prisma",
     "seed:rbac": "ts-node -r tsconfig-paths/register prisma/seed-rbac.ts",
@@ -48,6 +49,7 @@
     "@octokit/app": "^14.0.2",
     "@octokit/auth-app": "^6.1.4",
     "@octokit/rest": "^20.1.2",
+    "@oh-my-pi/pi-coding-agent": "^16.0.4",
     "@opentelemetry/auto-instrumentations-node": "^0.48.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
     "@opentelemetry/sdk-node": "^0.52.1",
@@ -105,6 +107,7 @@
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
   }

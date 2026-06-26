@@ -17,13 +17,7 @@ function isLocalhostDb(url?: string): boolean {
 }
 
 export function isLocalEnvironment(): boolean {
-  return (
-    isLocalhostDb(process.env.DATABASE_URL) ||
-    isLocalhostDb(process.env.DATABASE_URL_WORKSCHD) ||
-    isLocalhostDb(process.env.DATABASE_URL_INVESTAND) ||
-    isLocalhostDb(process.env.DATABASE_URL_AIPR) ||
-    process.env.NODE_ENV === 'development'
-  );
+  return isLocalhostDb(process.env.DATABASE_URL) || process.env.NODE_ENV === 'development';
 }
 
 function parseSqlFile(filePath: string): string[] {
@@ -99,8 +93,8 @@ export async function seedLocalAll(force = false) {
   }
 
   // 3. Seed aipr
-  if (!process.env.DATABASE_URL_AIPR) {
-    console.log('[seed-local] DATABASE_URL_AIPR environment variable is not defined. Skipping AIPR seeding.');
+  if (!process.env.DATABASE_URL) {
+    console.log('[seed-local] DATABASE_URL environment variable is not defined. Skipping AIPR seeding.');
   } else {
     try {
       const aiprCount = await aiprPrisma.admin.count();
