@@ -130,12 +130,19 @@ jobs:
           fi
           printf '%s' "${DOTENV_CONTENT}" > .env.prod
 
+      - name: Check Droplet password secret
+        run: |
+          if [ -z "${{ secrets.DROPLET_PASSWORD }}" ] && [ -z "${{ secrets.DROPLET_KEY }}" ]; then
+            echo "::error::Set repository secret DROPLET_PASSWORD (or legacy DROPLET_KEY) to the Droplet root password."
+            exit 1
+          fi
+
       - name: Ensure deploy directory on Droplet
         uses: appleboy/ssh-action@v1.2.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
             sudo mkdir -p ${{ env.DEPLOY_ROOT }}/data ${{ env.DEPLOY_ROOT }}/nginx ${{ env.DEPLOY_ROOT }}/scripts
 
@@ -144,7 +151,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/docker-compose.prod.yml
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 1
@@ -154,7 +161,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
             mv -f ${{ env.DEPLOY_ROOT }}/docker-compose.prod.yml ${{ env.DEPLOY_ROOT }}/docker-compose.yml
 
@@ -163,7 +170,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/nginx/voyagerss.conf
           target: ${{ env.DEPLOY_ROOT }}/nginx
           strip_components: 2
@@ -173,7 +180,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/scripts/install-nginx-site.sh
           target: ${{ env.DEPLOY_ROOT }}/scripts
           strip_components: 2
@@ -183,7 +190,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: .env.prod
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 0
@@ -193,7 +200,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
             mv -f ${{ env.DEPLOY_ROOT }}/.env.prod ${{ env.DEPLOY_ROOT }}/.env
 
@@ -202,7 +209,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_KEY }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           command_timeout: 10m
           script: |
             set -euo pipefail

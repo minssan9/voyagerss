@@ -42,7 +42,8 @@ Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.g
 |--------|---------|
 | `DROPLET_HOST` | Droplet IP or hostname |
 | `DROPLET_USERNAME` | SSH user |
-| `DROPLET_KEY` | SSH password (appleboy `password` field) |
+| `DROPLET_PASSWORD` | Droplet SSH password (preferred; same as en9door) |
+| `DROPLET_KEY` | Legacy alias for `DROPLET_PASSWORD` |
 | `DOTENV_PROD` | Production backend `.env` (synced each deploy) |
 | `GHCR_PULL_TOKEN` | (optional) PAT with `read:packages` if images are private |
 
