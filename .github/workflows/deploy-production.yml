@@ -172,7 +172,7 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/nginx/voyagerss.conf
-          target: ${{ env.DEPLOY_ROOT }}/nginx
+          target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
       - name: Sync install-nginx script to Droplet
@@ -182,7 +182,7 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/scripts/install-nginx-site.sh
-          target: ${{ env.DEPLOY_ROOT }}/scripts
+          target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
       - name: Sync gateway nginx conf to Droplet
@@ -192,7 +192,7 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/nginx/gateway-conf.d-voyagerss.conf
-          target: ${{ env.DEPLOY_ROOT }}/nginx
+          target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
       - name: Sync install-gateway script to Droplet
@@ -202,7 +202,7 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/scripts/install-gateway-voyagerss.sh
-          target: ${{ env.DEPLOY_ROOT }}/scripts
+          target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
       - name: Sync production .env to Droplet
