@@ -25,6 +25,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Prisma query engine (linux-musl) requires OpenSSL 1.1 compat on Alpine 3.17+
+RUN apk add --no-cache openssl1.1-compat
+
 # Copy built assets, prisma schemas, and production dependencies
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma

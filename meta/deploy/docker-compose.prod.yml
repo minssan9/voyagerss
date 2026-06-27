@@ -5,6 +5,8 @@
 # Usage on droplet:
 #   export GITHUB_OWNER=<owner> IMAGE_TAG=<sha|latest>
 #   docker compose pull && docker compose up -d
+#
+# Shares en9door_net with /data/gateway nginx for direct container upstream routing.
 
 services:
   backend:
@@ -17,11 +19,13 @@ services:
       BACKEND_PORT: "9002"
       BACKEND_HOST: "0.0.0.0"
     ports:
-      # Bind all interfaces so Docker gateway (host.docker.internal) can reach the service.
-      # Block 9002/9003 at the firewall; only :80 is public via gateway nginx.
+      # Host bind for CI health checks; gateway uses en9door_net (voyagerss-backend:9002).
       - "9002:9002"
     volumes:
       - ./data:/app/data
+    networks:
+      - default
+      - en9door_net
 
   frontend:
     image: ghcr.io/${GITHUB_OWNER}/voyagerss-frontend:${IMAGE_TAG}
@@ -29,3 +33,10 @@ services:
     restart: unless-stopped
     ports:
       - "9003:80"
+    networks:
+      - default
+      - en9door_net
+
+networks:
+  en9door_net:
+    external: true
