@@ -144,7 +144,15 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
-            sudo mkdir -p ${{ env.DEPLOY_ROOT }}/data ${{ env.DEPLOY_ROOT }}/nginx ${{ env.DEPLOY_ROOT }}/scripts
+            ROOT="${{ env.DEPLOY_ROOT }}"
+            sudo mkdir -p "${ROOT}/data" "${ROOT}/nginx" "${ROOT}/scripts"
+            sudo chown -R "$(whoami):$(whoami)" "${ROOT}"
+            df -h / "${ROOT}" 2>/dev/null || df -h /
+            USED="$(df / --output=pcent 2>/dev/null | tail -1 | tr -dc '0-9' || echo 0)"
+            if [[ "${USED}" -ge 85 ]]; then
+              echo "Disk usage ${USED}% — pruning stale Docker data"
+              sudo docker system prune -af --filter "until=48h" || true
+            fi
 
       - name: Sync docker-compose to Droplet
         uses: appleboy/scp-action@v0.1.7
@@ -155,6 +163,8 @@ jobs:
           source: meta/deploy/docker-compose.prod.yml
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
+          timeout: 120s
+          overwrite: true
 
       - name: Rename compose file on Droplet
         uses: appleboy/ssh-action@v1.2.3
