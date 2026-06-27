@@ -242,7 +242,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
-          command_timeout: 10m
+          command_timeout: 30m
           script: |
             set -euo pipefail
             cd "${{ env.DEPLOY_ROOT }}"
