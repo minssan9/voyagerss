@@ -20,13 +20,14 @@ RUN npm run generate || echo "Prisma generate skipped or failed"
 # Build the application
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Production stage — Debian slim for Prisma OpenSSL 3 query engine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Prisma query engine (linux-musl) requires OpenSSL 1.1 compat on Alpine 3.17+
-RUN apk add --no-cache openssl1.1-compat
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy built assets, prisma schemas, and production dependencies
 COPY --from=builder /app/dist ./dist
