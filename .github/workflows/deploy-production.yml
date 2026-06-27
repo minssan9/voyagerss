@@ -154,7 +154,7 @@ jobs:
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           source: meta/deploy/docker-compose.prod.yml
           target: ${{ env.DEPLOY_ROOT }}
-          strip_components: 1
+          strip_components: 2
 
       - name: Rename compose file on Droplet
         uses: appleboy/ssh-action@v1.2.3
