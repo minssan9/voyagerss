@@ -258,12 +258,23 @@ jobs:
             GATEWAY_DIR=/data/gateway \
               NGINX_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss.conf" \
               bash scripts/install-gateway-voyagerss.sh
-            for i in 1 2 3 4 5; do
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS http://127.0.0.1:9002/health >/dev/null 2>&1; then
+                break
+              fi
+              if [[ "$i" -eq 10 ]]; then
+                echo "Backend direct health check failed on :9002" >&2
+                sudo docker logs voyagerss-backend --tail 80 >&2 || true
+                exit 1
+              fi
+              sleep 3
+            done
+            for i in 1 2 3 4 5 6 7 8 9 10; do
               if curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health; then
                 echo ""
                 break
               fi
-              if [[ "$i" -eq 5 ]]; then
+              if [[ "$i" -eq 10 ]]; then
                 echo "API health check failed after retries" >&2
                 exit 1
               fi
