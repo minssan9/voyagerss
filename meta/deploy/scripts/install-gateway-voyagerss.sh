@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Install Voyagerss server blocks into Docker gateway nginx (/data/gateway).
+# Install Voyagerss into Docker gateway nginx (/data/gateway).
+# Single source: meta/deploy/nginx/voyagerss.conf → conf.d/voyagerss.conf
 # Default upstream: voyagerss containers on shared en9door_net.
 set -euo pipefail
 
@@ -7,8 +8,9 @@ GATEWAY_DIR="${GATEWAY_DIR:-/data/gateway}"
 VOYAGERSS_API_UPSTREAM="${VOYAGERSS_API_UPSTREAM:-voyagerss-backend:9002}"
 VOYAGERSS_FE_UPSTREAM="${VOYAGERSS_FE_UPSTREAM:-voyagerss-frontend:80}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-SOURCE_FILE="${NGINX_SOURCE_FILE:-${REPO_ROOT}/meta/deploy/nginx/gateway-conf.d-voyagerss.conf}"
+SOURCE_FILE="${NGINX_SOURCE_FILE:-${REPO_ROOT}/meta/deploy/nginx/voyagerss.conf}"
 TARGET_FILE="${GATEWAY_DIR}/nginx/conf.d/voyagerss.conf"
+STALE_SSL_FILE="${GATEWAY_DIR}/nginx/conf.d/voyagerss-ssl.conf"
 
 if [[ ! -f "${SOURCE_FILE}" ]]; then
   echo "Missing nginx source: ${SOURCE_FILE}" >&2
@@ -26,6 +28,11 @@ sed -e "s/__VOYAGERSS_API_UPSTREAM__/${VOYAGERSS_API_UPSTREAM}/g" \
     -e "s/__VOYAGERSS_FE_UPSTREAM__/${VOYAGERSS_FE_UPSTREAM}/g" \
     "${SOURCE_FILE}" > "${TARGET_FILE}"
 echo "Installed ${TARGET_FILE} (api=${VOYAGERSS_API_UPSTREAM}, fe=${VOYAGERSS_FE_UPSTREAM})"
+
+if [[ -f "${STALE_SSL_FILE}" ]]; then
+  rm -f "${STALE_SSL_FILE}"
+  echo "Removed stale ${STALE_SSL_FILE} (merged into voyagerss.conf)"
+fi
 
 OVERRIDE_FILE="${GATEWAY_DIR}/docker-compose.voyagerss.override.yml"
 if [[ ! -f "${OVERRIDE_FILE}" ]] || ! grep -q 'en9door_net' "${OVERRIDE_FILE}" 2>/dev/null; then
@@ -55,3 +62,4 @@ echo ""
 echo "Verify:"
 echo "  curl -fsS -H \"Host: api.voyagerss.com\" http://127.0.0.1/health"
 echo "  curl -fsS -o /dev/null -w \"FE %{http_code}\\n\" -H \"Host: voyagerss.com\" http://127.0.0.1/"
+echo "  curl -kfsS -H \"Host: api.voyagerss.com\" https://127.0.0.1/health"
