@@ -25,16 +25,24 @@ sed "s/__VOYAGERSS_UPSTREAM_HOST__/${VOYAGERSS_UPSTREAM_HOST}/g" "${SOURCE_FILE}
 echo "Installed ${TARGET_FILE} (upstream=${VOYAGERSS_UPSTREAM_HOST})"
 
 if ! grep -q 'host.docker.internal:host-gateway' "${GATEWAY_DIR}/docker-compose.yml" 2>/dev/null; then
-  echo ""
-  echo "WARN: Add to ${GATEWAY_DIR}/docker-compose.yml under services.nginx:"
-  echo "  extra_hosts:"
-  echo "    - \"host.docker.internal:host-gateway\""
-  echo "Then: cd ${GATEWAY_DIR} && sudo docker compose up -d"
+  OVERRIDE_FILE="${GATEWAY_DIR}/docker-compose.voyagerss.override.yml"
+  cat > "${OVERRIDE_FILE}" <<'EOF'
+services:
+  nginx:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+EOF
+  echo "Created ${OVERRIDE_FILE} (host.docker.internal → host-gateway)"
+  COMPOSE_ARGS=(-f docker-compose.yml -f docker-compose.voyagerss.override.yml)
+else
+  COMPOSE_ARGS=(-f docker-compose.yml)
 fi
 
 cd "${GATEWAY_DIR}"
-sudo docker compose exec -T nginx nginx -t
-sudo docker compose exec -T nginx nginx -s reload
+sudo docker compose "${COMPOSE_ARGS[@]}" up -d
+
+sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -t
+sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -s reload
 echo "Gateway nginx reloaded."
 
 echo ""
