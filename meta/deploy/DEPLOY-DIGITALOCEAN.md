@@ -16,7 +16,7 @@
 |------|---------|
 | [`meta/deploy/docker-compose.yml`](docker-compose.yml) | Local dev: build from source |
 | [`meta/deploy/docker-compose.prod.yml`](docker-compose.prod.yml) | Production: GHCR images only (no `build:`) |
-| [`.env.example`](../../.env.example) | Production env template; compose vars `GITHUB_OWNER`, `IMAGE_TAG` in comments |
+| [`.env.production.example`](../../.env.production.example) | Production env template; compose vars `GITHUB_OWNER`, `IMAGE_TAG` in comments |
 
 ### Local Docker (from repo root)
 
@@ -49,10 +49,42 @@ Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.g
 
 ## Architecture
 
-- **TLS**: DigitalOcean Load Balancer (HTTPS:443 → HTTP:80)
-- **Gateway nginx** (existing): merge from single source [`meta/deploy/nginx/voyagerss.conf`](nginx/voyagerss.conf) — do **not** overwrite other vhosts; see [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md)
-- **Backend**: `127.0.0.1:9002` — `api.voyagerss.com`
-- **Frontend**: `127.0.0.1:9003` — `voyagerss.com` (Vue SPA in Docker)
+- **DNS**: `voyagerss.com`, `api.voyagerss.com` → Droplet **host IP** (A record)
+- **Edge L7**: Docker gateway nginx at `/data/gateway` (shared with en9door) — port **80** entry
+- **Voyagerss routing** (via `nginx/conf.d/voyagerss.conf`):
+  - `api.voyagerss.com` → `host.docker.internal:9002` (BE: `/health`, `/api/`, `/socket.io/`)
+  - `voyagerss.com` → `host.docker.internal:9003` (FE SPA)
+- **App stack**: `/data/voyagerss/docker-compose.yml` — BE/FE bind `127.0.0.1:9002`, `:9003` on host
+
+### Gateway one-time setup (same Droplet as en9door)
+
+1. Ensure `/data/gateway` stack is running (`en9door_gateway` on :80).
+
+2. Add **host gateway** to gateway compose (`/data/gateway/docker-compose.yml`):
+
+```yaml
+services:
+  nginx:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+```
+
+```bash
+cd /data/gateway && sudo docker compose up -d
+```
+
+3. Install Voyagerss server blocks:
+
+```bash
+cd /opt/voyagerss   # or use files under /data/voyagerss/scripts
+GATEWAY_DIR=/data/gateway bash meta/deploy/scripts/install-gateway-voyagerss.sh
+```
+
+CI deploy runs the same `install-gateway-voyagerss.sh` after each `docker compose up`.
+
+### Host nginx (no Docker gateway)
+
+Use [`meta/deploy/nginx/voyagerss.conf`](nginx/voyagerss.conf) with upstream `127.0.0.1` and `INSTALL_MODE=standalone` — see [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md).
 
 ## DigitalOcean checklist
 
@@ -94,7 +126,7 @@ VOYAGERSS_UPSTREAM_HOST=host.docker.internal DATA_DIR=/data/voyagerss bash meta/
 
 ## Environment
 
-- Backend: [`.env.example`](../../.env.example) → `DOTENV_PROD`
+- Backend: [`.env.production.example`](../../.env.production.example) → `DOTENV_PROD`
 - Frontend build args are set in CI (`VITE_API_*` → `https://api.voyagerss.com`)
 
 Update Google/Kakao OAuth redirect URIs to `https://api.voyagerss.com/api/workschd/auth/.../callback`.

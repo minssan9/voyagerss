@@ -185,6 +185,26 @@ jobs:
           target: ${{ env.DEPLOY_ROOT }}/scripts
           strip_components: 2
 
+      - name: Sync gateway nginx conf to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/nginx/gateway-conf.d-voyagerss.conf
+          target: ${{ env.DEPLOY_ROOT }}/nginx
+          strip_components: 2
+
+      - name: Sync install-gateway script to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/scripts/install-gateway-voyagerss.sh
+          target: ${{ env.DEPLOY_ROOT }}/scripts
+          strip_components: 2
+
       - name: Sync production .env to Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -234,11 +254,10 @@ jobs:
               echo "Frontend container image mismatch" >&2
               exit 1
             fi
-            chmod +x scripts/install-nginx-site.sh
-            DATA_DIR="${{ env.DEPLOY_ROOT }}" \
-              NGINX_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/voyagerss.conf" \
-              INSTALL_MODE=reference-only \
-              bash scripts/install-nginx-site.sh
+            chmod +x scripts/install-gateway-voyagerss.sh
+            GATEWAY_DIR=/data/gateway \
+              NGINX_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss.conf" \
+              bash scripts/install-gateway-voyagerss.sh
             for i in 1 2 3 4 5; do
               if curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health; then
                 echo ""
@@ -253,7 +272,7 @@ jobs:
             code="$(curl -sS -o /dev/null -w "%{http_code}" -H "Host: voyagerss.com" http://127.0.0.1/ || echo "000")"
             if [[ "${code}" != "200" && "${code}" != "304" ]]; then
               echo "Frontend health check returned HTTP ${code} (expected 200 or 304)" >&2
-              echo "If gateway is not merged yet, merge meta/deploy/nginx/*.conf using GATEWAY-NGINX-MERGE-PROMPT.md" >&2
+              echo "If gateway is not configured, run meta/deploy/scripts/install-gateway-voyagerss.sh on the Droplet" >&2
               exit 1
             fi
             echo "Frontend OK (HTTP ${code})"
