@@ -222,7 +222,19 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
-            mv -f ${{ env.DEPLOY_ROOT }}/.env.prod ${{ env.DEPLOY_ROOT }}/.env
+            ROOT="${{ env.DEPLOY_ROOT }}"
+            if [[ -f "${ROOT}/.env.prod" ]]; then
+              mv -f "${ROOT}/.env.prod" "${ROOT}/.env"
+            elif [[ -f "${ROOT}/.env.prod/.env.prod" ]]; then
+              mv -f "${ROOT}/.env.prod/.env.prod" "${ROOT}/.env"
+              rmdir "${ROOT}/.env.prod" 2>/dev/null || true
+            elif [[ -f "${ROOT}/.env" ]]; then
+              echo "Keeping existing ${ROOT}/.env (.env.prod not uploaded)"
+            else
+              echo "No .env.prod or .env on droplet" >&2
+              ls -la "${ROOT}" >&2 || true
+              exit 1
+            fi
 
       - name: Deploy Docker Compose stack on Droplet
         uses: appleboy/ssh-action@v1.2.3
