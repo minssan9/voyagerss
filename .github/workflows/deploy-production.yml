@@ -195,6 +195,16 @@ jobs:
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
+      - name: Sync gateway nginx SSL conf to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/nginx/gateway-conf.d-voyagerss-ssl.conf
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
       - name: Sync install-gateway script to Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -250,6 +260,8 @@ jobs:
             export IMAGE_TAG="${{ env.IMAGE_TAG }}"
             export GITHUB_OWNER="${{ github.repository_owner }}"
             echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            sudo docker network inspect en9door_net >/dev/null 2>&1 \
+              || sudo docker network create en9door_net
             sudo -E docker compose -f docker-compose.yml pull
             sudo -E docker compose -f docker-compose.yml up -d --remove-orphans
             BE_IMAGE="ghcr.io/${GITHUB_OWNER}/voyagerss-backend:${IMAGE_TAG}"
@@ -269,6 +281,7 @@ jobs:
             chmod +x scripts/install-gateway-voyagerss.sh
             GATEWAY_DIR=/data/gateway \
               NGINX_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss.conf" \
+              NGINX_SSL_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss-ssl.conf" \
               bash scripts/install-gateway-voyagerss.sh
             for i in 1 2 3 4 5 6 7 8 9 10; do
               if curl -fsS http://127.0.0.1:9002/health >/dev/null 2>&1; then

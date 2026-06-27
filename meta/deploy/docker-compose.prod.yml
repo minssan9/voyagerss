@@ -9,15 +9,26 @@
 # Shares en9door_net with /data/gateway nginx for direct container upstream routing.
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: voyagerss-redis
+    restart: unless-stopped
+    networks:
+      - default
+
   backend:
     image: ghcr.io/${GITHUB_OWNER}/voyagerss-backend:${IMAGE_TAG}
     container_name: voyagerss-backend
     restart: unless-stopped
+    depends_on:
+      - redis
     env_file: .env
     environment:
       NODE_ENV: production
       BACKEND_PORT: "9002"
       BACKEND_HOST: "0.0.0.0"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
     ports:
       # Host bind for CI health checks; gateway uses en9door_net (voyagerss-backend:9002).
       - "9002:9002"
