@@ -17,7 +17,7 @@ const CreateFeedbackSchema = z.object({
   sourceUrl:     z.string().url().optional(),
   repoFullName:  z.string().optional(),
   baseBranch:    z.string().default('main'),
-  labels:        z.record(z.any()).optional(),
+  labels:        z.record(z.string(), z.unknown()).optional(),
   attachmentS3Keys: z.array(z.object({
     s3Key: z.string(),
     mime:  z.string(),
