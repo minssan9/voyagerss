@@ -309,7 +309,7 @@ Test files to be created:
 
 ## References
 
-- [PRD](../../../docs/PRD_INCHEON_AIRPORT_NAVIGATION.md)
+- PRD: `meta/docs/prd/PRD-aviation.md`
 - [Codebase Analysis](../../../CODEBASE_ANALYSIS.md)
 - [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 

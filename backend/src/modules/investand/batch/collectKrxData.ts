@@ -3,10 +3,10 @@
 import * as dotenv from 'dotenv'
 import * as path from 'path'
 
-// Load environment variables immediately
 dotenv.config({ path: path.resolve(process.cwd(), '../.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
+import { configService } from '../../../config/config-service'
 import { KrxCollectionService } from '@investand/collectors/krxCollectionService'
 import { formatDate } from '@investand/utils/common/dateUtils'
 import { logger } from '@investand/utils/common/logger'
@@ -28,6 +28,8 @@ const dateOptions = {
 
 async function main(): Promise<void> {
     try {
+        await configService.initialize()
+
         const args = process.argv.slice(2)
         const dateInput = args.find(arg => !arg.startsWith('--'))
 

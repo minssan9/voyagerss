@@ -2,6 +2,7 @@
  * Messaging Configuration
  * Configuration for Telegram bot and messaging services
  */
+import { configService } from '../../../config/config-service'
 
 export interface MessagingConfig {
   telegram: {
@@ -36,8 +37,7 @@ export interface MessagingConfig {
 
 export const defaultMessagingConfig: MessagingConfig = {
   telegram: {
-    botToken: process.env.TELEGRAM_BOT_TOKEN || '',
-    ...(process.env.TELEGRAM_WEBHOOK_URL && { webhookUrl: process.env.TELEGRAM_WEBHOOK_URL }),
+    botToken: '',
     polling: process.env.NODE_ENV !== 'production'
   },
   notifications: {
@@ -69,12 +69,14 @@ export const defaultMessagingConfig: MessagingConfig = {
  * Get messaging configuration
  */
 export function getMessagingConfig(): MessagingConfig {
+  const botToken = configService.get('TELEGRAM_BOT_TOKEN', '')!
+  const webhookUrl = configService.get('TELEGRAM_WEBHOOK_URL')
   return {
     ...defaultMessagingConfig,
     telegram: {
       ...defaultMessagingConfig.telegram,
-      botToken: process.env.TELEGRAM_BOT_TOKEN || defaultMessagingConfig.telegram.botToken,
-      ...(process.env.TELEGRAM_WEBHOOK_URL && { webhookUrl: process.env.TELEGRAM_WEBHOOK_URL })
+      botToken,
+      ...(webhookUrl && { webhookUrl })
     }
   }
 }

@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { Shop } from '@prisma/client-workschd';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 
+@Injectable()
 export class ShopService {
     async createShop(data: any): Promise<Shop> {
         return await prisma.shop.create({

@@ -12,14 +12,14 @@ export class BucheonCitizenScraper extends BaseScraper {
     const $ = this.load(html);
     const results: ScrapedFuneral[] = [];
 
-    $('table tr').each((_, el) => {
+    $('table tr').each((_: number, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
 
-      const texts = cells.toArray().map(c => $(c).text().trim());
-      if (texts.some(t => ['번호', '고인명', '빈소', '상주', '호실'].includes(t))) return;
+      const texts = cells.toArray().map((c: any) => $(c).text().trim());
+      if (texts.some((t: string) => ['번호', '고인명', '빈소', '상주', '호실'].includes(t))) return;
 
-      const deceasedName = texts.find(t => /[가-힣]{2,}/.test(t) && t.length <= 10);
+      const deceasedName = texts.find((t: string) => /[가-힣]{2,}/.test(t) && t.length <= 10);
       if (!deceasedName) return;
 
       results.push(this.makeRecord({

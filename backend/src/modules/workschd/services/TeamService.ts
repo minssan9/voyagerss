@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { Team, TeamMember } from '@prisma/client-workschd';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import crypto from 'crypto';
 
+@Injectable()
 export class TeamService {
     async getTeamById(id: number): Promise<Team | null> {
         return prisma.team.findUnique({

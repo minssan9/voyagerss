@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { runAllScrapers } from './index';
+import { configService } from '../../../config/config-service';
 
 let running = false;
 let started = false;
@@ -9,13 +10,13 @@ export function startWorkschdScraperScheduler(): void {
     return;
   }
 
-  const enabled = process.env.WORKSCHD_SCRAPER_ENABLED === 'true';
+  const enabled = configService.get('WORKSCHD_SCRAPER_ENABLED', 'false') === 'true';
   if (!enabled) {
     console.log('[WorkschdScraperScheduler] Disabled (WORKSCHD_SCRAPER_ENABLED != true)');
     return;
   }
 
-  const expression = process.env.WORKSCHD_SCRAPER_CRON || '*/30 * * * *';
+  const expression = configService.get('WORKSCHD_SCRAPER_CRON', '*/30 * * * *')!;
 
   cron.schedule(expression, async () => {
     if (running) {

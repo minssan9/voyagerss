@@ -1,0 +1,97 @@
+// ============================================
+// CSS Custom Properties (Design Tokens)
+// Runtime-accessible tokens for theming
+// ============================================
+
+:root {
+  // Primary Brand
+  --voy-primary: #0037EB;
+  --voy-primary-light: #4D6EFC;
+  --voy-primary-dark: #00005A;
+  --voy-primary-muted: rgba(0, 55, 235, 0.1);
+
+  // Secondary & Accent
+  --voy-secondary: #00D2BA;
+  --voy-accent: #7850FA;
+
+  // Semantic
+  --voy-success: #10b981;
+  --voy-warning: #f59e0b;
+  --voy-error: #ef4444;
+  --voy-info: #0037EB;
+
+  // Surface & Background
+  --voy-bg: #f5f5f7;
+  --voy-surface: #ffffff;
+  --voy-surface-raised: #ffffff;
+  --voy-border: rgba(0, 0, 0, 0.06);
+  --voy-border-strong: rgba(0, 0, 0, 0.12);
+
+  // Text
+  --voy-text: #1d1d1f;
+  --voy-text-secondary: #6e6e73;
+  --voy-text-muted: #9ca3af;
+  --voy-text-inverse: #ffffff;
+
+  // Sidebar (dark theme, kept across light/dark)
+  --voy-sidebar-bg-start: #1F2937;
+  --voy-sidebar-bg-end: #111827;
+  --voy-sidebar-text: #d1d5db;
+  --voy-sidebar-text-muted: rgba(255, 255, 255, 0.4);
+  --voy-sidebar-active-bg: rgba(77, 110, 252, 0.15);
+  --voy-sidebar-active-text: #7da0ff;
+  --voy-sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --voy-sidebar-section-border: rgba(255, 255, 255, 0.08);
+
+  // Header
+  --voy-header-bg: rgba(255, 255, 255, 0.85);
+  --voy-header-border: rgba(0, 0, 0, 0.05);
+  --voy-header-text: #1d1d1f;
+
+  // Layout dimensions
+  --voy-header-height: 64px;
+  --voy-sidebar-width: 260px;
+
+  // Border radius
+  --voy-radius-xs: 4px;
+  --voy-radius-sm: 8px;
+  --voy-radius-md: 12px;
+  --voy-radius-lg: 16px;
+  --voy-radius-xl: 20px;
+  --voy-radius-2xl: 24px;
+  --voy-radius-full: 9999px;
+
+  // Shadows
+  --voy-shadow-xs: 0 1px 2px rgba(0, 0, 90, 0.05);
+  --voy-shadow-sm: 0 2px 8px rgba(0, 0, 90, 0.06);
+  --voy-shadow-md: 0 4px 16px rgba(0, 0, 90, 0.08);
+  --voy-shadow-lg: 0 8px 32px rgba(0, 0, 90, 0.10);
+  --voy-shadow-xl: 0 16px 48px rgba(0, 0, 90, 0.14);
+
+  // Transitions
+  --voy-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --voy-transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --voy-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Module accent colors
+  --voy-module-workschd: #0037EB;
+  --voy-module-aviation: #7850FA;
+  --voy-module-investand: #00D2BA;
+}
+
+// Dark mode overrides
+body.body--dark {
+  --voy-bg: #0f0f0f;
+  --voy-surface: #1a1a1a;
+  --voy-surface-raised: #242424;
+  --voy-border: rgba(255, 255, 255, 0.08);
+  --voy-border-strong: rgba(255, 255, 255, 0.15);
+
+  --voy-text: #f5f5f7;
+  --voy-text-secondary: #a1a1a6;
+  --voy-text-muted: #6e6e73;
+
+  --voy-header-bg: rgba(26, 26, 26, 0.9);
+  --voy-header-border: rgba(255, 255, 255, 0.06);
+  --voy-header-text: #f5f5f7;
+}

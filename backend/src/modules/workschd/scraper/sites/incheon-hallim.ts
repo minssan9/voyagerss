@@ -11,12 +11,12 @@ export class IncheonHallimScraper extends BaseScraper {
     const $ = this.load(html);
     const results: ScrapedFuneral[] = [];
 
-    $('table tbody tr, .funeral-info tr, .binso-list tr').each((_, el) => {
+    $('table tbody tr, .funeral-info tr, .binso-list tr').each((_: number, el: any) => {
       const cells = $(el).find('td');
       if (cells.length < 2) return;
-      const texts = cells.toArray().map(c => $(c).text().trim());
-      if (texts.some(t => ['고인명', '빈소', '상주', '호실'].includes(t))) return;
-      const deceasedName = texts.find(t => /[가-힣]{2,4}/.test(t) && t.length <= 8);
+      const texts = cells.toArray().map((c: any) => $(c).text().trim());
+      if (texts.some((t: string) => ['고인명', '빈소', '상주', '호실'].includes(t))) return;
+      const deceasedName = texts.find((t: string) => /[가-힣]{2,4}/.test(t) && t.length <= 8);
       if (!deceasedName) return;
       results.push(this.makeRecord({
         deceasedName,

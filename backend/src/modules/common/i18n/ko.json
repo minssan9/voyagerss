@@ -1,0 +1,35 @@
+{
+  "login": {
+    "title": "로그인",
+    "email": { "label": "이메일" },
+    "password": { "label": "비밀번호" },
+    "validation": {
+      "required": "필수 입력 항목입니다",
+      "email": "올바른 이메일 형식이 아닙니다"
+    },
+    "form": {
+      "rememberMe": "로그인 상태 유지",
+      "forgotPassword": "비밀번호 찾기"
+    },
+    "button": { "submit": "로그인" },
+    "signup": {
+      "prompt": "계정이 없으신가요?",
+      "link": "회원가입"
+    },
+    "success": "로그인되었습니다.",
+    "error": {
+      "default": "로그인 중 오류가 발생했습니다.",
+      "invalid": "이메일 또는 비밀번호가 올바르지 않습니다."
+    }
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "message": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다",
+    "button": { "home": "홈으로 돌아가기" }
+  },
+  "common": {
+    "cancel": "취소",
+    "submit": "등록",
+    "save": "저장"
+  }
+}

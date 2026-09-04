@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { GlobalAssetRepository } from '@investand/repositories/market/GlobalAssetRepository';
 import { GlobalAssetCollectionService } from '@investand/collectors/globalAssetCollectionService';
-import { GlobalAssetTypesMapper } from '@investand/clients/yahoo/GlobalAssetTypesMapper';
+import {
+    GlobalAssetTypesMapper,
+    type NormalizedAssetDataModel,
+} from '@investand/clients/yahoo/GlobalAssetTypesMapper';
 import { GLOBAL_ASSET_MAP, ASSETS_BY_CATEGORY } from '@investand/clients/yahoo/GlobalAssetClient';
 
 const router = Router();
@@ -419,7 +422,7 @@ router.post('/normalize/:period', async (req: Request, res: Response) => {
         }
 
         // Save normalized data
-        const normalizedModels = [];
+        const normalizedModels: NormalizedAssetDataModel[] = [];
         for (const [assetCode, data] of normalizationResult.normalizedData.entries()) {
             const assetInfo = GLOBAL_ASSET_MAP[assetCode];
             if (!assetInfo) continue;

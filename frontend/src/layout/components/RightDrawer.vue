@@ -116,6 +116,13 @@
           </q-item-section>
           <q-item-section>Feedback</q-item-section>
         </q-item>
+
+        <q-item v-if="isAdmin" clickable v-ripple :to="{ name: 'feedback-admin' }">
+          <q-item-section avatar>
+            <q-icon name="rate_review" />
+          </q-item-section>
+          <q-item-section>기능 개선 요청 관리</q-item-section>
+        </q-item>
       </q-list>
     </q-scroll-area>
 
@@ -125,14 +132,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
-import { useTeamStore } from '@/stores/workschd/store_team'
+import { useTeamStore } from '@/modules/workschd/store/store_team'
 import { storeToRefs } from 'pinia'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { loadLanaguageAsync } from '@/locales/i18n'
+
+const STORAGE_KEY_DARK = 'voy-dark';
 
 const router = useRouter()
 const layoutStore = useLayoutStore()
@@ -142,6 +152,10 @@ const { drawerRight } = storeToRefs(layoutStore)
 const { teamOptions } = storeToRefs(userStore)
 const $q = useQuasar()
 const { locale } = useI18n()
+
+const isAdmin = computed(() =>
+  userStore.user.accountRoles?.map(ar => ar.roleType).includes('ADMIN') ?? false
+)
 
 // Team selection
 const selectedTeam = ref(userStore.user.teamId)
@@ -154,13 +168,20 @@ const handleTeamChange = (teamId: number | null) => {
 const languageOptions = [
   { label: 'English', value: 'en' },
   { label: 'Korean', value: 'ko' },
-  { label: 'French', value: 'fr' }, 
+  { label: 'French', value: 'fr' },
   { label: 'Spanish', value: 'es' },
   { label: 'Japanese', value: 'ja' }
 ]
 
+// Load translations whenever the locale is changed via the selector
+watch(locale, (newLocale) => {
+  loadLanaguageAsync(newLocale)
+})
+
 const toggleDarkMode = () => {
-  $q.dark.set(!$q.dark.isActive)
+  const next = !$q.dark.isActive
+  $q.dark.set(next)
+  localStorage.setItem(STORAGE_KEY_DARK, String(next))
 }
 
 const openHelp = () => {

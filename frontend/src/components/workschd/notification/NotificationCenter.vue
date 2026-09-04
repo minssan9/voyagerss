@@ -74,7 +74,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import notificationApi, { Notification } from '@/api/workschd/api-notification'
+import notificationApi, { Notification } from '@/modules/workschd/api/api-notification'
 import NotificationItem from './NotificationItem.vue'
 import { useWebSocket } from '@/composables/useWebSocket'
 

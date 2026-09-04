@@ -10,7 +10,7 @@
         <q-btn
           color="primary"
           :label="t('unauthorized.button.login', '로그인')"
-          :to="{ path: '/login', query: { redirect: currentPath } }"
+          :to="{ path: loginPath, query: loginQuery }"
           class="q-mb-md"
         />
         <q-btn
@@ -33,7 +33,16 @@ import { computed } from 'vue'
 const { t } = useI18n()
 const route = useRoute()
 
-const currentPath = computed(() => route.fullPath)
+const loginPath = computed(() => {
+  const q = route.query.login
+  return typeof q === 'string' && q.length > 0 ? q : '/login'
+})
+
+const loginQuery = computed(() => {
+  const r = route.query.redirect
+  const redirect = typeof r === 'string' && r.length > 0 ? r : '/'
+  return { redirect }
+})
 </script>
 
 <style scoped>

@@ -1,0 +1,42 @@
+# Local development: build backend + frontend from source.
+# Run from repo root:
+#   docker compose -f meta/deploy/docker-compose.yml --env-file .env.local up -d --build
+# Production (DigitalOcean): meta/deploy/docker-compose.prod.yml -> /data/voyagerss/docker-compose.yml
+# Gateway nginx upstreams: voyagerss_api :9002, voyagerss_fe :9003 — see meta/deploy/nginx/voyagerss.conf
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: voyagerss-backend
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: production
+      BACKEND_PORT: "9002"
+      BACKEND_HOST: "0.0.0.0"
+    ports:
+      - "127.0.0.1:9002:9002"
+    volumes:
+      - backend-data:/app/data
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api.voyagerss.com/api}
+        VITE_API_URL: ${VITE_API_URL:-https://api.voyagerss.com}
+        VITE_API_WEB: ${VITE_API_WEB:-https://api.voyagerss.com}
+    container_name: voyagerss-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9003:80"
+
+volumes:
+  backend-data:
+    driver: local

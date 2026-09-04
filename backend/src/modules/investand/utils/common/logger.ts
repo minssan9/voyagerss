@@ -1,7 +1,7 @@
 import winston from 'winston';
 import path from 'path';
+import { configService } from '../../../../config/config-service';
 
-// 로그 레벨 정의
 const levels = {
   error: 0,
   warn: 1,
@@ -10,7 +10,6 @@ const levels = {
   debug: 4,
 };
 
-// 로그 색상 정의
 const colors = {
   error: 'red',
   warn: 'yellow',
@@ -21,7 +20,6 @@ const colors = {
 
 winston.addColors(colors);
 
-// 로그 형식 정의
 const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.errors({ stack: true }),
@@ -31,60 +29,64 @@ const format = winston.format.combine(
   )
 );
 
-// 프로덕션용 파일 형식
 const fileFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.errors({ stack: true }),
   winston.format.json()
 );
 
-// Transport 설정
-const transports: winston.transport[] = [
-  new winston.transports.Console({
-    level: process.env.LOG_LEVEL || 'info',
-    format
-  })
-];
+function buildTransports(): winston.transport[] {
+  const level = configService.get('LOG_LEVEL', 'info')!;
+  const transports: winston.transport[] = [
+    new winston.transports.Console({ level, format }),
+  ];
 
-// 프로덕션 환경에서는 파일 로깅 추가
-if (process.env.NODE_ENV === 'production') {
-  const logPath = process.env.LOG_FILE_PATH || 'logs/app.log';
-  
-  transports.push(
-    new winston.transports.File({
-      filename: path.join(process.cwd(), logPath),
-      level: 'info',
-      format: fileFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    }),
-    new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs/error.log'),
-      level: 'error',
-      format: fileFormat,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5,
-    })
-  );
+  if (process.env.NODE_ENV === 'production') {
+    const logPath = configService.get('LOG_FILE_PATH', 'logs/app.log')!;
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(process.cwd(), logPath),
+        level: 'info',
+        format: fileFormat,
+        maxsize: 5242880,
+        maxFiles: 5,
+      }),
+      new winston.transports.File({
+        filename: path.join(process.cwd(), 'logs/error.log'),
+        level: 'error',
+        format: fileFormat,
+        maxsize: 5242880,
+        maxFiles: 5,
+      })
+    );
+  }
+
+  return transports;
 }
 
-// Logger 인스턴스 생성
+function resolveLogLevel(): string {
+  if (process.env.NODE_ENV === 'development') return 'debug';
+  return configService.get('LOG_LEVEL', 'info')!;
+}
+
 export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: resolveLogLevel(),
   levels,
   format,
-  transports,
+  transports: buildTransports(),
   exitOnError: false,
 });
 
-// 개발 환경에서 로그 레벨을 debug로 설정
-if (process.env.NODE_ENV === 'development') {
-  logger.level = 'debug';
+export function configureLoggerFromConfig(): void {
+  logger.level = resolveLogLevel();
+  logger.clear();
+  for (const transport of buildTransports()) {
+    logger.add(transport);
+  }
 }
 
-// Morgan과 함께 사용할 스트림 객체
 export const morganStream = {
   write: (message: string) => {
     logger.http(message.substring(0, message.lastIndexOf('\n')));
   },
-}; 
+};

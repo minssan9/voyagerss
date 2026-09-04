@@ -22,6 +22,7 @@
           <slot></slot>
         </q-page>
       </q-page-container>
+      <FeedbackFloatingButton v-if="userStore.user.accountId" />
       <Footer />
     </q-layout>
   </div>
@@ -33,9 +34,10 @@ import MainHeader from './components/MainHeader.vue'
 import LeftDrawer from './components/LeftDrawer.vue'
 import RightDrawer from './components/RightDrawer.vue'
 import Footer from './components/Footer.vue'
+import FeedbackFloatingButton from '@/components/feedback/FeedbackFloatingButton.vue'
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
-import { useTeamStore } from '@/stores/workschd/store_team'
+import { useTeamStore } from '@/modules/workschd/store/store_team'
 import * as ChannelService from '@channel.io/channel-web-sdk-loader'
 import Cookies from 'js-cookie'
 const layoutStore = useLayoutStore()
@@ -54,7 +56,7 @@ onMounted(() => {
   
   // ChannelService.loadScript()
   // ChannelService.boot({
-  //   "pluginKey": import.meta.env.VITE_CHANNEL_TALK_PLUGIN_KEY
+  //   "pluginKey": useAppConfigStore().get('VITE_CHANNEL_TALK_PLUGIN_KEY')
   // })
 })
 </script>

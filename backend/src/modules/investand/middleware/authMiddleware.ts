@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
 import { PrismaClient, AdminRole } from '@prisma/client-investand'
+import { configService } from '../../../config/config-service'
 
 const prisma = new PrismaClient()
 
@@ -24,8 +25,9 @@ export interface AuthenticatedRequest extends Request {
   admin?: AdminUser
 }
 
-// Authentication configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
+function getJwtSecret(): string {
+  return configService.get('JWT_SECRET', 'your-super-secret-jwt-key-change-in-production')!;
+}
 
 
 /**
@@ -227,7 +229,7 @@ export function securityHeaders(_req: Request, res: Response, next: NextFunction
 export function generateToken(user: AdminUser): string {
   return jwt.sign(
     { id: user.id, username: user.username, role: user.role, permissions: user.permissions },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: '24h' }
   )
 }
@@ -235,7 +237,7 @@ export function generateToken(user: AdminUser): string {
 // Simple token verification
 export function verifyToken(token: string): AdminUser | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any
+    const decoded = jwt.verify(token, getJwtSecret()) as any
     return {
       id: decoded.id,
       username: decoded.username,

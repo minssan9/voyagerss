@@ -1,0 +1,324 @@
+name: Deploy Production (GHCR)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: voyagerss-backend
+  FRONTEND_IMAGE: voyagerss-frontend
+  DEPLOY_ROOT: /data/voyagerss
+  COMPOSE_PROJECT_NAME: voyagerss
+  IMAGE_TAG: ${{ github.sha }}
+  VITE_API_BASE_URL: https://api.voyagerss.com/api
+  VITE_API_URL: https://api.voyagerss.com
+  VITE_API_WEB: https://api.voyagerss.com
+
+jobs:
+  backend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ env.VITE_API_BASE_URL }}
+            VITE_API_URL=${{ env.VITE_API_URL }}
+            VITE_API_WEB=${{ env.VITE_API_WEB }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE }}:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write production .env for SCP
+        env:
+          DOTENV_CONTENT: ${{ secrets.DOTENV_PROD }}
+        run: |
+          if [[ -z "${DOTENV_CONTENT}" ]]; then
+            echo "DOTENV_PROD secret is empty" >&2
+            exit 1
+          fi
+          printf '%s' "${DOTENV_CONTENT}" > .env.prod
+
+      - name: Check Droplet password secret
+        run: |
+          if [ -z "${{ secrets.DROPLET_PASSWORD }}" ] && [ -z "${{ secrets.DROPLET_KEY }}" ]; then
+            echo "::error::Set repository secret DROPLET_PASSWORD (or legacy DROPLET_KEY) to the Droplet root password."
+            exit 1
+          fi
+
+      - name: Ensure deploy directory on Droplet
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          script: |
+            ROOT="${{ env.DEPLOY_ROOT }}"
+            sudo mkdir -p "${ROOT}/data" "${ROOT}/nginx" "${ROOT}/scripts"
+            sudo chown -R "$(whoami):$(whoami)" "${ROOT}"
+            df -h / "${ROOT}" 2>/dev/null || df -h /
+            USED="$(df / --output=pcent 2>/dev/null | tail -1 | tr -dc '0-9' || echo 0)"
+            if [[ "${USED}" -ge 85 ]]; then
+              echo "Disk usage ${USED}% — pruning stale Docker data"
+              sudo docker system prune -af --filter "until=48h" || true
+            fi
+
+      - name: Sync docker-compose to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/docker-compose.prod.yml
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+          timeout: 120s
+          overwrite: true
+
+      - name: Rename compose file on Droplet
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          script: |
+            mv -f ${{ env.DEPLOY_ROOT }}/docker-compose.prod.yml ${{ env.DEPLOY_ROOT }}/docker-compose.yml
+
+      - name: Sync nginx config to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/nginx/voyagerss.conf
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
+      - name: Sync install-nginx script to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/scripts/install-nginx-site.sh
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
+      - name: Sync gateway nginx conf to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/nginx/gateway-conf.d-voyagerss.conf
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
+      - name: Sync gateway nginx SSL conf to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/nginx/gateway-conf.d-voyagerss-ssl.conf
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
+      - name: Sync install-gateway script to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: meta/deploy/scripts/install-gateway-voyagerss.sh
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 2
+
+      - name: Sync production .env to Droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          source: .env.prod
+          target: ${{ env.DEPLOY_ROOT }}
+          strip_components: 0
+
+      - name: Rename .env on Droplet
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          script: |
+            ROOT="${{ env.DEPLOY_ROOT }}"
+            if [[ -f "${ROOT}/.env.prod" ]]; then
+              mv -f "${ROOT}/.env.prod" "${ROOT}/.env"
+            elif [[ -f "${ROOT}/.env.prod/.env.prod" ]]; then
+              mv -f "${ROOT}/.env.prod/.env.prod" "${ROOT}/.env"
+              rmdir "${ROOT}/.env.prod" 2>/dev/null || true
+            elif [[ -f "${ROOT}/.env" ]]; then
+              echo "Keeping existing ${ROOT}/.env (.env.prod not uploaded)"
+            else
+              echo "No .env.prod or .env on droplet" >&2
+              ls -la "${ROOT}" >&2 || true
+              exit 1
+            fi
+
+      - name: Deploy Docker Compose stack on Droplet
+        uses: appleboy/ssh-action@v1.2.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+            cd "${{ env.DEPLOY_ROOT }}"
+            export COMPOSE_PROJECT_NAME="${{ env.COMPOSE_PROJECT_NAME }}"
+            export IMAGE_TAG="${{ env.IMAGE_TAG }}"
+            export GITHUB_OWNER="${{ github.repository_owner }}"
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            sudo docker network inspect en9door_net >/dev/null 2>&1 \
+              || sudo docker network create en9door_net
+            sudo -E docker compose -f docker-compose.yml pull
+            sudo -E docker compose -f docker-compose.yml up -d --remove-orphans
+            BE_IMAGE="ghcr.io/${GITHUB_OWNER}/voyagerss-backend:${IMAGE_TAG}"
+            FE_IMAGE="ghcr.io/${GITHUB_OWNER}/voyagerss-frontend:${IMAGE_TAG}"
+            BE_EXPECTED="$(sudo docker image inspect "${BE_IMAGE}" --format '{{.Id}}')"
+            FE_EXPECTED="$(sudo docker image inspect "${FE_IMAGE}" --format '{{.Id}}')"
+            BE_ACTUAL="$(sudo docker inspect voyagerss-backend --format '{{.Image}}')"
+            FE_ACTUAL="$(sudo docker inspect voyagerss-frontend --format '{{.Image}}')"
+            if [[ "${BE_ACTUAL}" != "${BE_EXPECTED}" ]]; then
+              echo "Backend container image mismatch" >&2
+              exit 1
+            fi
+            if [[ "${FE_ACTUAL}" != "${FE_EXPECTED}" ]]; then
+              echo "Frontend container image mismatch" >&2
+              exit 1
+            fi
+            chmod +x scripts/install-gateway-voyagerss.sh
+            GATEWAY_DIR=/data/gateway \
+              NGINX_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss.conf" \
+              NGINX_SSL_SOURCE_FILE="${{ env.DEPLOY_ROOT }}/nginx/gateway-conf.d-voyagerss-ssl.conf" \
+              bash scripts/install-gateway-voyagerss.sh
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS http://127.0.0.1:9002/health >/dev/null 2>&1; then
+                break
+              fi
+              if [[ "$i" -eq 10 ]]; then
+                echo "Backend direct health check failed on :9002" >&2
+                sudo docker logs voyagerss-backend --tail 80 >&2 || true
+                exit 1
+              fi
+              sleep 3
+            done
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health; then
+                echo ""
+                break
+              fi
+              if [[ "$i" -eq 10 ]]; then
+                echo "API health check failed after retries" >&2
+                exit 1
+              fi
+              sleep 3
+            done
+            code="$(curl -sS -o /dev/null -w "%{http_code}" -H "Host: voyagerss.com" http://127.0.0.1/ || echo "000")"
+            if [[ "${code}" != "200" && "${code}" != "304" ]]; then
+              echo "Frontend health check returned HTTP ${code} (expected 200 or 304)" >&2
+              echo "If gateway is not configured, run meta/deploy/scripts/install-gateway-voyagerss.sh on the Droplet" >&2
+              exit 1
+            fi
+            echo "Frontend OK (HTTP ${code})"

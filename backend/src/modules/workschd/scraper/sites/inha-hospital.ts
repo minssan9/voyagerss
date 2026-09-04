@@ -18,7 +18,8 @@ export class InhaHospitalScraper extends BaseScraper {
 
     // The page lists mourning rooms with deceased information in table rows
     // Typical selectors for this type of Korean hospital funeral page
-    $('table tbody tr, .deceased-list li, .funeral-list .item').each((_, el) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    $('table tbody tr, .deceased-list li, .funeral-list .item').each((_: number, el: any) => {
       const cells = $(el).find('td');
       if (cells.length === 0) return;
 

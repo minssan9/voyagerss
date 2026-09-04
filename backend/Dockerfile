@@ -1,35 +1,39 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Copy package files
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma
 
-# Install dependencies
 RUN npm install
 
-# Copy source code
 COPY src ./src
 
-# Generate Prisma clients for all schemas
-RUN npm run generate || echo "Prisma generate skipped or failed"
-
-# Build the application
+RUN npm run generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
-# Copy built assets and production dependencies
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
-EXPOSE 6172
+RUN mkdir -p /app/data
+
+EXPOSE 9002
 
 CMD ["npm", "run", "start"]

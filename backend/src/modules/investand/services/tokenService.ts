@@ -2,14 +2,15 @@ import * as jwt from 'jsonwebtoken'
 import * as crypto from 'crypto'
 import { PrismaClient } from '@prisma/client-investand'
 import { Request } from 'express'
+import { configService } from '../../../config/config-service'
 
 const prisma = new PrismaClient()
 
-// Configuration
-const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access-secret-change-in-production'
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-change-in-production'
-const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || '15m'
-const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || '7d'
+// Getter functions so each call reads current value from configService
+const getAccessSecret = () => configService.get('JWT_ACCESS_SECRET', 'access-secret-change-in-production')!
+const getRefreshSecret = () => configService.get('JWT_REFRESH_SECRET', 'refresh-secret-change-in-production')!
+const getAccessExpiry = () => configService.get('ACCESS_TOKEN_EXPIRY', '15m')!
+const getRefreshExpiry = () => configService.get('REFRESH_TOKEN_EXPIRY', '7d')!
 
 export interface TokenPayload {
   userId: string
@@ -62,17 +63,17 @@ export class TokenService {
     }
 
     // Generate tokens
-    const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET, {
-      expiresIn: ACCESS_TOKEN_EXPIRY,
+    const accessToken = jwt.sign(payload, getAccessSecret(), {
+      expiresIn: getAccessExpiry(),
       issuer: 'kospi-fg-index',
       audience: 'admin-panel'
     } as jwt.SignOptions)
 
     const refreshToken = jwt.sign(
       { userId, sessionId, type: 'refresh' },
-      JWT_REFRESH_SECRET,
+      getRefreshSecret(),
       {
-        expiresIn: REFRESH_TOKEN_EXPIRY,
+        expiresIn: getRefreshExpiry(),
         issuer: 'kospi-fg-index',
         audience: 'admin-panel'
       } as jwt.SignOptions
@@ -123,7 +124,7 @@ export class TokenService {
   static async validateAccessToken(token: string): Promise<TokenValidationResult> {
     try {
       // Verify JWT signature and expiry
-      const payload = jwt.verify(token, JWT_ACCESS_SECRET) as TokenPayload
+      const payload = jwt.verify(token, getAccessSecret()) as TokenPayload
 
       // Check if session exists and is active
       const session = await prisma.adminSession.findFirst({
@@ -174,7 +175,7 @@ export class TokenService {
   static async refreshAccessToken(refreshToken: string, ipAddress: string): Promise<TokenPair | null> {
     try {
       // Verify refresh token
-      const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as any
+      const payload = jwt.verify(refreshToken, getRefreshSecret()) as any
 
       if (payload.type !== 'refresh') {
         throw new Error('Invalid token type')

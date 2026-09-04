@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { Task, TaskEmployee } from '@prisma/client-workschd';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { NotificationService } from './NotificationService';
 
+@Injectable()
 export class TaskService {
     private notificationService: NotificationService;
 

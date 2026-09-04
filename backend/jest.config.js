@@ -11,6 +11,7 @@ module.exports = {
     '^@prisma/client-workschd$': '<rootDir>/node_modules/@prisma/client-workschd',
     '^@prisma/client-investand$': '<rootDir>/node_modules/@prisma/client-investand',
     '^@prisma/client-aviation$': '<rootDir>/node_modules/@prisma/client-aviation',
+    '^@prisma/client-aipr$': '<rootDir>/node_modules/@prisma/client-aipr',
   },
   collectCoverageFrom: [
     'src/**/*.ts',

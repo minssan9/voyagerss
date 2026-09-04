@@ -1,5 +1,6 @@
 ﻿import apiAccount from '@/api/account/api-account'
-import apiTeam from '@/api/workschd/api-team'
+import apiTeam from '@/modules/workschd/api/api-team'
+import apiRbac from '@/modules/workschd/api/api-rbac'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 
@@ -48,6 +49,8 @@ interface UserState {
   accountInfo: any[] // Type this based on your accountInfo structure
   isAuthPhone: boolean
   teams: Team[]
+  /** RBAC page permission codes granted to the current user (workschd module) */
+  rbacPagePermissions: string[]
 }
 
 export const useUserStore = defineStore('user', {
@@ -87,7 +90,8 @@ export const useUserStore = defineStore('user', {
     },
     accountInfo: [],
     isAuthPhone: false,
-    teams: []
+    teams: [],
+    rbacPagePermissions: []
   }),
 
   getters: {
@@ -117,21 +121,28 @@ export const useUserStore = defineStore('user', {
       if (!this.user.accountId) {
         try {
           const res = await apiAccount.getUser()
-          Cookies.set('refreshToken', res.data.refreshToken, { expires: 7 })
           Cookies.set('accountId', res.data.accountId, { expires: 7 })
           Cookies.set('username', res.data.username, { expires: 7 })
           Cookies.set('email', res.data.email, { expires: 7 })
           Cookies.set('role', res.data.accountRoles, { expires: 7 })
-          this.user = res.data
+          this.user = { ...this.user, ...res.data }
 
-          const accountInfo = await apiAccount.getAccountInfo(res.data.accountId)
-          if (accountInfo.accountId) {
-            this.user = { ...this.user, ...accountInfo }
+          try {
+            const accountInfoRes = await apiAccount.getAccountInfo(res.data.accountId)
+            if (accountInfoRes.data?.accountId) {
+              this.user = { ...this.user, ...accountInfoRes.data }
+            }
+          } catch {
+            // account info is optional — don't block login
           }
 
-          // Fetch teams after user data is loaded
-          if (this.user.accountId) {
-            await this.fetchTeams()
+          try {
+            if (this.user.accountId) {
+              await this.fetchTeams()
+              await this.fetchRbacPagePermissions()
+            }
+          } catch {
+            // teams/RBAC load is optional — don't block login
           }
 
           return res.data
@@ -152,6 +163,19 @@ export const useUserStore = defineStore('user', {
       } catch (error) {
         console.error('Error fetching teams:', error)
         throw error
+      }
+    },
+
+    async fetchRbacPagePermissions(): Promise<void> {
+      if (!this.user.accountId) return
+      try {
+        const res = await apiRbac.getSubjectPermissions('workschd', String(this.user.accountId))
+        this.rbacPagePermissions = res.data.data
+          .filter((p: any) => p.type === 'PAGE')
+          .map((p: any) => p.code as string)
+      } catch {
+        // Non-fatal: RBAC DB might not be set up yet
+        this.rbacPagePermissions = []
       }
     },
 
@@ -231,6 +255,7 @@ export const useUserStore = defineStore('user', {
         status: null,
         profileImageUrl: '',
         profileVideoUrl: '',
+        teamId: null,
       }
       // Reset any other state properties if needed
       this.accountInfo = []

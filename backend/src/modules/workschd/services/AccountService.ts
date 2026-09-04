@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { Account } from '@prisma/client-workschd';
 
+@Injectable()
 export class AccountService {
     async getAccountById(id: number): Promise<Account | null> {
         return prisma.account.findUnique({

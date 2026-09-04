@@ -1,10 +1,15 @@
-﻿<script setup>
-import { RouterLink, RouterView } from 'vue-router'
+<script setup>
+import { RouterView, useRoute } from 'vue-router'
 import MainLayout from "@/layout/MainLayout.vue";
+import { computed } from 'vue';
+
+const route = useRoute();
+const isBlankLayout = computed(() => route.meta.layout === 'blank');
 </script>
 
 <template>
-  <MainLayout>
+  <RouterView v-if="isBlankLayout" />
+  <MainLayout v-else>
     <RouterView />
   </MainLayout>
 </template>

@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 
 export interface DashboardStatistics {
@@ -66,6 +67,7 @@ export interface WorkerStatistics {
     averageWorkHours: number;
 }
 
+@Injectable()
 export class StatisticsService {
     /**
      * Get overall dashboard statistics

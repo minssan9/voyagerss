@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { SolapiProvider } from './notification/SolapiProvider';
 import { EmailProvider } from './notification/EmailProvider';
 import { webSocketService } from './WebSocketService';
+import { configService } from '../../../config/config-service';
 
 export enum NotificationType {
   TASK_CREATED = 'TASK_CREATED',
@@ -27,6 +29,7 @@ export enum NotificationChannel {
  * - 참여 신청/승인/거절 알림
  * - 인원 마감 알림
  */
+@Injectable()
 export class NotificationService {
   private solapiProvider: SolapiProvider;
   private emailProvider: EmailProvider;
@@ -463,7 +466,7 @@ export class NotificationService {
    * 이메일 HTML 생성
    */
   private generateEmailHtml(type: NotificationType, task: any, message: string): string {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:8080';
+    const frontendUrl = configService.get('FRONTEND_URL', 'http://localhost:8080')!;
     const startDate = new Date(task.startDateTime).toLocaleDateString('ko-KR');
     const startTime = new Date(task.startDateTime).toLocaleTimeString('ko-KR', {
       hour: '2-digit',

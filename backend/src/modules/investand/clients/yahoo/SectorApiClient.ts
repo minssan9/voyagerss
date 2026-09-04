@@ -232,7 +232,7 @@ export class SectorApiClient {
         if (data.length < period + 1) return 0;
 
         const recentData = data.slice(-period - 1);
-        const returns = [];
+        const returns: number[] = [];
 
         for (let i = 1; i < recentData.length; i++) {
             const dailyReturn = (recentData[i].closePrice - recentData[i - 1].closePrice)
@@ -259,8 +259,8 @@ export class SectorApiClient {
         const minLength = Math.min(sectorData.length, benchmarkData.length);
         if (minLength < 2) return 1.0;
 
-        const sectorReturns = [];
-        const benchmarkReturns = [];
+        const sectorReturns: number[] = [];
+        const benchmarkReturns: number[] = [];
 
         for (let i = 1; i < minLength; i++) {
             const sectorReturn = (sectorData[i].closePrice - sectorData[i - 1].closePrice)
@@ -300,8 +300,8 @@ export class SectorApiClient {
         const minLength = Math.min(sectorData.length, benchmarkData.length);
         if (minLength < 2) return 0;
 
-        const sectorReturns = [];
-        const benchmarkReturns = [];
+        const sectorReturns: number[] = [];
+        const benchmarkReturns: number[] = [];
 
         for (let i = 1; i < minLength; i++) {
             sectorReturns.push(

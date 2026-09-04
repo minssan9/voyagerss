@@ -1,0 +1,16 @@
+# Production frontend is deployed via deploy-production.yml (Docker on droplet).
+# This workflow is disabled; use workflow_dispatch only if you need a one-off Vercel deploy.
+
+name: Deploy Frontend (Vercel) [disabled]
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Production uses Docker
+        run: |
+          echo "Production FE is on voyagerss.com via deploy-production.yml." >&2
+          exit 1

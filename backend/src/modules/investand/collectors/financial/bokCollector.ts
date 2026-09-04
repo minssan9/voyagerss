@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { configService } from '../../../../config/config-service'
 
 // BOK API 데이터 타입 정의
 export interface InterestRateData {
@@ -28,7 +29,7 @@ export interface EconomicIndicatorData {
 
 export class BOKCollector {
   private static readonly BASE_URL = 'https://ecos.bok.or.kr/api'
-  private static readonly API_KEY = process.env.BOK_API_KEY || 'sample_key'
+  private static get API_KEY(): string { return configService.get('BOK_API_KEY', 'sample_key')! }
   private static readonly TIMEOUT = 10000
 
   /**

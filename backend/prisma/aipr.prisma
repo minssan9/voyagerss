@@ -1,0 +1,274 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-aipr"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum IssueStatus {
+  NEW
+  TRIAGED
+  QUEUED
+  PLAN_READY
+  BUILDING
+  PR_OPEN
+  MERGED
+  CLOSED
+  FAILED
+}
+
+enum RunKind {
+  PLAN
+  BUILD
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum LogStream {
+  stdout
+  stderr
+  event
+}
+
+enum PrState {
+  open
+  merged
+  closed
+}
+
+enum AdminRole {
+  SUPER
+  ADMIN
+}
+
+enum ProviderType {
+  GITHUB
+  GITLAB
+}
+
+enum RunnerMode {
+  CLI
+  SDK
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model Issue {
+  id                String      @id @default(uuid()) @db.Char(36)
+  status            IssueStatus @default(NEW)
+  title             String      @db.Text
+  body              String      @db.LongText
+  reporterEmail     String?     @db.VarChar(255)
+  reporterUserId    String?     @db.Char(36)
+  sourceUrl         String?     @db.Text
+  userAgent         String?     @db.Text
+  repoFullName      String?     @db.VarChar(255)
+  baseBranch        String      @default("main") @db.VarChar(100)
+  labels            Json?
+  repositoryId      Int?
+  sourceIssueNumber Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  attachments  Attachment[]
+  planningDocs PlanningDoc[]
+  runs         Run[]
+  pullRequests PullRequest[]
+  auditLogs    AuditLog[]
+  repository   Repository?  @relation(fields: [repositoryId], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("issues")
+}
+
+model Attachment {
+  id      String @id @default(uuid()) @db.Char(36)
+  issueId String @db.Char(36)
+  s3Key   String @db.VarChar(512)
+  mime    String @db.VarChar(100)
+  size    Int
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("attachments")
+}
+
+model PlanningDoc {
+  id        String   @id @default(uuid()) @db.Char(36)
+  issueId   String   @db.Char(36)
+  version   Int      @default(1)
+  content   String   @db.LongText
+  createdBy String?  @db.Char(36)
+  createdAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("planning_docs")
+}
+
+model Run {
+  id              String    @id @default(uuid()) @db.Char(36)
+  issueId         String    @db.Char(36)
+  kind            RunKind
+  status          RunStatus @default(PENDING)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  branchName      String?   @db.VarChar(255)
+  commitSha       String?   @db.Char(40)
+  prNumber        Int?
+  prUrl           String?   @db.Text
+  claudeSessionId String?   @db.VarChar(255)
+  costUsd         Decimal?  @db.Decimal(10, 4)
+  errorSummary    String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  issue   Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  runLogs RunLog[]
+
+  @@index([issueId])
+  @@index([status])
+  @@map("runs")
+}
+
+model RunLog {
+  id      String    @id @default(uuid()) @db.Char(36)
+  runId   String    @db.Char(36)
+  seq     Int
+  stream  LogStream
+  content String    @db.Text
+  ts      DateTime  @default(now())
+
+  run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, seq])
+  @@map("run_logs")
+}
+
+model PullRequest {
+  id          String    @id @default(uuid()) @db.Char(36)
+  issueId     String    @db.Char(36)
+  prNumber    Int
+  prUrl       String    @db.Text
+  state       PrState   @default(open)
+  author      String?   @db.VarChar(255)
+  headSha     String?   @db.Char(40)
+  mergedAt    DateTime?
+  lastEventAt DateTime  @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@map("pull_requests")
+}
+
+model Admin {
+  id           String    @id @default(uuid()) @db.Char(36)
+  email        String    @unique @db.VarChar(255)
+  role         AdminRole @default(ADMIN)
+  passwordHash String    @db.VarChar(255)
+  createdAt    DateTime  @default(now())
+
+  auditLogs AuditLog[]
+
+  @@map("admins")
+}
+
+model FeedbackRate {
+  ip    String   @db.VarChar(45)
+  day   DateTime @db.Date
+  count Int      @default(1)
+
+  @@id([ip, day])
+  @@map("feedback_rate")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Char(36)
+  adminId   String?  @db.Char(36)
+  action    String   @db.VarChar(100)
+  target    String?  @db.VarChar(255)
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  admin Admin? @relation(fields: [adminId], references: [id])
+  issue Issue? @relation(fields: [target], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt])
+  @@map("audit_log")
+}
+
+model AllowedOrigin {
+  id        String   @id @default(uuid()) @db.Char(36)
+  origin    String   @unique @db.VarChar(255)
+  appId     String   @db.Char(36)
+  createdAt DateTime @default(now())
+
+  @@map("allowed_origins")
+}
+
+model GitProvider {
+  id           Int          @id @default(autoincrement())
+  type         ProviderType
+  displayName  String       @db.VarChar(100)
+  baseUrl      String       @db.VarChar(255)
+  token        String       @db.Text
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  repositories Repository[]
+
+  @@map("git_providers")
+}
+
+model Repository {
+  id            Int         @id @default(autoincrement())
+  providerId    Int
+  remoteId      String      @db.VarChar(100)
+  fullName      String      @db.VarChar(255)
+  defaultBranch String      @default("main") @db.VarChar(100)
+  isPrivate     Boolean     @default(false)
+  description   String?     @db.Text
+  webUrl        String      @db.Text
+  autoPilot     Boolean     @default(false)
+  planRunner    RunnerMode  @default(SDK)
+  buildRunner   RunnerMode  @default(CLI)
+  syncedAt      DateTime?
+  createdAt     DateTime    @default(now())
+
+  provider      GitProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  issues        Issue[]
+
+  @@unique([providerId, remoteId])
+  @@map("repositories")
+}
+
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique @db.VarChar(255)
+  value       String   @db.Text
+  isEncrypted Boolean  @default(false) @map("is_encrypted")
+  description String?  @db.VarChar(500)
+  category    String   @default("general") @db.VarChar(100)
+  updatedBy   String?  @map("updated_by") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category], map: "idx_aipr_system_config_category")
+  @@map("system_config")
+}

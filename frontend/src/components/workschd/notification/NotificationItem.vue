@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { Notification, NotificationType } from '@/api/workschd/api-notification'
+import { Notification, NotificationType } from '@/modules/workschd/api/api-notification'
 import { formatDistanceToNow } from 'date-fns'
 
 interface Props {

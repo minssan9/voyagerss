@@ -5,11 +5,15 @@
         "outDir": "./dist",
         "rootDir": "./src",
         "strict": true,
+        "noImplicitAny": false,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "resolveJsonModule": true,
         "allowJs": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "strictPropertyInitialization": false,
         "baseUrl": ".",
         "paths": {
             "@investand/*": [
@@ -24,6 +28,7 @@
         "node_modules",
         "**/*.test.ts",
         "**/*.spec.ts",
+        "**/tests/**",
         "**/legacy_src/tests/**/*"
     ]
 }
