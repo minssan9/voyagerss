@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Namespace, Server as SocketIOServer, Socket } from 'socket.io';
 import { neighborhood, parseTileId, tileId as toTileId } from '../geo/tileMath';
-import { CITYGAME_DEFAULT_NEIGHBOR_RADIUS, CITYGAME_GRID_SIZE, CITYGAME_MAX_NEIGHBOR_RADIUS } from '../config/world';
-import type { BuildTool, PlacedObject, TileClaim, TileSnapshot } from '../types';
+import {
+  CITYGAME_DEFAULT_NEIGHBOR_RADIUS,
+  CITYGAME_GRID_SIZE,
+  CITYGAME_GROWTH_CHANCE,
+  CITYGAME_GROWTH_TICK_MS,
+  CITYGAME_MAX_BUILDING_LEVEL,
+  CITYGAME_MAX_NEIGHBOR_RADIUS,
+} from '../config/world';
+import type { BuildingLevel, BuildTool, PlacedObject, TileClaim, TileSnapshot } from '../types';
 
 const TILE_ROOM_PREFIX = 'tile:';
 const VALID_TOOLS: BuildTool[] = ['zone-residential', 'zone-commercial', 'zone-industrial', 'road'];
@@ -43,9 +50,11 @@ export class CityGameGatewayService {
   private namespace: Namespace | null = null;
   private claims = new Map<string, TileClaim>();
   private objects = new Map<string, Map<string, PlacedObject>>();
+  private growthTimer: NodeJS.Timeout | null = null;
 
   initialize(io: SocketIOServer): void {
     this.namespace = io.of('/citygame');
+    this.startGrowthTicker();
 
     this.namespace.on('connection', (socket: Socket) => {
       socket.data.subscribedTiles = new Set<string>();
@@ -139,6 +148,7 @@ export class CityGameGatewayService {
       cellX: payload.cellX,
       cellY: payload.cellY,
       tool: payload.tool,
+      level: 1,
       ownerId: socket.id,
       createdAt: Date.now(),
     };
@@ -179,6 +189,42 @@ export class CityGameGatewayService {
     const rawCount = this.namespace?.adapter.rooms.get(room)?.size ?? 0;
     const occupantCount = pendingSelfLeave ? Math.max(0, rawCount - 1) : rawCount;
     this.namespace?.to(room).emit('presence:update', { tileId: tid, occupantCount });
+  }
+
+  /**
+   * Simplified stand-in for SimCity's RCI/land-value simulation: every tick,
+   * each non-road building below max level has a flat chance to grow one
+   * stage. No demand model, no neighbor effects — just enough to make
+   * placed zones visibly develop over time.
+   */
+  private startGrowthTicker(): void {
+    if (this.growthTimer) return;
+    this.growthTimer = setInterval(() => this.tickGrowth(), CITYGAME_GROWTH_TICK_MS);
+  }
+
+  private tickGrowth(): void {
+    for (const [tid, tileObjects] of this.objects) {
+      for (const object of tileObjects.values()) {
+        if (object.tool === 'road') continue;
+        if (object.level >= CITYGAME_MAX_BUILDING_LEVEL) continue;
+        if (Math.random() >= CITYGAME_GROWTH_CHANCE) continue;
+
+        object.level = (object.level + 1) as BuildingLevel;
+        this.namespace?.to(TILE_ROOM_PREFIX + tid).emit('object:upgraded', {
+          tileId: tid,
+          cellX: object.cellX,
+          cellY: object.cellY,
+          level: object.level,
+        });
+      }
+    }
+  }
+
+  dispose(): void {
+    if (this.growthTimer) {
+      clearInterval(this.growthTimer);
+      this.growthTimer = null;
+    }
   }
 }
 

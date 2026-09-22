@@ -23,6 +23,8 @@ export class CameraController {
     public mode: CameraMode = 'planning'
     private isTransitioning = false
     private transitionHandle: number | null = null
+    /** While a build tool is active, left-drag should paint the grid, not orbit the camera. */
+    private buildModeActive = false
 
     private planningCamera: ArcRotateCamera
     private walkCamera: UniversalCamera
@@ -125,10 +127,21 @@ export class CameraController {
                 this.walkCamera.attachControl(this.canvas, true)
             } else {
                 this.scene.activeCamera = this.planningCamera
-                this.planningCamera.attachControl(this.canvas, true)
+                if (!this.buildModeActive) this.planningCamera.attachControl(this.canvas, true)
             }
         }
         this.transitionHandle = requestAnimationFrame(step)
+    }
+
+    /** WASD/QE still pan/rotate either way — this only decides whether mouse-drag orbits or is free for painting. */
+    setBuildModeActive(active: boolean) {
+        this.buildModeActive = active
+        if (this.mode !== 'planning' || this.isTransitioning) return
+        if (active) {
+            this.planningCamera.detachControl()
+        } else {
+            this.planningCamera.attachControl(this.canvas, true)
+        }
     }
 
     /** Called once per frame with the set of currently-active actions (from keyboard and/or gamepad). */

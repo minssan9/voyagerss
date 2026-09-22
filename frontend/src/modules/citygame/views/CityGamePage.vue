@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { PickingInfo, PointerEventTypes } from '@babylonjs/core'
 import { GameEngine } from '../engine/GameEngine'
 import { CameraController } from '../engine/CameraController'
@@ -103,6 +103,7 @@ function connectMultiplayer() {
         },
         onObjectPlaced: (object) => tileStreamer?.applyObjectPlaced(object),
         onObjectRemoved: (payload) => tileStreamer?.applyObjectRemoved(payload),
+        onObjectUpgraded: (payload) => tileStreamer?.applyObjectUpgraded(payload),
         onPresenceUpdate: (payload) => store.setOccupantCount(payload.tileId, payload.occupantCount),
     })
 }
@@ -126,14 +127,22 @@ function handleClaimTile() {
     citySocket.claimTile(tileId, guestName)
 }
 
-function handlePointerPick(pick: PickingInfo) {
+let isPainting = false
+let lastPaintedCellKey: string | null = null
+
+/** Shared by a single click and every step of a click-drag "paint" stroke — SimCity-style multi-place. */
+function attemptPlacementAt(pick: PickingInfo) {
     if (!tileStreamer || !citySocket || cameraController?.mode !== 'planning') return
     if (store.activeTool === 'select') return
 
     const cell = tileStreamer.pickCell(pick)
     if (!cell) return
+    const cellKey = `${cell.tileId}:${cell.cellX}:${cell.cellY}`
+    if (cellKey === lastPaintedCellKey) return
+    lastPaintedCellKey = cellKey
 
     if (store.activeTool === 'bulldoze') {
+        if (!store.spend('bulldoze')) return
         tileStreamer.applyObjectRemoved(cell)
         citySocket.removeObject(cell)
         return
@@ -142,12 +151,15 @@ function handlePointerPick(pick: PickingInfo) {
     if (!store.isClaimedByMe(cell.tileId)) return
 
     const tool = store.activeTool as PlaceableTool
+    if (!store.spend(tool)) return
+
     tileStreamer.applyObjectPlaced({
-        id: `${cell.tileId}:${cell.cellX}:${cell.cellY}`,
+        id: cellKey,
         tileId: cell.tileId,
         cellX: cell.cellX,
         cellY: cell.cellY,
         tool,
+        level: 1,
         ownerId: store.localOwnerId ?? 'me',
         createdAt: Date.now(),
     })
@@ -163,10 +175,26 @@ onMounted(async () => {
     store.setEngineReady(true)
 
     cameraController = new CameraController(scene, canvasRef.value, (mode) => store.setCameraMode(mode))
+    cameraController.setBuildModeActive(store.activeTool !== 'select')
+    watch(
+        () => store.activeTool,
+        (tool) => cameraController?.setBuildModeActive(tool !== 'select'),
+    )
 
     scene.onPointerObservable.add((pointerInfo) => {
-        if (pointerInfo.type === PointerEventTypes.POINTERPICK && pointerInfo.pickInfo) {
-            handlePointerPick(pointerInfo.pickInfo)
+        switch (pointerInfo.type) {
+            case PointerEventTypes.POINTERDOWN:
+                isPainting = true
+                lastPaintedCellKey = null
+                if (pointerInfo.pickInfo) attemptPlacementAt(pointerInfo.pickInfo)
+                break
+            case PointerEventTypes.POINTERMOVE:
+                if (isPainting && pointerInfo.pickInfo) attemptPlacementAt(pointerInfo.pickInfo)
+                break
+            case PointerEventTypes.POINTERUP:
+                isPainting = false
+                lastPaintedCellKey = null
+                break
         }
     })
 

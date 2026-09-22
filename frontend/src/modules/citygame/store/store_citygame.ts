@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import { CITYGAME_DEFAULT_NEIGHBOR_RADIUS } from '../config/world'
+import { STARTING_FUNDS, TOOL_COST } from '../config/economy'
 import { tileIdOf } from '../geo/tileMath'
 import type { BuildTool, CameraMode, GeoPoint, RendererBackend, TileClaim, TileCoord } from '../types'
 
@@ -20,6 +21,9 @@ export const useCityGameStore = defineStore('citygame', () => {
     const currentTile = ref<TileCoord | null>(null)
     const geoCenter = ref<GeoPoint | null>(null)
     const neighborRadius = ref(CITYGAME_DEFAULT_NEIGHBOR_RADIUS)
+
+    // Economy (local-only, cosmetic — not synced across players)
+    const funds = ref(STARTING_FUNDS)
 
     // Multiplayer
     const connectionStatus = ref<ConnectionStatus>('disconnected')
@@ -91,6 +95,17 @@ export const useCityGameStore = defineStore('citygame', () => {
         return currentTile.value ? tileIdOf(currentTile.value) : null
     }
 
+    function canAfford(tool: BuildTool): boolean {
+        return funds.value >= TOOL_COST[tool]
+    }
+
+    /** Deducts the tool's cost if affordable; returns whether the spend happened. */
+    function spend(tool: BuildTool): boolean {
+        if (!canAfford(tool)) return false
+        funds.value -= TOOL_COST[tool]
+        return true
+    }
+
     return {
         backend,
         cameraMode,
@@ -103,6 +118,7 @@ export const useCityGameStore = defineStore('citygame', () => {
         currentTile,
         geoCenter,
         neighborRadius,
+        funds,
         connectionStatus,
         localOwnerId,
         claims,
@@ -122,5 +138,7 @@ export const useCityGameStore = defineStore('citygame', () => {
         isClaimedByMe,
         setOccupantCount,
         currentTileId,
+        canAfford,
+        spend,
     }
 })

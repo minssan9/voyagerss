@@ -24,12 +24,16 @@ export interface TileCoord {
     y: number
 }
 
+/** SimCity-style growth stage: 1 = just built, 3 = fully developed. Roads don't level up. */
+export type BuildingLevel = 1 | 2 | 3
+
 export interface PlacedObject {
     id: string
     tileId: string
     cellX: number
     cellY: number
     tool: PlaceableTool
+    level: BuildingLevel
     ownerId: string
     createdAt: number
 }

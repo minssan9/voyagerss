@@ -12,6 +12,10 @@
 | Socket.IO `/citygame` 네임스페이스, 타일 기반 room, 인접 타일 스트리밍 | ✅ 구현 |
 | 건물/도로 배치·철거 실시간 동기화 | ✅ 구현 (서버 메모리 상태) |
 | 카메라 거리 기반 spatial partitioning (반경 1~3타일) | ✅ 구현 |
+| 절차적 3D 건물 모델 (주거/상업/공업 × 3단계, 도로) | ✅ 구현 (`ProceduralBuildingFactory`, GPU 인스턴싱) |
+| 배치 UI (드래그로 다중 배치, 비용 표시, 자금 시스템) | ✅ 구현 |
+| 건설/철거/레벨업 애니메이션, 도로 위 차량, 옥상 비컨 점멸 | ✅ 구현 |
+| SimCity 스타일 성장(레벨업) 시뮬레이션 | ✅ 단순화된 버전 — 실제 RCI/수요 모델 아님, 일정 확률로 자동 성장 |
 | Postgres/PostGIS 영속화 | ⏳ 스키마만 존재 (`backend/prisma/citygame.prisma`), 실제 조회/저장 미연결 |
 | 게임패드 입력 | ✅ 구현 (액션 레이어로 키보드와 동일 취급) |
 | Tauri/Electron 패키징, Steamworks 연동 | ⏳ 미착수 (아래 "향후 확장" 참고) |

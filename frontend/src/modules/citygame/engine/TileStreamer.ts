@@ -1,14 +1,12 @@
-import { Color3, Color4, Mesh, MeshBuilder, PickingInfo, Scene, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core'
+import { Animation, Color3, Color4, Mesh, MeshBuilder, PickingInfo, Scene, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core'
 import { CITYGAME_GRID_SIZE } from '../config/world'
 import { neighborhood, tileIdOf, tileOffsetMeters, tileSizeMeters } from '../geo/tileMath'
-import type { PlaceableTool, PlacedObject, TileClaim, TileCoord } from '../types'
+import { ProceduralBuildingFactory } from './models/ProceduralBuildingFactory'
+import type { BuildingLevel, PlacedObject, TileClaim, TileCoord } from '../types'
 
-const TOOL_STYLE: Record<PlaceableTool, { color: Color3; height: number; footprint: number }> = {
-    'zone-residential': { color: new Color3(0.31, 0.78, 0.47), height: 3.2, footprint: 0.8 },
-    'zone-commercial': { color: new Color3(0.22, 0.5, 0.96), height: 5.5, footprint: 0.8 },
-    'zone-industrial': { color: new Color3(0.95, 0.6, 0.2), height: 2.2, footprint: 0.85 },
-    road: { color: new Color3(0.3, 0.31, 0.33), height: 0.15, footprint: 1 },
-}
+const CONSTRUCTION_FPS = 30
+const CONSTRUCTION_FRAMES = 22
+const BULLDOZE_FRAMES = 12
 
 const UNCLAIMED_COLOR = new Color3(0.65, 0.66, 0.68)
 const CLAIMED_BY_OTHER_COLOR = new Color3(0.55, 0.72, 0.95)
@@ -20,7 +18,7 @@ interface TileEntry {
     plate: Mesh
     plateMat: StandardMaterial
     claim: TileClaim | null
-    objectMeshes: Map<string, Mesh>
+    objectNodes: Map<string, TransformNode>
 }
 
 /**
@@ -28,10 +26,16 @@ interface TileEntry {
  * map tile within `radius` of the player's current tile, tears down plates
  * (and everything placed on them) once they fall out of range, and maps
  * pointer picks back to (tileId, cellX, cellY) for placement.
+ *
+ * Also owns the visual life-cycle of what's placed on those plates:
+ * procedural building models (ProceduralBuildingFactory), a grow-in
+ * animation on construction, a cross-fade on SimCity-style level-up, and a
+ * shrink-out on bulldoze.
  */
 export class TileStreamer {
     private tiles = new Map<string, TileEntry>()
     private origin: TileCoord
+    private factory: ProceduralBuildingFactory
 
     constructor(
         private scene: Scene,
@@ -39,6 +43,7 @@ export class TileStreamer {
         private onMeshCreated?: (mesh: Mesh) => void,
     ) {
         this.origin = origin
+        this.factory = new ProceduralBuildingFactory(scene, onMeshCreated)
     }
 
     setOrigin(origin: TileCoord) {
@@ -78,17 +83,44 @@ export class TileStreamer {
         const entry = this.tiles.get(object.tileId)
         if (!entry) return
         const cellKey = `${object.cellX}:${object.cellY}`
-        if (entry.objectMeshes.has(cellKey)) return
-        entry.objectMeshes.set(cellKey, this.buildObjectMesh(entry, object))
+        if (entry.objectNodes.has(cellKey)) return
+        const node = this.buildObjectNode(entry, object)
+        entry.objectNodes.set(cellKey, node)
+        this.animateConstruction(node)
     }
 
     applyObjectRemoved(payload: { tileId: string; cellX: number; cellY: number }) {
         const entry = this.tiles.get(payload.tileId)
         if (!entry) return
         const cellKey = `${payload.cellX}:${payload.cellY}`
-        const mesh = entry.objectMeshes.get(cellKey)
-        mesh?.dispose()
-        entry.objectMeshes.delete(cellKey)
+        const node = entry.objectNodes.get(cellKey)
+        if (!node) return
+        entry.objectNodes.delete(cellKey)
+        this.animateBulldoze(node)
+    }
+
+    /** SimCity-style growth: swap in the next-level model with a quick cross-fade instead of an instant pop. */
+    applyObjectUpgraded(payload: { tileId: string; cellX: number; cellY: number; level: BuildingLevel; tool?: PlacedObject['tool'] }) {
+        const entry = this.tiles.get(payload.tileId)
+        if (!entry) return
+        const cellKey = `${payload.cellX}:${payload.cellY}`
+        const oldNode = entry.objectNodes.get(cellKey)
+        const tool = payload.tool ?? (oldNode?.metadata?.tool as PlacedObject['tool'] | undefined)
+        if (!tool) return
+
+        if (oldNode) this.animateBulldoze(oldNode, 8)
+        const newNode = this.buildObjectNode(entry, {
+            id: `${payload.tileId}:${cellKey}`,
+            tileId: payload.tileId,
+            cellX: payload.cellX,
+            cellY: payload.cellY,
+            tool,
+            level: payload.level,
+            ownerId: oldNode?.metadata?.ownerId ?? 'unknown',
+            createdAt: Date.now(),
+        })
+        entry.objectNodes.set(cellKey, newNode)
+        this.animateConstruction(newNode)
     }
 
     /** Renders a full server snapshot for a tile (claim + all placed objects), used on first join. */
@@ -156,7 +188,7 @@ export class TileStreamer {
         plate.edgesWidth = 2
         plate.edgesColor = new Color4(1, 1, 1, 0.5)
 
-        return { coord, root, plate, plateMat: mat, claim: null, objectMeshes: new Map() }
+        return { coord, root, plate, plateMat: mat, claim: null, objectNodes: new Map() }
     }
 
     private restyleTile(entry: TileEntry, localOwnerId: string | undefined) {
@@ -169,35 +201,48 @@ export class TileStreamer {
         }
     }
 
-    private buildObjectMesh(entry: TileEntry, object: PlacedObject): Mesh {
-        const style = TOOL_STYLE[object.tool]
+    private buildObjectNode(entry: TileEntry, object: PlacedObject): TransformNode {
         const size = tileSizeMeters(entry.coord)
         const cellSize = size / CITYGAME_GRID_SIZE
-        const footprint = cellSize * style.footprint
 
-        const box = MeshBuilder.CreateBox(
-            `obj-${object.id}`,
-            { width: footprint, depth: footprint, height: style.height },
-            this.scene,
-        )
-        box.parent = entry.root
+        const node = this.factory.spawn(object.tool, object.level, cellSize)
+        node.parent = entry.root
         const localX = (object.cellX + 0.5) * cellSize - size / 2
         const localZ = (object.cellY + 0.5) * cellSize - size / 2
-        box.position = new Vector3(localX, style.height / 2, localZ)
+        node.position = new Vector3(localX, 0, localZ)
+        node.metadata = { tool: object.tool, ownerId: object.ownerId, level: object.level }
 
-        const mat = new StandardMaterial(`obj-mat-${object.id}`, this.scene)
-        mat.diffuseColor = style.color
-        mat.specularColor = Color3.Black()
-        box.material = mat
-        box.receiveShadows = true
-        this.onMeshCreated?.(box)
+        return node
+    }
 
-        return box
+    /** Grows a freshly-placed (or upgraded) building from nothing, easing past 100% for a small "pop". */
+    private animateConstruction(node: TransformNode) {
+        const target = node.scaling.clone()
+        node.scaling.set(0.01, 0.01, 0.01)
+
+        const anim = new Animation('construct', 'scaling', CONSTRUCTION_FPS, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT)
+        anim.setKeys([
+            { frame: 0, value: new Vector3(0.01, 0.01, 0.01) },
+            { frame: CONSTRUCTION_FRAMES * 0.75, value: target.scale(1.06) },
+            { frame: CONSTRUCTION_FRAMES, value: target },
+        ])
+        this.scene.beginDirectAnimation(node, [anim], 0, CONSTRUCTION_FRAMES, false)
+    }
+
+    /** Shrinks a building out before disposing it — used for bulldoze and for the old model on a level-up swap. */
+    private animateBulldoze(node: TransformNode, frames: number = BULLDOZE_FRAMES) {
+        const start = node.scaling.clone()
+        const anim = new Animation('bulldoze', 'scaling', CONSTRUCTION_FPS, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT)
+        anim.setKeys([
+            { frame: 0, value: start },
+            { frame: frames, value: new Vector3(0.01, 0.01, 0.01) },
+        ])
+        this.scene.beginDirectAnimation(node, [anim], 0, frames, false, 1, () => node.dispose())
     }
 
     private disposeTile(entry: TileEntry) {
-        for (const mesh of entry.objectMeshes.values()) mesh.dispose()
-        entry.objectMeshes.clear()
+        for (const node of entry.objectNodes.values()) node.dispose()
+        entry.objectNodes.clear()
         entry.plate.dispose()
         entry.root.dispose()
     }

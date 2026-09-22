@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useCityGameStore } from '../store/store_citygame'
+import { TOOL_COST } from '../config/economy'
 import CityStatusPanel from './CityStatusPanel.vue'
 import type { BuildTool } from '../types'
 
@@ -20,6 +21,11 @@ const tools: { id: BuildTool; label: string; hint: string }[] = [
 
 const backendLabel = computed(() => (store.backend === 'webgpu' ? 'WebGPU' : 'WebGL 2.0'))
 const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning View' : 'Walkthrough View'))
+const fundsLabel = computed(() => `$${Math.round(store.funds).toLocaleString()}`)
+
+function costLabel(tool: BuildTool): string {
+    return TOOL_COST[tool] > 0 ? `$${TOOL_COST[tool]}` : ''
+}
 </script>
 
 <template>
@@ -30,6 +36,8 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
                 <span class="status-text">{{ backendLabel }}</span>
                 <span class="divider" />
                 <span class="status-text">{{ Math.round(store.fps) }} FPS</span>
+                <span class="divider" />
+                <span class="status-text funds">{{ fundsLabel }}</span>
             </div>
             <CityStatusPanel :owner-name="ownerName" @claim="emit('claim-tile')" />
         </div>
@@ -39,11 +47,13 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
                 v-for="tool in tools"
                 :key="tool.id"
                 class="tool-btn"
-                :class="{ active: store.activeTool === tool.id }"
+                :class="{ active: store.activeTool === tool.id, unaffordable: !store.canAfford(tool.id) }"
+                :disabled="!store.canAfford(tool.id)"
                 @click="store.setActiveTool(tool.id)"
             >
                 <span class="tool-key">{{ tool.label }}</span>
                 <span class="tool-label">{{ tool.hint }}</span>
+                <span v-if="costLabel(tool.id)" class="tool-cost">{{ costLabel(tool.id) }}</span>
             </button>
         </div>
 
@@ -117,6 +127,11 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
     background: rgba(0, 0, 0, 0.12);
 }
 
+.funds {
+    font-variant-numeric: tabular-nums;
+    color: #1a7f37;
+}
+
 .toolbar {
     align-self: center;
     padding: 8px;
@@ -156,6 +171,21 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
 .tool-label {
     font-size: 10px;
     opacity: 0.75;
+}
+
+.tool-cost {
+    font-size: 9px;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+}
+
+.tool-btn.unaffordable {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tool-btn:disabled {
+    pointer-events: none;
 }
 
 .view-toggle {

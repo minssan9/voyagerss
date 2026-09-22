@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-import type { PlaceableTool, PlacedObject, TileClaim, TileSnapshot } from '../types'
+import type { BuildingLevel, PlaceableTool, PlacedObject, TileClaim, TileSnapshot } from '../types'
 
 export interface CityGameSocketEvents {
     onConnected?: () => void
@@ -9,6 +9,7 @@ export interface CityGameSocketEvents {
     onObjectPlaced?: (object: PlacedObject) => void
     onObjectRejected?: (payload: { tileId: string; reason: string }) => void
     onObjectRemoved?: (payload: { tileId: string; cellX: number; cellY: number }) => void
+    onObjectUpgraded?: (payload: { tileId: string; cellX: number; cellY: number; level: BuildingLevel }) => void
     onPresenceUpdate?: (payload: { tileId: string; occupantCount: number }) => void
 }
 
@@ -36,6 +37,7 @@ export class CityGameSocket {
         this.socket.on('object:rejected', (payload) => events.onObjectRejected?.(payload))
         this.socket.on('object:removed', (payload) => events.onObjectRemoved?.(payload))
         this.socket.on('object:remove-ack', (payload) => events.onObjectRemoved?.(payload))
+        this.socket.on('object:upgraded', (payload) => events.onObjectUpgraded?.(payload))
         this.socket.on('presence:update', (payload) => events.onPresenceUpdate?.(payload))
     }
 
