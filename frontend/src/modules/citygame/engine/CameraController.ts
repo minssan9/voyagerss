@@ -1,4 +1,5 @@
 import { ArcRotateCamera, UniversalCamera, Scene, Vector3 } from '@babylonjs/core'
+import type { GameAction } from '../config/actions'
 import type { CameraMode } from '../types'
 
 const PLANNING = {
@@ -32,7 +33,11 @@ export class CameraController {
     private readonly panSpeed = 0.6
     private readonly rotateSpeed = 0.022
 
-    constructor(scene: Scene, canvas: HTMLCanvasElement) {
+    constructor(
+        scene: Scene,
+        canvas: HTMLCanvasElement,
+        private onModeChange?: (mode: CameraMode) => void,
+    ) {
         this.scene = scene
         this.canvas = canvas
 
@@ -111,6 +116,7 @@ export class CameraController {
             this.mode = targetMode
             this.isTransitioning = false
             this.transitionHandle = null
+            this.onModeChange?.(targetMode)
 
             if (targetMode === 'walkthrough') {
                 this.walkCamera.position.copyFrom(toPos)
@@ -125,17 +131,17 @@ export class CameraController {
         this.transitionHandle = requestAnimationFrame(step)
     }
 
-    /** Called once per frame with the set of currently-held KeyboardEvent.code values. */
-    update(pressedKeys: ReadonlySet<string>, deltaMs: number) {
+    /** Called once per frame with the set of currently-active actions (from keyboard and/or gamepad). */
+    update(activeActions: ReadonlySet<GameAction>, deltaMs: number) {
         if (this.mode !== 'planning' || this.isTransitioning) return
         const scale = deltaMs / 16.67
 
         let dx = 0
         let dz = 0
-        if (pressedKeys.has('KeyW')) dz -= 1
-        if (pressedKeys.has('KeyS')) dz += 1
-        if (pressedKeys.has('KeyA')) dx -= 1
-        if (pressedKeys.has('KeyD')) dx += 1
+        if (activeActions.has('pan-forward')) dz -= 1
+        if (activeActions.has('pan-back')) dz += 1
+        if (activeActions.has('pan-left')) dx -= 1
+        if (activeActions.has('pan-right')) dx += 1
 
         if (dx !== 0 || dz !== 0) {
             const forward = new Vector3(Math.sin(this.planningCamera.alpha), 0, Math.cos(this.planningCamera.alpha))
@@ -144,8 +150,18 @@ export class CameraController {
             this.planningCamera.target.addInPlace(move)
         }
 
-        if (pressedKeys.has('KeyQ')) this.planningCamera.alpha -= this.rotateSpeed * scale
-        if (pressedKeys.has('KeyE')) this.planningCamera.alpha += this.rotateSpeed * scale
+        if (activeActions.has('rotate-left')) this.planningCamera.alpha -= this.rotateSpeed * scale
+        if (activeActions.has('rotate-right')) this.planningCamera.alpha += this.rotateSpeed * scale
+    }
+
+    /** Current planning-camera orbit target, in world meters — used to resolve which map tile is under view. */
+    getPlanningTarget(): Vector3 {
+        return this.planningCamera.target
+    }
+
+    /** Current planning-camera orbit radius, in meters — the camera-distance signal for tile streaming. */
+    getPlanningRadius(): number {
+        return this.planningCamera.radius
     }
 
     dispose() {

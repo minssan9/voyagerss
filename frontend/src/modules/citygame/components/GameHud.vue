@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useCityGameStore } from '../store/store_citygame'
+import CityStatusPanel from './CityStatusPanel.vue'
 import type { BuildTool } from '../types'
+
+defineProps<{ ownerName: string }>()
+const emit = defineEmits<{ (event: 'claim-tile'): void }>()
 
 const store = useCityGameStore()
 
@@ -20,11 +24,14 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
 
 <template>
     <div class="hud">
-        <div class="hud-panel status-panel">
-            <span class="status-dot" :class="{ ready: store.isEngineReady }" />
-            <span class="status-text">{{ backendLabel }}</span>
-            <span class="divider" />
-            <span class="status-text">{{ Math.round(store.fps) }} FPS</span>
+        <div class="hud-row top-row">
+            <div class="hud-panel status-panel">
+                <span class="status-dot" :class="{ ready: store.isEngineReady }" />
+                <span class="status-text">{{ backendLabel }}</span>
+                <span class="divider" />
+                <span class="status-text">{{ Math.round(store.fps) }} FPS</span>
+            </div>
+            <CityStatusPanel :owner-name="ownerName" @claim="emit('claim-tile')" />
         </div>
 
         <div class="hud-panel toolbar">
@@ -73,6 +80,13 @@ const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning 
     align-items: center;
     gap: 12px;
     width: fit-content;
+}
+
+.hud-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    pointer-events: none;
 }
 
 .status-panel {

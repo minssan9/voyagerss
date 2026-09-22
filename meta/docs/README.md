@@ -17,6 +17,7 @@
 | [workschd-implementation-guide.md](guides/workschd-implementation-guide.md) | WorkSchd 구현 |
 | [github-runner-guide.md](guides/github-runner-guide.md) | GitHub Actions runner |
 | [github-actions-logs.md](guides/github-actions-logs.md) | `gh` CLI로 pipeline 로그 보기 |
+| [citygame-infra.md](guides/citygame-infra.md) | citygame 모듈 인프라 아키텍처 & 무료 티어 배포 |
 
 ## PRD
 

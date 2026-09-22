@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import { configService } from './config/config-service';
 import { aiprConfigService } from './config/aipr-config-service';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
+import { cityGameGatewayService } from './modules/citygame/services/CityGameGatewayService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
 import { configureLoggerFromConfig } from './modules/investand/utils/common/logger';
@@ -65,6 +66,9 @@ async function bootstrap() {
   // WebSocket — must use NestJS-managed HTTP server, not a separately created server
   const httpServer = app.getHttpServer();
   webSocketService.initialize(httpServer);
+
+  const io = webSocketService.getIO();
+  if (io) cityGameGatewayService.initialize(io);
 
   startWorkschdScraperScheduler();
   initWorkers();

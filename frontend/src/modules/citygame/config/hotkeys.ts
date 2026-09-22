@@ -1,17 +1,4 @@
-import type { BuildTool, HotkeyHint } from '../types'
-
-/** KeyboardEvent.code -> build tool, for the rapid 1-5 hotkey row. */
-export const TOOL_HOTKEYS: Record<string, BuildTool> = {
-    Digit1: 'select',
-    Digit2: 'zone-residential',
-    Digit3: 'zone-commercial',
-    Digit4: 'zone-industrial',
-    Digit5: 'road',
-}
-
-export const BULLDOZE_KEY = 'Delete'
-export const TOGGLE_CAMERA_KEY = 'Tab'
-export const TOGGLE_HINTS_KEY = 'KeyH'
+import type { HotkeyHint } from '../types'
 
 export const HOTKEY_HINTS: HotkeyHint[] = [
     { keys: '1 - 5', description: '도구 선택 (Select / 주거 / 상업 / 공업 / 도로)' },
@@ -21,4 +8,5 @@ export const HOTKEY_HINTS: HotkeyHint[] = [
     { keys: 'Q / E', description: '카메라 회전 (Planning view)' },
     { keys: 'Tab', description: '평면도 / 도보 시점 전환' },
     { keys: 'H', description: '단축키 힌트 표시/숨김' },
+    { keys: 'Gamepad', description: 'A/B/X/Y = 도구, LB/RB = 회전, 좌스틱 = 이동' },
 ]

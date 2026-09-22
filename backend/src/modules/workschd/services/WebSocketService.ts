@@ -117,6 +117,15 @@ export class WebSocketService {
   }
 
   /**
+   * Expose the underlying Socket.IO server so other modules can attach
+   * their own namespace (e.g. `io.of('/citygame')`) instead of binding a
+   * second server to the same HTTP server.
+   */
+  getIO(): SocketIOServer | null {
+    return this.io;
+  }
+
+  /**
    * Check if user is connected
    */
   isUserConnected(accountId: number): boolean {
