@@ -10,13 +10,14 @@ const emit = defineEmits<{ (event: 'claim-tile'): void }>()
 
 const store = useCityGameStore()
 
-const tools: { id: BuildTool; label: string; hint: string }[] = [
-    { id: 'select', label: '1', hint: '선택' },
-    { id: 'zone-residential', label: '2', hint: '주거' },
-    { id: 'zone-commercial', label: '3', hint: '상업' },
-    { id: 'zone-industrial', label: '4', hint: '공업' },
-    { id: 'road', label: '5', hint: '도로' },
-    { id: 'bulldoze', label: 'Del', hint: '철거' },
+/** Accent per tool — matches the in-world placement-preview ghost color so the toolbar and the 3D hover cue read as one system. */
+const tools: { id: BuildTool; label: string; hint: string; accent: string }[] = [
+    { id: 'select', label: '1', hint: '선택', accent: '#8e8e93' },
+    { id: 'zone-residential', label: '2', hint: '주거', accent: '#59d973' },
+    { id: 'zone-commercial', label: '3', hint: '상업', accent: '#4d8cf2' },
+    { id: 'zone-industrial', label: '4', hint: '공업', accent: '#f29940' },
+    { id: 'road', label: '5', hint: '도로', accent: '#bfbfc7' },
+    { id: 'bulldoze', label: 'Del', hint: '철거', accent: '#f24040' },
 ]
 
 const backendLabel = computed(() => (store.backend === 'webgpu' ? 'WebGPU' : 'WebGL 2.0'))
@@ -48,9 +49,11 @@ function costLabel(tool: BuildTool): string {
                 :key="tool.id"
                 class="tool-btn"
                 :class="{ active: store.activeTool === tool.id, unaffordable: !store.canAfford(tool.id) }"
+                :style="{ '--accent': tool.accent }"
                 :disabled="!store.canAfford(tool.id)"
                 @click="store.setActiveTool(tool.id)"
             >
+                <span class="tool-swatch" />
                 <span class="tool-key">{{ tool.label }}</span>
                 <span class="tool-label">{{ tool.hint }}</span>
                 <span v-if="costLabel(tool.id)" class="tool-cost">{{ costLabel(tool.id) }}</span>
@@ -139,6 +142,7 @@ function costLabel(tool: BuildTool): string {
 }
 
 .tool-btn {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -158,9 +162,29 @@ function costLabel(tool: BuildTool): string {
     background: rgba(0, 0, 0, 0.05);
 }
 
+/* A soft tint of the tool's own accent color, plus a solid underline — reads as "selected + this color" without going loud. */
 .tool-btn.active {
-    background: #1d1d1f;
-    color: #fff;
+    background: color-mix(in srgb, var(--accent) 16%, #fff 84%);
+}
+
+.tool-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 20px;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+}
+
+.tool-swatch {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
 }
 
 .tool-key {

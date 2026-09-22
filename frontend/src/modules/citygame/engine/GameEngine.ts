@@ -87,6 +87,10 @@ export class GameEngine {
         scene.autoClear = true
         // Grid environments carry a lot of static geometry; freeze what we can.
         scene.blockMaterialDirtyMechanism = true
+        // Babylon only picks on pointer move when a mesh has a registered action — off by default here.
+        // Both the click-drag "paint" placement and the hover placement-preview ghost need a pick on every
+        // move (not just clicks), so force it on.
+        scene.constantlyUpdateMeshUnderPointer = true
 
         const sun = new DirectionalLight('sun', new Vector3(-0.45, -1, -0.28), scene)
         sun.position = new Vector3(60, 120, 60)

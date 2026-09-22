@@ -166,6 +166,21 @@ function attemptPlacementAt(pick: PickingInfo) {
     citySocket.placeObject({ tileId: cell.tileId, cellX: cell.cellX, cellY: cell.cellY, tool })
 }
 
+/** Runs on every pointer move (not just while painting) so the ghost box tracks the cursor before the player commits to a placement. */
+function updateHoverPreview(pick: PickingInfo | undefined) {
+    if (!tileStreamer) return
+    if (cameraController?.mode !== 'planning' || store.activeTool === 'select') {
+        tileStreamer.hidePreview()
+        return
+    }
+    const cell = pick ? tileStreamer.pickCell(pick) : null
+    if (!cell) {
+        tileStreamer.hidePreview()
+        return
+    }
+    tileStreamer.showPreview(cell.tileId, cell.cellX, cell.cellY, store.activeTool)
+}
+
 onMounted(async () => {
     if (!canvasRef.value) return
 
@@ -178,7 +193,10 @@ onMounted(async () => {
     cameraController.setBuildModeActive(store.activeTool !== 'select')
     watch(
         () => store.activeTool,
-        (tool) => cameraController?.setBuildModeActive(tool !== 'select'),
+        (tool) => {
+            cameraController?.setBuildModeActive(tool !== 'select')
+            if (tool === 'select') tileStreamer?.hidePreview()
+        },
     )
 
     scene.onPointerObservable.add((pointerInfo) => {
@@ -189,6 +207,7 @@ onMounted(async () => {
                 if (pointerInfo.pickInfo) attemptPlacementAt(pointerInfo.pickInfo)
                 break
             case PointerEventTypes.POINTERMOVE:
+                updateHoverPreview(pointerInfo.pickInfo)
                 if (isPainting && pointerInfo.pickInfo) attemptPlacementAt(pointerInfo.pickInfo)
                 break
             case PointerEventTypes.POINTERUP:

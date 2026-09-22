@@ -174,6 +174,8 @@ export class NpcSystem {
         if (this.npcs.has(id)) return
         const instance = this.carMaster.createInstance(`npc-car-${this.counter++}`)
         instance.parent = parent
+        // Wandering NPCs shouldn't intercept placement/bulldoze picks meant for the ground cell below them.
+        instance.isPickable = false
         const color = pick(CAR_COLORS, hash)
         instance.instancedBuffers.color = new Color4(color.r, color.g, color.b, 1)
         this.registerNpc(id, tileId, instance, bounds, 1.2 + hash * 1.3, 0.32)
@@ -184,11 +186,13 @@ export class NpcSystem {
         if (this.npcs.has(id)) return
         const body = this.personMaster.createInstance(`npc-person-${this.counter++}`)
         body.parent = parent
+        body.isPickable = false
         const shirt = pick(SHIRT_COLORS, hash)
         body.instancedBuffers.color = new Color4(shirt.r, shirt.g, shirt.b, 1)
 
         const head = this.headMaster.createInstance(`npc-person-head-${this.counter++}`)
         head.parent = body
+        head.isPickable = false
         head.position.set(0, 0.58, 0)
 
         this.registerNpc(id, tileId, body, bounds, 0.35 + hash * 0.3, 0.45)

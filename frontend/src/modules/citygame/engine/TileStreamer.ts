@@ -1,9 +1,16 @@
-import { Animation, Color3, Color4, Mesh, MeshBuilder, PickingInfo, Scene, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core'
+import { Animation, Color3, Color4, DynamicTexture, Mesh, MeshBuilder, PickingInfo, Scene, StandardMaterial, TransformNode, Vector3 } from '@babylonjs/core'
 import { CITYGAME_GRID_SIZE } from '../config/world'
 import { neighborhood, tileIdOf, tileOffsetMeters, tileSizeMeters } from '../geo/tileMath'
-import { ProceduralBuildingFactory } from './models/ProceduralBuildingFactory'
+import { ProceduralBuildingFactory, type RoadDirection } from './models/ProceduralBuildingFactory'
 import { NpcSystem, type NpcBounds } from './npc/NpcSystem'
 import type { BuildingLevel, PlacedObject, TileClaim, TileCoord } from '../types'
+
+const ROAD_NEIGHBORS: { dir: RoadDirection; dx: number; dy: number }[] = [
+    { dir: 'N', dx: 0, dy: -1 },
+    { dir: 'E', dx: 1, dy: 0 },
+    { dir: 'S', dx: 0, dy: 1 },
+    { dir: 'W', dx: -1, dy: 0 },
+]
 
 const CONSTRUCTION_FPS = 30
 const CONSTRUCTION_FRAMES = 22
@@ -14,15 +21,25 @@ const MAX_PEDESTRIANS_PER_TILE = 6
 const CAR_ID_PREFIX = 'car:'
 const PEDESTRIAN_ID_PREFIX = 'ped:'
 
-const UNCLAIMED_COLOR = new Color3(0.65, 0.66, 0.68)
-const CLAIMED_BY_OTHER_COLOR = new Color3(0.55, 0.72, 0.95)
-const CLAIMED_BY_ME_COLOR = new Color3(0.65, 0.9, 0.6)
+const UNCLAIMED_COLOR = '#a6a8ab'
+const CLAIMED_BY_OTHER_COLOR = '#8cb8f2'
+const CLAIMED_BY_ME_COLOR = '#8fd6a0'
+
+const GRID_TEXTURE_SIZE = 512
+const PREVIEW_COLORS: Partial<Record<string, Color3>> = {
+    'zone-residential': new Color3(0.35, 0.85, 0.45),
+    'zone-commercial': new Color3(0.3, 0.55, 0.95),
+    'zone-industrial': new Color3(0.95, 0.6, 0.25),
+    road: new Color3(0.75, 0.75, 0.78),
+    bulldoze: new Color3(0.95, 0.25, 0.25),
+}
 
 interface TileEntry {
     coord: TileCoord
     root: TransformNode
     plate: Mesh
     plateMat: StandardMaterial
+    gridTexture: DynamicTexture
     claim: TileClaim | null
     objectNodes: Map<string, TransformNode>
     /** cellKeys ("x:y") of placed roads/population buildings — drives how many NPCs this tile gets and where they roam. */
@@ -46,6 +63,9 @@ export class TileStreamer {
     private tiles = new Map<string, TileEntry>()
     private origin: TileCoord
     private factory: ProceduralBuildingFactory
+    private previewMesh: Mesh | null = null
+    private previewMat: StandardMaterial | null = null
+    private previewKey: string | null = null
     private npcSystem: NpcSystem
 
     constructor(
@@ -101,6 +121,7 @@ export class TileStreamer {
         entry.objectNodes.set(cellKey, node)
         this.animateConstruction(node)
         this.trackCell(entry, object.tool, cellKey, true)
+        if (object.tool === 'road') this.refreshNeighborRoads(entry, object.cellX, object.cellY)
     }
 
     applyObjectRemoved(payload: { tileId: string; cellX: number; cellY: number }) {
@@ -113,7 +134,10 @@ export class TileStreamer {
         this.animateBulldoze(node)
 
         const tool = node.metadata?.tool as PlacedObject['tool'] | undefined
-        if (tool) this.trackCell(entry, tool, cellKey, false)
+        if (tool) {
+            this.trackCell(entry, tool, cellKey, false)
+            if (tool === 'road') this.refreshNeighborRoads(entry, payload.cellX, payload.cellY)
+        }
     }
 
     /** SimCity-style growth: swap in the next-level model with a quick cross-fade instead of an instant pop. */
@@ -170,6 +194,51 @@ export class TileStreamer {
         return this.tiles.get(tileId)?.claim ?? null
     }
 
+    /** Shows (or moves) a translucent, tool-colored ghost box over the hovered cell — hover feedback for placement, not tied to painting. */
+    showPreview(tileId: string, cellX: number, cellY: number, tool: string) {
+        const key = `${tileId}:${cellX}:${cellY}:${tool}`
+        if (key === this.previewKey) return
+
+        const entry = this.tiles.get(tileId)
+        const color = PREVIEW_COLORS[tool]
+        if (!entry || !color) {
+            this.hidePreview()
+            return
+        }
+        this.previewKey = key
+
+        const size = tileSizeMeters(entry.coord)
+        const cellSize = size / CITYGAME_GRID_SIZE
+
+        if (!this.previewMesh) {
+            this.previewMesh = MeshBuilder.CreateBox('placement-preview', { size: 1 }, this.scene)
+            this.previewMesh.isPickable = false
+            this.previewMat = new StandardMaterial('placement-preview-mat', this.scene)
+            this.previewMat.specularColor = Color3.Black()
+            this.previewMat.alpha = 0.45
+            this.previewMesh.material = this.previewMat
+        }
+
+        // Deliberately NOT parented to the tile root: that root can be disposed (and, by default, its
+        // children with it) as tiles stream out of range, which would silently invalidate this reused mesh.
+        const height = tool === 'road' ? 0.2 : 2
+        this.previewMat!.diffuseColor = color
+        this.previewMat!.emissiveColor = color.scale(0.3)
+        this.previewMesh.scaling.set(cellSize * 0.92, height, cellSize * 0.92)
+        this.previewMesh.position.set(
+            entry.root.position.x + (cellX + 0.5) * cellSize - size / 2,
+            entry.root.position.y + height / 2 + 0.05,
+            entry.root.position.z + (cellY + 0.5) * cellSize - size / 2,
+        )
+        this.previewMesh.setEnabled(true)
+    }
+
+    hidePreview() {
+        if (!this.previewKey) return
+        this.previewKey = null
+        this.previewMesh?.setEnabled(false)
+    }
+
     /** Finds which currently-rendered tile plate contains this world XZ position, if any. */
     resolveTileAt(worldX: number, worldZ: number): TileCoord | null {
         for (const entry of this.tiles.values()) {
@@ -195,26 +264,67 @@ export class TileStreamer {
         plate.metadata = { tileId: id }
         plate.isPickable = true
 
+        const gridTexture = new DynamicTexture(`tile-grid-${id}`, GRID_TEXTURE_SIZE, this.scene, false)
+        this.paintGridTexture(gridTexture, UNCLAIMED_COLOR)
+
         const mat = new StandardMaterial(`tile-mat-${id}`, this.scene)
-        mat.diffuseColor = UNCLAIMED_COLOR
+        mat.diffuseTexture = gridTexture
         mat.specularColor = Color3.Black()
-        mat.alpha = 0.55
         plate.material = mat
 
         plate.enableEdgesRendering()
         plate.edgesWidth = 2
         plate.edgesColor = new Color4(1, 1, 1, 0.5)
 
-        return { coord, root, plate, plateMat: mat, claim: null, objectNodes: new Map(), roadCells: new Set(), populationCells: new Set() }
+        return {
+            coord,
+            root,
+            plate,
+            plateMat: mat,
+            gridTexture,
+            claim: null,
+            objectNodes: new Map(),
+            roadCells: new Set(),
+            populationCells: new Set(),
+        }
+    }
+
+    /** Draws a solid fill + 16x16 grid lines directly into the plate's texture — an opaque, SimCity-style tiled lot instead of a flat translucent color. */
+    private paintGridTexture(texture: DynamicTexture, fillColor: string) {
+        const ctx = texture.getContext() as CanvasRenderingContext2D
+        const size = GRID_TEXTURE_SIZE
+
+        ctx.fillStyle = fillColor
+        ctx.fillRect(0, 0, size, size)
+
+        const step = size / CITYGAME_GRID_SIZE
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)'
+        ctx.lineWidth = 1
+        for (let i = 1; i < CITYGAME_GRID_SIZE; i++) {
+            ctx.beginPath()
+            ctx.moveTo(i * step, 0)
+            ctx.lineTo(i * step, size)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.moveTo(0, i * step)
+            ctx.lineTo(size, i * step)
+            ctx.stroke()
+        }
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)'
+        ctx.lineWidth = 4
+        ctx.strokeRect(2, 2, size - 4, size - 4)
+
+        texture.update(false)
     }
 
     private restyleTile(entry: TileEntry, localOwnerId: string | undefined) {
         if (!entry.claim) {
-            entry.plateMat.diffuseColor = UNCLAIMED_COLOR
+            this.paintGridTexture(entry.gridTexture, UNCLAIMED_COLOR)
         } else if (entry.claim.ownerId === localOwnerId) {
-            entry.plateMat.diffuseColor = CLAIMED_BY_ME_COLOR
+            this.paintGridTexture(entry.gridTexture, CLAIMED_BY_ME_COLOR)
         } else {
-            entry.plateMat.diffuseColor = CLAIMED_BY_OTHER_COLOR
+            this.paintGridTexture(entry.gridTexture, CLAIMED_BY_OTHER_COLOR)
         }
     }
 
@@ -222,7 +332,10 @@ export class TileStreamer {
         const size = tileSizeMeters(entry.coord)
         const cellSize = size / CITYGAME_GRID_SIZE
 
-        const node = this.factory.spawn(object.tool, object.level, cellSize, object.tileId, object.cellX, object.cellY)
+        const node =
+            object.tool === 'road'
+                ? this.factory.spawnRoad(cellSize, this.computeRoadArms(entry, object.cellX, object.cellY))
+                : this.factory.spawn(object.tool, object.level, cellSize, object.tileId, object.cellX, object.cellY)
         node.parent = entry.root
         const localX = (object.cellX + 0.5) * cellSize - size / 2
         const localZ = (object.cellY + 0.5) * cellSize - size / 2
@@ -230,6 +343,41 @@ export class TileStreamer {
         node.metadata = { tool: object.tool, ownerId: object.ownerId, level: object.level }
 
         return node
+    }
+
+    /** Which of a road cell's 4 neighbors (within this tile) also have a road, right now. */
+    private computeRoadArms(entry: TileEntry, cellX: number, cellY: number): Set<RoadDirection> {
+        const arms = new Set<RoadDirection>()
+        for (const { dir, dx, dy } of ROAD_NEIGHBORS) {
+            if (entry.roadCells.has(`${cellX + dx}:${cellY + dy}`)) arms.add(dir)
+        }
+        return arms
+    }
+
+    /** After a road is placed/removed, its neighbors' own connection shape may have changed — rebuild whichever of them are roads. */
+    private refreshNeighborRoads(entry: TileEntry, cellX: number, cellY: number) {
+        for (const { dx, dy } of ROAD_NEIGHBORS) {
+            const nx = cellX + dx
+            const ny = cellY + dy
+            const key = `${nx}:${ny}`
+            const node = entry.objectNodes.get(key)
+            if (!node || node.metadata?.tool !== 'road') continue
+            this.rebuildRoadNode(entry, nx, ny, node)
+        }
+    }
+
+    /** Instant swap (no grow/shrink animation) — this is a connectivity refresh, not a new placement or a demolition. */
+    private rebuildRoadNode(entry: TileEntry, cellX: number, cellY: number, oldNode: TransformNode) {
+        const ownerId = oldNode.metadata?.ownerId
+        oldNode.dispose()
+
+        const size = tileSizeMeters(entry.coord)
+        const cellSize = size / CITYGAME_GRID_SIZE
+        const node = this.factory.spawnRoad(cellSize, this.computeRoadArms(entry, cellX, cellY))
+        node.parent = entry.root
+        node.position = new Vector3((cellX + 0.5) * cellSize - size / 2, 0, (cellY + 0.5) * cellSize - size / 2)
+        node.metadata = { tool: 'road', ownerId, level: 1 }
+        entry.objectNodes.set(`${cellX}:${cellY}`, node)
     }
 
     /** Grows a freshly-placed (or upgraded) building from nothing, easing past 100% for a small "pop". */
@@ -353,5 +501,7 @@ export class TileStreamer {
         for (const [id, entry] of this.tiles) this.disposeTile(id, entry)
         this.tiles.clear()
         this.npcSystem.dispose()
+        this.previewMesh?.dispose()
+        this.previewMat?.dispose()
     }
 }
