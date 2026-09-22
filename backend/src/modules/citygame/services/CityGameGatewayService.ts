@@ -22,6 +22,8 @@ interface ViewportUpdatePayload {
 interface ClaimTilePayload {
   tileId: string;
   ownerName?: string;
+  /** Stable client-generated id (see frontend's useGuestIdentity) — not socket.id, which changes on reconnect. */
+  ownerId?: string;
 }
 
 interface PlaceObjectPayload {
@@ -29,6 +31,7 @@ interface PlaceObjectPayload {
   cellX: number;
   cellY: number;
   tool: BuildTool;
+  ownerId?: string;
 }
 
 interface RemoveObjectPayload {
@@ -120,7 +123,7 @@ export class CityGameGatewayService {
 
     const claim: TileClaim = {
       tileId: tid,
-      ownerId: socket.id,
+      ownerId: (payload.ownerId || socket.id).slice(0, 100),
       ownerName: (payload.ownerName || 'Player').slice(0, 40),
       claimedAt: Date.now(),
     };
@@ -149,7 +152,7 @@ export class CityGameGatewayService {
       cellY: payload.cellY,
       tool: payload.tool,
       level: 1,
-      ownerId: socket.id,
+      ownerId: (payload.ownerId || socket.id).slice(0, 100),
       createdAt: Date.now(),
     };
 

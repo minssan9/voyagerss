@@ -18,7 +18,8 @@ import CityMapPicker from '../components/CityMapPicker.vue'
 import type { GeoPoint, PlaceableTool, TileCoord } from '../types'
 
 const store = useCityGameStore()
-const { guestName } = useGuestIdentity()
+const { guestName, guestId } = useGuestIdentity()
+store.setLocalOwnerId(guestId)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
 let gameEngine: GameEngine | null = null
@@ -90,10 +91,9 @@ function scheduleViewportSync() {
 
 function connectMultiplayer() {
     store.setConnectionStatus('connecting')
-    citySocket = new CityGameSocket({
+    citySocket = new CityGameSocket(guestId, {
         onConnected: () => {
             store.setConnectionStatus('connected')
-            store.setLocalOwnerId(citySocket?.id)
             scheduleViewportSync()
         },
         onDisconnected: () => store.setConnectionStatus('disconnected'),

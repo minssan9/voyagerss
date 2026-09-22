@@ -2,11 +2,17 @@ import { Animation, Color3, Color4, Mesh, MeshBuilder, PickingInfo, Scene, Stand
 import { CITYGAME_GRID_SIZE } from '../config/world'
 import { neighborhood, tileIdOf, tileOffsetMeters, tileSizeMeters } from '../geo/tileMath'
 import { ProceduralBuildingFactory } from './models/ProceduralBuildingFactory'
+import { NpcSystem, type NpcBounds } from './npc/NpcSystem'
 import type { BuildingLevel, PlacedObject, TileClaim, TileCoord } from '../types'
 
 const CONSTRUCTION_FPS = 30
 const CONSTRUCTION_FRAMES = 22
 const BULLDOZE_FRAMES = 12
+
+const MAX_CARS_PER_TILE = 5
+const MAX_PEDESTRIANS_PER_TILE = 6
+const CAR_ID_PREFIX = 'car:'
+const PEDESTRIAN_ID_PREFIX = 'ped:'
 
 const UNCLAIMED_COLOR = new Color3(0.65, 0.66, 0.68)
 const CLAIMED_BY_OTHER_COLOR = new Color3(0.55, 0.72, 0.95)
@@ -19,6 +25,9 @@ interface TileEntry {
     plateMat: StandardMaterial
     claim: TileClaim | null
     objectNodes: Map<string, TransformNode>
+    /** cellKeys ("x:y") of placed roads/population buildings — drives how many NPCs this tile gets and where they roam. */
+    roadCells: Set<string>
+    populationCells: Set<string>
 }
 
 /**
@@ -29,13 +38,15 @@ interface TileEntry {
  *
  * Also owns the visual life-cycle of what's placed on those plates:
  * procedural building models (ProceduralBuildingFactory), a grow-in
- * animation on construction, a cross-fade on SimCity-style level-up, and a
- * shrink-out on bulldoze.
+ * animation on construction, a cross-fade on SimCity-style level-up, a
+ * shrink-out on bulldoze, and autonomous cars/pedestrians (NpcSystem) sized
+ * to how much road/population each tile currently has.
  */
 export class TileStreamer {
     private tiles = new Map<string, TileEntry>()
     private origin: TileCoord
     private factory: ProceduralBuildingFactory
+    private npcSystem: NpcSystem
 
     constructor(
         private scene: Scene,
@@ -44,6 +55,7 @@ export class TileStreamer {
     ) {
         this.origin = origin
         this.factory = new ProceduralBuildingFactory(scene, onMeshCreated)
+        this.npcSystem = new NpcSystem(scene, onMeshCreated)
     }
 
     setOrigin(origin: TileCoord) {
@@ -57,7 +69,7 @@ export class TileStreamer {
 
         for (const [id, entry] of this.tiles) {
             if (!nextIds.has(id)) {
-                this.disposeTile(entry)
+                this.disposeTile(id, entry)
                 this.tiles.delete(id)
             }
         }
@@ -84,9 +96,11 @@ export class TileStreamer {
         if (!entry) return
         const cellKey = `${object.cellX}:${object.cellY}`
         if (entry.objectNodes.has(cellKey)) return
+
         const node = this.buildObjectNode(entry, object)
         entry.objectNodes.set(cellKey, node)
         this.animateConstruction(node)
+        this.trackCell(entry, object.tool, cellKey, true)
     }
 
     applyObjectRemoved(payload: { tileId: string; cellX: number; cellY: number }) {
@@ -97,6 +111,9 @@ export class TileStreamer {
         if (!node) return
         entry.objectNodes.delete(cellKey)
         this.animateBulldoze(node)
+
+        const tool = node.metadata?.tool as PlacedObject['tool'] | undefined
+        if (tool) this.trackCell(entry, tool, cellKey, false)
     }
 
     /** SimCity-style growth: swap in the next-level model with a quick cross-fade instead of an instant pop. */
@@ -188,7 +205,7 @@ export class TileStreamer {
         plate.edgesWidth = 2
         plate.edgesColor = new Color4(1, 1, 1, 0.5)
 
-        return { coord, root, plate, plateMat: mat, claim: null, objectNodes: new Map() }
+        return { coord, root, plate, plateMat: mat, claim: null, objectNodes: new Map(), roadCells: new Set(), populationCells: new Set() }
     }
 
     private restyleTile(entry: TileEntry, localOwnerId: string | undefined) {
@@ -205,7 +222,7 @@ export class TileStreamer {
         const size = tileSizeMeters(entry.coord)
         const cellSize = size / CITYGAME_GRID_SIZE
 
-        const node = this.factory.spawn(object.tool, object.level, cellSize)
+        const node = this.factory.spawn(object.tool, object.level, cellSize, object.tileId, object.cellX, object.cellY)
         node.parent = entry.root
         const localX = (object.cellX + 0.5) * cellSize - size / 2
         const localZ = (object.cellY + 0.5) * cellSize - size / 2
@@ -240,7 +257,92 @@ export class TileStreamer {
         this.scene.beginDirectAnimation(node, [anim], 0, frames, false, 1, () => node.dispose())
     }
 
-    private disposeTile(entry: TileEntry) {
+    /** Updates a tile's road/population cell sets and re-syncs how many NPCs it should have. */
+    private trackCell(entry: TileEntry, tool: PlacedObject['tool'], cellKey: string, added: boolean) {
+        if (tool === 'road') {
+            added ? entry.roadCells.add(cellKey) : entry.roadCells.delete(cellKey)
+            this.syncTraffic(entry)
+        } else if (tool === 'zone-residential' || tool === 'zone-commercial') {
+            added ? entry.populationCells.add(cellKey) : entry.populationCells.delete(cellKey)
+            this.syncPedestrians(entry)
+        }
+    }
+
+    private syncTraffic(entry: TileEntry) {
+        const tileId = tileIdOf(entry.coord)
+        const desired = entry.roadCells.size === 0 ? 0 : Math.min(MAX_CARS_PER_TILE, Math.max(1, Math.floor(entry.roadCells.size / 2)))
+        const existingIds = this.npcSystem.idsForTile(tileId, CAR_ID_PREFIX)
+
+        if (desired === 0) {
+            for (const id of existingIds) this.npcSystem.remove(id)
+            return
+        }
+
+        const bounds = this.boundsForCells(entry, entry.roadCells)
+        for (const id of existingIds) this.npcSystem.updateBounds(id, bounds)
+
+        for (let i = existingIds.length; i < desired; i++) {
+            this.npcSystem.spawnCar(`${CAR_ID_PREFIX}${tileId}:${i}`, tileId, entry.root, bounds, Math.random())
+        }
+        for (let i = desired; i < existingIds.length; i++) {
+            this.npcSystem.remove(existingIds[i])
+        }
+    }
+
+    private syncPedestrians(entry: TileEntry) {
+        const tileId = tileIdOf(entry.coord)
+        const desired =
+            entry.populationCells.size === 0 ? 0 : Math.min(MAX_PEDESTRIANS_PER_TILE, Math.max(1, Math.floor(entry.populationCells.size / 2)))
+        const existingIds = this.npcSystem.idsForTile(tileId, PEDESTRIAN_ID_PREFIX)
+
+        if (desired === 0) {
+            for (const id of existingIds) this.npcSystem.remove(id)
+            return
+        }
+
+        const bounds = this.fullTileBounds(entry)
+        for (const id of existingIds) this.npcSystem.updateBounds(id, bounds)
+
+        for (let i = existingIds.length; i < desired; i++) {
+            this.npcSystem.spawnPedestrian(`${PEDESTRIAN_ID_PREFIX}${tileId}:${i}`, tileId, entry.root, bounds, Math.random())
+        }
+        for (let i = desired; i < existingIds.length; i++) {
+            this.npcSystem.remove(existingIds[i])
+        }
+    }
+
+    /** Axis-aligned bounding box (in tile-local meters) of a set of "x:y" cell keys, so NPCs roam roughly where the cells actually are. */
+    private boundsForCells(entry: TileEntry, cells: Set<string>): NpcBounds {
+        const size = tileSizeMeters(entry.coord)
+        const cellSize = size / CITYGAME_GRID_SIZE
+        let minCellX = Infinity
+        let maxCellX = -Infinity
+        let minCellY = Infinity
+        let maxCellY = -Infinity
+        for (const key of cells) {
+            const [xStr, yStr] = key.split(':')
+            const x = Number(xStr)
+            const y = Number(yStr)
+            minCellX = Math.min(minCellX, x)
+            maxCellX = Math.max(maxCellX, x)
+            minCellY = Math.min(minCellY, y)
+            maxCellY = Math.max(maxCellY, y)
+        }
+        return {
+            minX: minCellX * cellSize - size / 2,
+            maxX: (maxCellX + 1) * cellSize - size / 2,
+            minZ: minCellY * cellSize - size / 2,
+            maxZ: (maxCellY + 1) * cellSize - size / 2,
+        }
+    }
+
+    private fullTileBounds(entry: TileEntry): NpcBounds {
+        const size = tileSizeMeters(entry.coord)
+        return { minX: -size / 2, maxX: size / 2, minZ: -size / 2, maxZ: size / 2 }
+    }
+
+    private disposeTile(tileId: string, entry: TileEntry) {
+        this.npcSystem.removeAllForTile(tileId)
         for (const node of entry.objectNodes.values()) node.dispose()
         entry.objectNodes.clear()
         entry.plate.dispose()
@@ -248,7 +350,8 @@ export class TileStreamer {
     }
 
     dispose() {
-        for (const entry of this.tiles.values()) this.disposeTile(entry)
+        for (const [id, entry] of this.tiles) this.disposeTile(id, entry)
         this.tiles.clear()
+        this.npcSystem.dispose()
     }
 }

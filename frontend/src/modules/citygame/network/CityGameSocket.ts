@@ -22,7 +22,17 @@ export interface CityGameSocketEvents {
 export class CityGameSocket {
     private socket: Socket
 
-    constructor(events: CityGameSocketEvents = {}) {
+    /**
+     * `ownerId` is a stable, client-generated id (see useGuestIdentity) sent
+     * with every claim/place call — deliberately NOT `this.socket.id`.
+     * Socket.IO reassigns `.id` on every reconnect, so using it as the
+     * ownership key would make a client lose recognition of its own claimed
+     * tile after any network blip.
+     */
+    constructor(
+        private ownerId: string,
+        events: CityGameSocketEvents = {},
+    ) {
         this.socket = io('/citygame', {
             path: '/socket.io',
             transports: ['websocket', 'polling'],
@@ -45,10 +55,6 @@ export class CityGameSocket {
         return this.socket.connected
     }
 
-    get id(): string | undefined {
-        return this.socket.id
-    }
-
     /** Tells the server which tile the camera is centered on; resolves with a full snapshot of every tile now in range. */
     updateViewport(tileId: string, radius: number): Promise<TileSnapshot[]> {
         return new Promise((resolve) => {
@@ -59,11 +65,11 @@ export class CityGameSocket {
     }
 
     claimTile(tileId: string, ownerName: string) {
-        this.socket.emit('tile:claim', { tileId, ownerName })
+        this.socket.emit('tile:claim', { tileId, ownerName, ownerId: this.ownerId })
     }
 
     placeObject(payload: { tileId: string; cellX: number; cellY: number; tool: PlaceableTool }) {
-        this.socket.emit('object:place', payload)
+        this.socket.emit('object:place', { ...payload, ownerId: this.ownerId })
     }
 
     removeObject(payload: { tileId: string; cellX: number; cellY: number }) {
