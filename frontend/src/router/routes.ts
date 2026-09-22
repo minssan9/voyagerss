@@ -3,6 +3,7 @@ import workschdRoutes from '@/modules/workschd/router/routes';
 import aviationRoutes from '@/modules/aviation/router/routes';
 import investandRoutes from '@/modules/investand/router/routes';
 import aiprRoutes from '@/modules/aipr/router/routes';
+import citygameRoutes from '@/modules/citygame/router/routes';
 
 // ─── Common Routes ───────────────────────────────────────────────
 const commonRoutes: RouteRecordRaw[] = [
@@ -47,6 +48,7 @@ export const routes: RouteRecordRaw[] = [
     ...investandRoutes,
     ...workschdRoutes,
     ...aiprRoutes,
+    ...citygameRoutes,
     ...errorRoutes,
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/common/error/404.vue'), meta: { icon: 'search_off', hidden: true } }
 ];
