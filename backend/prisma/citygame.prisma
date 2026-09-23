@@ -1,0 +1,51 @@
+// Persistence for the citygame module's real-world tiles and placed
+// buildings — currently a scaffold. CityGameGatewayService.ts keeps
+// authoritative state in-memory for now (fine for one backend instance);
+// this schema is here so a follow-up phase can back it with real storage
+// without re-deriving the data model.
+//
+// Uses its own datasource (Postgres, e.g. Supabase's free tier) rather than
+// the MySQL database the other modules share, since PostGIS-based spatial
+// queries (nearest tiles, bounding-box lookups) are the reason to reach for
+// Postgres here. Requires the `postgis` extension enabled on the target
+// database before any spatial columns/indexes are added in a later
+// migration; plain lat/lng floats are enough for the tile-grid math this
+// module currently does.
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-citygame"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("CITYGAME_DATABASE_URL")
+}
+
+model CityTile {
+  id         Int      @id @default(autoincrement())
+  tileId     String   @unique @db.VarChar(40) // "{z}/{x}/{y}"
+  ownerId    String   @map("owner_id") @db.VarChar(100)
+  ownerName  String   @map("owner_name") @db.VarChar(40)
+  centerLat  Float    @map("center_lat")
+  centerLon  Float    @map("center_lon")
+  claimedAt  DateTime @default(now()) @map("claimed_at")
+
+  buildings PlacedBuilding[]
+
+  @@map("citygame_tile")
+}
+
+model PlacedBuilding {
+  id        Int      @id @default(autoincrement())
+  tileId    String   @map("tile_id") @db.VarChar(40)
+  cellX     Int      @map("cell_x")
+  cellY     Int      @map("cell_y")
+  tool      String   @db.VarChar(30) // zone-residential | zone-commercial | zone-industrial | road
+  ownerId   String   @map("owner_id") @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tile CityTile @relation(fields: [tileId], references: [tileId], onDelete: Cascade)
+
+  @@unique([tileId, cellX, cellY])
+  @@map("citygame_placed_building")
+}

@@ -14,6 +14,7 @@
     "firebase:deploy": "firebase deploy --config .devops/firebase.json"
   },
   "dependencies": {
+    "@babylonjs/core": "^7.54.3",
     "@channel.io/channel-web-sdk-loader": "^1.1.7",
     "@quasar/extras": "^1.16.12",
     "@types/leaflet": "^1.9.18",

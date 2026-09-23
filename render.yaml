@@ -1,0 +1,39 @@
+# Render Blueprint — optional free-tier deploy path for the backend
+# (Socket.IO + REST API, all modules including citygame's realtime
+# gateway), as an alternative to the DigitalOcean droplet documented in
+# meta/deploy/DEPLOY-DIGITALOCEAN.md. Reuses backend/Dockerfile so the
+# build is identical to the droplet image — no separate build config to
+# keep in sync.
+#
+# Fly.io is a drop-in alternative: `fly launch` in backend/ picks up the
+# same Dockerfile with no changes.
+#
+# NOTE: BACKEND_PORT below is a starting value — check Render's current
+# "which port does my service listen on" docs for Docker-runtime web
+# services before deploying, and adjust it (and this comment) if Render's
+# port-detection behavior differs from what's assumed here.
+services:
+  - type: web
+    name: voyagerss-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_PORT
+        value: "10000"
+      - key: DATABASE_URL
+        sync: false
+      - key: CITYGAME_DATABASE_URL
+        sync: false
+      - key: CONFIG_ENCRYPTION_KEY
+        sync: false
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        value: "6379"
+      - key: ALLOWED_ORIGINS
+        sync: false
