@@ -71,6 +71,7 @@ export class ProceduralBuildingFactory {
     private roadCurbMaster!: Mesh
     private roadArmMaster!: Mesh
     private roadCrosswalkBarMaster!: Mesh
+    private unfundedMarkerMaster!: Mesh
 
     constructor(
         private scene: Scene,
@@ -87,7 +88,14 @@ export class ProceduralBuildingFactory {
         this.registerVariants('zone-industrial:1', [this.buildWarehouseA(), this.buildWarehouseB()])
         this.registerVariants('zone-industrial:2', [this.buildFactory()])
         this.registerVariants('zone-industrial:3', [this.buildIndustrialComplex()])
+        this.registerVariants('home:1', [this.buildHome()])
+        this.registerVariants('facility-park:1', [this.buildPark()])
+        this.registerVariants('facility-hospital:1', [this.buildHospital()])
+        this.registerVariants('facility-police:1', [this.buildPolice()])
+        this.registerVariants('facility-school:1', [this.buildSchool()])
+        this.registerVariants('facility-landmark:1', [this.buildLandmark()])
         this.buildRoadMasters()
+        this.buildUnfundedMarkerMaster()
 
         this.startBeaconBlink()
     }
@@ -346,11 +354,110 @@ export class ProceduralBuildingFactory {
         return mat
     }
 
+    /**
+     * A 4-sided cone turned 45° so its base lines up with a square wall. The turn is baked into the
+     * vertices: instances don't inherit the master's rotation, so setting it on the master alone left
+     * every roof diamond-rotated relative to its house.
+     */
     private pyramidRoof(name: string, baseSize: number, height: number, mat: StandardMaterial): Mesh {
         const mesh = MeshBuilder.CreateCylinder(name, { diameterTop: 0, diameterBottom: baseSize, height, tessellation: 4 }, this.scene)
         mesh.material = mat
         mesh.rotation.y = Math.PI / 4
+        mesh.bakeCurrentTransformIntoVertices()
         return mesh
+    }
+
+    /** Triangular-prism gable roof, ridge along X, apex up — rotation baked in for the same reason as pyramidRoof. */
+    private gableRoof(name: string, length: number, width: number, height: number, mat: StandardMaterial): Mesh {
+        const mesh = MeshBuilder.CreateCylinder(name, { diameter: 1, height: length, tessellation: 3 }, this.scene)
+        mesh.rotation.z = Math.PI / 2
+        mesh.bakeCurrentTransformIntoVertices()
+        // Stretch the unit triangle to the requested footprint, then rebase so the eaves sit at local y=0.
+        mesh.refreshBoundingInfo()
+        const unit = mesh.getBoundingInfo().boundingBox
+        mesh.scaling.set(1, height / (unit.maximum.y - unit.minimum.y), width / (unit.maximum.z - unit.minimum.z))
+        mesh.bakeCurrentTransformIntoVertices()
+        mesh.refreshBoundingInfo()
+        mesh.position.y = -mesh.getBoundingInfo().boundingBox.minimum.y
+        mesh.bakeCurrentTransformIntoVertices()
+        mesh.material = mat
+        return mesh
+    }
+
+    private sphere(name: string, diameter: number, mat: StandardMaterial, segments = 10): Mesh {
+        const mesh = MeshBuilder.CreateSphere(name, { diameter, segments }, this.scene)
+        mesh.material = mat
+        return mesh
+    }
+
+    private disc(name: string, diameter: number, height: number, mat: StandardMaterial, tessellation = 24): Mesh {
+        const mesh = MeshBuilder.CreateCylinder(name, { diameter, height, tessellation }, this.scene)
+        mesh.material = mat
+        return mesh
+    }
+
+    private taper(name: string, bottom: number, top: number, height: number, mat: StandardMaterial): Mesh {
+        const mesh = MeshBuilder.CreateCylinder(name, { diameterBottom: bottom, diameterTop: top, height, tessellation: 16 }, this.scene)
+        mesh.material = mat
+        return mesh
+    }
+
+    private part(mesh: Mesh, x: number, y: number, z: number, rotationY = 0, tintable = false): PartTemplate {
+        return { mesh, position: new Vector3(x, y, z), rotationY, tintable }
+    }
+
+    /** A leafy tree: trunk + two stacked canopy spheres; returns parts positioned around (x, z). */
+    private tree(prefix: string, x: number, z: number, scale = 1): PartTemplate[] {
+        const trunkMat = this.mat('tree-trunk', new Color3(0.42, 0.3, 0.2))
+        const leafMat = this.mat('tree-leaf', new Color3(0.27, 0.55, 0.28))
+        const leafLightMat = this.mat('tree-leaf-light', new Color3(0.36, 0.64, 0.32))
+        return [
+            this.part(this.stack(`${prefix}-trunk`, 0.28 * scale, 1.6 * scale, trunkMat), x, 0.8 * scale, z),
+            this.part(this.sphere(`${prefix}-canopy`, 2 * scale, leafMat), x, 2.2 * scale, z),
+            this.part(this.sphere(`${prefix}-canopy-top`, 1.3 * scale, leafLightMat), x + 0.2 * scale, 3 * scale, z - 0.1 * scale),
+        ]
+    }
+
+    private bench(prefix: string, x: number, z: number, rotationY: number): PartTemplate[] {
+        const woodMat = this.mat('bench-wood', new Color3(0.55, 0.36, 0.2))
+        const ironMat = this.mat('bench-iron', new Color3(0.2, 0.2, 0.22))
+        return [
+            this.part(this.box(`${prefix}-seat`, 1.4, 0.08, 0.45, woodMat), x, 0.45, z, rotationY),
+            this.part(this.box(`${prefix}-back`, 1.4, 0.4, 0.06, woodMat), x, 0.7, z, rotationY),
+            this.part(this.box(`${prefix}-legs`, 1.2, 0.42, 0.4, ironMat), x, 0.21, z, rotationY),
+        ]
+    }
+
+    private flagpole(prefix: string, x: number, z: number, flagColor: Color3): PartTemplate[] {
+        const poleMat = this.mat('flag-pole', new Color3(0.8, 0.8, 0.82))
+        const flagMat = this.mat(`flag-${flagColor.toHexString()}`, flagColor, true)
+        return [
+            this.part(this.stack(`${prefix}-pole`, 0.08, 5, poleMat), x, 2.5, z),
+            this.part(this.box(`${prefix}-flag`, 1.1, 0.7, 0.03, flagMat), x + 0.58, 4.55, z),
+        ]
+    }
+
+    // ---- unfunded facility marker ----
+
+    /** A red floating "!" shown over any facility whose owner's treasury couldn't pay this month's upkeep. */
+    private buildUnfundedMarkerMaster() {
+        const mat = this.mat('unfunded-marker', new Color3(0.95, 0.2, 0.18), true)
+        const stem = MeshBuilder.CreateBox('unfunded-stem', { width: 0.5, height: 1.6, depth: 0.5 }, this.scene)
+        stem.position.y = 1.1
+        const dot = MeshBuilder.CreateBox('unfunded-dot', { width: 0.5, height: 0.5, depth: 0.5 }, this.scene)
+        const merged = Mesh.MergeMeshes([stem, dot], true)!
+        merged.name = 'unfunded-marker'
+        merged.material = mat
+        this.unfundedMarkerMaster = merged
+        this.hide(merged)
+    }
+
+    spawnUnfundedMarker(parent: TransformNode, height: number): Mesh {
+        const marker = this.unfundedMarkerMaster.createInstance(`unfunded-${this.counter++}`) as unknown as Mesh
+        marker.parent = parent
+        marker.isPickable = false
+        marker.position.set(0, height, 0)
+        return marker
     }
 
     private stack(name: string, diameter: number, height: number, mat: StandardMaterial): Mesh {
@@ -536,4 +643,171 @@ export class ProceduralBuildingFactory {
         ]
     }
 
+    // ---- player home (the exterior everyone sees on the shared map) ----
+
+    /** Two-storey house on its own lot: gable roof, chimney, porch, path, picket fence, garden tree, mailbox. */
+    private buildHome(): PartTemplate[] {
+        const lawnMat = this.mat('home-lawn', new Color3(0.42, 0.68, 0.36))
+        const wallMat = this.windowWallMat('home', new Color3(0.95, 0.9, 0.8), new Color3(1, 0.85, 0.5), 3, 2, true)
+        const roofMat = this.mat('home-roof', new Color3(0.45, 0.2, 0.17))
+        const brickMat = this.mat('home-brick', new Color3(0.62, 0.3, 0.22))
+        const trimMat = this.mat('home-trim', new Color3(0.97, 0.97, 0.95))
+        const pathMat = this.mat('home-path', new Color3(0.78, 0.74, 0.66))
+        const mailMat = this.mat('home-mailbox', new Color3(0.2, 0.35, 0.65))
+
+        const parts: PartTemplate[] = [
+            this.part(this.box('home-lawn', 7.8, 0.1, 7.8, lawnMat), 0, 0.05, 0),
+            this.part(this.tintBox('home-body', 5, 4.2, 4.6, wallMat, true), 0, 2.2, -0.6, 0, true),
+            this.part(this.box('home-base', 5.2, 0.3, 4.8, brickMat), 0, 0.15, -0.6),
+            this.part(this.gableRoof('home-roof', 5.6, 5.4, 1.9, roofMat), 0, 4.3, -0.6),
+            this.part(this.box('home-chimney', 0.6, 1.8, 0.6, brickMat), 1.6, 5.2, -1.4),
+            this.part(this.box('home-porch-roof', 2.4, 0.15, 1.3, trimMat), 0, 2.3, 2.3),
+            this.part(this.stack('home-porch-col-l', 0.14, 2.2, trimMat), -1.05, 1.1, 2.85),
+            this.part(this.stack('home-porch-col-r', 0.14, 2.2, trimMat), 1.05, 1.1, 2.85),
+            this.part(this.box('home-porch-step', 2.2, 0.2, 1.2, pathMat), 0, 0.2, 2.3),
+            this.part(this.box('home-path', 1, 0.06, 1.6, pathMat), 0, 0.12, 3.35),
+            this.part(this.box('home-mailbox', 0.3, 0.3, 0.45, mailMat), 1.2, 1, 3.7),
+            this.part(this.stack('home-mailbox-post', 0.08, 0.9, trimMat), 1.2, 0.45, 3.7),
+        ]
+
+        // Picket fence along the front and sides, with a gap for the path.
+        for (const x of [-3.7, -3, -2.3, -1.6, -0.9, 0.9, 1.6, 2.3, 3, 3.7]) {
+            parts.push(this.part(this.box('home-picket', 0.12, 0.8, 0.08, trimMat), x, 0.5, 3.8))
+        }
+        parts.push(this.part(this.box('home-rail-l', 3, 0.08, 0.06, trimMat), -2.3, 0.65, 3.8))
+        parts.push(this.part(this.box('home-rail-r', 3, 0.08, 0.06, trimMat), 2.3, 0.65, 3.8))
+        for (const x of [-3.8, 3.8]) {
+            parts.push(this.part(this.box('home-rail-side', 0.06, 0.08, 7.6, trimMat), x, 0.65, 0))
+        }
+
+        parts.push(...this.tree('home-tree', -2.8, 2.4, 0.9))
+        parts.push(...this.tree('home-tree-b', 3, -2.9, 0.75))
+        return parts
+    }
+
+    // ---- facilities (city services & landmarks — run on the city treasury) ----
+
+    private buildPark(): PartTemplate[] {
+        const grassMat = this.mat('park-grass', new Color3(0.36, 0.66, 0.32))
+        const pathMat = this.mat('park-path', new Color3(0.85, 0.8, 0.68))
+        const stoneMat = this.mat('park-stone', new Color3(0.72, 0.72, 0.74))
+        const waterMat = this.mat('park-water', new Color3(0.35, 0.65, 0.95), true)
+        const flowerMat = this.mat('park-flower', new Color3(0.95, 0.45, 0.6), true)
+
+        const parts: PartTemplate[] = [
+            this.part(this.box('park-grass', 7.8, 0.12, 7.8, grassMat), 0, 0.06, 0),
+            this.part(this.box('park-path-x', 7.8, 0.04, 1, pathMat), 0, 0.14, 0),
+            this.part(this.box('park-path-z', 1, 0.04, 7.8, pathMat), 0, 0.14, 0),
+            this.part(this.disc('park-basin', 2.6, 0.5, stoneMat), 0, 0.35, 0),
+            this.part(this.disc('park-water', 2.2, 0.1, waterMat), 0, 0.58, 0),
+            this.part(this.disc('park-spout-base', 0.5, 0.8, stoneMat, 12), 0, 0.9, 0),
+            this.part(this.disc('park-spout-top', 0.9, 0.15, stoneMat, 12), 0, 1.35, 0),
+            this.part(this.sphere('park-spout-water', 0.5, waterMat, 8), 0, 1.6, 0),
+        ]
+        parts.push(...this.tree('park-tree-a', -2.7, -2.7, 1))
+        parts.push(...this.tree('park-tree-b', 2.7, -2.7, 0.85))
+        parts.push(...this.tree('park-tree-c', -2.7, 2.7, 0.9))
+        parts.push(...this.tree('park-tree-d', 2.7, 2.7, 1.05))
+        parts.push(...this.bench('park-bench-a', -1.6, 1.2, 0))
+        parts.push(...this.bench('park-bench-b', 1.6, -1.2, Math.PI))
+        for (const [x, z] of [[-1.2, -2.4], [2.4, 1.3], [-2.4, 1.3], [1.3, 2.4]]) {
+            parts.push(this.part(this.sphere('park-flowers', 0.6, flowerMat, 6), x, 0.25, z))
+        }
+        return parts
+    }
+
+    private buildHospital(): PartTemplate[] {
+        const lotMat = this.mat('hosp-lot', new Color3(0.62, 0.63, 0.66))
+        const wallMat = this.windowWallMat('hospital', new Color3(0.95, 0.96, 0.97), new Color3(0.55, 0.78, 0.92), 5, 5)
+        const capMat = this.mat('hosp-cap', new Color3(0.8, 0.82, 0.85))
+        const crossMat = this.mat('hosp-cross', new Color3(0.9, 0.12, 0.15), true)
+        const padMat = this.mat('hosp-pad', new Color3(0.25, 0.27, 0.3))
+        const glassMat = this.mat('hosp-glass', new Color3(0.5, 0.75, 0.9), true)
+
+        return [
+            this.part(this.box('hosp-lot', 7.8, 0.08, 7.8, lotMat), 0, 0.04, 0),
+            this.part(this.tintBox('hosp-body', 6, 7, 5, wallMat, true), 0, 3.5, -0.8, 0, true),
+            this.part(this.tintBox('hosp-wing', 3, 3.6, 2.4, wallMat, true), 1.8, 1.8, 2.4, 0, true),
+            this.part(this.box('hosp-cap', 6.2, 0.3, 5.2, capMat), 0, 7.15, -0.8),
+            this.part(this.disc('hosp-helipad', 3, 0.12, padMat), -0.6, 7.36, -0.8),
+            this.part(this.box('hosp-cross-v', 0.5, 1.6, 0.12, crossMat), -1.5, 5.6, 1.76),
+            this.part(this.box('hosp-cross-h', 1.6, 0.5, 0.12, crossMat), -1.5, 5.6, 1.76),
+            this.part(this.box('hosp-roofcross-v', 0.4, 0.05, 1.4, crossMat), -0.6, 7.44, -0.8),
+            this.part(this.box('hosp-roofcross-h', 1.4, 0.05, 0.4, crossMat), -0.6, 7.44, -0.8),
+            this.part(this.box('hosp-entry-glass', 2.4, 1.6, 0.1, glassMat), -1.5, 0.9, 1.72),
+            this.part(this.box('hosp-canopy', 3, 0.15, 1.4, capMat), -1.5, 2, 2.4),
+        ]
+    }
+
+    private buildPolice(): PartTemplate[] {
+        const lotMat = this.mat('police-lot', new Color3(0.55, 0.56, 0.6))
+        const wallMat = this.windowWallMat('police', new Color3(0.36, 0.45, 0.62), new Color3(0.75, 0.85, 0.95), 4, 2, true)
+        const capMat = this.mat('police-cap', new Color3(0.22, 0.26, 0.34))
+        const redLight = this.mat('police-red', new Color3(0.95, 0.15, 0.15), true)
+        const blueLight = this.mat('police-blue', new Color3(0.15, 0.4, 0.98), true)
+        const badgeMat = this.mat('police-badge', new Color3(0.95, 0.78, 0.25), true)
+        const carMat = this.mat('police-car', new Color3(0.96, 0.96, 0.96))
+        const carTopMat = this.mat('police-car-top', new Color3(0.12, 0.14, 0.2))
+
+        return [
+            this.part(this.box('police-lot', 7.8, 0.08, 7.8, lotMat), 0, 0.04, 0),
+            this.part(this.tintBox('police-body', 6, 4, 4.4, wallMat, true), 0, 2, -1.2, 0, true),
+            this.part(this.box('police-cap', 6.3, 0.35, 4.7, capMat), 0, 4.17, -1.2),
+            this.part(this.box('police-badge', 1, 1, 0.12, badgeMat), 0, 3.2, 1.06),
+            this.part(this.box('police-light-r', 0.7, 0.35, 0.35, redLight), -0.4, 4.52, -1.2),
+            this.part(this.box('police-light-b', 0.7, 0.35, 0.35, blueLight), 0.4, 4.52, -1.2),
+            this.part(this.box('police-car', 2.2, 0.6, 1.1, carMat), -2, 0.4, 2.6),
+            this.part(this.box('police-car-top', 1.2, 0.45, 1, carTopMat), -2.1, 0.9, 2.6),
+            this.part(this.box('police-car-light', 0.5, 0.12, 0.3, blueLight), -2.1, 1.18, 2.6),
+            ...this.flagpole('police-flag', 2.8, 2.6, new Color3(0.9, 0.9, 0.95)),
+        ]
+    }
+
+    private buildSchool(): PartTemplate[] {
+        const fieldMat = this.mat('school-field', new Color3(0.4, 0.66, 0.34))
+        const trackMat = this.mat('school-track', new Color3(0.72, 0.38, 0.3))
+        const wallMat = this.windowWallMat('school', new Color3(0.74, 0.36, 0.28), new Color3(0.98, 0.92, 0.7), 5, 2, true)
+        const roofMat = this.mat('school-roof', new Color3(0.3, 0.3, 0.33))
+        const trimMat = this.mat('school-trim', new Color3(0.95, 0.93, 0.88))
+        const clockMat = this.mat('school-clock', new Color3(0.98, 0.98, 0.95), true)
+        const slideMat = this.mat('school-slide', new Color3(0.98, 0.72, 0.15))
+
+        return [
+            this.part(this.box('school-field', 7.8, 0.08, 7.8, fieldMat), 0, 0.04, 0),
+            this.part(this.box('school-track', 7, 0.04, 2.6, trackMat), 0, 0.1, 2.4),
+            this.part(this.tintBox('school-body', 6.6, 3.6, 3.4, wallMat, true), 0, 1.8, -1.9, 0, true),
+            this.part(this.gableRoof('school-roof', 6.9, 3.8, 1.2, roofMat), 0, 3.6, -1.9),
+            this.part(this.box('school-tower', 1.4, 2.2, 1.4, trimMat), 0, 4.9, -1.9),
+            this.part(this.pyramidRoof('school-tower-roof', 2, 1.2, roofMat), 0, 6.6, -1.9),
+            this.part(this.disc('school-clock', 0.9, 0.08, clockMat, 20), 0, 5.2, -1.16),
+            this.part(this.box('school-slide', 0.5, 0.08, 2, slideMat), 2.4, 0.7, 2.4, 0.4),
+            this.part(this.box('school-slide-ladder', 0.5, 1.4, 0.2, trimMat), 2.7, 0.7, 1.5),
+            ...this.flagpole('school-flag', -3, 1, new Color3(0.2, 0.45, 0.9)),
+        ]
+    }
+
+    /** City landmark — an observation tower (N Seoul Tower motif, since the default map origin is Seoul). */
+    private buildLandmark(): PartTemplate[] {
+        const plazaMat = this.mat('landmark-plaza', new Color3(0.82, 0.8, 0.76))
+        const shaftMat = this.mat('landmark-shaft', new Color3(0.93, 0.93, 0.95))
+        const podMat = this.mat('landmark-pod', new Color3(0.4, 0.55, 0.75))
+        const deckMat = this.mat('landmark-deck', new Color3(0.8, 0.85, 0.9))
+        const glowMat = this.mat('landmark-glow', new Color3(0.55, 0.85, 1), true)
+
+        const parts: PartTemplate[] = [
+            this.part(this.disc('landmark-plaza', 7.6, 0.2, plazaMat, 32), 0, 0.1, 0),
+            this.part(this.disc('landmark-plinth', 3.2, 1, deckMat, 16), 0, 0.7, 0),
+            this.part(this.taper('landmark-shaft', 1.6, 0.9, 22, shaftMat), 0, 12, 0),
+            this.part(this.disc('landmark-pod-lower', 3.4, 1.4, podMat, 20), 0, 22.4, 0),
+            this.part(this.disc('landmark-pod-glow', 3.5, 0.3, glowMat, 20), 0, 23.2, 0),
+            this.part(this.disc('landmark-pod-upper', 3, 1.2, podMat, 20), 0, 24, 0),
+            this.part(this.taper('landmark-antenna', 0.5, 0.12, 7, shaftMat), 0, 28.1, 0),
+            this.part(this.stack('landmark-beacon', 0.3, 0.6, this.beaconMat), 0, 31.9, 0),
+        ]
+        parts.push(...this.tree('landmark-tree-a', -3, -3, 0.8))
+        parts.push(...this.tree('landmark-tree-b', 3, 3, 0.8))
+        parts.push(...this.tree('landmark-tree-c', -3, 3, 0.7))
+        parts.push(...this.tree('landmark-tree-d', 3, -3, 0.7))
+        return parts
+    }
 }

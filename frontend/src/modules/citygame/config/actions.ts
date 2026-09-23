@@ -13,7 +13,14 @@ export type GameAction =
     | 'tool-commercial'
     | 'tool-industrial'
     | 'tool-road'
+    | 'tool-home'
+    | 'tool-park'
+    | 'tool-hospital'
+    | 'tool-police'
+    | 'tool-school'
+    | 'tool-landmark'
     | 'bulldoze'
+    | 'enter-home'
     | 'toggle-camera'
     | 'toggle-hints'
     | 'pan-forward'
@@ -39,6 +46,12 @@ export const ACTION_TOOL: Partial<Record<GameAction, PlaceableTool | 'select'>> 
     'tool-commercial': 'zone-commercial',
     'tool-industrial': 'zone-industrial',
     'tool-road': 'road',
+    'tool-home': 'home',
+    'tool-park': 'facility-park',
+    'tool-hospital': 'facility-hospital',
+    'tool-police': 'facility-police',
+    'tool-school': 'facility-school',
+    'tool-landmark': 'facility-landmark',
 }
 
 /** KeyboardEvent.code -> action. */
@@ -48,6 +61,13 @@ export const KEYBOARD_ACTION_MAP: Record<string, GameAction> = {
     Digit3: 'tool-commercial',
     Digit4: 'tool-industrial',
     Digit5: 'tool-road',
+    Digit6: 'tool-home',
+    Digit7: 'tool-park',
+    Digit8: 'tool-hospital',
+    Digit9: 'tool-police',
+    Digit0: 'tool-school',
+    KeyL: 'tool-landmark',
+    KeyI: 'enter-home',
     Delete: 'bulldoze',
     Tab: 'toggle-camera',
     KeyH: 'toggle-hints',

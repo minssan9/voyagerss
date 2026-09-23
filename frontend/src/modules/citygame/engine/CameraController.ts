@@ -1,6 +1,7 @@
 import { ArcRotateCamera, UniversalCamera, Scene, Vector3 } from '@babylonjs/core'
 import type { GameAction } from '../config/actions'
 import type { CameraMode } from '../types'
+import { FreeRoamController, type FreeRoamHooks } from './FreeRoamController'
 
 const PLANNING = {
     alpha: -Math.PI / 2,
@@ -15,9 +16,10 @@ function easeInOutQuad(t: number): number {
 }
 
 /**
- * Owns both cameras (top-down isometric planning + ground-level walkthrough)
- * and cross-fades position/target between them with a requestAnimationFrame
- * lerp so switching views never feels like a hard cut.
+ * Owns both views — the top-down planning camera (SimCity) and GTA-style
+ * third-person free roam (see FreeRoamController) — and cross-fades
+ * position/target between them with a requestAnimationFrame lerp so
+ * switching views never feels like a hard cut.
  */
 export class CameraController {
     public mode: CameraMode = 'planning'
@@ -27,7 +29,7 @@ export class CameraController {
     private buildModeActive = false
 
     private planningCamera: ArcRotateCamera
-    private walkCamera: UniversalCamera
+    readonly freeRoam: FreeRoamController
     private transitionCamera: UniversalCamera
     private scene: Scene
     private canvas: HTMLCanvasElement
@@ -38,7 +40,10 @@ export class CameraController {
     constructor(
         scene: Scene,
         canvas: HTMLCanvasElement,
-        private onModeChange?: (mode: CameraMode) => void,
+        private onModeChange: ((mode: CameraMode) => void) | undefined,
+        freeRoamHooks: FreeRoamHooks,
+        /** Where the avatar appears when entering free roam (e.g. your front door) — defaults to the planning target. */
+        private spawnPoint: () => Vector3 | null = () => null,
     ) {
         this.scene = scene
         this.canvas = canvas
@@ -60,22 +65,11 @@ export class CameraController {
         this.planningCamera.pinchPrecision = 80
         this.planningCamera.attachControl(canvas, true)
 
-        this.walkCamera = new UniversalCamera('walkCamera', new Vector3(0, 1.8, -10), scene)
-        this.walkCamera.minZ = 0.1
-        this.walkCamera.speed = 0.4
-        this.walkCamera.angularSensibility = 3200
-        this.walkCamera.keysUp.push(87) // W
-        this.walkCamera.keysDown.push(83) // S
-        this.walkCamera.keysLeft.push(65) // A
-        this.walkCamera.keysRight.push(68) // D
-        this.walkCamera.applyGravity = true
-        this.walkCamera.checkCollisions = true
-        this.walkCamera.ellipsoid = new Vector3(0.5, 0.9, 0.5)
+        this.freeRoam = new FreeRoamController(scene, canvas, freeRoamHooks)
 
         this.transitionCamera = new UniversalCamera('transitionCamera', Vector3.Zero(), scene)
 
         scene.activeCamera = this.planningCamera
-        scene.collisionsEnabled = true
     }
 
     toggle() {
@@ -88,17 +82,22 @@ export class CameraController {
 
         const activeCamera = this.scene.activeCamera as ArcRotateCamera | UniversalCamera
         const fromPos = activeCamera.position.clone()
-        const fromTarget = (this.mode === 'planning' ? this.planningCamera.target : this.walkCamera.getTarget()).clone()
+        const fromTarget = (this.mode === 'planning' ? this.planningCamera.target : this.freeRoam.camera.target).clone()
 
-        const planningTarget = this.planningCamera.target.clone()
-        const toPos =
-            targetMode === 'walkthrough'
-                ? new Vector3(planningTarget.x, 1.8, planningTarget.z - 6)
-                : this.planningCamera.position.clone()
-        const toTarget = planningTarget
+        // Entering: land behind the avatar at its spawn. Leaving: re-center the planning view on wherever you roamed to.
+        const spawn = targetMode === 'walkthrough' ? this.spawnPoint() ?? this.planningCamera.target.clone() : null
+        if (targetMode === 'planning') {
+            const roamed = this.freeRoam.focusPoint()
+            this.planningCamera.target.set(roamed.x, 0, roamed.z)
+            this.freeRoam.disable()
+        }
+        const toTarget = spawn ? new Vector3(spawn.x, 1.35, spawn.z) : this.planningCamera.target.clone()
+        // The avatar spawns facing its home (−z), so the chase camera starts on the street side looking at the house.
+        const toPos = spawn
+            ? new Vector3(spawn.x, 1.35 + 7 * Math.cos(1.2), spawn.z + 7 * Math.sin(1.2))
+            : this.planningCamera.target.add(this.planningOffset())
 
         this.planningCamera.detachControl()
-        this.walkCamera.detachControl()
         this.transitionCamera.position.copyFrom(fromPos)
         this.transitionCamera.setTarget(fromTarget)
         this.scene.activeCamera = this.transitionCamera
@@ -121,10 +120,7 @@ export class CameraController {
             this.onModeChange?.(targetMode)
 
             if (targetMode === 'walkthrough') {
-                this.walkCamera.position.copyFrom(toPos)
-                this.walkCamera.setTarget(toTarget)
-                this.scene.activeCamera = this.walkCamera
-                this.walkCamera.attachControl(this.canvas, true)
+                this.freeRoam.enable(spawn!, Math.PI)
             } else {
                 this.scene.activeCamera = this.planningCamera
                 if (!this.buildModeActive) this.planningCamera.attachControl(this.canvas, true)
@@ -144,9 +140,22 @@ export class CameraController {
         }
     }
 
+    private planningOffset(): Vector3 {
+        const c = this.planningCamera
+        return new Vector3(
+            c.radius * Math.cos(c.alpha) * Math.sin(c.beta),
+            c.radius * Math.cos(c.beta),
+            c.radius * Math.sin(c.alpha) * Math.sin(c.beta),
+        )
+    }
+
     /** Called once per frame with the set of currently-active actions (from keyboard and/or gamepad). */
     update(activeActions: ReadonlySet<GameAction>, deltaMs: number) {
-        if (this.mode !== 'planning' || this.isTransitioning) return
+        if (this.isTransitioning) return
+        if (this.mode === 'walkthrough') {
+            this.freeRoam.update(activeActions, deltaMs / 1000)
+            return
+        }
         const scale = deltaMs / 16.67
 
         let dx = 0
@@ -167,20 +176,32 @@ export class CameraController {
         if (activeActions.has('rotate-right')) this.planningCamera.alpha += this.rotateSpeed * scale
     }
 
-    /** Current planning-camera orbit target, in world meters — used to resolve which map tile is under view. */
+    /** Where the player is looking/standing, in world meters — used to resolve which map tile is under view. */
     getPlanningTarget(): Vector3 {
-        return this.planningCamera.target
+        return this.mode === 'walkthrough' ? this.freeRoam.focusPoint() : this.planningCamera.target
     }
 
-    /** Current planning-camera orbit radius, in meters — the camera-distance signal for tile streaming. */
+    /** Camera distance, in meters — the signal for how many neighbouring tiles to stream in. */
     getPlanningRadius(): number {
-        return this.planningCamera.radius
+        return this.mode === 'walkthrough' ? 40 : this.planningCamera.radius
+    }
+
+    /** Hands the canvas back and forth when the page switches between the city and a home interior. */
+    suspend() {
+        this.planningCamera.detachControl()
+        this.freeRoam.camera.detachControl()
+    }
+
+    resume() {
+        this.freeRoam.clearInput()
+        if (this.mode === 'walkthrough') this.freeRoam.camera.attachControl(this.canvas, true)
+        else if (!this.buildModeActive) this.planningCamera.attachControl(this.canvas, true)
     }
 
     dispose() {
         if (this.transitionHandle !== null) cancelAnimationFrame(this.transitionHandle)
         this.planningCamera.dispose()
-        this.walkCamera.dispose()
+        this.freeRoam.dispose()
         this.transitionCamera.dispose()
     }
 }

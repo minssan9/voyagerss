@@ -22,8 +22,10 @@ const CAR_ID_PREFIX = 'car:'
 const PEDESTRIAN_ID_PREFIX = 'ped:'
 
 const UNCLAIMED_COLOR = '#a6a8ab'
-const CLAIMED_BY_OTHER_COLOR = '#8cb8f2'
-const CLAIMED_BY_ME_COLOR = '#8fd6a0'
+const RESERVED_BY_OTHER_COLOR = '#c3d3ea'
+const OWNED_BY_OTHER_COLOR = '#8cb8f2'
+const RESERVED_BY_ME_COLOR = '#f2d68b'
+const OWNED_BY_ME_COLOR = '#8fd6a0'
 
 const GRID_TEXTURE_SIZE = 512
 const PREVIEW_COLORS: Partial<Record<string, Color3>> = {
@@ -31,8 +33,56 @@ const PREVIEW_COLORS: Partial<Record<string, Color3>> = {
     'zone-commercial': new Color3(0.3, 0.55, 0.95),
     'zone-industrial': new Color3(0.95, 0.6, 0.25),
     road: new Color3(0.75, 0.75, 0.78),
+    home: new Color3(0.98, 0.78, 0.35),
+    'facility-park': new Color3(0.3, 0.75, 0.35),
+    'facility-hospital': new Color3(0.95, 0.35, 0.4),
+    'facility-police': new Color3(0.3, 0.45, 0.85),
+    'facility-school': new Color3(0.85, 0.5, 0.3),
+    'facility-landmark': new Color3(0.65, 0.45, 0.95),
     bulldoze: new Color3(0.95, 0.25, 0.25),
 }
+
+/** Height (canonical meters) the red "unfunded" marker floats at over each facility model. */
+const UNFUNDED_MARKER_HEIGHT: Partial<Record<string, number>> = {
+    'facility-park': 5,
+    'facility-hospital': 9.5,
+    'facility-police': 6.5,
+    'facility-school': 8.5,
+    'facility-landmark': 34,
+}
+
+/** How far (meters) each kind of facility serves homes around it. */
+export const FACILITY_RADIUS_M: Record<string, number> = {
+    'facility-park': 160,
+    'facility-hospital': 320,
+    'facility-police': 260,
+    'facility-school': 260,
+    'facility-landmark': 420,
+}
+
+export interface NearbyFacility {
+    tool: string
+    funded: boolean
+    distance: number
+    ownerId: string
+}
+
+/**
+ * Half-width, as a fraction of a cell, of the solid footprint free-roam collides with. Roads and parks
+ * are walkable (absent); buildings leave a margin inside their cell so sidewalks stay passable.
+ */
+const SOLID_HALF_EXTENT: Partial<Record<string, number>> = {
+    'zone-residential': 0.34,
+    'zone-commercial': 0.36,
+    'zone-industrial': 0.4,
+    home: 0.32,
+    'facility-hospital': 0.4,
+    'facility-police': 0.4,
+    'facility-school': 0.42,
+    'facility-landmark': 0.22,
+}
+
+const POPULATION_TOOLS = new Set(['zone-residential', 'zone-commercial', 'home', 'facility-park', 'facility-school'])
 
 interface TileEntry {
     coord: TileCoord
@@ -41,6 +91,8 @@ interface TileEntry {
     plateMat: StandardMaterial
     gridTexture: DynamicTexture
     claim: TileClaim | null
+    /** Last fill painted into gridTexture, so the 900ms snapshot sync doesn't re-upload an unchanged texture. */
+    paintedColor: string | null
     objectNodes: Map<string, TransformNode>
     /** cellKeys ("x:y") of placed roads/population buildings — drives how many NPCs this tile gets and where they roam. */
     roadCells: Set<string>
@@ -67,6 +119,9 @@ export class TileStreamer {
     private previewMat: StandardMaterial | null = null
     private previewKey: string | null = null
     private npcSystem: NpcSystem
+    private localOwnerId: string | undefined
+    private unfundedMarkers = new Set<Mesh>()
+    private spinObserver: ReturnType<Scene['onBeforeRenderObservable']['add']>
 
     constructor(
         private scene: Scene,
@@ -76,10 +131,20 @@ export class TileStreamer {
         this.origin = origin
         this.factory = new ProceduralBuildingFactory(scene, onMeshCreated)
         this.npcSystem = new NpcSystem(scene, onMeshCreated)
+        this.spinObserver = scene.onBeforeRenderObservable.add(() => {
+            const dt = scene.getEngine().getDeltaTime() / 1000
+            for (const marker of this.unfundedMarkers) marker.rotation.y += dt * 2.2
+        })
     }
 
     setOrigin(origin: TileCoord) {
         this.origin = origin
+    }
+
+    /** Who "me" is for ground coloring — set once, not inferred per event (a broadcast claim is usually someone else's). */
+    setLocalOwnerId(ownerId: string | undefined) {
+        this.localOwnerId = ownerId
+        for (const entry of this.tiles.values()) this.restyleTile(entry)
     }
 
     /** Returns the tile ids now in view after this sync. */
@@ -108,20 +173,146 @@ export class TileStreamer {
         const entry = this.tiles.get(claim.tileId)
         if (!entry) return
         entry.claim = claim
-        this.restyleTile(entry, claim.ownerId)
+        this.restyleTile(entry)
+    }
+
+    applyTileReleased(tileId: string) {
+        const entry = this.tiles.get(tileId)
+        if (!entry) return
+        entry.claim = null
+        this.restyleTile(entry)
     }
 
     applyObjectPlaced(object: PlacedObject) {
         const entry = this.tiles.get(object.tileId)
         if (!entry) return
         const cellKey = `${object.cellX}:${object.cellY}`
-        if (entry.objectNodes.has(cellKey)) return
+        const existing = entry.objectNodes.get(cellKey)
+        if (existing) {
+            // Snapshots re-send objects we already render; only the facility funding flag can have changed.
+            if (object.funded !== undefined) this.setFunded(existing, object.funded)
+            return
+        }
 
         const node = this.buildObjectNode(entry, object)
         entry.objectNodes.set(cellKey, node)
         this.animateConstruction(node)
+        if (object.funded === false) this.setFunded(node, false)
         this.trackCell(entry, object.tool, cellKey, true)
         if (object.tool === 'road') this.refreshNeighborRoads(entry, object.cellX, object.cellY)
+    }
+
+    /** A facility's owner couldn't (or can again) pay its upkeep — toggle the floating red "!" over it. */
+    applyObjectFunding(payload: { tileId: string; cellX: number; cellY: number; funded: boolean }) {
+        const node = this.tiles.get(payload.tileId)?.objectNodes.get(`${payload.cellX}:${payload.cellY}`)
+        if (node) this.setFunded(node, payload.funded)
+    }
+
+    private setFunded(node: TransformNode, funded: boolean) {
+        const metadata = node.metadata ?? {}
+        metadata.funded = funded
+        node.metadata = metadata
+        const marker = metadata.unfundedMarker as Mesh | undefined
+        if (!funded && !marker) {
+            const height = UNFUNDED_MARKER_HEIGHT[metadata.tool as string] ?? 7
+            const created = this.factory.spawnUnfundedMarker(node, height)
+            metadata.unfundedMarker = created
+            this.unfundedMarkers.add(created)
+        } else if (funded && marker) {
+            this.unfundedMarkers.delete(marker)
+            marker.dispose()
+            metadata.unfundedMarker = undefined
+        }
+    }
+
+    /**
+     * Every facility currently rendered within its own service radius of the given cell — what a home
+     * there is actually served by, and whether each one is running (its owner's treasury paid upkeep).
+     */
+    facilitiesNear(tileId: string, cellX: number, cellY: number): NearbyFacility[] {
+        const home = this.cellWorldPosition(tileId, cellX, cellY)
+        if (!home) return []
+        const result: NearbyFacility[] = []
+        for (const [tid, entry] of this.tiles) {
+            for (const [cellKey, node] of entry.objectNodes) {
+                const tool = node.metadata?.tool as string | undefined
+                if (!tool || !tool.startsWith('facility-')) continue
+                const [x, y] = cellKey.split(':').map(Number)
+                const pos = this.cellWorldPosition(tid, x, y)
+                if (!pos) continue
+                const distance = Vector3.Distance(home, pos)
+                if (distance > (FACILITY_RADIUS_M[tool] ?? 0)) continue
+                result.push({ tool, funded: node.metadata?.funded !== false, distance, ownerId: node.metadata?.ownerId ?? '' })
+            }
+        }
+        return result.sort((a, b) => a.distance - b.distance)
+    }
+
+    /** Everything a minimap needs around a point: tile plates (with ownership color) and placed objects, in world meters. */
+    minimapFeatures(centerX: number, centerZ: number, radius: number) {
+        const tiles: { x: number; z: number; size: number; color: string }[] = []
+        const objects: { x: number; z: number; size: number; tool: string; funded: boolean }[] = []
+        for (const [tid, entry] of this.tiles) {
+            const size = tileSizeMeters(entry.coord)
+            const tx = entry.root.position.x
+            const tz = entry.root.position.z
+            if (Math.abs(tx - centerX) > radius + size / 2 || Math.abs(tz - centerZ) > radius + size / 2) continue
+            tiles.push({ x: tx, z: tz, size, color: entry.paintedColor ?? UNCLAIMED_COLOR })
+            const cellSize = size / CITYGAME_GRID_SIZE
+            for (const [key, node] of entry.objectNodes) {
+                const [cx, cz] = key.split(':').map(Number)
+                const pos = this.cellWorldPosition(tid, cx, cz)!
+                if (Math.abs(pos.x - centerX) > radius || Math.abs(pos.z - centerZ) > radius) continue
+                objects.push({ x: pos.x, z: pos.z, size: cellSize, tool: node.metadata?.tool ?? '', funded: node.metadata?.funded !== false })
+            }
+        }
+        return { tiles, objects }
+    }
+
+    /** Free-roam collision: does a disc of `radius` at world (x, z) overlap any building's solid footprint? */
+    isBlockedAt(x: number, z: number, radius: number): boolean {
+        // Sampling the disc's bounding-box corners (plus center) catches footprints in neighbouring cells too.
+        for (const [sx, sz] of [
+            [0, 0],
+            [radius, radius],
+            [radius, -radius],
+            [-radius, radius],
+            [-radius, -radius],
+        ]) {
+            if (this.pointHitsBuilding(x + sx, z + sz)) return true
+        }
+        return false
+    }
+
+    private pointHitsBuilding(x: number, z: number): boolean {
+        for (const entry of this.tiles.values()) {
+            const size = tileSizeMeters(entry.coord)
+            const lx = x - entry.root.position.x + size / 2
+            const lz = z - entry.root.position.z + size / 2
+            if (lx < 0 || lz < 0 || lx >= size || lz >= size) continue
+            const cellSize = size / CITYGAME_GRID_SIZE
+            const cx = Math.floor(lx / cellSize)
+            const cz = Math.floor(lz / cellSize)
+            const node = entry.objectNodes.get(`${cx}:${cz}`)
+            const half = SOLID_HALF_EXTENT[node?.metadata?.tool as string]
+            if (!half) return false
+            const dx = Math.abs(lx - (cx + 0.5) * cellSize)
+            const dz = Math.abs(lz - (cz + 0.5) * cellSize)
+            return dx < half * cellSize && dz < half * cellSize
+        }
+        return false
+    }
+
+    cellWorldPosition(tileId: string, cellX: number, cellY: number): Vector3 | null {
+        const entry = this.tiles.get(tileId)
+        if (!entry) return null
+        const size = tileSizeMeters(entry.coord)
+        const cellSize = size / CITYGAME_GRID_SIZE
+        return new Vector3(
+            entry.root.position.x + (cellX + 0.5) * cellSize - size / 2,
+            0,
+            entry.root.position.z + (cellY + 0.5) * cellSize - size / 2,
+        )
     }
 
     applyObjectRemoved(payload: { tileId: string; cellX: number; cellY: number }) {
@@ -165,11 +356,11 @@ export class TileStreamer {
     }
 
     /** Renders a full server snapshot for a tile (claim + all placed objects), used on first join. */
-    applySnapshot(snapshot: { tileId: string; claim: TileClaim | null; objects: PlacedObject[] }, localOwnerId: string | undefined) {
+    applySnapshot(snapshot: { tileId: string; claim: TileClaim | null; objects: PlacedObject[] }) {
         const entry = this.tiles.get(snapshot.tileId)
         if (!entry) return
         entry.claim = snapshot.claim
-        this.restyleTile(entry, localOwnerId)
+        this.restyleTile(entry)
         for (const object of snapshot.objects) this.applyObjectPlaced(object)
     }
 
@@ -188,6 +379,10 @@ export class TileStreamer {
         const cellY = Math.floor((local.z + size / 2) / cellSize)
         if (cellX < 0 || cellY < 0 || cellX >= CITYGAME_GRID_SIZE || cellY >= CITYGAME_GRID_SIZE) return null
         return { tileId, cellX, cellY }
+    }
+
+    hasObjectAt(tileId: string, cellX: number, cellY: number): boolean {
+        return !!this.tiles.get(tileId)?.objectNodes.has(`${cellX}:${cellY}`)
     }
 
     getClaim(tileId: string): TileClaim | null {
@@ -283,6 +478,7 @@ export class TileStreamer {
             plateMat: mat,
             gridTexture,
             claim: null,
+            paintedColor: UNCLAIMED_COLOR,
             objectNodes: new Map(),
             roadCells: new Set(),
             populationCells: new Set(),
@@ -318,14 +514,17 @@ export class TileStreamer {
         texture.update(false)
     }
 
-    private restyleTile(entry: TileEntry, localOwnerId: string | undefined) {
-        if (!entry.claim) {
-            this.paintGridTexture(entry.gridTexture, UNCLAIMED_COLOR)
-        } else if (entry.claim.ownerId === localOwnerId) {
-            this.paintGridTexture(entry.gridTexture, CLAIMED_BY_ME_COLOR)
-        } else {
-            this.paintGridTexture(entry.gridTexture, CLAIMED_BY_OTHER_COLOR)
+    private restyleTile(entry: TileEntry) {
+        const claim = entry.claim
+        let color = UNCLAIMED_COLOR
+        if (claim) {
+            const mine = !!this.localOwnerId && claim.ownerId === this.localOwnerId
+            if (claim.status === 'owned') color = mine ? OWNED_BY_ME_COLOR : OWNED_BY_OTHER_COLOR
+            else color = mine ? RESERVED_BY_ME_COLOR : RESERVED_BY_OTHER_COLOR
         }
+        if (color === entry.paintedColor) return
+        entry.paintedColor = color
+        this.paintGridTexture(entry.gridTexture, color)
     }
 
     private buildObjectNode(entry: TileEntry, object: PlacedObject): TransformNode {
@@ -340,7 +539,7 @@ export class TileStreamer {
         const localX = (object.cellX + 0.5) * cellSize - size / 2
         const localZ = (object.cellY + 0.5) * cellSize - size / 2
         node.position = new Vector3(localX, 0, localZ)
-        node.metadata = { tool: object.tool, ownerId: object.ownerId, level: object.level }
+        node.metadata = { tool: object.tool, ownerId: object.ownerId, level: object.level, funded: object.funded !== false }
 
         return node
     }
@@ -396,6 +595,8 @@ export class TileStreamer {
 
     /** Shrinks a building out before disposing it — used for bulldoze and for the old model on a level-up swap. */
     private animateBulldoze(node: TransformNode, frames: number = BULLDOZE_FRAMES) {
+        const marker = node.metadata?.unfundedMarker as Mesh | undefined
+        if (marker) this.unfundedMarkers.delete(marker)
         const start = node.scaling.clone()
         const anim = new Animation('bulldoze', 'scaling', CONSTRUCTION_FPS, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT)
         anim.setKeys([
@@ -410,7 +611,7 @@ export class TileStreamer {
         if (tool === 'road') {
             added ? entry.roadCells.add(cellKey) : entry.roadCells.delete(cellKey)
             this.syncTraffic(entry)
-        } else if (tool === 'zone-residential' || tool === 'zone-commercial') {
+        } else if (POPULATION_TOOLS.has(tool)) {
             added ? entry.populationCells.add(cellKey) : entry.populationCells.delete(cellKey)
             this.syncPedestrians(entry)
         }
@@ -491,7 +692,11 @@ export class TileStreamer {
 
     private disposeTile(tileId: string, entry: TileEntry) {
         this.npcSystem.removeAllForTile(tileId)
-        for (const node of entry.objectNodes.values()) node.dispose()
+        for (const node of entry.objectNodes.values()) {
+            const marker = node.metadata?.unfundedMarker as Mesh | undefined
+            if (marker) this.unfundedMarkers.delete(marker)
+            node.dispose()
+        }
         entry.objectNodes.clear()
         entry.plate.dispose()
         entry.root.dispose()
@@ -501,6 +706,7 @@ export class TileStreamer {
         for (const [id, entry] of this.tiles) this.disposeTile(id, entry)
         this.tiles.clear()
         this.npcSystem.dispose()
+        this.scene.onBeforeRenderObservable.remove(this.spinObserver)
         this.previewMesh?.dispose()
         this.previewMat?.dispose()
     }

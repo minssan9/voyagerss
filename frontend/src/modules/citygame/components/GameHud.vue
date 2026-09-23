@@ -6,66 +6,122 @@ import CityStatusPanel from './CityStatusPanel.vue'
 import type { BuildTool } from '../types'
 
 defineProps<{ ownerName: string }>()
-const emit = defineEmits<{ (event: 'claim-tile'): void }>()
+const emit = defineEmits<{
+    (event: 'claim-tile'): void
+    (event: 'purchase-tile'): void
+    (event: 'enter-home'): void
+    (event: 'toggle-camera'): void
+}>()
 
 const store = useCityGameStore()
 
+interface ToolDef {
+    id: BuildTool
+    label: string
+    hint: string
+    accent: string
+}
+
 /** Accent per tool — matches the in-world placement-preview ghost color so the toolbar and the 3D hover cue read as one system. */
-const tools: { id: BuildTool; label: string; hint: string; accent: string }[] = [
-    { id: 'select', label: '1', hint: '선택', accent: '#8e8e93' },
-    { id: 'zone-residential', label: '2', hint: '주거', accent: '#59d973' },
-    { id: 'zone-commercial', label: '3', hint: '상업', accent: '#4d8cf2' },
-    { id: 'zone-industrial', label: '4', hint: '공업', accent: '#f29940' },
-    { id: 'road', label: '5', hint: '도로', accent: '#bfbfc7' },
-    { id: 'bulldoze', label: 'Del', hint: '철거', accent: '#f24040' },
+const toolGroups: ToolDef[][] = [
+    [{ id: 'select', label: '1', hint: '선택', accent: '#8e8e93' }],
+    [
+        { id: 'zone-residential', label: '2', hint: '주거', accent: '#59d973' },
+        { id: 'zone-commercial', label: '3', hint: '상업', accent: '#4d8cf2' },
+        { id: 'zone-industrial', label: '4', hint: '공업', accent: '#f29940' },
+        { id: 'road', label: '5', hint: '도로', accent: '#bfbfc7' },
+    ],
+    [{ id: 'home', label: '6', hint: '내 집', accent: '#f9c75a' }],
+    [
+        { id: 'facility-park', label: '7', hint: '공원', accent: '#4cbf59' },
+        { id: 'facility-hospital', label: '8', hint: '병원', accent: '#f25a66' },
+        { id: 'facility-police', label: '9', hint: '경찰서', accent: '#4d73d9' },
+        { id: 'facility-school', label: '0', hint: '학교', accent: '#d9804d' },
+        { id: 'facility-landmark', label: 'L', hint: '랜드마크', accent: '#a673f2' },
+    ],
+    [{ id: 'bulldoze', label: 'Del', hint: '철거', accent: '#f24040' }],
 ]
 
 const backendLabel = computed(() => (store.backend === 'webgpu' ? 'WebGPU' : 'WebGL 2.0'))
-const cameraLabel = computed(() => (store.cameraMode === 'planning' ? 'Planning View' : 'Walkthrough View'))
-const fundsLabel = computed(() => `$${Math.round(store.funds).toLocaleString()}`)
+const cameraLabel = computed(() => (store.cameraMode === 'planning' ? '도시 설계' : '자유 탐험'))
+
+const money = (value: number) => Math.round(value).toLocaleString()
+const monthlyNet = computed(() => (store.account ? store.account.lastIncome - store.account.lastUpkeep : 0))
 
 function costLabel(tool: BuildTool): string {
-    return TOOL_COST[tool] > 0 ? `$${TOOL_COST[tool]}` : ''
+    return TOOL_COST[tool] > 0 ? `$${TOOL_COST[tool].toLocaleString()}` : ''
 }
 </script>
 
 <template>
     <div class="hud">
         <div class="hud-row top-row">
-            <div class="hud-panel status-panel">
-                <span class="status-dot" :class="{ ready: store.isEngineReady }" />
-                <span class="status-text">{{ backendLabel }}</span>
-                <span class="divider" />
-                <span class="status-text">{{ Math.round(store.fps) }} FPS</span>
-                <span class="divider" />
-                <span class="status-text funds">{{ fundsLabel }}</span>
+            <div class="left-stack">
+                <div class="hud-panel status-panel">
+                    <span class="status-dot" :class="{ ready: store.isEngineReady }" />
+                    <span class="status-text">{{ backendLabel }}</span>
+                    <span class="divider" />
+                    <span class="status-text">{{ Math.round(store.fps) }} FPS</span>
+                </div>
+                <div class="hud-panel budget-panel">
+                    <div class="budget-row">
+                        <span class="budget-label">시 예산</span>
+                        <span class="budget-value treasury">${{ money(store.treasury) }}</span>
+                    </div>
+                    <div class="budget-row sub">
+                        <span>월 세수 +${{ money(store.account?.lastIncome ?? 0) }}</span>
+                        <span>유지비 −${{ money(store.account?.lastUpkeep ?? 0) }}</span>
+                        <span :class="monthlyNet >= 0 ? 'pos' : 'neg'">{{ monthlyNet >= 0 ? '+' : '−' }}${{ money(Math.abs(monthlyNet)) }}/월</span>
+                    </div>
+                    <div v-if="store.account && store.account.unfundedFacilities > 0" class="budget-warning">
+                        예산 부족 — 시설 {{ store.account.unfundedFacilities }}곳 운영 중단
+                    </div>
+                    <div class="budget-row household">
+                        <span class="budget-label">가계 자금</span>
+                        <span class="budget-value">§{{ money(store.household) }}</span>
+                    </div>
+                </div>
             </div>
-            <CityStatusPanel :owner-name="ownerName" @claim="emit('claim-tile')" />
+            <CityStatusPanel
+                :owner-name="ownerName"
+                @claim="emit('claim-tile')"
+                @purchase="emit('purchase-tile')"
+                @enter-home="emit('enter-home')"
+            />
         </div>
 
-        <div class="hud-panel toolbar">
-            <button
-                v-for="tool in tools"
-                :key="tool.id"
-                class="tool-btn"
-                :class="{ active: store.activeTool === tool.id, unaffordable: !store.canAfford(tool.id) }"
-                :style="{ '--accent': tool.accent }"
-                :disabled="!store.canAfford(tool.id)"
-                @click="store.setActiveTool(tool.id)"
-            >
-                <span class="tool-swatch" />
-                <span class="tool-key">{{ tool.label }}</span>
-                <span class="tool-label">{{ tool.hint }}</span>
-                <span v-if="costLabel(tool.id)" class="tool-cost">{{ costLabel(tool.id) }}</span>
-            </button>
+        <div class="hud-row bottom-row">
+            <div class="hud-panel view-toggle">
+                <span class="status-text">{{ cameraLabel }}</span>
+                <button class="pill-btn" @click="emit('toggle-camera')">Tab ⇄</button>
+            </div>
+
+            <div v-if="store.cameraMode === 'planning'" class="hud-panel toolbar">
+                <template v-for="(group, gi) in toolGroups" :key="gi">
+                    <span v-if="gi > 0" class="tool-divider" />
+                    <button
+                        v-for="tool in group"
+                        :key="tool.id"
+                        class="tool-btn"
+                        :class="{ active: store.activeTool === tool.id, unaffordable: !store.canAfford(tool.id) }"
+                        :style="{ '--accent': tool.accent }"
+                        :disabled="!store.canAfford(tool.id)"
+                        @click="store.setActiveTool(tool.id)"
+                    >
+                        <span class="tool-swatch" />
+                        <span class="tool-key">{{ tool.label }}</span>
+                        <span class="tool-label">{{ tool.hint }}</span>
+                        <span v-if="costLabel(tool.id)" class="tool-cost">{{ costLabel(tool.id) }}</span>
+                    </button>
+                </template>
+            </div>
+
+            <div class="bottom-spacer" />
         </div>
 
-        <div class="hud-panel view-toggle">
-            <span class="status-text">{{ cameraLabel }}</span>
-            <button class="pill-btn" @click="store.setCameraMode(store.cameraMode === 'planning' ? 'walkthrough' : 'planning')">
-                Tab ⇄
-            </button>
-        </div>
+        <transition name="notice">
+            <div v-if="store.lastNotice" :key="store.lastNotice.at" class="notice">{{ store.lastNotice.text }}</div>
+        </transition>
     </div>
 </template>
 
@@ -130,15 +186,116 @@ function costLabel(tool: BuildTool): string {
     background: rgba(0, 0, 0, 0.12);
 }
 
-.funds {
+.left-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.budget-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    min-width: 250px;
+}
+
+.budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.budget-row.sub {
+    font-size: 11px;
+    color: #6e6e73;
     font-variant-numeric: tabular-nums;
+}
+
+.budget-row.household {
+    margin-top: 4px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.budget-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6e6e73;
+}
+
+.budget-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+}
+
+.budget-value.treasury {
     color: #1a7f37;
 }
 
+.pos {
+    color: #1a7f37;
+    font-weight: 600;
+}
+
+.neg {
+    color: #d70015;
+    font-weight: 600;
+}
+
+.budget-warning {
+    font-size: 11px;
+    font-weight: 600;
+    color: #d70015;
+    background: rgba(255, 59, 48, 0.1);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.bottom-row {
+    align-items: flex-end;
+}
+
+.bottom-spacer {
+    width: 200px;
+}
+
 .toolbar {
-    align-self: center;
     padding: 8px;
-    gap: 6px;
+    gap: 4px;
+}
+
+.tool-divider {
+    width: 1px;
+    height: 36px;
+    margin: 0 4px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.notice {
+    position: absolute;
+    left: 50%;
+    bottom: 110px;
+    transform: translateX(-50%);
+    background: rgba(29, 29, 31, 0.85);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+.notice-enter-active,
+.notice-leave-active {
+    transition: opacity 0.2s ease;
+}
+.notice-enter-from,
+.notice-leave-to {
+    opacity: 0;
 }
 
 .tool-btn {
@@ -213,7 +370,9 @@ function costLabel(tool: BuildTool): string {
 }
 
 .view-toggle {
-    align-self: flex-end;
+    width: 200px;
+    box-sizing: border-box;
+    justify-content: space-between;
 }
 
 .pill-btn {

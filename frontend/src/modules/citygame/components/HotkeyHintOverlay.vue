@@ -26,7 +26,7 @@ const store = useCityGameStore()
 .hint-overlay {
     position: absolute;
     right: 20px;
-    bottom: 20px;
+    bottom: 100px;
     pointer-events: auto;
     background: rgba(30, 30, 32, 0.6);
     backdrop-filter: blur(20px) saturate(180%);

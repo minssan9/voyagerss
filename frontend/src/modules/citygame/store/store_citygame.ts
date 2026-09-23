@@ -1,11 +1,16 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { CITYGAME_DEFAULT_NEIGHBOR_RADIUS } from '../config/world'
-import { STARTING_FUNDS, TOOL_COST } from '../config/economy'
+import { STARTING_HOUSEHOLD, STARTING_TREASURY, TOOL_COST } from '../config/economy'
 import { tileIdOf } from '../geo/tileMath'
-import type { BuildTool, CameraMode, GeoPoint, RendererBackend, TileClaim, TileCoord } from '../types'
+import type { BuildTool, CameraMode, CityAccount, GeoPoint, RendererBackend, TileClaim, TileCoord } from '../types'
+import type { FreeRoamHudState } from '../engine/FreeRoamController'
+import type { InteriorSnapshot } from '../engine/interior/InteriorScene'
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected'
+
+/** `city` = shared SimCity map; `interior` = your own home, Sims-style. */
+export type GameView = 'city' | 'interior'
 
 export const useCityGameStore = defineStore('citygame', () => {
     const backend = ref<RendererBackend>('webgl2')
@@ -14,6 +19,7 @@ export const useCityGameStore = defineStore('citygame', () => {
     const showHotkeyHints = ref(true)
     const fps = ref(0)
     const isEngineReady = ref(false)
+    const view = ref<GameView>('city')
 
     // Real-world map sync
     const showMapPicker = ref(true)
@@ -22,14 +28,32 @@ export const useCityGameStore = defineStore('citygame', () => {
     const geoCenter = ref<GeoPoint | null>(null)
     const neighborRadius = ref(CITYGAME_DEFAULT_NEIGHBOR_RADIUS)
 
-    // Economy (local-only, cosmetic — not synced across players)
-    const funds = ref(STARTING_FUNDS)
+    // Economy — server-authoritative; these are the last values the server pushed.
+    const account = ref<CityAccount | null>(null)
+    const treasury = computed(() => account.value?.treasury ?? STARTING_TREASURY)
+    const household = computed(() => account.value?.household ?? STARTING_HOUSEHOLD)
 
     // Multiplayer
     const connectionStatus = ref<ConnectionStatus>('disconnected')
     const localOwnerId = ref<string | undefined>(undefined)
     const claims = reactive(new Map<string, TileClaim>())
     const occupantCounts = reactive(new Map<string, number>())
+    /** tileId -> cell of the home placed there (one per tile), so the HUD can offer "enter home". */
+    const homes = reactive(new Map<string, { cellX: number; cellY: number; ownerId: string }>())
+
+    const lastNotice = ref<{ text: string; at: number } | null>(null)
+
+    // Free roam (GTA-style) and home interior (Sims-style) live state, pushed from the engine a few times a second.
+    const roam = ref<FreeRoamHudState | null>(null)
+    const interior = ref<InteriorSnapshot | null>(null)
+
+    function setRoam(value: FreeRoamHudState | null) {
+        roam.value = value
+    }
+
+    function setInterior(value: InteriorSnapshot | null) {
+        interior.value = value
+    }
 
     function setBackend(value: RendererBackend) {
         backend.value = value
@@ -55,6 +79,10 @@ export const useCityGameStore = defineStore('citygame', () => {
         isEngineReady.value = value
     }
 
+    function setView(value: GameView) {
+        view.value = value
+    }
+
     function selectHome(tile: TileCoord, center: GeoPoint) {
         originTile.value = tile
         currentTile.value = tile
@@ -78,14 +106,47 @@ export const useCityGameStore = defineStore('citygame', () => {
         localOwnerId.value = id
     }
 
-    function upsertClaim(claim: TileClaim) {
-        claims.set(claim.tileId, claim)
+    function setAccount(value: CityAccount | null) {
+        account.value = value
     }
 
+    function upsertClaim(claim: TileClaim | null, tileId?: string) {
+        if (claim) claims.set(claim.tileId, claim)
+        else if (tileId) claims.delete(tileId)
+    }
+
+    function releaseClaim(tileId: string) {
+        claims.delete(tileId)
+    }
+
+    /** Owned (paid for) by me — the only state that allows building. */
+    function isOwnedByMe(tileId: string): boolean {
+        const claim = claims.get(tileId)
+        return !!claim && claim.status === 'owned' && claim.ownerId === localOwnerId.value
+    }
+
+    function isReservedByMe(tileId: string): boolean {
+        const claim = claims.get(tileId)
+        return !!claim && claim.status === 'reserved' && claim.ownerId === localOwnerId.value
+    }
+
+    /** Any claim (reserved or owned) held by me — drives the ground-plate "mine" color. */
     function isClaimedByMe(tileId: string): boolean {
         const claim = claims.get(tileId)
         return !!claim && claim.ownerId === localOwnerId.value
     }
+
+    function setHome(tileId: string, home: { cellX: number; cellY: number; ownerId: string } | null) {
+        if (home) homes.set(tileId, home)
+        else homes.delete(tileId)
+    }
+
+    const myHome = computed(() => {
+        for (const [tileId, home] of homes) {
+            if (home.ownerId === localOwnerId.value) return { tileId, ...home }
+        }
+        return null
+    })
 
     function setOccupantCount(tileId: string, count: number) {
         occupantCounts.set(tileId, count)
@@ -96,14 +157,16 @@ export const useCityGameStore = defineStore('citygame', () => {
     }
 
     function canAfford(tool: BuildTool): boolean {
-        return funds.value >= TOOL_COST[tool]
+        return treasury.value >= TOOL_COST[tool]
     }
 
-    /** Deducts the tool's cost if affordable; returns whether the spend happened. */
-    function spend(tool: BuildTool): boolean {
-        if (!canAfford(tool)) return false
-        funds.value -= TOOL_COST[tool]
-        return true
+    function notify(text: string) {
+        const at = Date.now()
+        lastNotice.value = { text, at }
+        // Compare by timestamp: the ref hands back a reactive proxy, so object identity never matches.
+        setTimeout(() => {
+            if (lastNotice.value?.at === at) lastNotice.value = null
+        }, 2800)
     }
 
     return {
@@ -113,32 +176,48 @@ export const useCityGameStore = defineStore('citygame', () => {
         showHotkeyHints,
         fps,
         isEngineReady,
+        view,
         showMapPicker,
         originTile,
         currentTile,
         geoCenter,
         neighborRadius,
-        funds,
+        account,
+        treasury,
+        household,
         connectionStatus,
         localOwnerId,
         claims,
         occupantCounts,
+        homes,
+        myHome,
+        lastNotice,
+        roam,
+        interior,
+        setRoam,
+        setInterior,
         setBackend,
         setCameraMode,
         setActiveTool,
         toggleHotkeyHints,
         setFps,
         setEngineReady,
+        setView,
         selectHome,
         setCurrentTile,
         setNeighborRadius,
         setConnectionStatus,
         setLocalOwnerId,
+        setAccount,
         upsertClaim,
+        releaseClaim,
+        isOwnedByMe,
+        isReservedByMe,
         isClaimedByMe,
+        setHome,
         setOccupantCount,
         currentTileId,
         canAfford,
-        spend,
+        notify,
     }
 })

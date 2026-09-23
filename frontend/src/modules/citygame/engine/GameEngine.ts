@@ -28,6 +28,8 @@ export class GameEngine {
     private canvas: HTMLCanvasElement
     private engine!: Engine | WebGPUEngine
     private scene!: Scene
+    /** The scene the render loop draws — the city, or a home interior while the player is inside. */
+    private activeScene!: Scene
     private shadowGenerator!: ShadowGenerator
     private resizeObserver?: ResizeObserver
     public backend: RendererBackend = 'webgl2'
@@ -66,6 +68,7 @@ export class GameEngine {
         }
 
         this.scene = this.buildScene()
+        this.activeScene = this.scene
         this.startRenderLoop()
         this.watchResize()
 
@@ -121,7 +124,7 @@ export class GameEngine {
 
     private startRenderLoop() {
         this.engine.runRenderLoop(() => {
-            this.scene.render()
+            this.activeScene.render()
         })
     }
 
@@ -135,6 +138,10 @@ export class GameEngine {
 
     getScene(): Scene {
         return this.scene
+    }
+
+    setActiveScene(scene: Scene | null) {
+        this.activeScene = scene ?? this.scene
     }
 
     getEngine(): Engine | WebGPUEngine {
