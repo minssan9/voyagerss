@@ -13,6 +13,7 @@ class BrightnessAnalyzer(Analyzer):
     """
 
     name = "brightness"
+    spatial = False  # 프레임 전체 지표라 ROI 필터링 대상이 아님 (항상 트리거 유지)
 
     def __init__(self, dark_threshold: float = 40.0, blur_threshold: float = 30.0):
         self.dark_threshold = dark_threshold

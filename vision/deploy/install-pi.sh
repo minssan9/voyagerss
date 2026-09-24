@@ -11,5 +11,7 @@ python3 -m venv --system-site-packages .venv
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -r requirements-pi.txt
 
+bash deploy/download-models.sh
+
 [ -f .env ] || cp .env.example .env
 echo "설치 완료. 테스트: .venv/bin/python -m camvision --no-display --stream 8080"

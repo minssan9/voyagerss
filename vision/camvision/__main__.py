@@ -5,6 +5,8 @@
   python -m camvision --analyzers motion,face --stream 8080
   python -m camvision --source picamera --no-display --stream 8080   # 라즈베리파이
   python -m camvision --source sample.mp4 --events events.jsonl
+  python -m camvision --analyzers object --object-every 3 --roi roi.json --decide
+  python -m camvision.roi_tool                          # ROI 구역 그리기 도구
 """
 from __future__ import annotations
 
@@ -20,7 +22,9 @@ import urllib.request
 import cv2
 
 from .analyzers import REGISTRY, build_analyzers
+from .decision import DecisionRules, DrivingDecider
 from .pipeline import FrameReport, Pipeline
+from .roi import load_zones
 from .sources import open_source
 
 
@@ -49,6 +53,25 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="트리거 시 오버레이 이미지를 JPEG 로 저장할 폴더")
     p.add_argument("--cooldown", type=float, default=float(env("CAMVISION_COOLDOWN", 5.0)),
                    help="같은 분석기의 이벤트 최소 간격(초)")
+    p.add_argument("--roi", metavar="FILE", default=env("CAMVISION_ROI_FILE"),
+                   help="ROI 구역 JSON 파일 (python -m camvision.roi_tool 로 생성)")
+    p.add_argument("--object-model", metavar="DIR", default=env("CAMVISION_MODEL_DIR"),
+                   help="object 분석기 모델 폴더 (기본: vision/models, deploy/download-models.sh 로 다운로드)")
+    p.add_argument("--object-confidence", type=float,
+                   default=float(env("CAMVISION_OBJECT_CONFIDENCE", 0.5)),
+                   help="object 분석기 최소 신뢰도")
+    p.add_argument("--object-classes", default=env("CAMVISION_OBJECT_CLASSES", ""),
+                   help="object 분석기가 검출할 클래스 (쉼표 구분, 비우면 전체)")
+    p.add_argument("--object-every", type=int, default=int(env("CAMVISION_OBJECT_EVERY", 1)),
+                   help="N 프레임마다 1회 추론 (파이에서는 3 권장)")
+    p.add_argument("--decide", action="store_true",
+                   default=env("CAMVISION_DECIDE", "").lower() in ("1", "true"),
+                   help="자율주행 STOP/SLOW/GO 판단 레이어 활성화")
+    p.add_argument("--decision-config", metavar="FILE", default=env("CAMVISION_DECISION_CONFIG"),
+                   help="DecisionRules 오버라이드 JSON 파일")
+    p.add_argument("--decision-heartbeat", type=float,
+                   default=float(env("CAMVISION_DECISION_HEARTBEAT", 0.0)),
+                   help="변화 없어도 이 간격(초)마다 driving 이벤트 재전송 (0=끔)")
     p.add_argument("--max-frames", type=int, default=0, help="이 프레임 수 처리 후 종료 (테스트용)")
     args = p.parse_args(argv)
     if args.display is None:
@@ -60,14 +83,22 @@ class EventSink:
     """트리거된 결과를 cooldown 적용 후 파일/웹훅/스냅샷으로 내보낸다."""
 
     def __init__(self, events_file: str | None, webhook: str | None,
-                 snapshot_dir: str | None, cooldown: float):
+                 snapshot_dir: str | None, cooldown: float, decision_heartbeat: float = 0.0):
         self.events_file = events_file
         self.webhook = webhook
         self.snapshot_dir = snapshot_dir
         self.cooldown = cooldown
+        self.decision_heartbeat = decision_heartbeat
         self._last: dict[str, float] = {}
+        self._last_decision_ts = 0.0
         if snapshot_dir:
             os.makedirs(snapshot_dir, exist_ok=True)
+
+    def _snapshot(self, report: FrameReport, overlay, tag: str) -> str:
+        name = f"{time.strftime('%Y%m%d-%H%M%S', time.localtime(report.timestamp))}_{tag}.jpg"
+        path = os.path.join(self.snapshot_dir, name)
+        cv2.imwrite(path, overlay)
+        return path
 
     def handle(self, report: FrameReport, overlay) -> list[dict]:
         fired = []
@@ -77,11 +108,28 @@ class EventSink:
             self._last[r.analyzer] = report.timestamp
             event = {"ts": round(report.timestamp, 3), **r.to_dict()}
             if self.snapshot_dir:
-                name = f"{time.strftime('%Y%m%d-%H%M%S', time.localtime(report.timestamp))}_{r.analyzer}.jpg"
-                path = os.path.join(self.snapshot_dir, name)
-                cv2.imwrite(path, overlay)
-                event["snapshot"] = path
+                event["snapshot"] = self._snapshot(report, overlay, r.analyzer)
             fired.append(event)
+
+        # 주행 판단 이벤트는 STOP 이 지연되면 안 되므로 cooldown 을 적용하지 않는다.
+        decision = report.decision
+        if decision is not None:
+            due_heartbeat = (
+                self.decision_heartbeat > 0
+                and report.timestamp - self._last_decision_ts >= self.decision_heartbeat
+            )
+            if decision.changed or due_heartbeat:
+                self._last_decision_ts = report.timestamp
+                event = {
+                    "ts": round(report.timestamp, 3),
+                    "analyzer": "driving",
+                    "triggered": True,
+                    "decision": decision.to_dict(),
+                    "zone_hits": report.zone_hits,
+                }
+                if self.snapshot_dir and decision.changed:
+                    event["snapshot"] = self._snapshot(report, overlay, "driving")
+                fired.append(event)
 
         for event in fired:
             line = json.dumps(event, ensure_ascii=False)
@@ -106,8 +154,32 @@ class EventSink:
 
 def run(args: argparse.Namespace) -> int:
     names = [n.strip() for n in args.analyzers.split(",") if n.strip()]
-    pipeline = Pipeline(build_analyzers(names), analysis_width=args.analysis_width)
-    sink = EventSink(args.events, args.webhook, args.snapshot_dir, args.cooldown)
+
+    options: dict[str, dict] = {}
+    if "object" in names:
+        object_opts: dict = {
+            "confidence": args.object_confidence,
+            "every_n": args.object_every,
+        }
+        if args.object_model:
+            object_opts["model_dir"] = args.object_model
+        classes = [c.strip() for c in args.object_classes.split(",") if c.strip()]
+        if classes:
+            object_opts["classes"] = classes
+        options["object"] = object_opts
+
+    zones = load_zones(args.roi) if args.roi else None
+    decider = None
+    if args.decide:
+        rules = DecisionRules.from_file(args.decision_config) if args.decision_config else None
+        decider = DrivingDecider(rules)
+
+    pipeline = Pipeline(
+        build_analyzers(names, options), analysis_width=args.analysis_width,
+        zones=zones, decider=decider,
+    )
+    sink = EventSink(args.events, args.webhook, args.snapshot_dir, args.cooldown,
+                      decision_heartbeat=args.decision_heartbeat)
 
     broadcaster = server = None
     if args.stream:
@@ -120,7 +192,9 @@ def run(args: argparse.Namespace) -> int:
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
 
     source = open_source(args.source, args.width, args.height, args.fps)
-    print(f"[camvision] source={args.source} analyzers={names}", file=sys.stderr)
+    zone_names = [z.name for z in (zones or [])]
+    print(f"[camvision] source={args.source} analyzers={names} "
+          f"roi={zone_names or 'off'} decide={'on' if decider else 'off'}", file=sys.stderr)
     frames = 0
     try:
         with source:

@@ -5,3 +5,5 @@ __pycache__/
 snapshots/
 events.jsonl
 .env
+models/*.caffemodel
+models/*.prototxt

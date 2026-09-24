@@ -13,6 +13,8 @@ class Detection:
     label: str
     bbox: tuple[int, int, int, int]
     score: float = 1.0
+    # ROI 적용 후 이 검출이 속한 구역 이름들 (roi.apply_zones 가 채움)
+    zones: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -24,14 +26,17 @@ class AnalysisResult:
     triggered: bool = False
 
     def to_dict(self) -> dict[str, Any]:
+        def _det(d: Detection) -> dict[str, Any]:
+            out = {"label": d.label, "bbox": list(d.bbox), "score": round(d.score, 3)}
+            if d.zones:
+                out["zones"] = d.zones
+            return out
+
         return {
             "analyzer": self.analyzer,
             "triggered": self.triggered,
             "metrics": self.metrics,
-            "detections": [
-                {"label": d.label, "bbox": list(d.bbox), "score": round(d.score, 3)}
-                for d in self.detections
-            ],
+            "detections": [_det(d) for d in self.detections],
         }
 
 
@@ -39,6 +44,9 @@ class Analyzer:
     """모든 분석기의 베이스. BGR 프레임을 받아 AnalysisResult 를 돌려준다."""
 
     name = "base"
+    # 검출 좌표가 실제 위치를 의미하는지 여부. True 인 분석기만 ROI 필터링 대상이 된다.
+    # (brightness 처럼 프레임 전체를 보는 분석기는 False 로 둔다)
+    spatial = True
 
     def analyze(self, frame: np.ndarray) -> AnalysisResult:  # pragma: no cover
         raise NotImplementedError
