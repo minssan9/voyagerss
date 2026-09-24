@@ -1,0 +1,5 @@
+# Raspberry Pi (headless) 용
+# Pi Camera Module 을 쓰려면 picamera2 는 apt 로 설치: sudo apt install -y python3-picamera2
+# venv 는 --system-site-packages 로 만들어야 picamera2 를 import 할 수 있음
+opencv-python-headless>=4.8,<5
+numpy>=1.24
