@@ -192,6 +192,19 @@ python -m camvision --analyzers object,brightness --roi roi.json --decide
 **조향(steer)**: SLOW 일 때만 `-1`(왼쪽) ~ `1`(오른쪽) 값을 계산합니다. 장애물 반대 방향으로
 조향을 제안합니다 (예: 장애물이 화면 왼쪽에 있으면 `steer > 0`, 오른쪽으로 피함).
 
+### 점진적 반영 (ramp) — 차량에 내려보내는 속도/조향
+
+`action`(STOP/SLOW/GO)은 판단이고, 실제로 차량에 내려보내는 **속도(`speed`, 0~1)와
+조향(`steer`)은 프레임마다 정해진 폭만큼씩만 목표값에 다가갑니다.** 판단이 바뀌었다고
+바로 목표 속도로 점프하지 않으므로 급가속·급조향 없이 부드럽게 반영됩니다.
+
+- **`STOP` 은 예외**: 속도·조향을 즉시 0으로 만듭니다. 제동이 지연되는 것은 안전상
+  허용할 수 없기 때문에, 정지만은 점진적 반영을 거치지 않습니다.
+- `accel_step` : GO 방향으로 속도가 늘어날 때 프레임당 최대 증가폭
+- `decel_step` : STOP 이 아닌 감속(GO→SLOW 등)일 때 프레임당 최대 감소폭
+- `steer_step` : 조향이 목표값에 다가가는 프레임당 최대 변화폭
+- `go_speed`/`slow_speed`/`stop_speed` : 각 판단에 대응하는 목표 속도
+
 `--decision-config rules.json` 으로 기본값을 덮어씁니다 (아래는 기본값):
 
 ```json
@@ -205,16 +218,26 @@ python -m camvision --analyzers object,brightness --roi roi.json --decide
   "stop_area_ratio": 0.15,
   "slow_area_ratio": 0.03,
   "blind_action": "STOP",
-  "clear_frames": 5
+  "clear_frames": 5,
+  "go_speed": 1.0,
+  "slow_speed": 0.4,
+  "stop_speed": 0.0,
+  "accel_step": 0.15,
+  "decel_step": 0.35,
+  "steer_step": 0.3
 }
 ```
 
 판단 결과는 `driving` 이벤트로 기록됩니다 (다른 분석기와 달리 STOP 지연을 막기 위해
-`--cooldown` 을 적용하지 않고, 변화가 있을 때마다 즉시 내보냅니다):
+`--cooldown` 을 적용하지 않고, 변화가 있을 때마다 즉시 내보냅니다). 차량 제어부는
+`decision.action` 이 아니라 **`decision.speed`/`decision.steer` 를 그대로 목표값으로
+사용**하면 됩니다 (이미 점진적으로 다듬어진 값이므로 제어부에서 추가로 스무딩할 필요가
+없습니다):
 
 ```json
 {"ts": 1790213216.12, "analyzer": "driving", "triggered": true,
  "decision": {"action": "STOP", "reason": "obstacle_in_stop_zone", "steer": 0.0,
+              "speed": 0.0,
               "target": {"label": "person", "score": 0.91, "bbox": [10,54,93,133],
                          "zones": ["danger"], "area_ratio": 0.16},
               "changed": true, "ts": 1790213216.12},

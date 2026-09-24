@@ -170,3 +170,64 @@ def test_event_sink_heartbeat_resends_unchanged_decision(tmp_path):
     report2.decision = Decision(action=Action.GO, reason="clear", changed=False, ts=2.5)
     fired = sink.handle(report2, np.zeros((10, 10, 3), np.uint8))
     assert any(e["analyzer"] == "driving" for e in fired)
+
+
+def test_speed_ramps_up_gradually_on_go():
+    decider = DrivingDecider(DecisionRules(accel_step=0.2, decel_step=0.5))
+    d1 = decider.decide(make_report([]))  # GO, 시작 speed=0.0
+    assert d1.action == Action.GO
+    assert d1.speed == pytest.approx(0.2)  # 목표 1.0 이지만 accel_step 만큼만 증가
+    d2 = decider.decide(make_report([]))
+    assert d2.speed == pytest.approx(0.4)
+    d3 = decider.decide(make_report([]))
+    assert d3.speed == pytest.approx(0.6)
+
+
+def test_stop_forces_speed_and_steer_to_zero_immediately():
+    decider = DrivingDecider()
+    # 먼저 GO 로 몇 프레임 가속시켜 speed > 0 을 만든다
+    for _ in range(5):
+        decider.decide(make_report([]))
+    assert decider._speed > 0.5
+
+    d = decider.decide(make_report([person((100, 100, 20, 20), zones=["danger"])]))
+    assert d.action == Action.STOP
+    assert d.speed == 0.0  # 램프 없이 즉시 정지
+    assert d.steer == 0.0
+
+
+def test_speed_decelerates_gradually_when_action_relaxes_without_full_stop():
+    rules = DecisionRules(accel_step=1.0, decel_step=0.1, slow_area_ratio=0.01, stop_area_ratio=0.9)
+    decider = DrivingDecider(rules)
+    # GO 로 속도를 최대까지 올림 (accel_step=1.0 이므로 한 번에 도달)
+    d1 = decider.decide(make_report([]))
+    assert d1.speed == pytest.approx(1.0)
+
+    # SLOW 로 전환 (장애물 medium) -> decel_step=0.1 만큼만 감속
+    d2 = decider.decide(make_report([person((0, 0, 150, 110))]))
+    assert d2.action == Action.SLOW
+    assert d2.speed == pytest.approx(0.9)
+
+
+def test_steer_ramps_toward_target_by_steer_step():
+    decider = DrivingDecider(DecisionRules(steer_step=0.1))
+    report = make_report([person((50, 100, 60, 60), zones=["caution"])])
+    d1 = decider.decide(report)
+    assert d1.steer == pytest.approx(0.1)
+    d2 = decider.decide(report)
+    assert d2.steer == pytest.approx(0.2)
+
+
+def test_decision_to_dict_includes_speed():
+    decider = DrivingDecider()
+    d = decider.decide(make_report([]))
+    assert "speed" in d.to_dict()
+
+
+def test_decision_rules_from_file_overrides_ramp_fields(tmp_path):
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps({"accel_step": 0.5, "slow_speed": 0.2}))
+    rules = DecisionRules.from_file(str(path))
+    assert rules.accel_step == 0.5
+    assert rules.slow_speed == 0.2
+    assert rules.decel_step == DecisionRules().decel_step

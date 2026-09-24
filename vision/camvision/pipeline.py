@@ -155,9 +155,20 @@ def _draw_decision(out: np.ndarray, decision: "Decision") -> None:
     text = f"{action} ({decision.reason})"
     h, w = out.shape[:2]
     (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-    x0, y0 = w - tw - 20, 10
-    cv2.rectangle(out, (x0, y0), (x0 + tw + 12, y0 + th + 16), color, -1)
+    box_w = max(tw + 12, 120)
+    x0, y0 = w - box_w - 20, 10
+    cv2.rectangle(out, (x0, y0), (x0 + box_w, y0 + th + 16), color, -1)
     cv2.putText(out, text, (x0 + 6, y0 + th + 6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+
+    # 판단은 즉시 바뀔 수 있어도 실제로 내려보내는 speed 는 점진적으로만 변하므로
+    # 게이지로 그 차이를 보여준다 (예: STOP 직후에도 SLOW 잔여 속도가 잠깐 남을 수 있음)
+    bar_y = y0 + th + 24
+    bar_w = box_w
+    cv2.rectangle(out, (x0, bar_y), (x0 + bar_w, bar_y + 10), (60, 60, 60), -1)
+    fill_w = int(bar_w * max(0.0, min(1.0, decision.speed)))
+    cv2.rectangle(out, (x0, bar_y), (x0 + fill_w, bar_y + 10), color, -1)
+    cv2.putText(out, f"speed {decision.speed:.2f}", (x0, bar_y + 26),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
 
     if decision.steer:
         cx, cy = w // 2, h - 20
