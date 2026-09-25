@@ -8,9 +8,6 @@ import { Quasar, Notify, Dialog, Loading, Dark } from 'quasar'
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 import { i18n, loadLanaguageAsync } from "@/locales/i18n";
-// Module Styles
-import '@/modules/aviation/views/styles/app.sass'
-import '@/modules/investand/views/styles/app.scss'
 
 // import { app as firebaseApp } from './firebase/config'  // Import Firebase
 
