@@ -9,9 +9,9 @@ This module appears to be a financial or investment dashboard application ("Find
 - **MarketLab**: Analysis or experimental view for market data.
 - **HistoryPage**: View historical data or logs.
 - **Settings**: Application configuration.
-- **FindashLayout**: Layout wrapper for the financial dashboard.
+- **RouteView**: Shared nested-route wrapper (see `src/layout/RouteView.vue`).
 
 ## Structure
-- Located in `src/views/investand/`
+- Located in `src/modules/investand/`
 - Includes `admin` and `boot` subdirectories for administrative and initialization logic.
 - `composables` and `utils` for shared logic.
