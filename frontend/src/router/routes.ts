@@ -6,20 +6,20 @@ import aiprRoutes from '@/modules/aipr/router/routes';
 
 // ─── Common Routes ───────────────────────────────────────────────
 const commonRoutes: RouteRecordRaw[] = [
-    { path: '/', name: 'home', component: () => import('@/views/Landing.vue'), meta: { icon: 'home' } },
-    { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info' } },
-    { path: '/subscription', name: 'Subscription', component: () => import('@/modules/workschd/views/main/Subscription.vue'), meta: { icon: 'card_membership' } },
-    { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true } },
-    { path: '/terms', name: 'Terms', component: () => import('@/modules/workschd/views/main/Terms.vue'), meta: { icon: 'description', hidden: true } },
-    { path: '/dashboard', name: 'Dashboard', component: () => import('@/modules/workschd/views/main/Dashboard.vue'), meta: { icon: 'dashboard', requiresAuth: true, loginPath: '/workschd/login' } },
+    { path: '/', name: 'home', component: () => import('@/views/Landing.vue'), meta: { icon: 'home', title: '홈' } },
+    { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info', title: '소개' } },
+    { path: '/subscription', name: 'Subscription', component: () => import('@/modules/workschd/views/main/Subscription.vue'), meta: { icon: 'card_membership', title: '구독' } },
+    { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true, title: '개인정보처리방침' } },
+    { path: '/terms', name: 'Terms', component: () => import('@/modules/workschd/views/main/Terms.vue'), meta: { icon: 'description', hidden: true, title: '이용약관' } },
+    { path: '/dashboard', name: 'Dashboard', component: () => import('@/modules/workschd/views/main/Dashboard.vue'), meta: { icon: 'dashboard', title: '대시보드', requiresAuth: true, loginPath: '/workschd/login' } },
     { path: '/feedback-admin', name: 'feedback-admin', component: () => import('@/views/admin/FeedbackAdminView.vue'), meta: { icon: 'feedback', hidden: true, requiresAuth: true, roles: ['ADMIN'], loginPath: '/login', tabTitle: '기능 개선 요청 관리' } },
 ];
 
 // ─── Auth & Account Routes ───────────────────────────────────────
 const authRoutes: RouteRecordRaw[] = [
-    { path: '/login', name: 'login', component: () => import('@/views/common/auth/Login.vue'), meta: { icon: 'login', hidden: true } },
-    { path: '/redirect', name: 'redirect', component: () => import('@/views/common/auth/redirect.vue'), meta: { icon: 'refresh', hidden: true } },
-    { path: '/signup', name: 'Signup', component: () => import('@/views/common/auth/Signup.vue'), meta: { icon: 'person_add', requiresAuth: false, hidden: true } },
+    { path: '/login', name: 'login', component: () => import('@/views/common/auth/Login.vue'), meta: { icon: 'login', hidden: true, title: '로그인' } },
+    { path: '/redirect', name: 'redirect', component: () => import('@/views/common/auth/redirect.vue'), meta: { icon: 'refresh', hidden: true, title: '리다이렉트' } },
+    { path: '/signup', name: 'Signup', component: () => import('@/views/common/auth/Signup.vue'), meta: { icon: 'person_add', requiresAuth: false, hidden: true, title: '회원가입' } },
     { path: '/account/profile', name: 'AccountProfile', component: () => import('@/views/common/account/AccountProfile.vue'), meta: { icon: 'person', hidden: true, requiresAuth: true, loginPath: '/login' } },
     { path: '/account/schedule', name: 'AccountSchedule', component: () => import('@/views/common/account/AccountSchedule.vue'), meta: { icon: 'calendar_today', hidden: true, requiresAuth: true, loginPath: '/login' } },
     { path: '/workschd/login', name: 'WorkschdLogin', redirect: () => ({ path: '/login', query: { service: 'workschd' } }) },

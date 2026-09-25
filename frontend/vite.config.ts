@@ -43,11 +43,11 @@ export default defineConfig(({ mode }) => {
           disableDevLogs: true,
           sourcemap: true,
         },
-        includeAssets: ['logo.svg'],
+        includeAssets: ['favicon.ico', 'icon-192x192.png', 'icon-512x512.png'],
         manifest: {
           name: 'Voyagerss',
           short_name: 'Voyagerss',
-          description: 'Voyagerss',
+          description: 'Voyagerss — 일정·재무·항공·자동 PR을 하나의 플랫폼에서 관리하세요.',
           theme_color: '#ffffff',
           icons: [
             {

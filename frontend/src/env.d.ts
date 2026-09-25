@@ -12,6 +12,9 @@ declare module 'vue-router' {
     hidden?: boolean
     icon?: string
     title?: string
+    tabTitle?: string
+    description?: string
+    layout?: 'default' | 'blank' | 'minimal'
     project?: string
   }
 }

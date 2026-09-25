@@ -1,6 +1,7 @@
 ﻿import { Router, RouteLocationNormalized } from 'vue-router'
 import Cookies from 'js-cookie'
 import { useUserStore } from '@/stores/common/store_user'
+import { applyRouteHead } from '@/utils/head'
 import { LoadingService } from '@/utils/loading'
 import {
   decideRouteAccess,
@@ -80,7 +81,8 @@ export function setupRouterGuards(router: Router) {
     }
   })
 
-  router.afterEach(() => {
+  router.afterEach((to) => {
+    applyRouteHead(to)
     LoadingService.done()
   })
 
