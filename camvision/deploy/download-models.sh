@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MobileNet-SSD(Caffe, VOC) 가중치를 vision/models/ 에 내려받는다.
+# MobileNet-SSD(Caffe, VOC) 가중치를 camvision/models/ 에 내려받는다.
 # 바이너리 가중치는 git 에 커밋하지 않으므로 최초 1회 실행 필요.
 set -euo pipefail
 cd "$(dirname "$0")/.."

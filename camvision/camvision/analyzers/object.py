@@ -29,7 +29,7 @@ def _default_model_dir() -> str:
     env = os.environ.get("CAMVISION_MODEL_DIR")
     if env:
         return env
-    # <repo>/vision/models  (이 파일은 vision/camvision/analyzers/object.py)
+    # <repo>/camvision/models  (이 파일은 camvision/camvision/analyzers/object.py)
     return str(Path(__file__).resolve().parents[2] / "models")
 
 

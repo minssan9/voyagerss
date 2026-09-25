@@ -56,7 +56,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--roi", metavar="FILE", default=env("CAMVISION_ROI_FILE"),
                    help="ROI 구역 JSON 파일 (python -m camvision.roi_tool 로 생성)")
     p.add_argument("--object-model", metavar="DIR", default=env("CAMVISION_MODEL_DIR"),
-                   help="object 분석기 모델 폴더 (기본: vision/models, deploy/download-models.sh 로 다운로드)")
+                   help="object 분석기 모델 폴더 (기본: camvision/models, deploy/download-models.sh 로 다운로드)")
     p.add_argument("--object-confidence", type=float,
                    default=float(env("CAMVISION_OBJECT_CONFIDENCE", 0.5)),
                    help="object 분석기 최소 신뢰도")

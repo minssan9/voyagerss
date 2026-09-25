@@ -5,7 +5,7 @@
 ## 구조
 
 ```text
-vision/
+camvision/
 ├── camvision/
 │   ├── __main__.py        # CLI 진입점 (python -m camvision)
 │   ├── sources.py         # 카메라 입력: OpenCV(맥/USB/파일/RTSP), picamera2(파이 CSI)
@@ -41,7 +41,7 @@ vision/
 ## 1. macOS 에서 테스트
 
 ```bash
-cd vision
+cd camvision
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 
@@ -57,7 +57,7 @@ pytest -q                                             # 카메라 없이 테스�
 권장: Raspberry Pi 4/5, Raspberry Pi OS Bookworm 64-bit.
 
 ```bash
-git clone <repo> ~/voyagerss && cd ~/voyagerss/vision
+git clone <repo> ~/voyagerss && cd ~/voyagerss/camvision
 bash deploy/install-pi.sh
 
 # CSI 카메라 모듈이면 picamera, USB 웹캠이면 0 (auto 는 자동 판별)
@@ -110,7 +110,7 @@ horse, motorbike, person, pottedplant, sheep, sofa, train, tvmonitor`
 
 | 옵션 | 설명 |
 |---|---|
-| `--object-model DIR` | 모델 폴더 (기본: `vision/models`) |
+| `--object-model DIR` | 모델 폴더 (기본: `camvision/models`) |
 | `--object-confidence` | 최소 신뢰도 (기본 0.5) |
 | `--object-classes` | 검출할 클래스 (쉼표 구분, 비우면 전체) |
 | `--object-every N` | N 프레임마다 1회 추론 |
@@ -159,13 +159,13 @@ python -m camvision.roi_tool                 # 맥: 카메라로 클릭해서 �
 ```bash
 # 1. 파이에서 한 프레임 캡처
 python -m camvision.roi_tool --source picamera --capture frame.jpg
-scp pi@raspberrypi:~/voyagerss/vision/frame.jpg .
+scp pi@raspberrypi:~/voyagerss/camvision/frame.jpg .
 
 # 2. 맥에서 그 이미지로 편집
 python -m camvision.roi_tool --image frame.jpg --out roi.json
 
 # 3. 완성된 roi.json 을 파이로 복사
-scp roi.json pi@raspberrypi:~/voyagerss/vision/
+scp roi.json pi@raspberrypi:~/voyagerss/camvision/
 ```
 
 ## 자율주행 판단 (decision)

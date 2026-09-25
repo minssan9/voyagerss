@@ -8,9 +8,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/voyagerss/vision
-EnvironmentFile=-/home/pi/voyagerss/vision/.env
-ExecStart=/home/pi/voyagerss/vision/.venv/bin/python -m camvision --no-display
+WorkingDirectory=/home/pi/voyagerss/camvision
+EnvironmentFile=-/home/pi/voyagerss/camvision/.env
+ExecStart=/home/pi/voyagerss/camvision/.venv/bin/python -m camvision --no-display
 Restart=on-failure
 RestartSec=5
 
