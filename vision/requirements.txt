@@ -1,0 +1,4 @@
+# macOS / 개발용 (GUI 창 표시 가능한 빌드)
+# OpenCV 5.x 는 CascadeClassifier 가 빠졌으므로 4.x 로 고정
+opencv-python>=4.8,<5
+numpy>=1.24
