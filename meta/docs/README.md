@@ -4,6 +4,7 @@
 
 ## 시작하기
 
+- [architecture.md](architecture.md) — 전체 모듈 아키텍처
 - [setup.md](setup.md) — 로컬 개발·운영 배포 전체 가이드
 - [.env.example](../../.env.example) — 운영 환경 변수 템플릿 (로컬은 `.env.local`)
 

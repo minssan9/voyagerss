@@ -1,0 +1,18 @@
+# /etc/systemd/system/vision_cam.service
+# 설치: sudo cp deploy/vision_cam.service /etc/systemd/system/ && sudo systemctl enable --now vision_cam
+[Unit]
+Description=vision_cam - OpenCV realtime camera analysis
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/voyagerss/vision_cam
+EnvironmentFile=-/home/pi/voyagerss/vision_cam/.env
+ExecStart=/home/pi/voyagerss/vision_cam/.venv/bin/python -m vision_cam --no-display
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

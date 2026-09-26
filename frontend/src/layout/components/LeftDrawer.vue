@@ -85,6 +85,7 @@ const currentProject = computed(() => {
   if (path.startsWith('/investand')) return 'investand'
   if (path.startsWith('/workschd')) return 'workschd'
   if (path.startsWith('/aipr')) return 'aipr'
+  if (path.startsWith('/vision')) return 'vision'
   return null
 })
 
@@ -103,6 +104,7 @@ const projectSections = computed<ProjectSection[]>(() => {
     investand: { label: 'Investand',     icon: 'show_chart'       },
     workschd:  { label: 'WorkSchd',      icon: 'business_center'  },
     aipr:      { label: 'AI Operations', icon: 'settings_suggest' },
+    vision:    { label: 'Vision',        icon: 'visibility'       },
   }
 
   const sections: ProjectSection[] = []
@@ -142,7 +144,7 @@ const commonFilteredRoutes = computed(() => {
     'PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup',
     'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden',
     'NotFound', 'Aviation', 'Investand', 'Workschd', 'WorkschdLogin',
-    'Aipr', 'AuthCallback', 'Dashboard'
+    'Aipr', 'Vision', 'AuthCallback', 'Dashboard'
   ]
 
   return allRoutes.filter((r: any) => {
