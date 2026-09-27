@@ -1,23 +1,23 @@
 <template>
   <div>
-    <div class="row items-center q-gutter-sm q-mb-md">
+    <teleport v-if="docked" to="#workschd-page-toolbar">
       <q-select
         v-model="filterModule"
         :options="moduleOptions"
-        label="모듈"
+        :label="t('rbac.common.module')"
         outlined dense emit-value map-options
-        style="min-width: 140px"
         @update:model-value="load"
       />
-      <q-input v-model="filterSubjectId" label="대상 ID 검색" dense outlined clearable style="min-width: 200px"
+      <q-input v-model="filterSubjectId" :label="t('rbac.subjects.searchSubjectId')" dense outlined clearable
         @keyup.enter="load"
       >
-        <template v-slot:prepend><q-icon name="search" /></template>
+        <template #prepend><q-icon name="search" size="16px" /></template>
       </q-input>
-      <q-btn color="grey-7" flat icon="refresh" round @click="load" />
-      <q-space />
-      <q-btn color="primary" icon="person_add" label="역할 부여" @click="openAssignDialog" />
-    </div>
+      <q-btn flat dense round icon="refresh" @click="load" />
+    </teleport>
+    <teleport v-if="docked" to="#workschd-page-actions">
+      <q-btn class="workschd-btn" unelevated no-caps dense icon="person_add" :label="t('rbac.subjects.assignRole')" @click="openAssignDialog" />
+    </teleport>
 
     <q-card flat bordered>
       <q-table
@@ -42,7 +42,7 @@
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <q-btn flat dense round icon="delete" color="negative" @click="confirmRevoke(props.row)">
-              <q-tooltip>역할 해제</q-tooltip>
+              <q-tooltip>{{ t('rbac.subjects.revokeTooltip') }}</q-tooltip>
             </q-btn>
           </q-td>
         </template>
@@ -53,31 +53,31 @@
     <q-dialog v-model="assignDialog" persistent>
       <q-card style="min-width: 420px">
         <q-card-section>
-          <div class="text-h6">역할 부여</div>
+          <div class="text-h6">{{ t('rbac.subjects.assignDialogTitle') }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none q-gutter-sm">
           <q-select
             v-model="assignForm.module"
             :options="moduleOptions"
-            label="모듈 *"
+            :label="t('rbac.common.module') + ' *'"
             outlined dense emit-value map-options
           />
           <q-input
             v-model="assignForm.subjectId"
-            label="대상 ID *"
+            :label="t('rbac.subjects.subjectId')"
             outlined dense
-            hint="workschd: accountId(숫자), investand/aipr: admin ID(문자열)"
+            :hint="t('rbac.subjects.subjectIdHint')"
           />
           <q-select
             v-model="assignForm.roleId"
             :options="roleOptions"
-            label="역할 *"
+            :label="t('rbac.subjects.role')"
             outlined dense emit-value map-options
           />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat label="취소" @click="assignDialog = false" />
-          <q-btn color="primary" label="부여" :loading="saving" @click="assignRole" />
+          <q-btn flat :label="t('rbac.common.cancel')" @click="assignDialog = false" />
+          <q-btn color="primary" :label="t('rbac.common.assign')" :loading="saving" @click="assignRole" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -88,7 +88,7 @@
         <div class="row items-center justify-between">
           <div class="text-subtitle1">
             <q-icon name="lock" class="q-mr-xs" />
-            {{ viewingSubject.module }}:{{ viewingSubject.subjectId }} 의 유효 권한
+            {{ t('rbac.subjects.effectivePermissions', { module: viewingSubject.module, subjectId: viewingSubject.subjectId }) }}
           </div>
           <q-btn flat round dense icon="close" @click="viewingSubject = null" />
         </div>
@@ -105,7 +105,7 @@
           >
             {{ perm.name }}
           </q-chip>
-          <span v-if="subjectPermissions.length === 0" class="text-grey-6">부여된 권한 없음</span>
+          <span v-if="subjectPermissions.length === 0" class="text-grey-6">{{ t('rbac.subjects.noPermissions') }}</span>
         </div>
       </q-card-section>
     </q-card>
@@ -114,9 +114,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import apiRbac, { RbacRole, RbacSubjectRole, RbacPermission } from '@/modules/workschd/api/api-rbac'
+import { useWorkschdHeaderDock } from '@/modules/workschd/composables/useWorkschdHeaderDock'
 
+const { t } = useI18n()
+const docked = useWorkschdHeaderDock()
 const $q = useQuasar()
 const subjectRoles = ref<RbacSubjectRole[]>([])
 const roles = ref<RbacRole[]>([])
@@ -132,7 +136,6 @@ const assignForm = ref({ module: 'workschd', subjectId: '', roleId: null as numb
 
 const moduleOptions = [
   { label: 'workschd', value: 'workschd' },
-  { label: 'investand', value: 'investand' },
   { label: 'aipr', value: 'aipr' },
   { label: 'aviation', value: 'aviation' },
 ]
@@ -141,16 +144,16 @@ const roleOptions = computed(() =>
   roles.value.map((r) => ({ label: `${r.name} (${r.code})`, value: r.id }))
 )
 
-const columns = [
-  { name: 'module', label: '모듈', field: 'module', align: 'center' as const, sortable: true },
-  { name: 'subjectId', label: '대상 ID', field: 'subjectId', align: 'left' as const, sortable: true },
-  { name: 'role', label: '역할', field: 'role', align: 'left' as const },
+const columns = computed(() => [
+  { name: 'module', label: t('rbac.common.module'), field: 'module', align: 'center' as const, sortable: true },
+  { name: 'subjectId', label: t('rbac.subjects.subjectIdColumn'), field: 'subjectId', align: 'left' as const, sortable: true },
+  { name: 'role', label: t('rbac.subjects.role').replace(' *', ''), field: 'role', align: 'left' as const },
   {
-    name: 'viewPerms', label: '권한 확인', field: 'viewPerms', align: 'center' as const,
+    name: 'viewPerms', label: t('rbac.subjects.viewPermissions'), field: 'viewPerms', align: 'center' as const,
     format: (_: any, row: RbacSubjectRole) => row,
   },
   { name: 'actions', label: '', field: 'actions', align: 'right' as const },
-]
+])
 
 async function load() {
   loading.value = true
@@ -187,11 +190,11 @@ async function assignRole() {
         assignForm.value.roleId,
       ])
     }
-    $q.notify({ type: 'positive', message: '역할이 부여되었습니다.' })
+    $q.notify({ type: 'positive', message: t('rbac.subjects.assigned') })
     assignDialog.value = false
     await load()
   } catch (e: any) {
-    $q.notify({ type: 'negative', message: e.response?.data?.message ?? '오류 발생' })
+    $q.notify({ type: 'negative', message: e.response?.data?.message ?? t('rbac.subjects.error') })
   } finally {
     saving.value = false
   }
@@ -199,10 +202,10 @@ async function assignRole() {
 
 function confirmRevoke(sr: RbacSubjectRole) {
   $q.dialog({
-    title: '역할 해제',
-    message: `"${sr.role.name}" 역할을 ${sr.module}:${sr.subjectId} 에서 해제하시겠습니까?`,
+    title: t('rbac.subjects.revokeTitle'),
+    message: t('rbac.subjects.revokeMessage', { role: sr.role.name, module: sr.module, subjectId: sr.subjectId }),
     cancel: true,
-    ok: { color: 'negative', label: '해제' },
+    ok: { color: 'negative', label: t('rbac.common.revoke') },
   }).onOk(async () => {
     try {
       const currentRoles = await apiRbac.getSubjectRoles(sr.module, sr.subjectId)
@@ -210,13 +213,13 @@ function confirmRevoke(sr: RbacSubjectRole) {
         .map((r: RbacSubjectRole) => r.roleId)
         .filter((id: number) => id !== sr.roleId)
       await apiRbac.setSubjectRoles(sr.module, sr.subjectId, remainingIds)
-      $q.notify({ type: 'positive', message: '역할이 해제되었습니다.' })
+      $q.notify({ type: 'positive', message: t('rbac.subjects.revoked') })
       await load()
       if (viewingSubject.value?.module === sr.module && viewingSubject.value?.subjectId === sr.subjectId) {
         await viewPerms(sr)
       }
     } catch (e: any) {
-      $q.notify({ type: 'negative', message: e.response?.data?.message ?? '해제 실패' })
+      $q.notify({ type: 'negative', message: e.response?.data?.message ?? t('rbac.subjects.revokeFailed') })
     }
   })
 }

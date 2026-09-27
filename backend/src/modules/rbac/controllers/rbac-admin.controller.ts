@@ -13,16 +13,15 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../workschd/guards/jwt-auth.guard';
-import { RolesGuard } from '../../workschd/guards/roles.guard';
-import { Roles } from '../../workschd/decorators/roles.decorator';
 import { RbacGuard } from '../guards/rbac.guard';
+import { RbacAdminAccess } from '../decorators/require-rbac-admin.decorator';
 import { RequirePermission } from '../decorators/require-permission.decorator';
 import { RbacService, CreateRoleDto, UpdateRoleDto, CreatePermissionDto, UpdatePermissionDto } from '../rbac.service';
 import { RbacSyncService } from '../rbac-sync.service';
 
 @Controller('rbac')
-@UseGuards(JwtAuthGuard, RolesGuard, RbacGuard)
-@Roles('ADMIN')
+@UseGuards(JwtAuthGuard, RbacGuard)
+@RbacAdminAccess()
 export class RbacAdminController {
   constructor(
     private readonly rbacService: RbacService,

@@ -7,6 +7,7 @@ import router from './router'
 import { Quasar, Notify, Dialog, Loading, Dark } from 'quasar'
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
+import './assets/styles/auth-contrast.scss'
 import { i18n, loadLanaguageAsync } from "@/locales/i18n";
 
 // import { app as firebaseApp } from './firebase/config'  // Import Firebase
@@ -18,6 +19,8 @@ const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches 
 const initialDark = savedDark !== null ? savedDark === 'true' : prefersDark;
 
 import { useAppConfigStore } from '@/stores/common/store_app_config'
+import { setActivePinia } from 'pinia'
+import { bootDevSession } from '@/boot/dev-auto-login'
 
 declare global {
   interface Window {
@@ -31,7 +34,7 @@ async function bootstrap() {
 
   app.use(i18n)
   app.use(pinia)
-  app.use(router)
+  setActivePinia(pinia)
 
   app.use(Quasar, {
     plugins: { Notify, Dialog, Loading, Dark },
@@ -48,6 +51,11 @@ async function bootstrap() {
   loadLanaguageAsync(i18n.global.locale.value)
 
   await useAppConfigStore().load()
+  await bootDevSession()
+
+  // Router install starts the first navigation immediately. Login must finish first,
+  // or protected pages redirect to /401 before the dev session token exists.
+  app.use(router)
 
   // window.Kakao.init(useAppConfigStore().get('VITE_KAKAO_CLIENT_ID'))
 

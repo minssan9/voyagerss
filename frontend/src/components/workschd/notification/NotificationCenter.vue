@@ -19,14 +19,14 @@
     <q-card style="min-width: 350px; max-width: 450px; max-height: 500px">
       <!-- Header -->
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">Notifications</div>
+        <div class="text-h6">{{ t('notification.title') }}</div>
         <q-space />
         <q-btn
           v-if="unreadCount > 0"
           flat
           dense
           size="sm"
-          label="Mark all as read"
+          :label="t('notification.markAllRead')"
           color="primary"
           @click="markAllAsRead"
         />
@@ -41,7 +41,7 @@
             v-if="notifications.length === 0"
             class="text-center text-grey"
           >
-            <q-item-section>No notifications</q-item-section>
+            <q-item-section>{{ t('notification.empty') }}</q-item-section>
           </q-item>
 
           <notification-item
@@ -61,7 +61,7 @@
         <q-btn
           flat
           dense
-          label="View All"
+          :label="t('notification.viewAll')"
           color="primary"
           @click="viewAllNotifications"
         />
@@ -73,12 +73,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import notificationApi, { Notification } from '@/modules/workschd/api/api-notification'
 import NotificationItem from './NotificationItem.vue'
 import { useWebSocket } from '@/composables/useWebSocket'
 
 const router = useRouter()
+const { t } = useI18n()
 const $q = useQuasar()
 
 // Use WebSocket composable for real-time notifications

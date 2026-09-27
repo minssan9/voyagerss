@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { I18nHttpException } from '../../common/i18n-http.exception';
 import axios from 'axios';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService } from '../../../config/config-service';
@@ -27,14 +28,14 @@ const SAFE_URL_PATTERN = /^https?:\/\//i;
 export class FeedbackService {
   async create(accountId: number, input: CreateFeedbackInput): Promise<Feedback> {
     if (input.pageUrl && !SAFE_URL_PATTERN.test(input.pageUrl)) {
-      throw new BadRequestException('pageUrl must start with http:// or https://');
+      throw new I18nHttpException('workschd.feedback.pageUrl', HttpStatus.BAD_REQUEST);
     }
 
     let fileData: Buffer | undefined;
     if (input.fileBase64) {
       fileData = Buffer.from(input.fileBase64, 'base64');
       if (fileData.length > MAX_ATTACHMENT_BYTES) {
-        throw new BadRequestException('Attachment exceeds the 5MB size limit');
+        throw new I18nHttpException('workschd.feedback.attachmentSize', HttpStatus.BAD_REQUEST);
       }
     }
 
@@ -89,11 +90,11 @@ export class FeedbackService {
 
   async updateStatus(id: number, status: string): Promise<Feedback> {
     if (!ALLOWED_STATUSES.includes(status)) {
-      throw new BadRequestException(`Invalid status: ${status}`);
+      throw new I18nHttpException('workschd.feedback.invalidStatus', HttpStatus.BAD_REQUEST, { status });
     }
 
     const existing = await prisma.feedback.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundException('Feedback not found');
+    if (!existing) throw new I18nHttpException('workschd.feedback.notFound', HttpStatus.NOT_FOUND);
 
     return prisma.feedback.update({
       where: { id },
@@ -103,7 +104,7 @@ export class FeedbackService {
 
   async getFile(id: number): Promise<{ fileName: string; fileMime: string; fileData: Buffer }> {
     const feedback = await prisma.feedback.findUnique({ where: { id } });
-    if (!feedback || !feedback.fileData) throw new NotFoundException('Attachment not found');
+    if (!feedback || !feedback.fileData) throw new I18nHttpException('workschd.feedback.attachmentNotFound', HttpStatus.NOT_FOUND);
 
     return {
       fileName: feedback.fileName ?? `feedback-${id}`,

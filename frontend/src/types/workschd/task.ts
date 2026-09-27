@@ -12,6 +12,7 @@ export interface Task {
   shopId: number | null;
   shopName?: string;
   teamName?: string;
+  currentWorkerCount?: number;
   active: boolean;
   taskEmployees?: TaskEmployee[];
 }

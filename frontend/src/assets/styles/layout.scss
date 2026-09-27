@@ -237,6 +237,12 @@ body {
   padding-bottom: $footer-height;
 }
 
+@media (min-width: 1024px) {
+  .q-layout.with-sidebar .q-page-container {
+    margin-left: var(--voy-sidebar-width, 260px);
+  }
+}
+
 // Sidebar q-expansion-item global overrides
 .sidebar {
   .q-expansion-item__container > .q-item {

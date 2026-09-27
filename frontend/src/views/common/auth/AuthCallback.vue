@@ -4,14 +4,14 @@
       <q-card-section>
         <div v-if="hasError">
           <q-icon name="error_outline" color="negative" size="50px" class="q-mb-md" />
-          <div class="text-h6 q-mb-sm">로그인에 실패했습니다</div>
-          <div class="text-caption text-grey-7 q-mb-md">다시 시도해 주세요.</div>
-          <q-btn color="primary" label="로그인으로 돌아가기" @click="goLogin" />
+          <div class="text-h6 q-mb-sm">{{ t('callback.failed') }}</div>
+          <div class="text-caption text-grey-7 q-mb-md">{{ t('callback.retry') }}</div>
+          <q-btn color="primary" :label="t('callback.backToLogin')" @click="goLogin" />
         </div>
         <div v-else>
           <q-spinner-orbit color="primary" size="50px" class="q-mb-md" />
-          <div class="text-h6 q-mb-sm">로그인 처리 중...</div>
-          <div class="text-caption text-grey-7">잠시만 기다려 주세요</div>
+          <div class="text-h6 q-mb-sm">{{ t('callback.processing') }}</div>
+          <div class="text-caption text-grey-7">{{ t('callback.wait') }}</div>
         </div>
       </q-card-section>
     </q-card>
@@ -20,10 +20,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useUserStore } from '@/stores/common/store_user'
 
+const { t } = useI18n()
 const router = useRouter()
 const $q = useQuasar()
 const userStore = useUserStore()
@@ -37,27 +39,30 @@ onMounted(async () => {
     const error = params.get('error')
 
     if (error || !accessToken) {
-      $q.notify({ type: 'negative', message: `로그인 실패: ${error || '토큰 없음'}`, position: 'top' })
+      $q.notify({
+        type: 'negative',
+        message: error ? t('callback.errorWithReason', { error }) : t('callback.errorNoToken'),
+        position: 'top'
+      })
       hasError.value = true
       return
     }
 
-    // Store tokens in Pinia store + cookie (via login action)
     userStore.setAccessToken(accessToken)
     if (refreshToken) userStore.setRefreshToken(refreshToken)
     await userStore.login(accessToken)
     await userStore.fetchUser()
 
-    $q.notify({ type: 'positive', message: '로그인 되었습니다!', position: 'top' })
-    router.replace('/workschd/funeral-board')
+    $q.notify({ type: 'positive', message: t('callback.success'), position: 'top' })
+    router.replace('/')
   } catch (err) {
     console.error('Auth callback error:', err)
-    $q.notify({ type: 'negative', message: '로그인 처리 중 오류가 발생했습니다', position: 'top' })
+    $q.notify({ type: 'negative', message: t('callback.processError'), position: 'top' })
     hasError.value = true
   }
 })
 
 function goLogin() {
-  router.replace('/login?service=workschd')
+  router.replace('/login')
 }
 </script>

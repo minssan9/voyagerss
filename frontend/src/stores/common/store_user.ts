@@ -1,6 +1,6 @@
 ﻿import apiAccount from '@/api/account/api-account'
 import apiTeam from '@/modules/workschd/api/api-team'
-import apiRbac from '@/modules/workschd/api/api-rbac'
+import apiRbac, { type RbacProfile } from '@/modules/workschd/api/api-rbac'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 
@@ -49,8 +49,10 @@ interface UserState {
   accountInfo: any[] // Type this based on your accountInfo structure
   isAuthPhone: boolean
   teams: Team[]
-  /** RBAC page permission codes granted to the current user (workschd module) */
+  /** RBAC page permission codes granted to the current user */
   rbacPagePermissions: string[]
+  /** Profile from GET /api/rbac/me */
+  rbacProfile: RbacProfile | null
 }
 
 export const useUserStore = defineStore('user', {
@@ -91,16 +93,22 @@ export const useUserStore = defineStore('user', {
     accountInfo: [],
     isAuthPhone: false,
     teams: [],
-    rbacPagePermissions: []
+    rbacPagePermissions: [],
+    rbacProfile: null
   }),
 
   getters: {
     accountId: (state): string | null => state.user.accountId,
     accessToken: (state): string | null => state.user.accessToken,
     refreshToken: (state): string | null => state.user.refreshToken,
-    isWorker: (state): boolean =>
-      state.user.accountRoles?.map(ar => ar.roleType).includes('WORKER') &&
-      state.user.accountRoles?.length === 1,
+    isWorker: (state): boolean => {
+      const roles = state.user.accountRoles?.map(ar => ar.roleType) ?? []
+      if (!roles.length) return false
+      const leader = ['TEAM_LEADER', 'ADMIN', 'MANAGER', 'OWNER']
+      if (roles.some(role => leader.includes(role))) return false
+      const worker = ['MEMBER', 'WORKER', 'HELPER', 'USER', 'ROLE_USER']
+      return roles.some(role => worker.includes(role))
+    },
     isOwner: (state): boolean =>
       state.user.accountRoles?.map(ar => ar.roleType).includes('OWNER') ?? false,
     isManager: (state): boolean =>
@@ -155,7 +163,7 @@ export const useUserStore = defineStore('user', {
     },
 
     async fetchTeams(): Promise<void> {
-      if (!this.user.accountId) return
+      if (!this.user.accountId || !this.accessToken) return
 
       try {
         const response = await apiAccount.getTeamsByAccountId(this.user.accountId)
@@ -177,6 +185,25 @@ export const useUserStore = defineStore('user', {
         // Non-fatal: RBAC DB might not be set up yet
         this.rbacPagePermissions = []
       }
+    },
+
+    async fetchRbacProfile(): Promise<RbacProfile | null> {
+      if (!this.accessToken && !Cookies.get('accessToken')) {
+        return null
+      }
+      try {
+        const res = await apiRbac.getMe()
+        if (res.data.result === 'SUCCESS' && res.data.data) {
+          this.rbacProfile = res.data.data
+          this.rbacPagePermissions = res.data.data.pages.map((p) => p.code)
+          return this.rbacProfile
+        }
+      } catch {
+        // Non-fatal until backend endpoint lands
+      }
+      this.rbacProfile = null
+      this.rbacPagePermissions = []
+      return null
     },
 
     async updateUser(partialData?: Partial<User>): Promise<User> {
@@ -259,6 +286,8 @@ export const useUserStore = defineStore('user', {
       }
       // Reset any other state properties if needed
       this.accountInfo = []
+      this.rbacProfile = null
+      this.rbacPagePermissions = []
     },
 
     setTeam(teamId: number | null): void {

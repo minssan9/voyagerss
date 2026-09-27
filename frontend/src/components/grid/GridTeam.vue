@@ -18,15 +18,18 @@
       />
     </div>
     <div class="button">
-      <button @click="onAddRow">추가</button>
-      <button @click="onRemoveSelected">삭제</button>
+      <button @click="onAddRow">{{ t('grid.add') }}</button>
+      <button @click="onRemoveSelected">{{ t('grid.delete') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { AgGridVue } from 'ag-grid-vue3'
+
+const { t } = useI18n()
 
 import type { GridReadyEvent } from 'ag-grid-community'
 import type { ColumnApi } from 'ag-grid-community/dist/lib/columns/columnApi'

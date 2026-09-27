@@ -57,8 +57,12 @@ const apiTeam = {
     return service.post('/workschd/team', teamData);
   },
 
-  generateInviteLink: (teamData: { teamName: string; region: string }): Promise<AxiosResponse> => {
+  generateInviteLink: (teamData: { teamName?: string; region?: string; teamId?: number }): Promise<AxiosResponse> => {
     return service.post('/workschd/team/generate-invite', teamData);
+  },
+
+  getJoinRequests: (teamId: number): Promise<AxiosResponse> => {
+    return service.get(`/workschd/team/${teamId}/join-requests`);
   },
 
   getTeamMembers: (teamId: number, params: TeamMemberParams = {
@@ -103,7 +107,11 @@ const apiTeam = {
 
   approveJoinRequest: (teamId: number, requestId: number): Promise<AxiosResponse<any>> => {
     return service.post(`/workschd/team/${teamId}/approve/${requestId}`);
-  }
+  },
+
+  rejectJoinRequest: (teamId: number, requestId: number): Promise<AxiosResponse<any>> => {
+    return service.post(`/workschd/team/${teamId}/reject/${requestId}`);
+  },
 };
 
 export default apiTeam;

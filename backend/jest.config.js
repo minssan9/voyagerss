@@ -7,11 +7,10 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/modules/investand/legacy_src/$1',
     '^@prisma/client-workschd$': '<rootDir>/node_modules/@prisma/client-workschd',
-    '^@prisma/client-investand$': '<rootDir>/node_modules/@prisma/client-investand',
     '^@prisma/client-aviation$': '<rootDir>/node_modules/@prisma/client-aviation',
     '^@prisma/client-aipr$': '<rootDir>/node_modules/@prisma/client-aipr',
+    '^@prisma/client-identity$': '<rootDir>/node_modules/@prisma/client-identity',
   },
   collectCoverageFrom: [
     'src/**/*.ts',

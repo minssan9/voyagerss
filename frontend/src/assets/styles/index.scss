@@ -14,9 +14,11 @@
 @import './layout.scss';
 @import './views.scss';
 
+@import './landing-shared';
+
 // Modules
 @import './modules/layout';
-@import './modules/investand';
 @import './modules/vision';
+@import './modules/workschd';
 
 // Add any additional global styles here

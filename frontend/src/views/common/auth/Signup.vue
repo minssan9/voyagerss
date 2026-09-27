@@ -1,18 +1,18 @@
 ﻿<template>
-  <q-page class="column items-center justify-center q-pa-md auth-page">
+  <div class="column items-center justify-center q-pa-md auth-page">
     <div class="auth-container card q-pa-lg">
-      <h5 class="text-center q-mb-md">{{ t('signup.title', '회원가입') }}</h5>
+      <h5 class="text-center q-mb-md">{{ t('signup.title') }}</h5>
       
       <q-form @submit="handleSignup" class="q-gutter-md">
         <q-input
           v-model="signupForm.email"
-          :label="t('signup.email.label', '이메일')"
+          :label="t('signup.email.label')"
           type="email"
           outlined
           class="auth-input"
           :rules="[
-            val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
-            val => isValidEmail(val) || t('signup.validation.email', '올바른 이메일 형식이 아닙니다')
+            val => !!val || t('signup.validation.required'),
+            val => isValidEmail(val) || t('signup.validation.email')
           ]"
         >
           <template v-slot:prepend>
@@ -22,12 +22,12 @@
 
         <q-input
           v-model="signupForm.username"
-          :label="t('signup.username.label', '사용자 이름')"
+          :label="t('signup.username.label')"
           outlined
           class="auth-input"
           :rules="[
-            val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
-            val => val.length >= 2 || t('signup.validation.username.length', '사용자 이름은 2자 이상이어야 합니다')
+            val => !!val || t('signup.validation.required'),
+            val => val.length >= 2 || t('signup.validation.username.length')
           ]"
         >
           <template v-slot:prepend>
@@ -37,13 +37,13 @@
 
         <q-input
           v-model="signupForm.password"
-          :label="t('signup.password.label', '비밀번호')"
+          :label="t('signup.password.label')"
           type="password"
           outlined
           class="auth-input"
           :rules="[
-            val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
-            val => val.length >= 4 || t('signup.validation.password.length', '비밀번호는 4자 이상이어야 합니다')
+            val => !!val || t('signup.validation.required'),
+            val => val.length >= 4 || t('signup.validation.password.length')
           ]"
         >
           <template v-slot:prepend>
@@ -53,13 +53,13 @@
 
         <q-input
           v-model="signupForm.confirmPassword"
-          :label="t('signup.confirmPassword.label', '비밀번호 확인')"
+          :label="t('signup.confirmPassword.label')"
           type="password"
           outlined
           class="signup-input"
           :rules="[
-            val => !!val || t('signup.validation.required', '필수 입력 항목입니다'),
-            val => val === signupForm.password || t('signup.validation.password.match', '비밀번호가 일치하지 않습니다')
+            val => !!val || t('signup.validation.required'),
+            val => val === signupForm.password || t('signup.validation.password.match')
           ]"
         >
           <template v-slot:prepend>
@@ -72,25 +72,25 @@
         <q-btn
           type="submit"
           color="primary"
-          :label="t('signup.button.submit', '가입하기')"
+          :label="t('signup.button.submit')"
           class="full-width q-py-sm q-mt-lg"
           size="lg"
         />
 
         <div class="row justify-center q-mt-md">
-          <span class="text-grey-7">{{ t('signup.login.prompt', '이미 계정이 있으신가요?') }}</span>
+          <span class="text-grey-7">{{ t('signup.login.prompt') }}</span>
           <q-btn
             flat
             dense
             color="primary"
             class="q-px-sm"
-            :label="t('signup.login.link', '로그인')"
+            :label="t('signup.login.link')"
             @click="router.push('/login')"
           />
         </div>
       </q-form>
     </div>
-  </q-page>
+  </div>
 </template>
 
 <script setup>
@@ -125,15 +125,15 @@ const handleSignup = async () => {
     })
 
     if (response) {
-      $q.notify({type: 'positive', message: t('signup.success', '회원가입이 완료되었습니다. 로그인해주세요.') })
+      $q.notify({type: 'positive', message: t('signup.success') })
       router.push('/login')
     }
   } catch (error) {
     console.error('Signup error:', error)
-    let errorMessage = t('signup.error.default', '회원가입 중 오류가 발생했습니다.')
+    let errorMessage = t('signup.error.default')
     
     if (error.response?.status === 409) {
-      errorMessage = t('signup.error.emailExists', '이미 존재하는 이메일입니다.')
+      errorMessage = t('signup.error.emailExists')
     }
     
     $q.notify({ type: 'negative', message: errorMessage })

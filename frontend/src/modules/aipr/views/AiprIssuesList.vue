@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import api from '../api/api-aipr';
 import StatusChip from './components/StatusChip.vue';
 import { useQuasar } from 'quasar';
@@ -8,6 +9,7 @@ import { useQuasar } from 'quasar';
 const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
+const { t, locale } = useI18n();
 
 const STATUS_OPTIONS = [
   'ALL', 'NEW', 'TRIAGED', 'QUEUED', 'PLAN_READY', 'BUILDING', 'PR_OPEN', 'MERGED', 'CLOSED', 'FAILED',
@@ -39,13 +41,15 @@ const totalCount = ref(0);
 const totalPages = ref(1);
 const isLoading = ref(false);
 
-const columns = [
-  { name: 'status', label: '상태', field: 'status', align: 'left' as const },
-  { name: 'title', label: '제목', field: 'title', align: 'left' as const },
-  { name: 'reporterEmail', label: 'Reporter', field: 'reporterEmail', align: 'left' as const },
-  { name: 'runs', label: 'Runs', field: (row: IssueItem) => row._count.runs, align: 'center' as const },
-  { name: 'createdAt', label: '생성일', field: 'createdAt', align: 'right' as const },
-];
+const columns = computed(() => [
+  { name: 'status', label: t('aipr.issues.columns.status'), field: 'status', align: 'left' as const },
+  { name: 'title', label: t('aipr.issues.columns.title'), field: 'title', align: 'left' as const },
+  { name: 'reporterEmail', label: t('aipr.issues.columns.reporter'), field: 'reporterEmail', align: 'left' as const },
+  { name: 'runs', label: t('aipr.issues.columns.runs'), field: (row: IssueItem) => row._count.runs, align: 'center' as const },
+  { name: 'createdAt', label: t('aipr.issues.columns.createdAt'), field: 'createdAt', align: 'right' as const },
+]);
+
+const dateLocale = computed(() => (locale.value === 'ko' ? 'ko-KR' : 'en-US'));
 
 async function fetchIssues() {
   isLoading.value = true;
@@ -65,7 +69,7 @@ async function fetchIssues() {
   } catch (err: any) {
     $q.notify({
       type: 'negative',
-      message: err.message || '이슈 목록을 불러오지 못했습니다.',
+      message: err.message || t('aipr.issues.loadFailed'),
       position: 'top-right',
     });
   } finally {
@@ -89,7 +93,7 @@ function handleRowClick(evt: any, row: IssueItem) {
 }
 
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('ko-KR', {
+  return new Date(d).toLocaleDateString(dateLocale.value, {
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
@@ -109,8 +113,8 @@ watch(
   <div class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <h1 class="text-h5 text-weight-bold q-my-none">Issues</h1>
-        <p class="text-caption text-grey-7 q-my-none">{{ totalCount }}개 전체</p>
+        <h1 class="text-h5 text-weight-bold q-my-none">{{ t('aipr.issues.title') }}</h1>
+        <p class="text-caption text-grey-7 q-my-none">{{ t('aipr.issues.totalCount', { count: totalCount }) }}</p>
       </div>
       <q-btn
         flat
@@ -119,11 +123,10 @@ watch(
         icon="settings"
         color="grey-7"
         @click="router.push({ name: 'aipr-settings' })"
-        label="설정"
+        :label="t('aipr.common.settings')"
       />
     </div>
 
-    <!-- Status Filter Buttons -->
     <div class="row q-gutter-xs q-mb-lg">
       <q-btn
         v-for="s in STATUS_OPTIONS"
@@ -138,7 +141,6 @@ watch(
       />
     </div>
 
-    <!-- Issues Table -->
     <q-table
       :rows="items"
       :columns="columns"
@@ -149,8 +151,8 @@ watch(
       bordered
       class="rounded-borders shadow-1"
       @row-click="handleRowClick"
-      no-data-label="이슈가 없습니다."
-      loading-label="불러오는 중..."
+      :no-data-label="t('aipr.issues.noData')"
+      :loading-label="t('aipr.issues.loading')"
     >
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
@@ -177,7 +179,6 @@ watch(
       </template>
     </q-table>
 
-    <!-- Pagination -->
     <div v-if="totalPages > 1" class="row justify-center q-mt-lg">
       <q-pagination
         v-model="filter.page"

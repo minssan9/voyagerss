@@ -4,7 +4,7 @@ import { FeedbackService } from '../services/FeedbackService';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { CurrentUser, AuthUser } from '../decorators/user.decorator';
+import { CurrentWorkschdUser, WorkschdAuthUser } from '../decorators/user.decorator';
 
 @Controller('v2/feedback')
 @UseGuards(JwtAuthGuard)
@@ -13,7 +13,7 @@ export class FeedbackNestController {
 
   @Post()
   async create(
-    @CurrentUser() user: AuthUser,
+    @CurrentWorkschdUser() user: WorkschdAuthUser,
     @Body() body: { title: string; content: string; pageUrl?: string; fileName?: string; fileMime?: string; fileBase64?: string },
   ) {
     const feedback = await this.feedbackService.create(user.accountId, body);

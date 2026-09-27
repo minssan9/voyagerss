@@ -7,7 +7,7 @@
       class="feedback-floating-btn"
       @click="dialogOpen = true"
     >
-      <q-tooltip anchor="center left" self="center right">기능 개선 요청</q-tooltip>
+      <q-tooltip anchor="center left" self="center right">{{ t('feedback.title') }}</q-tooltip>
     </q-btn>
     <FeedbackRequestDialog v-model="dialogOpen" />
   </q-page-sticky>
@@ -15,8 +15,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import FeedbackRequestDialog from './FeedbackRequestDialog.vue'
 
+const { t } = useI18n()
 const dialogOpen = ref(false)
 </script>
 

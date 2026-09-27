@@ -1,19 +1,23 @@
-import type { RouteLocationNormalizedLoaded } from 'vue-router'
+import type { RouteLocationNormalizedLoaded, RouteMeta } from 'vue-router'
+import { i18n } from '@/locales/i18n'
 
 const SITE_NAME = 'Voyagerss'
-const DEFAULT_DESCRIPTION =
-  'Voyagerss — 일정·재무·항공·자동 PR을 하나의 플랫폼에서 관리하세요.'
+
+export function routeLabel(meta: RouteMeta | undefined): string {
+  if (!meta) return ''
+  if (meta.titleKey) return String(i18n.global.t(meta.titleKey))
+  return meta.title ?? meta.tabTitle ?? ''
+}
 const SITE_URL = 'https://voyagerss.com'
 const DEFAULT_OG_IMAGE = `${SITE_URL}/icon-512x512.png`
 
 function getRouteTitle(route: RouteLocationNormalizedLoaded): string {
-  const meta = route.meta
-  const pageTitle = meta.title ?? meta.tabTitle
+  const pageTitle = routeLabel(route.meta)
   return pageTitle ? `${pageTitle} | ${SITE_NAME}` : SITE_NAME
 }
 
 function getRouteDescription(route: RouteLocationNormalizedLoaded): string {
-  return route.meta.description ?? DEFAULT_DESCRIPTION
+  return route.meta.description ?? String(i18n.global.t('routes.description'))
 }
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Param, Body, UseGuards, HttpCode } from '@n
 import { AccountService } from '../services/AccountService';
 import { AccountScheduleService } from '../services/AccountScheduleService';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { CurrentUser, AuthUser } from '../decorators/user.decorator';
+import { CurrentWorkschdUser, WorkschdAuthUser } from '../decorators/user.decorator';
 
 @Controller('workschd')
 export class AccountNestController {
@@ -24,7 +24,7 @@ export class AccountNestController {
 
   @Get('account')
   @UseGuards(JwtAuthGuard)
-  async getCurrentAccount(@CurrentUser() user: AuthUser) {
+  async getCurrentAccount(@CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.accountService.getAccountById(user.accountId);
   }
 
@@ -36,14 +36,14 @@ export class AccountNestController {
 
   @Put('accounts/profile')
   @UseGuards(JwtAuthGuard)
-  async updateProfile(@Body() body: any, @CurrentUser() user: AuthUser) {
+  async updateProfile(@Body() body: any, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.accountService.updateProfile(user.accountId, body);
   }
 
   @Post('accounts/change-password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  async changePassword(@Body() body: any, @CurrentUser() user: AuthUser) {
+  async changePassword(@Body() body: any, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.accountService.changePassword(user.accountId, body.currentPassword, body.newPassword);
   }
 

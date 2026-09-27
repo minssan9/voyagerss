@@ -29,8 +29,8 @@ flowchart TB
     rbac[RbacModule]
     common[CommonModule]
     ws[WorkschdModule]
-    inv[InvestandModule]
     av[AviationModule]
+    vision[VisionModule]
   end
 
   api --> app
@@ -62,7 +62,7 @@ flowchart TB
 | 엔트리 | `frontend/src/main.ts` |
 | 라우터 | `frontend/src/router/routes.ts` |
 | 권한 | `frontend/src/router/permission.ts`, `route-access.ts` |
-| 모듈 화면 | `frontend/src/modules/{workschd,investand,aviation,aipr}` |
+| 모듈 화면 | `frontend/src/modules/{workschd,aviation,aipr,vision}` |
 | 공통 화면 | `frontend/src/views/common`, `Landing.vue` |
 | 상태 | Pinia |
 | UI | Quasar |
@@ -73,7 +73,6 @@ flowchart LR
   routes --> home["/ 랜딩"]
   routes --> auth["/login /signup /auth/callback"]
   routes --> workschd["/workschd"]
-  routes --> investand["/investand"]
   routes --> aviation["/aviation"]
   routes --> aipr["/aipr"]
   routes --> vision["/vision"]
@@ -87,7 +86,7 @@ flowchart LR
 
 `backend/src/main.ts` 순서입니다.
 
-1. `bootstrapDatabase`: workschd Prisma migrate, AIPR SQL 패치, system_config 시드
+1. `bootstrapDatabase`: workschd Prisma migrate, investand 테이블 제거 SQL 패치, AIPR SQL 패치, system_config 시드
 2. Nest `AppModule` 생성
 3. `configService`, `aiprConfigService`로 DB 설정 캐시
 4. CORS, Helmet, ValidationPipe
@@ -101,12 +100,11 @@ flowchart LR
 
 ## 데이터
 
-하나의 MySQL 데이터베이스에 Prisma 클라이언트 다섯 개가 붙습니다. `PrismaModule`은 `@Global()`이라 Nest 모듈에서 주입할 수 있습니다.
+하나의 MySQL 데이터베이스에 Prisma 클라이언트 네 개가 붙습니다. `PrismaModule`은 `@Global()`이라 Nest 모듈에서 주입할 수 있습니다.
 
 | 클라이언트 | 스키마 파일 | 사용처 |
 |------------|-------------|--------|
 | `@prisma/client-workschd` | `backend/prisma/workschd.prisma` | Workschd, 공유 system_config |
-| `@prisma/client-investand` | `backend/prisma/investand.prisma` | Investand |
 | `@prisma/client-aviation` | `backend/prisma/aviation.prisma` | Aviation 기능의 MySQL 저장소 |
 | `@prisma/client-aipr` | `backend/prisma/aipr.prisma` | AIPR |
 | `@prisma/client-rbac` | `backend/prisma/rbac.prisma` | 권한 동기화, RBAC 관리 API |
@@ -145,31 +143,6 @@ flowchart LR
 ```
 
 화면: 홈, 팀 가입/관리, 업무 관리(데스크톱·모바일), 빈소 현황, 관리자 대시보드, RBAC(역할, 권한, 역할-권한, 주체).
-
-## Investand
-
-시장 데이터, 섹터, 글로벌 자산, Fear and Greed, DART입니다. Nest `InvestandModule`이고 `RbacModule`을 가져옵니다.
-
-```mermaid
-flowchart LR
-  ui["/investand"] --> api["/api/investand/*"]
-
-  subgraph controllers [Nest 컨트롤러]
-    data["/data"]
-    sectors["/sectors"]
-    assets["/assets"]
-    fg[Fear and Greed]
-    findash["/findash"]
-    dart["/dart"]
-    admin["/admin"]
-  end
-
-  api --> controllers
-  controllers --> guard["InvestandAdminGuard, InvestandPermissionGuard"]
-  controllers --> db[(investand Prisma)]
-```
-
-화면: 홈, Market Lab, 섹터, 글로벌 자산, DART, BOK, 설정, 관리자(대시보드, DART, Fear and Greed).
 
 ## Aviation
 

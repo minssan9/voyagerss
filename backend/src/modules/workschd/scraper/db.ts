@@ -16,6 +16,7 @@ export async function syncFuneralHomes(sources: FuneralHomeSource[]): Promise<nu
   await prisma.$transaction(async (tx) => {
     await tx.funeralHome.updateMany({
       where: {
+        hasScraper: true,
         listingUrl: {
           notIn: listingUrls
         }
@@ -35,12 +36,14 @@ export async function syncFuneralHomes(sources: FuneralHomeSource[]): Promise<nu
           homeUrl: source.funeralHomeUrl,
           listingUrl: source.listingUrl,
           region: source.region,
+          hasScraper: true,
           isActive: true
         },
         update: {
           name: source.funeralHomeName,
           homeUrl: source.funeralHomeUrl,
           region: source.region,
+          hasScraper: true,
           isActive: true
         }
       });
@@ -91,10 +94,12 @@ export async function insertFunerals(funerals: ScrapedFuneral[]): Promise<number
         homeUrl: home.homeUrl,
         listingUrl: home.homeUrl,
         region: home.region,
+        hasScraper: true,
         isActive: true
       },
       update: {
         homeUrl: home.homeUrl,
+        hasScraper: true,
         isActive: true
       }
     });

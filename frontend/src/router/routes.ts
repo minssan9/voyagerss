@@ -1,26 +1,25 @@
 import { RouteRecordRaw } from 'vue-router';
 import workschdRoutes from '@/modules/workschd/router/routes';
 import aviationRoutes from '@/modules/aviation/router/routes';
-import investandRoutes from '@/modules/investand/router/routes';
 import aiprRoutes from '@/modules/aipr/router/routes';
 import visionRoutes from '@/modules/vision/router/routes';
 
 // ─── Common Routes ───────────────────────────────────────────────
 const commonRoutes: RouteRecordRaw[] = [
-    { path: '/', name: 'home', component: () => import('@/views/Landing.vue'), meta: { icon: 'home', title: '홈' } },
-    { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info', title: '소개' } },
-    { path: '/subscription', name: 'Subscription', component: () => import('@/modules/workschd/views/main/Subscription.vue'), meta: { icon: 'card_membership', title: '구독' } },
-    { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true, title: '개인정보처리방침' } },
-    { path: '/terms', name: 'Terms', component: () => import('@/modules/workschd/views/main/Terms.vue'), meta: { icon: 'description', hidden: true, title: '이용약관' } },
-    { path: '/dashboard', name: 'Dashboard', component: () => import('@/modules/workschd/views/main/Dashboard.vue'), meta: { icon: 'dashboard', title: '대시보드', requiresAuth: true, loginPath: '/workschd/login' } },
-    { path: '/feedback-admin', name: 'feedback-admin', component: () => import('@/views/admin/FeedbackAdminView.vue'), meta: { icon: 'feedback', hidden: true, requiresAuth: true, roles: ['ADMIN'], loginPath: '/login', tabTitle: '기능 개선 요청 관리' } },
+    { path: '/', name: 'home', component: () => import('@/views/Landing.vue'), meta: { icon: 'home', titleKey: 'routes.home', integrated: true } },
+    { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info', titleKey: 'routes.about' } },
+    { path: '/subscription', name: 'Subscription', component: () => import('@/modules/workschd/views/main/Subscription.vue'), meta: { icon: 'card_membership', titleKey: 'routes.subscription' } },
+    { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true, titleKey: 'routes.privacy' } },
+    { path: '/terms', name: 'Terms', component: () => import('@/modules/workschd/views/main/Terms.vue'), meta: { icon: 'description', hidden: true, titleKey: 'routes.terms' } },
+    { path: '/dashboard', name: 'Dashboard', component: () => import('@/modules/workschd/views/main/Dashboard.vue'), meta: { icon: 'dashboard', titleKey: 'routes.dashboard', requiresAuth: true, loginPath: '/workschd/login' } },
+    { path: '/feedback-admin', name: 'feedback-admin', component: () => import('@/views/admin/FeedbackAdminView.vue'), meta: { icon: 'feedback', hidden: true, requiresAuth: true, roles: ['ADMIN'], loginPath: '/login', titleKey: 'routes.feedbackAdmin' } },
 ];
 
 // ─── Auth & Account Routes ───────────────────────────────────────
 const authRoutes: RouteRecordRaw[] = [
-    { path: '/login', name: 'login', component: () => import('@/views/common/auth/Login.vue'), meta: { icon: 'login', hidden: true, title: '로그인' } },
-    { path: '/redirect', name: 'redirect', component: () => import('@/views/common/auth/redirect.vue'), meta: { icon: 'refresh', hidden: true, title: '리다이렉트' } },
-    { path: '/signup', name: 'Signup', component: () => import('@/views/common/auth/Signup.vue'), meta: { icon: 'person_add', requiresAuth: false, hidden: true, title: '회원가입' } },
+    { path: '/login', name: 'login', component: () => import('@/views/common/auth/Login.vue'), meta: { icon: 'login', hidden: true, titleKey: 'routes.login' } },
+    { path: '/redirect', name: 'redirect', component: () => import('@/views/common/auth/redirect.vue'), meta: { icon: 'refresh', hidden: true, titleKey: 'routes.redirect' } },
+    { path: '/signup', name: 'Signup', component: () => import('@/views/common/auth/Signup.vue'), meta: { icon: 'person_add', requiresAuth: false, hidden: true, titleKey: 'routes.signup' } },
     { path: '/account/profile', name: 'AccountProfile', component: () => import('@/views/common/account/AccountProfile.vue'), meta: { icon: 'person', hidden: true, requiresAuth: true, loginPath: '/login' } },
     { path: '/account/schedule', name: 'AccountSchedule', component: () => import('@/views/common/account/AccountSchedule.vue'), meta: { icon: 'calendar_today', hidden: true, requiresAuth: true, loginPath: '/login' } },
     { path: '/workschd/login', name: 'WorkschdLogin', redirect: () => ({ path: '/login', query: { service: 'workschd' } }) },
@@ -37,7 +36,6 @@ const errorRoutes: RouteRecordRaw[] = [
 // ─── Sub-Project Routes (separated by project) ──────────────────
 // Each sub-project has its own entry path prefix:
 //   /aviation/*   → Aviation
-//   /investand/*  → Investand
 //   /workschd/*   → Workschd
 
 // ─── Assemble All Routes ─────────────────────────────────────────
@@ -45,7 +43,6 @@ export const routes: RouteRecordRaw[] = [
     ...commonRoutes,
     ...authRoutes,
     ...aviationRoutes,
-    ...investandRoutes,
     ...workschdRoutes,
     ...aiprRoutes,
     ...visionRoutes,

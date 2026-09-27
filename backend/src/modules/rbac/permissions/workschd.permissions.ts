@@ -3,6 +3,14 @@ import { PermissionDef } from './types';
 // ── Pages ─────────────────────────────────────────────────────────────────────
 const pages: PermissionDef[] = [
   {
+    code: 'workschd:page:home',
+    name: '워크스케줄 홈',
+    type: 'PAGE',
+    module: 'workschd',
+    resource: '/workschd',
+    defaultRoles: ['VIEWER', 'TEAM_LEADER', 'ADMIN', 'SUPER_ADMIN'],
+  },
+  {
     code: 'workschd:page:admin-dashboard',
     name: '관리자 대시보드',
     type: 'PAGE',

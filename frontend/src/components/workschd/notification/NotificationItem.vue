@@ -36,7 +36,7 @@
           color="primary"
           @click.stop="$emit('read', notification.id)"
         >
-          <q-tooltip>Mark as read</q-tooltip>
+          <q-tooltip>{{ t('notification.markRead') }}</q-tooltip>
         </q-btn>
         <q-btn
           flat
@@ -47,7 +47,7 @@
           color="negative"
           @click.stop="$emit('delete', notification.id)"
         >
-          <q-tooltip>Delete</q-tooltip>
+          <q-tooltip>{{ t('notification.delete') }}</q-tooltip>
         </q-btn>
       </div>
     </q-item-section>
@@ -55,8 +55,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { Notification, NotificationType } from '@/modules/workschd/api/api-notification'
 import { formatDistanceToNow } from 'date-fns'
+
+const { t } = useI18n()
 
 interface Props {
   notification: Notification
@@ -113,24 +116,9 @@ const getNotificationColor = (type: NotificationType): string => {
 }
 
 const getNotificationTitle = (type: NotificationType): string => {
-  switch (type) {
-    case NotificationType.TASK_CREATED:
-      return 'New Task Created'
-    case NotificationType.JOIN_REQUEST:
-      return 'Join Request Received'
-    case NotificationType.JOIN_APPROVED:
-      return 'Join Request Approved'
-    case NotificationType.JOIN_REJECTED:
-      return 'Join Request Rejected'
-    case NotificationType.TASK_CLOSED:
-      return 'Task Closed'
-    case NotificationType.TASK_UPDATED:
-      return 'Task Updated'
-    case NotificationType.TASK_CANCELLED:
-      return 'Task Cancelled'
-    default:
-      return 'Notification'
-  }
+  const key = `notification.types.${type}`
+  const translated = t(key)
+  return translated === key ? t('notification.types.default') : translated
 }
 
 const formatDate = (dateString: string): string => {

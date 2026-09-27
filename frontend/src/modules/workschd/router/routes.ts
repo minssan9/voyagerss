@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
                 path: '',
                 name: 'workschd-home',
                 component: () => import('@/modules/workschd/views/main/Home.vue'),
-                meta: { icon: 'home', title: 'WorkSchd Home', public: true }
+                meta: { icon: 'home', titleKey: 'routes.workschdHome', public: true }
             },
             {
                 path: 'team/join/:token',
@@ -21,54 +21,73 @@ const routes: RouteRecordRaw[] = [
                 meta: { icon: 'group_add', hidden: true, requiresAuth: true, loginPath: '/login?service=workschd' }
             },
             {
-                path: 'team/manage',
+                path: 'admin/team',
                 name: 'TeamManage',
-                component: () => import('@/modules/workschd/views/team/TeamManage.vue'),
+                component: () => import('@/modules/workschd/views/admin/TeamManage.vue'),
                 meta: {
                     icon: 'manage_accounts',
+                    titleKey: 'routes.teamManage',
+                    surface: 'admin',
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
             {
-                path: 'task/manage',
+                path: 'admin/tasks',
                 name: 'TaskManage',
-                component: () => import('@/modules/workschd/views/task/TaskManage.vue'),
+                component: () => import('@/modules/workschd/views/admin/TaskManage.vue'),
                 meta: {
                     icon: 'list',
+                    titleKey: 'routes.taskManage',
+                    surface: 'admin',
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
             {
-                path: 'task/manage-mobile',
+                path: 'admin/tasks/mobile',
                 name: 'TaskManageMobile',
-                component: () => import('@/modules/workschd/views/task/TaskManageMobile.vue'),
+                component: () => import('@/modules/workschd/views/admin/TaskManageMobile.vue'),
                 meta: {
                     icon: 'assignment',
+                    titleKey: 'routes.taskManageMobile',
+                    surface: 'admin',
+                    mobile: true,
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
                     roles: ['ADMIN', 'TEAM_LEADER']
                 }
             },
             {
-                path: 'task/list-mobile',
+                path: 'm/tasks',
                 name: 'TaskListMobile',
-                component: () => import('@/modules/workschd/views/task/TaskListMobile.vue'),
+                component: () => import('@/modules/workschd/views/worker/TaskListMobile.vue'),
                 meta: {
                     icon: 'work',
+                    titleKey: 'routes.myTasks',
+                    surface: 'worker',
+                    mobile: true,
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
-                    roles: ['ADMIN', 'TEAM_LEADER', 'HELPER', 'USER', 'ROLE_USER']
+                    workerNav: true,
+                    roles: ['ADMIN', 'TEAM_LEADER', 'MEMBER', 'WORKER', 'HELPER', 'USER', 'ROLE_USER']
                 }
             },
             {
-                path: 'funeral-board',
+                path: 'm/board',
                 name: 'FuneralBoard',
-                component: () => import('@/modules/workschd/views/FuneralBoardView.vue'),
-                meta: { icon: 'home', requiresAuth: true, loginPath: '/login?service=workschd' }
+                component: () => import('@/modules/workschd/views/worker/FuneralBoardView.vue'),
+                meta: {
+                    icon: 'event_note',
+                    titleKey: 'routes.funeralBoard',
+                    surface: 'worker',
+                    mobile: true,
+                    requiresAuth: true,
+                    loginPath: '/login?service=workschd',
+                    workerNav: true
+                }
             },
             {
                 path: 'admin/dashboard',
@@ -76,6 +95,8 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/workschd/views/admin/AdminDashboard.vue'),
                 meta: {
                     icon: 'dashboard',
+                    titleKey: 'routes.adminDashboard',
+                    surface: 'admin',
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
                     roles: ['ADMIN']
@@ -87,6 +108,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/workschd/views/admin/rbac/RbacAdminLayout.vue'),
                 meta: {
                     icon: 'admin_panel_settings',
+                    surface: 'admin',
                     requiresAuth: true,
                     loginPath: '/login?service=workschd',
                     roles: ['ADMIN'],
@@ -98,27 +120,76 @@ const routes: RouteRecordRaw[] = [
                         path: 'roles',
                         name: 'RbacRoles',
                         component: () => import('@/modules/workschd/views/admin/rbac/RoleManagePage.vue'),
-                        meta: { icon: 'badge', title: '역할 관리', requiresAuth: true, roles: ['ADMIN'] }
+                        meta: {
+                            icon: 'badge',
+                            titleKey: 'routes.rbacRoles',
+                            surface: 'admin',
+                            requiresAuth: true,
+                            roles: ['ADMIN']
+                        }
                     },
                     {
                         path: 'permissions',
                         name: 'RbacPermissions',
                         component: () => import('@/modules/workschd/views/admin/rbac/PermissionManagePage.vue'),
-                        meta: { icon: 'lock', title: '권한 관리', requiresAuth: true, roles: ['ADMIN'] }
+                        meta: {
+                            icon: 'lock',
+                            titleKey: 'routes.rbacPermissions',
+                            surface: 'admin',
+                            requiresAuth: true,
+                            roles: ['ADMIN']
+                        }
                     },
                     {
                         path: 'role-permissions',
                         name: 'RbacRolePermissions',
                         component: () => import('@/modules/workschd/views/admin/rbac/RolePermissionPage.vue'),
-                        meta: { icon: 'link', title: '역할-권한 매핑', requiresAuth: true, roles: ['ADMIN'] }
+                        meta: {
+                            icon: 'link',
+                            titleKey: 'routes.rbacRolePermissions',
+                            surface: 'admin',
+                            requiresAuth: true,
+                            roles: ['ADMIN']
+                        }
                     },
                     {
                         path: 'subjects',
                         name: 'RbacSubjects',
                         component: () => import('@/modules/workschd/views/admin/rbac/SubjectRolePage.vue'),
-                        meta: { icon: 'manage_accounts', title: '대상-역할 매핑', requiresAuth: true, roles: ['ADMIN'] }
+                        meta: {
+                            icon: 'manage_accounts',
+                            titleKey: 'routes.rbacSubjectRoles',
+                            surface: 'admin',
+                            requiresAuth: true,
+                            roles: ['ADMIN']
+                        }
                     }
                 ]
+            },
+            {
+                path: 'task/list-mobile',
+                redirect: { name: 'TaskListMobile' },
+                meta: { hidden: true }
+            },
+            {
+                path: 'funeral-board',
+                redirect: { name: 'FuneralBoard' },
+                meta: { hidden: true }
+            },
+            {
+                path: 'team/manage',
+                redirect: { name: 'TeamManage' },
+                meta: { hidden: true }
+            },
+            {
+                path: 'task/manage',
+                redirect: { name: 'TaskManage' },
+                meta: { hidden: true }
+            },
+            {
+                path: 'task/manage-mobile',
+                redirect: { name: 'TaskManageMobile' },
+                meta: { hidden: true }
             },
             {
                 path: 'auth/callback',

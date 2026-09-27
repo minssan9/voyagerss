@@ -9,10 +9,12 @@ import { aiprConfigService } from './config/aipr-config-service';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
-import { configureLoggerFromConfig } from './modules/investand/utils/common/logger';
+import { configureLoggerFromConfig } from './utils/logger';
 import { bootstrapDatabase } from './config/bootstrap-database';
 import aiprRouter from './modules/aipr/routes';
 import { initWorkers } from './modules/aipr/worker/worker-setup';
+import { localeMiddleware } from './modules/common/i18n-locale';
+import { I18nExceptionFilter } from './modules/common/i18n-exception.filter';
 
 async function bootstrap() {
   await bootstrapDatabase();
@@ -46,10 +48,11 @@ async function bootstrap() {
     app.use(helmet());
   }
 
+  app.use(localeMiddleware);
+  app.useGlobalFilters(new I18nExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // workschd: migrated to NestJS WorkschdModule
-  // investand: migrated to NestJS InvestandModule
   // aviation: migrated to NestJS AviationModule
 
   expressInstance.get('/health', (_: any, res: any) => {

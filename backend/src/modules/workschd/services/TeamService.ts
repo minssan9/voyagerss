@@ -1,10 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { I18nHttpException } from '../../common/i18n-http.exception';
+import { tApi } from '../../common/i18n-locale';
 import { Team, TeamMember } from '@prisma/client-workschd';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import crypto from 'crypto';
+import { apiSuccess } from '../utils/api-response';
 
 @Injectable()
 export class TeamService {
+    private async assertTeamLeaderOrAdmin(teamId: number, accountId: number, userRoles: string[]) {
+        if (userRoles.includes('ADMIN')) return;
+
+        const leader = await prisma.teamMember.findFirst({
+            where: { teamId, accountId, role: 'LEADER' },
+        });
+        if (!leader) {
+            throw new I18nHttpException('workschd.team.leadersOnly', HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private mapJoinRequest(request: {
+        id: number;
+        teamId: number;
+        accountId: number;
+        status: string;
+        createdAt: Date;
+        account?: { accountId: number; username: string; email: string | null };
+    }) {
+        return {
+            id: request.id,
+            teamId: request.teamId,
+            accountId: request.accountId,
+            userId: request.accountId,
+            userName: request.account?.username,
+            email: request.account?.email,
+            requestDate: request.createdAt,
+            status: request.status,
+        };
+    }
+
     async getTeamById(id: number): Promise<Team | null> {
         return prisma.team.findUnique({
             where: { id },
@@ -38,13 +72,28 @@ export class TeamService {
                 skip: page * size,
                 take: size,
                 orderBy: { createdAt: 'desc' },
-                include: { teamMembers: { select: { id: true } } }
+                include: {
+                    teamMembers: { select: { id: true } },
+                    teamJoinRequests: {
+                        where: { status: 'PENDING' },
+                        include: {
+                            account: {
+                                select: { accountId: true, username: true, email: true },
+                            },
+                        },
+                    },
+                },
             }),
             prisma.team.count({ where })
         ]);
 
         return {
-            content: items.map(t => ({ ...t, memberCount: t.teamMembers.length })),
+            content: items.map(t => ({
+                ...t,
+                memberCount: t.teamMembers.length,
+                joinRequests: t.teamJoinRequests.map((r) => this.mapJoinRequest(r)),
+                teamJoinRequests: undefined,
+            })),
             totalElements: total,
             totalPages: Math.ceil(total / size),
             size,
@@ -80,7 +129,7 @@ export class TeamService {
 
     async generateInviteLink(teamId: number) {
         const hash = crypto.randomBytes(16).toString('hex');
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
         const team = await prisma.team.update({
             where: { id: teamId },
@@ -96,32 +145,85 @@ export class TeamService {
 
     async joinByInviteHash(hash: string, accountId: number) {
         const team = await prisma.team.findFirst({
-            where: {
-                invitationHash: hash,
-                invitationExpireAt: { gt: new Date() }
-            }
+            where: { invitationHash: hash },
         });
 
         if (!team) {
-            throw new Error('Invalid or expired invitation link');
+            throw new I18nHttpException('workschd.team.invalidInvite', HttpStatus.BAD_REQUEST);
         }
 
-        const existing = await prisma.teamMember.findFirst({
-            where: { teamId: team.id, accountId }
+        if (!team.invitationExpireAt || team.invitationExpireAt <= new Date()) {
+            throw new I18nHttpException('workschd.team.inviteExpired', HttpStatus.BAD_REQUEST);
+        }
+
+        const existingMember = await prisma.teamMember.findFirst({
+            where: { teamId: team.id, accountId },
         });
-        if (existing) {
-            throw new Error('Already a member of this team');
-        }
-
-        const member = await prisma.teamMember.create({
-            data: {
+        if (existingMember) {
+            return apiSuccess(tApi('workschd.team.alreadyMember'), {
+                status: 'already-member',
                 teamId: team.id,
-                accountId,
-                role: 'MEMBER'
-            }
+                teamName: team.name,
+                memberId: existingMember.id,
+            });
+        }
+
+        const existingRequest = await prisma.teamJoinRequest.findUnique({
+            where: { teamId_accountId: { teamId: team.id, accountId } },
         });
 
-        return { teamId: team.id, teamName: team.name, memberId: member.id };
+        if (existingRequest?.status === 'PENDING') {
+            return apiSuccess('Join request already pending', {
+                status: 'pending',
+                teamId: team.id,
+                teamName: team.name,
+                requestId: existingRequest.id,
+            });
+        }
+
+        let request;
+        if (existingRequest) {
+            request = await prisma.teamJoinRequest.update({
+                where: { id: existingRequest.id },
+                data: {
+                    status: 'PENDING',
+                    createdAt: new Date(),
+                    decidedAt: null,
+                    decidedBy: null,
+                },
+            });
+        } else {
+            request = await prisma.teamJoinRequest.create({
+                data: {
+                    teamId: team.id,
+                    accountId,
+                    status: 'PENDING',
+                },
+            });
+        }
+
+        return apiSuccess('Join request submitted', {
+            status: 'pending',
+            teamId: team.id,
+            teamName: team.name,
+            requestId: request.id,
+        });
+    }
+
+    async getPendingJoinRequests(teamId: number, accountId: number, userRoles: string[]) {
+        await this.assertTeamLeaderOrAdmin(teamId, accountId, userRoles);
+
+        const requests = await prisma.teamJoinRequest.findMany({
+            where: { teamId, status: 'PENDING' },
+            include: {
+                account: {
+                    select: { accountId: true, username: true, email: true },
+                },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        return apiSuccess('Pending join requests', requests.map((r) => this.mapJoinRequest(r)));
     }
 
     async getTeamMembers(teamId: number, params: { page?: number; size?: number; name?: string; email?: string; status?: string }) {
@@ -172,24 +274,71 @@ export class TeamService {
         };
     }
 
-    async approveJoinRequest(teamId: number, requestId: number) {
-        const member = await prisma.teamMember.findFirst({
-            where: { id: requestId, teamId }
+    async approveJoinRequest(teamId: number, requestId: number, decidedBy: number, userRoles: string[]) {
+        await this.assertTeamLeaderOrAdmin(teamId, decidedBy, userRoles);
+
+        const request = await prisma.teamJoinRequest.findFirst({
+            where: { id: requestId, teamId, status: 'PENDING' },
         });
 
-        if (!member) {
-            throw new Error('Join request not found');
+        if (!request) {
+            throw new I18nHttpException('workschd.team.joinNotFound', HttpStatus.NOT_FOUND);
         }
 
-        return prisma.teamMember.update({
-            where: { id: requestId },
-            data: { role: 'MEMBER' }
+        await prisma.$transaction(async (tx) => {
+            const existingMember = await tx.teamMember.findFirst({
+                where: { teamId, accountId: request.accountId },
+            });
+
+            if (!existingMember) {
+                await tx.teamMember.create({
+                    data: {
+                        teamId,
+                        accountId: request.accountId,
+                        role: 'MEMBER',
+                    },
+                });
+            }
+
+            await tx.teamJoinRequest.update({
+                where: { id: requestId },
+                data: {
+                    status: 'APPROVED',
+                    decidedAt: new Date(),
+                    decidedBy,
+                },
+            });
         });
+
+        return apiSuccess(tApi('workschd.team.joinApproved'), { requestId, teamId, status: 'APPROVED' });
+    }
+
+    async rejectJoinRequest(teamId: number, requestId: number, decidedBy: number, userRoles: string[]) {
+        await this.assertTeamLeaderOrAdmin(teamId, decidedBy, userRoles);
+
+        const request = await prisma.teamJoinRequest.findFirst({
+            where: { id: requestId, teamId, status: 'PENDING' },
+        });
+
+        if (!request) {
+            throw new I18nHttpException('workschd.team.joinNotFound', HttpStatus.NOT_FOUND);
+        }
+
+        await prisma.teamJoinRequest.update({
+            where: { id: requestId },
+            data: {
+                status: 'REJECTED',
+                decidedAt: new Date(),
+                decidedBy,
+            },
+        });
+
+        return apiSuccess(tApi('workschd.team.joinRejected'), { requestId, teamId, status: 'REJECTED' });
     }
 
     async getScheduleConfig(teamId: number) {
         const team = await prisma.team.findUnique({ where: { id: teamId } });
-        if (!team) throw new Error('Team not found');
+        if (!team) throw new I18nHttpException('workschd.team.notFound', HttpStatus.NOT_FOUND);
         return {
             teamId,
             minStaffPerDay: { MONDAY: 1, TUESDAY: 1, WEDNESDAY: 1, THURSDAY: 1, FRIDAY: 1, SATURDAY: 1, SUNDAY: 1 },
@@ -205,7 +354,7 @@ export class TeamService {
 
     async saveScheduleConfig(teamId: number, config: any) {
         const team = await prisma.team.findUnique({ where: { id: teamId } });
-        if (!team) throw new Error('Team not found');
+        if (!team) throw new I18nHttpException('workschd.team.notFound', HttpStatus.NOT_FOUND);
         return { teamId, ...config, saved: true };
     }
 }

@@ -1,5 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { io, Socket } from 'socket.io-client';
+import { i18n } from '@/locales/i18n';
 import { useUserStore } from '@/stores/common/store_user';
 
 interface Notification {
@@ -71,7 +72,7 @@ export function useWebSocket() {
 
       // Trigger browser notification if permitted
       if (Notification.permission === 'granted') {
-        new Notification('새 알림', {
+        new Notification(i18n.global.t('notification.newTitle'), {
           body: notification.message,
           icon: '/favicon.ico'
         });

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RBAC_PERMISSION_KEY } from '../decorators/require-permission.decorator';
+import { RBAC_ADMIN_KEY } from '../decorators/require-rbac-admin.decorator';
 import { RbacService } from '../rbac.service';
 
 @Injectable()
@@ -22,42 +23,41 @@ export class RbacGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!permCode) return true;
+    const requireAdmin = this.reflector.getAllAndOverride<boolean>(RBAC_ADMIN_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (!permCode && !requireAdmin) return true;
 
     const req = context.switchToHttp().getRequest();
-    // Derive module from the permission code prefix (e.g. "workschd:api:...")
-    const module = permCode.split(':')[0];
-    const subjectId = this.resolveSubjectId(req, module);
+    const subjectId = this.resolveSubjectId(req);
 
     if (!subjectId) {
       throw new UnauthorizedException('Authentication required for RBAC check');
     }
 
-    const allowed = await this.rbacService.hasPermission(module, subjectId, permCode);
-    if (!allowed) {
-      throw new ForbiddenException(`Permission denied: ${permCode}`);
+    if (permCode) {
+      const module = permCode.split(':')[0];
+      const allowed =
+        (await this.rbacService.hasPermission(module, subjectId, permCode)) ||
+        (await this.rbacService.isAdmin(subjectId));
+      if (!allowed) {
+        throw new ForbiddenException(`Permission denied: ${permCode}`);
+      }
+      return true;
+    }
+
+    const isAdmin = await this.rbacService.isAdmin(subjectId);
+    if (!isAdmin) {
+      throw new ForbiddenException('Admin access required');
     }
 
     return true;
   }
 
-  private resolveSubjectId(req: any, module: string): string | undefined {
-    switch (module) {
-      case 'workschd':
-        return req.user?.accountId ? String(req.user.accountId) : undefined;
-      case 'investand':
-        return req.admin?.id ? String(req.admin.id) : undefined;
-      case 'aipr':
-        return req.user?.id ? String(req.user.id) : undefined;
-      default:
-        // Fallback: try all known identity slots
-        return req.user?.accountId
-          ? String(req.user.accountId)
-          : req.admin?.id
-          ? String(req.admin.id)
-          : req.user?.id
-          ? String(req.user.id)
-          : undefined;
-    }
+  private resolveSubjectId(req: any): string | undefined {
+    const identityUserId = req.user?.identityUserId;
+    return identityUserId ? String(identityUserId) : undefined;
   }
 }

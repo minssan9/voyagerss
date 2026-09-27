@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { i18n } from '@/locales/i18n'
 import service from '@/api/common/axios-voyagerss'
 
 export interface FeedbackItem {
@@ -62,7 +63,7 @@ export function useFeedback() {
       const { data } = await service.post('/v2/feedback', body)
       return data as { id: number; status: string }
     } catch (e: any) {
-      error.value = e?.message ?? '피드백 등록에 실패했습니다.'
+      error.value = e?.message ?? i18n.global.t('feedback.createFailed')
       throw e
     } finally {
       loading.value = false
@@ -76,7 +77,7 @@ export function useFeedback() {
       const { data } = await service.get('/v2/feedback', { params })
       return data as FeedbackListResult
     } catch (e: any) {
-      error.value = e?.message ?? '피드백 목록을 불러오지 못했습니다.'
+      error.value = e?.message ?? i18n.global.t('feedback.listFailed')
       throw e
     } finally {
       loading.value = false
@@ -90,7 +91,7 @@ export function useFeedback() {
       const { data } = await service.patch(`/v2/feedback/${id}`, { status })
       return data as { id: number; status: string }
     } catch (e: any) {
-      error.value = e?.message ?? '피드백 상태 변경에 실패했습니다.'
+      error.value = e?.message ?? i18n.global.t('feedback.updateFailed')
       throw e
     } finally {
       loading.value = false

@@ -47,6 +47,7 @@ const columnApi = ref<ColumnApi | null>(null)
 
 const columnDefs = defineModel('columnDefs')
 const rowData = defineModel('rowData')
+const props = withDefaults(defineProps<{ light?: boolean }>(), { light: false })
 const emits = defineEmits(['onCellClicked', 'rowClicked'])
 
 const $q = useQuasar()
@@ -199,8 +200,8 @@ function onRowClicked(params) {
 }
 
 // Add computed property for grid theme class
-const gridThemeClass = computed(() => 
-  $q.dark.isActive ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'
+const gridThemeClass = computed(() =>
+  props.light || !$q.dark.isActive ? 'ag-theme-alpine' : 'ag-theme-alpine-dark'
 )
 
 onMounted(() => {

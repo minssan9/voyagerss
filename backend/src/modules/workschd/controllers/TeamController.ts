@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { TeamService } from '../services/TeamService';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { tApi } from '../../common/i18n-locale';
 
 export class TeamController {
     private teamService: TeamService;
@@ -12,7 +13,7 @@ export class TeamController {
     getTeam = async (req: Request, res: Response) => {
         try {
             const id = parseInt(req.params.id);
-            if (isNaN(id)) return res.status(400).json({ message: 'Invalid ID' });
+            if (isNaN(id)) return res.status(400).json({ message: tApi('common.invalidId') });
             const team = await this.teamService.getTeamById(id);
             if (!team) return res.status(404).json({ message: 'Team not found' });
             return res.json(team);
@@ -39,9 +40,9 @@ export class TeamController {
 
     createTeam = async (req: AuthRequest, res: Response) => {
         try {
-            if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+            if (!req.user) return res.status(401).json({ message: tApi('workschd.team.unauthorized') });
             const { name, region, scheduleType, location } = req.body;
-            if (!name || !region) return res.status(400).json({ message: 'name and region are required' });
+            if (!name || !region) return res.status(400).json({ message: tApi('workschd.team.nameRegionRequired') });
             const team = await this.teamService.createTeam({ name, region, scheduleType, location }, req.user.accountId);
             return res.status(201).json(team);
         } catch (error: any) {
@@ -51,7 +52,7 @@ export class TeamController {
 
     generateInviteLink = async (req: AuthRequest, res: Response) => {
         try {
-            if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+            if (!req.user) return res.status(401).json({ message: tApi('workschd.team.unauthorized') });
             const { teamName, region } = req.body;
 
             const team = await this.teamService.getTeams({ name: teamName, region });
@@ -66,12 +67,12 @@ export class TeamController {
 
     joinByInvite = async (req: AuthRequest, res: Response) => {
         try {
-            if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+            if (!req.user) return res.status(401).json({ message: tApi('workschd.team.unauthorized') });
             const { hash } = req.params;
             const result = await this.teamService.joinByInviteHash(hash, req.user.accountId);
             return res.json(result);
         } catch (error: any) {
-            const status = error.message.includes('Invalid') ? 400 : error.message.includes('Already') ? 409 : 500;
+            const status = typeof error.getStatus === 'function' ? error.getStatus() : 500;
             return res.status(status).json({ message: error.message });
         }
     };
@@ -79,7 +80,7 @@ export class TeamController {
     getTeamMembers = async (req: Request, res: Response) => {
         try {
             const teamId = parseInt(req.params.teamId);
-            if (isNaN(teamId)) return res.status(400).json({ message: 'Invalid team ID' });
+            if (isNaN(teamId)) return res.status(400).json({ message: tApi('common.invalidId') });
             const { page = '0', size = '10', name, email, status } = req.query as any;
             const result = await this.teamService.getTeamMembers(teamId, {
                 page: parseInt(page),
@@ -98,11 +99,17 @@ export class TeamController {
         try {
             const teamId = parseInt(req.params.teamId);
             const requestId = parseInt(req.params.requestId);
-            if (isNaN(teamId) || isNaN(requestId)) return res.status(400).json({ message: 'Invalid ID' });
-            const result = await this.teamService.approveJoinRequest(teamId, requestId);
+            if (isNaN(teamId) || isNaN(requestId)) return res.status(400).json({ message: tApi('common.invalidId') });
+            const user = (req as any).user;
+            const result = await this.teamService.approveJoinRequest(
+                teamId,
+                requestId,
+                user?.accountId,
+                user?.roles ?? [],
+            );
             return res.json(result);
         } catch (error: any) {
-            const status = error.message === 'Join request not found' ? 404 : 500;
+            const status = typeof error.getStatus === 'function' ? error.getStatus() : 500;
             return res.status(status).json({ message: error.message });
         }
     };
@@ -110,7 +117,7 @@ export class TeamController {
     getScheduleConfig = async (req: Request, res: Response) => {
         try {
             const teamId = parseInt(req.params.teamId);
-            if (isNaN(teamId)) return res.status(400).json({ message: 'Invalid team ID' });
+            if (isNaN(teamId)) return res.status(400).json({ message: tApi('common.invalidId') });
             const config = await this.teamService.getScheduleConfig(teamId);
             return res.json(config);
         } catch (error: any) {
@@ -121,7 +128,7 @@ export class TeamController {
     saveScheduleConfig = async (req: Request, res: Response) => {
         try {
             const teamId = parseInt(req.params.teamId);
-            if (isNaN(teamId)) return res.status(400).json({ message: 'Invalid team ID' });
+            if (isNaN(teamId)) return res.status(400).json({ message: tApi('common.invalidId') });
             const result = await this.teamService.saveScheduleConfig(teamId, req.body);
             return res.json(result);
         } catch (error: any) {

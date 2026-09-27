@@ -1,0 +1,119 @@
+{
+  "common": {
+    "active": "Active",
+    "backToHome": "Back to Home",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "inactive": "Inactive",
+    "reset": "Reset",
+    "save": "Save",
+    "submit": "Submit",
+    "errors": {
+      "unauthenticated": "You are not signed in",
+      "forbidden": "You do not have permission",
+      "badRequest": "Invalid request",
+      "badAccess": "Invalid access",
+      "server": "A server error occurred. Please contact an administrator."
+    },
+    "language": {
+      "label": "Language",
+      "english": "English",
+      "korean": "Korean"
+    },
+    "settings": "Settings",
+    "loginAction": "Sign in",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "guest": "Guest",
+    "drawer": {
+      "guest": "Guest",
+      "login": "Sign in",
+      "logout": "Sign out",
+      "account": "Account",
+      "profile": "Profile",
+      "accountSchedule": "Account schedule",
+      "selectTeam": "Select team",
+      "system": "System",
+      "help": "Help",
+      "feedback": "Feedback"
+    }
+  },
+  "days": {
+    "friday": "Friday",
+    "monday": "Monday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "thursday": "Thursday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday"
+  },
+  "validation": {
+    "min": "Must be greater than 0",
+    "required": "Field is required"
+  },
+  "footer": {
+    "copyright": "All rights reserved",
+    "privacyPolicy": "Privacy policy",
+    "terms": "Terms of service"
+  },
+  "grid": {
+    "add": "Add",
+    "delete": "Delete"
+  },
+  "notification": {
+    "newTitle": "New notification"
+  },
+  "layout": {
+    "platform": "Platform",
+    "enterprise": "Enterprise",
+    "brandName": "Voyager",
+    "sidebarShortcut": "Sidebar (F4)"
+  },
+  "modules": {
+    "aviation": "Aviation",
+    "workschd": "WorkSchd",
+    "aipr": "AI Operations",
+    "vision": "Vision"
+  },
+  "feedback": {
+    "title": "Feature request",
+    "admin": {
+      "title": "Feature request management",
+      "subtitle": "Review user-submitted feature requests and manage their status.",
+      "refresh": "Refresh",
+      "statusFilter": "Status filter",
+      "loadFailed": "Could not load the list.",
+      "statusChanged": "Status updated.",
+      "statusChangeFailed": "Could not update status."
+    },
+    "status": {
+      "all": "All",
+      "open": "Open",
+      "inProgress": "In progress",
+      "done": "Done",
+      "rejected": "Rejected"
+    },
+    "columns": {
+      "id": "ID",
+      "title": "Title",
+      "content": "Content",
+      "reporter": "Reporter",
+      "pageUrl": "Page URL",
+      "attachment": "Attachment",
+      "status": "Status",
+      "createdAt": "Created"
+    },
+    "form": {
+      "titleRequired": "Please enter a title",
+      "contentMinLength": "Please enter at least 10 characters",
+      "attachmentOptional": "Attachment (optional)",
+      "fileSizeLimit": "File size cannot exceed 5MB"
+    },
+    "submitSuccess": "Your feature request has been submitted. Thank you!",
+    "submitFailed": "Submission failed. Please try again later.",
+    "createFailed": "Could not submit feedback.",
+    "listFailed": "Could not load feedback list.",
+    "updateFailed": "Could not update feedback status."
+  }
+}

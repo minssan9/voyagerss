@@ -1,0 +1,136 @@
+{
+  "aviation": {
+    "common": {
+      "daysShort": ["일", "월", "화", "수", "목", "금", "토"],
+      "days": {
+        "0": "일요일",
+        "1": "월요일",
+        "2": "화요일",
+        "3": "수요일",
+        "4": "목요일",
+        "5": "금요일",
+        "6": "토요일"
+      },
+      "cancel": "취소",
+      "save": "저장",
+      "edit": "편집",
+      "actions": "작업",
+      "id": "ID",
+      "description": "설명",
+      "dayOfWeek": "요일"
+    },
+    "dashboard": {
+      "badge": "항공 지식 관리",
+      "title": "항공 퀴즈 &\n날씨 관리",
+      "subtitle": "일별 항공 지식 토픽 스케줄을 관리하고\n기상청 이미지를 자동 수집·보관합니다",
+      "topicsManage": "토픽 관리",
+      "weatherStatus": "날씨 현황",
+      "totalTopics": "전체 토픽",
+      "activeTopics": "활성 토픽",
+      "weeklySchedule": "이번 주 스케줄",
+      "weeklyScheduleTitle": "주간 토픽 스케줄",
+      "noSchedule": "등록된 스케줄이 없습니다",
+      "navTopicsTitle": "토픽 관리",
+      "navTopicsDesc": "항공 지식 주제 등록 및 스케줄 편집",
+      "navWeatherTitle": "날씨 현황",
+      "navWeatherDesc": "기상청 날씨 이미지 수집 및 조회",
+      "navBackupsTitle": "백업 관리",
+      "navBackupsDesc": "항공 지식 데이터 백업 및 복원",
+      "notify": {
+        "statsLoadFailed": "통계 로딩 실패: {message}",
+        "scheduleLoadFailed": "스케줄 로딩 실패: {message}"
+      }
+    },
+    "topics": {
+      "title": "토픽 관리",
+      "addTopic": "새 토픽 추가",
+      "editTopic": "토픽 편집",
+      "name": "토픽명",
+      "validation": {
+        "nameRequired": "토픽명은 필수입니다",
+        "dayRequired": "요일을 선택하세요"
+      },
+      "columns": {
+        "name": "토픽명"
+      },
+      "notify": {
+        "loadFailed": "토픽 로딩 실패: {message}",
+        "requiredFields": "모든 필수 필드를 입력하세요",
+        "updated": "토픽이 업데이트되었습니다",
+        "created": "토픽이 생성되었습니다",
+        "saveFailed": "저장 실패: {message}"
+      }
+    },
+    "weather": {
+      "title": "날씨 이미지 관리",
+      "collectImages": "이미지 수집",
+      "cleanup": "정리",
+      "autoGatherTitle": "자동 수집 설정",
+      "autoGatherDesc": "스케줄러가 자동으로 날씨 이미지를 수집합니다 (10분마다)",
+      "serviceStatus": "서비스 상태",
+      "statusLabel": "상태",
+      "latestTimestamp": "최근 타임스탬프",
+      "errorLabel": "오류",
+      "dateFilterTitle": "날짜 범위 필터",
+      "startDate": "시작 날짜",
+      "endDate": "종료 날짜",
+      "search": "조회",
+      "reset": "초기화",
+      "quickToday": "오늘",
+      "quick7days": "최근 7일",
+      "quick30days": "최근 30일",
+      "quickThisMonth": "이번 달",
+      "quickLastMonth": "지난 달",
+      "cleanupTitle": "이미지 정리",
+      "retentionDays": "보관할 일수",
+      "retentionValidation": "1 이상의 값을 입력하세요",
+      "runCleanup": "정리 실행",
+      "capturedAt": "촬영일시",
+      "fileSize": "파일 크기",
+      "imageLoadFailed": "이미지를 불러올 수 없습니다",
+      "columns": {
+        "filename": "파일명",
+        "size": "크기",
+        "capturedAt": "촬영일시",
+        "created": "생성일"
+      },
+      "notify": {
+        "loadFailed": "이미지 로딩 실패: {message}",
+        "fetchFailed": "이미지 조회 실패",
+        "collectSuccess": "이미지 수집이 완료되었습니다",
+        "collectFailed": "이미지 수집 실패: {message}",
+        "collectError": "수집 실패",
+        "cleanupSuccess": "{count}개 파일이 삭제되었습니다",
+        "cleanupFailed": "정리 실패: {message}",
+        "cleanupError": "정리 실패",
+        "gatheringEnabled": "자동 수집이 활성화되었습니다",
+        "gatheringDisabled": "자동 수집이 비활성화되었습니다",
+        "settingsFailed": "설정 변경 실패: {message}",
+        "settingsError": "설정 변경 실패"
+      }
+    },
+    "backups": {
+      "title": "백업 관리",
+      "createBackup": "백업 생성",
+      "restoreBackup": "백업 복원",
+      "dataValidation": "데이터 검증",
+      "runValidation": "데이터 검증 실행",
+      "dataValid": "데이터가 유효합니다",
+      "dataInvalid": "데이터에 오류가 있습니다:",
+      "restoreTitle": "백업 복원",
+      "selectFile": "백업 파일 선택",
+      "fileRequired": "파일을 선택하세요",
+      "restore": "복원",
+      "notify": {
+        "createSuccess": "백업이 생성되었습니다: {filename}",
+        "createFailed": "백업 생성 실패: {message}",
+        "selectFile": "파일을 선택하세요",
+        "restoreSuccess": "백업이 복원되었습니다",
+        "restoreFailed": "백업 복원 실패: {message}",
+        "validationSuccess": "데이터가 유효합니다",
+        "validationFailed": "데이터 검증 실패",
+        "validateFailed": "검증 실패: {message}"
+      }
+    }
+  }
+}

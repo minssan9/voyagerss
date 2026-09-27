@@ -17,25 +17,25 @@ const routes: RouteRecordRaw[] = [
                 path: '',
                 name: 'aviation-dashboard',
                 component: () => import('@/modules/aviation/views/Dashboard.vue'),
-                meta: { icon: 'dashboard', title: 'Dashboard' }
+                meta: { icon: 'dashboard', titleKey: 'routes.aviationDashboard' }
             },
             {
                 path: 'topics',
                 name: 'aviation-topics',
                 component: () => import('@/modules/aviation/views/TopicsManagement.vue'),
-                meta: { icon: 'topic', title: '토픽 관리' }
+                meta: { icon: 'topic', titleKey: 'routes.aviationTopics' }
             },
             {
                 path: 'weather',
                 name: 'aviation-weather',
                 component: () => import('@/modules/aviation/views/WeatherManagement.vue'),
-                meta: { icon: 'wb_cloudy', title: '날씨 관리' }
+                meta: { icon: 'wb_cloudy', titleKey: 'routes.aviationWeather' }
             },
             {
                 path: 'backups',
                 name: 'aviation-backups',
                 component: () => import('@/modules/aviation/views/BackupsManagement.vue'),
-                meta: { icon: 'backup', title: '백업 관리' }
+                meta: { icon: 'backup', titleKey: 'routes.aviationBackups' }
             }
         ]
     }

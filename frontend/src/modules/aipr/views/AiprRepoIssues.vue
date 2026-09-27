@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../api/api-aipr';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -30,7 +32,7 @@ async function fetchIssues() {
   try {
     issues.value = await api.get<RemoteIssue[]>(`/admin/repos/${repoId}/issues`);
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '이슈 불러오기 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repoIssues.loadFailed'), position: 'top-right' });
   } finally {
     isLoading.value = false;
   }
@@ -40,17 +42,17 @@ async function importIssue(num: number) {
   isImporting.value[num] = true;
   try {
     const created = await api.post<{ id: string }>(`/admin/repos/${repoId}/issues/${num}/import`, {});
-    $q.notify({ type: 'positive', message: `이슈 #${num} 임포트됨`, position: 'top-right' });
+    $q.notify({ type: 'positive', message: t('aipr.repoIssues.importSuccess', { number: num }), position: 'top-right' });
     router.push({ name: 'aipr-issue-detail', params: { id: created.id } });
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '임포트 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repoIssues.importFailed'), position: 'top-right' });
   } finally {
     isImporting.value[num] = false;
   }
 }
 
 function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' });
+  return new Date(d).toLocaleDateString(locale.value === 'ko' ? 'ko-KR' : 'en-US', { month: '2-digit', day: '2-digit' });
 }
 
 onMounted(fetchIssues);
@@ -61,8 +63,8 @@ onMounted(fetchIssues);
     <div class="row items-center q-mb-md q-gutter-sm">
       <q-btn flat dense round icon="arrow_back" color="primary" @click="router.back()" />
       <div>
-        <h1 class="text-h5 text-weight-bold q-my-none">Remote Issues</h1>
-        <p class="text-caption text-grey-7 q-my-none">원격 저장소 이슈 목록</p>
+        <h1 class="text-h5 text-weight-bold q-my-none">{{ t('aipr.repoIssues.title') }}</h1>
+        <p class="text-caption text-grey-7 q-my-none">{{ t('aipr.repoIssues.subtitle') }}</p>
       </div>
       <q-space />
       <q-btn flat dense icon="refresh" color="grey-7" @click="fetchIssues" :loading="isLoading" />
@@ -71,7 +73,7 @@ onMounted(fetchIssues);
     <q-spinner v-if="isLoading" color="primary" size="2rem" />
 
     <div v-else-if="issues.length === 0" class="text-grey-6 text-center q-mt-xl">
-      열린 이슈가 없습니다.
+      {{ t('aipr.repoIssues.empty') }}
     </div>
 
     <q-list v-else bordered separator class="rounded-borders shadow-1">
@@ -101,10 +103,10 @@ onMounted(fetchIssues);
               flat dense size="sm" color="grey-7" icon="open_in_new"
               :href="issue.url" target="_blank"
             >
-              <q-tooltip>원본 보기</q-tooltip>
+              <q-tooltip>{{ t('aipr.repoIssues.viewOriginal') }}</q-tooltip>
             </q-btn>
             <q-btn
-              unelevated size="sm" color="primary" label="Task로 임포트"
+              unelevated size="sm" color="primary" :label="t('aipr.repoIssues.importAsTask')"
               :loading="isImporting[issue.number]"
               @click="importIssue(issue.number)"
             />

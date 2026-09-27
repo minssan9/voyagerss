@@ -10,9 +10,17 @@ import {
   isWhitelisted
 } from './route-access'
 
+const WORKER_APP_PREFIXES = ['/workschd/m', '/account/']
+
+function isOutsideWorkerApp(path: string): boolean {
+  if (path.startsWith('/workschd/team/join')) return false
+  if (WORKER_APP_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))) return false
+  if (path === '/401' || path === '/403' || path === '/login') return false
+  return true
+}
+
 /** Paths that never run RBAC (exact or prefix*). */
 const whiteList = [
-  '/',
   '/login',
   '/signup',
   '/redirect',
@@ -25,7 +33,6 @@ const whiteList = [
   '/404',
   '/workschd/login',
   '/aipr/login',
-  '/investand/admin/login',
   '/auth/callback',
   '/workschd/auth/callback'
 ]
@@ -39,12 +46,25 @@ export function setupRouterGuards(router: Router) {
       const storeToken = userStore.accessToken
 
       const quickMeta = getEffectiveMeta(to.matched)
+      const hasMain = hasMainAccessToken(storeToken, cookieToken)
 
-      if (quickMeta.public || isWhitelisted(to.path, whiteList)) {
+      if (hasMain && !userStore.user.accountRoles?.length) {
+        try {
+          await userStore.fetchUser()
+        } catch (e) {
+          console.error('Navigation guard: fetchUser failed', e)
+        }
+      }
+
+      const workerPath = to.path.length > 1 && to.path.endsWith('/') ? to.path.slice(0, -1) : to.path
+      if (userStore.isWorker && isOutsideWorkerApp(workerPath)) {
+        return '/workschd/m/tasks'
+      }
+
+      if (quickMeta.public || (isWhitelisted(to.path, whiteList) && !quickMeta.integrated)) {
         return true
       }
 
-      const hasMain = hasMainAccessToken(storeToken, cookieToken)
       const shouldHydrateProfile =
         hasMain &&
         quickMeta.requiresAuth &&
@@ -56,7 +76,17 @@ export function setupRouterGuards(router: Router) {
           await userStore.fetchUser()
         } catch (e) {
           console.error('Navigation guard: fetchUser failed', e)
-          await userStore.logout()
+          if (!import.meta.env.DEV) {
+            await userStore.logout()
+          }
+        }
+      }
+
+      if (hasMain && (quickMeta.integrated || !userStore.rbacProfile)) {
+        try {
+          await userStore.fetchRbacProfile()
+        } catch (e) {
+          console.error('Navigation guard: fetchRbacProfile failed', e)
         }
       }
 
@@ -68,7 +98,11 @@ export function setupRouterGuards(router: Router) {
         storeAccessToken: userStore.accessToken,
         cookieAccessToken: cookieToken,
         accountRoles: userStore.user.accountRoles,
-        rbacPagePermissions: userStore.rbacPagePermissions
+        rbacPagePermissions: userStore.rbacPagePermissions,
+        rbacModules: import.meta.env.DEV
+          ? ['workschd', 'aviation', 'aipr', 'vision']
+          : userStore.rbacProfile?.modules,
+        rbacIsAdmin: import.meta.env.DEV ? true : userStore.rbacProfile?.isAdmin
       })
 
       if (decision.action === 'allow') {

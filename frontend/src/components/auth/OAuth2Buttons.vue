@@ -9,7 +9,7 @@
     >
       <div class="row items-center full-width">
         <q-icon name="fab fa-google" size="20px" class="q-mr-sm" />
-        <span>Continue with Google</span>
+        <span>{{ t('oauth.continueGoogle') }}</span>
       </div>
     </q-btn>
 
@@ -22,13 +22,13 @@
     >
       <div class="row items-center full-width">
         <q-icon name="chat" size="20px" class="q-mr-sm" />
-        <span>Continue with Kakao</span>
+        <span>{{ t('oauth.continueKakao') }}</span>
       </div>
     </q-btn>
 
     <div class="row items-center q-mt-md">
       <q-separator class="col" />
-      <span class="q-px-md text-grey-6">OR</span>
+      <span class="q-px-md text-grey-6">{{ t('oauth.or') }}</span>
       <q-separator class="col" />
     </div>
   </div>
@@ -36,6 +36,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const isLoading = ref(false)
 

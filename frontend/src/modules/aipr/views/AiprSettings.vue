@@ -3,9 +3,11 @@ import { ref, reactive, onMounted } from 'vue';
 import api from '../api/api-aipr';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
 const router = useRouter();
+const { t } = useI18n();
 
 const form = reactive({ repoFullName: '', baseBranch: 'main', origin: '' });
 const isSavingRepo = ref(false);
@@ -30,13 +32,13 @@ async function saveRepo() {
     }));
     $q.notify({
       type: 'positive',
-      message: `저장소 ${form.repoFullName}가 기본값으로 설정되었습니다.`,
+      message: t('aipr.settings.defaultRepoSaved', { repo: form.repoFullName }),
       position: 'top-right',
     });
   } catch (err: any) {
     $q.notify({
       type: 'negative',
-      message: err.message || '저장에 실패했습니다.',
+      message: err.message || t('aipr.common.saveFailed'),
       position: 'top-right',
     });
   } finally {
@@ -52,14 +54,14 @@ async function addOrigin() {
     originsList.value.push(added);
     $q.notify({
       type: 'positive',
-      message: 'Origin이 추가되었습니다.',
+      message: t('aipr.settings.originAdded'),
       position: 'top-right',
     });
     form.origin = '';
   } catch (err: any) {
     $q.notify({
       type: 'negative',
-      message: err.message || 'Origin 추가에 실패했습니다.',
+      message: err.message || t('aipr.settings.originAddFailed'),
       position: 'top-right',
     });
   } finally {
@@ -92,22 +94,22 @@ onMounted(() => {
         @click="router.push({ name: 'aipr-issues' })"
         class="q-mr-sm"
       />
-      <h1 class="text-h5 text-weight-bold q-my-none">Settings</h1>
+      <h1 class="text-h5 text-weight-bold q-my-none">{{ t('aipr.settings.title') }}</h1>
     </div>
 
     <!-- Repository settings -->
     <q-card flat bordered class="q-mb-md rounded-borders">
       <q-card-section>
-        <div class="text-subtitle1 text-weight-bold">GitHub Repository</div>
+        <div class="text-subtitle1 text-weight-bold">{{ t('aipr.settings.githubRepo') }}</div>
         <p class="text-caption text-grey-7 q-mb-md">
-          이슈 승인(Approve) 시 기본값으로 사용할 원격 저장소를 입력합니다.
+          {{ t('aipr.settings.githubRepoDesc') }}
         </p>
 
         <q-form @submit.prevent="saveRepo" class="q-gutter-md">
           <q-input
             v-model="form.repoFullName"
-            label="Repository (owner/repo)"
-            placeholder="myorg/my-repo"
+            :label="t('aipr.common.repository') + ' (owner/repo)'"
+            :placeholder="t('aipr.settings.repoPlaceholder')"
             outlined
             dense
             required
@@ -116,8 +118,8 @@ onMounted(() => {
 
           <q-input
             v-model="form.baseBranch"
-            label="Base Branch"
-            placeholder="main"
+            :label="t('aipr.common.baseBranch')"
+            :placeholder="t('aipr.settings.branchPlaceholder')"
             outlined
             dense
             required
@@ -126,7 +128,7 @@ onMounted(() => {
 
           <q-btn
             type="submit"
-            label="저장"
+            :label="t('aipr.common.save')"
             color="primary"
             :loading="isSavingRepo"
             unelevated
@@ -139,16 +141,16 @@ onMounted(() => {
     <!-- Allowed widget origins list -->
     <q-card flat bordered class="rounded-borders">
       <q-card-section>
-        <div class="text-subtitle1 text-weight-bold">Widget Origin 허용 목록</div>
+        <div class="text-subtitle1 text-weight-bold">{{ t('aipr.settings.widgetOrigins') }}</div>
         <p class="text-caption text-grey-7 q-mb-md">
-          피드백 위젯 iframe을 삽입하여 호출할 수 있는 도메인을 등록합니다.
+          {{ t('aipr.settings.widgetOriginsDesc') }}
         </p>
 
         <q-form @submit.prevent="addOrigin" class="row q-col-gutter-sm q-mb-md">
           <div class="col-grow">
             <q-input
               v-model="form.origin"
-              placeholder="https://your-site.com"
+              :placeholder="t('aipr.settings.originPlaceholder')"
               type="url"
               outlined
               dense
@@ -159,7 +161,7 @@ onMounted(() => {
           <div class="col-auto">
             <q-btn
               type="submit"
-              label="추가"
+              :label="t('aipr.common.add')"
               color="primary"
               :loading="isAddingOrigin"
               unelevated

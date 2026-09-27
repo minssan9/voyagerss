@@ -2,21 +2,21 @@
   <q-page class="column items-center justify-center">
     <div class="text-center">
       <div class="text-h1 text-grey-4 q-mb-md">401</div>
-      <div class="text-h4 q-mb-md">{{ t('unauthorized.title', '인증이 필요합니다') }}</div>
+      <div class="text-h4 q-mb-md">{{ t('unauthorized.title') }}</div>
       <div class="text-subtitle1 text-grey-7 q-mb-xl">
-        {{ t('unauthorized.message', '로그인이 필요한 페이지입니다') }}
+        {{ t('unauthorized.message') }}
       </div>
       <div class="row justify-center q-gutter-md">
         <q-btn
           color="primary"
-          :label="t('unauthorized.button.login', '로그인')"
+          :label="t('unauthorized.button.login')"
           :to="{ path: loginPath, query: loginQuery }"
           class="q-mb-md"
         />
         <q-btn
           outline
           color="primary"
-          :label="t('unauthorized.button.home', '홈으로')"
+          :label="t('unauthorized.button.home')"
           to="/"
           class="q-mb-md"
         />

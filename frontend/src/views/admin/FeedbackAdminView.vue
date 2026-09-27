@@ -2,10 +2,10 @@
   <q-page padding>
     <div class="row items-center justify-between q-mb-lg">
       <div>
-        <h4 class="q-my-none">기능 개선 요청 관리</h4>
-        <p class="text-grey-7 q-mb-none">사용자가 등록한 기능 개선 요청을 확인하고 처리 상태를 관리합니다.</p>
+        <h4 class="q-my-none">{{ t('feedback.admin.title') }}</h4>
+        <p class="text-grey-7 q-mb-none">{{ t('feedback.admin.subtitle') }}</p>
       </div>
-      <q-btn color="primary" label="새로고침" icon="refresh" :loading="loading" @click="load" />
+      <q-btn color="primary" :label="t('feedback.admin.refresh')" icon="refresh" :loading="loading" @click="load" />
     </div>
 
     <q-card>
@@ -13,7 +13,7 @@
         <q-select
           v-model="statusFilter"
           :options="statusFilterOptions"
-          label="상태 필터"
+          :label="t('feedback.admin.statusFilter')"
           dense
           outlined
           emit-value
@@ -109,10 +109,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useFeedback, FeedbackItem } from '@/composables/useFeedback'
 
+const { t } = useI18n()
 const $q = useQuasar()
 const { loading, fetchFeedbackList, updateFeedbackStatus, getFeedbackFileUrl } = useFeedback()
 
@@ -127,28 +129,31 @@ const pagination = ref({
   rowsNumber: 0,
 })
 
-const statusOptions = [
-  { label: '접수', value: 'OPEN' },
-  { label: '처리중', value: 'IN_PROGRESS' },
-  { label: '완료', value: 'DONE' },
-  { label: '반려', value: 'REJECTED' },
-]
+const statusOptions = computed(() => [
+  { label: t('feedback.status.open'), value: 'OPEN' },
+  { label: t('feedback.status.inProgress'), value: 'IN_PROGRESS' },
+  { label: t('feedback.status.done'), value: 'DONE' },
+  { label: t('feedback.status.rejected'), value: 'REJECTED' },
+])
 
-const statusFilterOptions = [{ label: '전체', value: '' }, ...statusOptions]
+const statusFilterOptions = computed(() => [
+  { label: t('feedback.status.all'), value: '' },
+  ...statusOptions.value,
+])
 
-const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left' as const },
-  { name: 'title', label: '제목', field: 'title', align: 'left' as const },
-  { name: 'content', label: '내용', field: 'content', align: 'left' as const },
-  { name: 'reporter', label: '요청자', field: 'reporter', align: 'left' as const },
-  { name: 'pageUrl', label: '요청 페이지', field: 'pageUrl', align: 'left' as const },
-  { name: 'attachment', label: '첨부', field: 'fileName', align: 'center' as const },
-  { name: 'status', label: '상태', field: 'status', align: 'center' as const },
-  { name: 'createdAt', label: '등록일', field: 'createdAt', align: 'left' as const },
-]
+const columns = computed(() => [
+  { name: 'id', label: t('feedback.columns.id'), field: 'id', align: 'left' as const },
+  { name: 'title', label: t('feedback.columns.title'), field: 'title', align: 'left' as const },
+  { name: 'content', label: t('feedback.columns.content'), field: 'content', align: 'left' as const },
+  { name: 'reporter', label: t('feedback.columns.reporter'), field: 'reporter', align: 'left' as const },
+  { name: 'pageUrl', label: t('feedback.columns.pageUrl'), field: 'pageUrl', align: 'left' as const },
+  { name: 'attachment', label: t('feedback.columns.attachment'), field: 'fileName', align: 'center' as const },
+  { name: 'status', label: t('feedback.columns.status'), field: 'status', align: 'center' as const },
+  { name: 'createdAt', label: t('feedback.columns.createdAt'), field: 'createdAt', align: 'left' as const },
+])
 
 function statusLabel(status: string): string {
-  return statusOptions.find(o => o.value === status)?.label ?? status
+  return statusOptions.value.find(o => o.value === status)?.label ?? status
 }
 
 function statusColor(status: string): string {
@@ -181,7 +186,7 @@ async function load() {
     pagination.value.page = result.page
     pagination.value.rowsPerPage = result.pageSize
   } catch (e: any) {
-    $q.notify({ type: 'negative', message: e?.message ?? '목록을 불러오지 못했습니다.' })
+    $q.notify({ type: 'negative', message: e?.message ?? t('feedback.admin.loadFailed') })
   }
 }
 
@@ -196,9 +201,9 @@ async function changeStatus(row: FeedbackItem, status: string) {
   try {
     await updateFeedbackStatus(row.id, status)
     row.status = status
-    $q.notify({ type: 'positive', message: '상태가 변경되었습니다.' })
+    $q.notify({ type: 'positive', message: t('feedback.admin.statusChanged') })
   } catch (e: any) {
-    $q.notify({ type: 'negative', message: e?.message ?? '상태 변경에 실패했습니다.' })
+    $q.notify({ type: 'negative', message: e?.message ?? t('feedback.admin.statusChangeFailed') })
   }
 }
 

@@ -1,5 +1,6 @@
 import service from '@/api/common/axios-voyagerss'
 import axios from 'axios'
+import { i18n } from '@/locales/i18n'
 
 export interface ApiEnvelope<T> {
   result: 'SUCCESS' | 'ERROR'
@@ -32,7 +33,7 @@ function readError(error: unknown): string {
     }
     return error.message
   }
-  return '요청에 실패했습니다.'
+  return i18n.global.t('vision.errors.requestFailed')
 }
 
 async function unwrap<T>(request: Promise<{ data: ApiEnvelope<T> }>): Promise<ApiEnvelope<T>> {

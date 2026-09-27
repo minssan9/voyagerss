@@ -1,23 +1,17 @@
 <template>
-  <q-page padding>
-    <!-- Page Header -->
-    <div class="row items-center justify-between q-mb-lg">
-      <div>
-        <h4 class="q-my-none">Admin Dashboard</h4>
-        <p class="text-grey-7 q-mb-none">Overview of workschd system</p>
-      </div>
-      <q-btn
-        color="primary"
-        label="Refresh"
-        icon="refresh"
-        @click="refreshData"
-        :loading="loading"
-      />
-    </div>
+  <WorkschdPage
+    :title="t('admin.title')"
+    :subtitle="t('admin.subtitle')"
+    test-id="admin-dashboard"
+    body-class="admin-dashboard"
+  >
+    <template #actions>
+      <q-btn class="workschd-btn" unelevated no-caps dense :label="t('admin.refresh')" icon="refresh" @click="refreshData" :loading="loading" />
+    </template>
 
     <!-- Statistics Cards Row 1 -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <!-- Total Tasks -->
+      <!-- 전체 업무 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -25,14 +19,14 @@
               <q-icon name="assignment" size="40px" color="blue" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.totalTasks }}</div>
-                <div class="text-grey-7">Total Tasks</div>
+                <div class="text-grey-7">{{ t('admin.stats.totalTasks') }}</div>
               </div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Open Tasks -->
+      <!-- 모집 중 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -40,14 +34,14 @@
               <q-icon name="schedule" size="40px" color="green" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.openTasks }}</div>
-                <div class="text-grey-7">Open Tasks</div>
+                <div class="text-grey-7">{{ t('admin.stats.openTasks') }}</div>
               </div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Closed Tasks -->
+      <!-- 마감 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -55,14 +49,14 @@
               <q-icon name="check_circle" size="40px" color="teal" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.closedTasks }}</div>
-                <div class="text-grey-7">Closed Tasks</div>
+                <div class="text-grey-7">{{ t('admin.stats.closedTasks') }}</div>
               </div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Cancelled Tasks -->
+      <!-- 취소 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -70,7 +64,7 @@
               <q-icon name="cancel" size="40px" color="red" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.cancelledTasks }}</div>
-                <div class="text-grey-7">Cancelled Tasks</div>
+                <div class="text-grey-7">{{ t('admin.stats.cancelledTasks') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -80,7 +74,7 @@
 
     <!-- Statistics Cards Row 2 -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <!-- Total Workers -->
+      <!-- 전체 인력 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -88,7 +82,7 @@
               <q-icon name="group" size="40px" color="orange" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.totalWorkers }}</div>
-                <div class="text-grey-7">Total Workers</div>
+                <div class="text-grey-7">{{ t('admin.stats.totalWorkers') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -103,14 +97,14 @@
               <q-icon name="person_check" size="40px" color="purple" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.activeWorkers }}</div>
-                <div class="text-grey-7">Active Workers (7d)</div>
+                <div class="text-grey-7">{{ t('admin.stats.activeWorkers') }}</div>
               </div>
             </div>
           </q-card-section>
         </q-card>
       </div>
 
-      <!-- Total Teams -->
+      <!-- 전체 팀 -->
       <div class="col-12 col-sm-6 col-md-3">
         <q-card>
           <q-card-section>
@@ -118,7 +112,7 @@
               <q-icon name="groups" size="40px" color="indigo" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.totalTeams }}</div>
-                <div class="text-grey-7">Total Teams</div>
+                <div class="text-grey-7">{{ t('admin.stats.totalTeams') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -133,7 +127,7 @@
               <q-icon name="verified" size="40px" color="pink" class="q-mr-md" />
               <div>
                 <div class="text-h4">{{ statistics.activeTeams }}</div>
-                <div class="text-grey-7">Active Teams (30d)</div>
+                <div class="text-grey-7">{{ t('admin.stats.activeTeams') }}</div>
               </div>
             </div>
           </q-card-section>
@@ -143,11 +137,11 @@
 
     <!-- Charts Row -->
     <div class="row q-col-gutter-md q-mb-lg">
-      <!-- Task Status Distribution -->
+      <!-- 업무 상태 -->
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Task Status Distribution</div>
+            <div class="text-h6 q-mb-md">{{ t('admin.taskStatusDistribution') }}</div>
             <q-list separator>
               <q-item v-for="status in statistics.tasksByStatus" :key="status.status">
                 <q-item-section>
@@ -166,7 +160,7 @@
               </q-item>
               <q-item v-if="statistics.tasksByStatus.length === 0">
                 <q-item-section class="text-center text-grey-7">
-                  No data available
+                  {{ t('admin.noData') }}
                 </q-item-section>
               </q-item>
             </q-list>
@@ -174,11 +168,11 @@
         </q-card>
       </div>
 
-      <!-- Tasks by Region -->
+      <!-- 지역별 업무 -->
       <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Tasks by Region</div>
+            <div class="text-h6 q-mb-md">{{ t('admin.tasksByRegion') }}</div>
             <q-list separator>
               <q-item v-for="region in statistics.tasksByRegion.slice(0, 8)" :key="region.region">
                 <q-item-section>
@@ -197,7 +191,7 @@
               </q-item>
               <q-item v-if="statistics.tasksByRegion.length === 0">
                 <q-item-section class="text-center text-grey-7">
-                  No data available
+                  {{ t('admin.noData') }}
                 </q-item-section>
               </q-item>
             </q-list>
@@ -206,12 +200,12 @@
       </div>
     </div>
 
-    <!-- Recent Activity Row -->
+    <!-- 최근 활동 Row -->
     <div class="row q-col-gutter-md q-mb-lg">
       <div class="col-12">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Recent Activity</div>
+            <div class="text-h6 q-mb-md">{{ t('admin.recentActivity') }}</div>
             <q-list separator>
               <q-item v-for="activity in recentActivities" :key="activity.id">
                 <q-item-section avatar>
@@ -231,7 +225,7 @@
               </q-item>
               <q-item v-if="recentActivities.length === 0">
                 <q-item-section class="text-center text-grey-7">
-                  No recent activities
+                  {{ t('admin.noRecentActivity') }}
                 </q-item-section>
               </q-item>
             </q-list>
@@ -245,7 +239,7 @@
       <div class="col-12">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">Teams Overview</div>
+            <div class="text-h6 q-mb-md">{{ t('admin.teamsOverview') }}</div>
             <q-table
               :rows="teams"
               :columns="teamColumns"
@@ -290,19 +284,19 @@
       </div>
     </div>
 
-    <!-- Admin Quick Links -->
+    <!-- 관리 바로가기 -->
     <div class="row q-col-gutter-md q-mb-lg">
       <div class="col-12">
         <q-card>
           <q-card-section>
-            <div class="text-h6 q-mb-md">관리 메뉴</div>
+            <div class="text-h6 q-mb-md">{{ t('admin.adminMenu') }}</div>
             <div class="row q-gutter-sm">
               <q-btn
-                outline color="primary" icon="admin_panel_settings" label="RBAC 권한 관리"
+                outline color="primary" icon="admin_panel_settings" :label="t('admin.rbacManage')"
                 @click="router.push('/workschd/admin/rbac')"
               />
               <q-btn
-                outline color="grey-7" icon="settings" label="시스템 설정"
+                outline color="grey-7" icon="settings" :label="t('admin.systemSettings')"
                 @click="router.push('/workschd/admin/config')"
               />
             </div>
@@ -310,16 +304,19 @@
         </q-card>
       </div>
     </div>
-  </q-page>
+  </WorkschdPage>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import WorkschdPage from '@/modules/workschd/components/WorkschdPage.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { formatDistanceToNow } from 'date-fns'
 import apiStatistics, { DashboardStatistics, RecentActivity } from '@/modules/workschd/api/api-statistics'
 
+const { t } = useI18n()
 const router = useRouter()
 const $q = useQuasar()
 
@@ -347,35 +344,35 @@ const recentActivities = ref<RecentActivity[]>([])
 const teams = ref([
   {
     id: 1,
-    name: 'Seoul Team',
+    name: '서울 팀',
     region: 'Seoul',
     members: 15,
     status: 'ACTIVE'
   },
   {
     id: 2,
-    name: 'Busan Team',
+    name: '부산 팀',
     region: 'Busan',
     members: 12,
     status: 'ACTIVE'
   },
   {
     id: 3,
-    name: 'Incheon Team',
+    name: '인천 팀',
     region: 'Incheon',
     members: 8,
     status: 'INACTIVE'
   }
 ])
 
-const teamColumns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left' },
-  { name: 'name', label: 'Team Name', field: 'name', align: 'left' },
-  { name: 'region', label: 'Region', field: 'region', align: 'left' },
-  { name: 'members', label: 'Members', field: 'members', align: 'center' },
-  { name: 'status', label: 'Status', field: 'status', align: 'center' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'center' }
-]
+const teamColumns = computed(() => [
+  { name: 'id', label: t('admin.columns.id'), field: 'id', align: 'left' },
+  { name: 'name', label: t('admin.columns.teamName'), field: 'name', align: 'left' },
+  { name: 'region', label: t('admin.columns.region'), field: 'region', align: 'left' },
+  { name: 'members', label: t('admin.columns.members'), field: 'members', align: 'center' },
+  { name: 'status', label: t('admin.columns.status'), field: 'status', align: 'center' },
+  { name: 'actions', label: t('admin.columns.actions'), field: 'actions', align: 'center' },
+])
 
 const refreshData = async () => {
   loading.value = true
@@ -387,7 +384,7 @@ const refreshData = async () => {
     console.error('Failed to fetch statistics:', error)
     $q.notify({
       type: 'negative',
-      message: 'Failed to load dashboard statistics',
+      message: t('admin.notifyLoadFailed'),
       caption: error.response?.data?.message || error.message,
       position: 'top'
     })
@@ -428,12 +425,3 @@ onMounted(() => {
   refreshData()
 })
 </script>
-
-<style scoped>
-.chart-container {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>

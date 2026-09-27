@@ -1,0 +1,745 @@
+{
+  "about": {
+    "customerFeedback": {
+      "quote": "Managing the team schedule used to be complicated, but this service made it much easier...",
+      "title": "Customer feedback",
+      "authorName": "Ji-yeon Kim",
+      "authorTitle": "HR Manager"
+    },
+    "features": {
+      "title": "Key features",
+      "feature1": {
+        "title": "Schedule automation",
+        "description": "Learns staff patterns to generate optimal schedules automatically."
+      },
+      "feature2": {
+        "title": "Real-time alerts",
+        "description": "Sends instant notifications for shift changes and approval requests."
+      },
+      "feature3": {
+        "title": "Report generation",
+        "description": "Easily create attendance and overtime reports."
+      }
+    },
+    "footer": {
+      "copyright": "© 2024 Work Schedule Automation Service. All rights reserved."
+    },
+    "overview": {
+      "subtitle": "A schedule automation solution for efficient workforce management",
+      "title": "Overview",
+      "feature1": "Intuitive interface",
+      "feature2": "Real-time sync",
+      "feature3": "Customizable options"
+    },
+    "pricing": {
+      "criteria": "Criteria",
+      "premium": "Premium",
+      "standard": "Standard",
+      "team10": "Teams of 10 or fewer",
+      "team10to50": "Teams of 10–50",
+      "team50": "Teams of 50 or more",
+      "title": "Pricing"
+    }
+  },
+  "accountWorkHour": {
+    "grid": {
+      "date": "Date",
+      "dayOfWeek": "Day",
+      "reason": "Reason"
+    },
+    "preferences": {
+      "endTime": "End time",
+      "save": "Save settings",
+      "saveError": "Failed to save schedule settings",
+      "saveSuccess": "Schedule settings saved",
+      "startTime": "Start time",
+      "title": "Schedule settings (available hours)"
+    },
+    "unavailable": {
+      "loadError": "Failed to load unavailable dates",
+      "save": "Save",
+      "saveError": "Failed to save unavailable dates",
+      "saveSuccess": "Unavailable dates saved",
+      "title": "Unavailable dates"
+    },
+    "view": {
+      "calendar": "Calendar",
+      "grid": "List"
+    }
+  },
+  "dashboard": {
+    "activeEmployees": "Active Employees",
+    "addEmployee": "Add Employee",
+    "attendance": "ATTENDANCE",
+    "attendanceRate": "Attendance Rate",
+    "createSchedule": "Create Schedule",
+    "error": {
+      "loading": "Failed to load dashboard data"
+    },
+    "noShifts": "No shifts scheduled for today",
+    "quickActions": "Quick Actions",
+    "shiftsToday": "Shifts Today",
+    "title": "Dashboard",
+    "todaysSchedule": "Today's Schedule",
+    "trackAttendance": "Track Attendance",
+    "viewEmployees": "VIEW EMPLOYEES",
+    "viewReports": "VIEW REPORTS",
+    "viewSchedule": "VIEW SCHEDULE",
+    "weeklyLabor": "Weekly Labor",
+    "weeklySchedule": "WEEKLY SCHEDULE"
+  },
+  "events": {
+    "basicInfo": "Basic Information",
+    "description": "Description",
+    "taskEmployees": "Task Employees",
+    "timeAndAssignment": "Time & Assignment"
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "sections": [
+      {
+        "title": "1. Purpose of processing personal information",
+        "content": [
+          "We process personal information for the purposes below. Information will not be used beyond these purposes; if purposes change, we will take required measures such as obtaining separate consent under applicable privacy law.",
+          "We process essential information to provide the service, perform contracts, and handle billing."
+        ]
+      }
+    ]
+  },
+  "profile": {
+    "button": {
+      "update": "Update profile"
+    },
+    "image": {
+      "change": "Change image"
+    },
+    "label": {
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "username": "Username"
+    },
+    "notification": {
+      "imageUpdateError": "Failed to upload the image",
+      "imageUpdateSuccess": "Profile image updated",
+      "updateError": "Failed to update the profile",
+      "updateSuccess": "Profile updated"
+    },
+    "notifications": {
+      "accountWorkHour": "Schedule notifications",
+      "email": "Email notifications",
+      "emailDesc": "Receive schedule changes and important notices by email",
+      "loadError": "Failed to load notification settings",
+      "push": "Push notifications",
+      "pushDesc": "Receive realtime alerts in the browser",
+      "saveButton": "Save notification settings",
+      "scheduleDesc": "Get a reminder before a shift starts",
+      "title": "Notification settings",
+      "updateError": "Failed to save notification settings",
+      "updateSuccess": "Notification settings saved"
+    },
+    "title": "Profile settings",
+    "validation": {
+      "emailInvalid": "Invalid email address",
+      "emailRequired": "Enter your email",
+      "phoneInvalid": "Invalid phone number",
+      "usernameRequired": "Enter your username"
+    }
+  },
+  "task": {
+    "active": "Active",
+    "addEmployee": "Add Employee",
+    "addError": "Failed to add task",
+    "approvalRequests": "Approval Requests",
+    "approveRequests": "Approval requests",
+    "cancel": "Cancel task",
+    "cancelTask": "Cancel task",
+    "currentWorkers": "Current staff",
+    "date": "Date",
+    "description": "Description",
+    "edit": "Edit Task",
+    "endDateTime": "End Date & Time",
+    "joinRequest": "Request to join task",
+    "location": "Location",
+    "people": "people",
+    "register": "Register New Task",
+    "shop": "Shop",
+    "startDateTime": "Start Date & Time",
+    "status": "Status",
+    "team": "Team",
+    "time": "Time",
+    "title": "Title",
+    "updateError": "Failed to update task",
+    "workerCount": "Worker Count",
+    "statusLabels": {
+      "SCHEDULED": "Scheduled",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "requestStatusLabels": {
+      "PENDING": "Pending approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "dialog": {
+      "joinConfirm": "Request to join this task?",
+      "cancelConfirm": "Cancel this task?",
+      "apply": "Apply",
+      "confirmCancel": "Cancel task",
+      "noPendingRequests": "No pending requests",
+      "requestDate": "Request date: {date}",
+      "approve": "Approve",
+      "back": "Back"
+    },
+    "manage": {
+      "addNewTask": "Add new task",
+      "autoSchedule": "Auto-schedule",
+      "shiftTemplates": "Shift templates",
+      "notify": {
+        "registerSuccess": "Task registered successfully",
+        "registerFailed": "Failed to register task",
+        "approveSuccess": "Request approved successfully",
+        "approveFailed": "Failed to approve request",
+        "fetchFailed": "Failed to fetch tasks",
+        "updateSuccess": "Task updated successfully",
+        "updateFailed": "Failed to update task",
+        "joinSuccess": "Join request submitted successfully",
+        "joinFailed": "Failed to submit join request",
+        "cancelSuccess": "Task cancelled successfully",
+        "cancelFailed": "Failed to cancel task",
+        "autoScheduleStub": "Auto-scheduling (stub)",
+        "templateApplied": "Applied template: {name}"
+      },
+      "pageTitle": "Today's tasks",
+      "pageSubtitle": "Register and assign shift schedules",
+      "registerTask": "Register task",
+      "calendarWeek": "Week",
+      "calendarMonth": "Month",
+      "autoAssign": "Auto-assign",
+      "shiftTemplateTitle": "Shift templates",
+      "conflictDetected": "Conflict detected: overlapping shifts or availability violation.",
+      "grid": {
+        "task": "Task",
+        "shop": "Location",
+        "team": "Team",
+        "title": "Title",
+        "description": "Description",
+        "workerCount": "Required staff",
+        "start": "Start",
+        "end": "End",
+        "status": "Status",
+        "active": "Active"
+      }
+    },
+    "mobileManage": {
+      "pageTitle": "Task management",
+      "pageSubtitle": "Register shifts on mobile",
+      "addTask": "Add task",
+      "empty": "No tasks registered",
+      "noShop": "No location"
+    }
+  },
+  "team": {
+    "accountWorkHour": {
+      "additionalOptions": "Additional Options",
+      "allowWeekendWork": "Allow Weekend Work",
+      "enforceMinimumRest": "Enforce Minimum Rest Between Shifts",
+      "fetchError": "Failed to load configuration",
+      "frequency": {
+        "biweekly": "Bi-weekly",
+        "monthly": "Monthly",
+        "weekly": "Weekly"
+      },
+      "generationFrequency": "Schedule Generation Frequency",
+      "maxConsecutiveWorkDays": "Maximum Consecutive Work Days",
+      "maxOffDaysTitle": "Maximum Off Days Per Month",
+      "minStaffTitle": "Minimum Staff Per Day",
+      "resetConfirmMessage": "Are you sure you want to reset all configuration values to defaults?",
+      "resetConfirmTitle": "Reset Configuration",
+      "resetSuccess": "Configuration reset to defaults",
+      "saveConfig": "Save Configuration",
+      "saveError": "Failed to save configuration",
+      "saveSuccess": "Configuration saved successfully",
+      "title": "Schedule Configuration"
+    },
+    "join": {
+      "alreadyMember": "You are already a member of this team.",
+      "error": "Failed to process invitation",
+      "pending": "Your join request is pending approval.",
+      "processing": "Processing invitation...",
+      "success": "Successfully joined the team!",
+      "title": "Join Team"
+    },
+    "manage": {
+      "grid": {
+        "actions": "Actions",
+        "copyInvite": "Copy Invite Link",
+        "createdAt": "Created At",
+        "inviteLink": "Invite Link",
+        "members": "Members",
+        "pendingRequests": "Pending Requests",
+        "region": "Region",
+        "scheduleType": "Schedule Type",
+        "teamName": "Team Name",
+        "viewRequests": "View Requests"
+      },
+      "inviteLinkCopied": "Invite link copied to clipboard",
+      "refreshTeams": "Refresh",
+      "registerNewTeam": "Register New Team",
+      "tabs": {
+        "accountWorkHour": "Schedule Config",
+        "members": "Members",
+        "shop": "Shop"
+      },
+      "teamDetails": "Team Details",
+      "teamMembers": "Team Members",
+      "title": "Team Management",
+      "viewTeam": "View Team",
+      "pageSubtitle": "Manage teams, members, and locations"
+    },
+    "member": {
+      "info": "Member Information",
+      "joinedAt": "Joined"
+    },
+    "shop": {
+      "addError": "Failed to add shop",
+      "addShop": "Add Shop",
+      "address": "Address",
+      "clickAddShop": "Click \"Add Shop\" to add a new shop",
+      "closed": "Closed",
+      "confirmDelete": "Confirm Deletion",
+      "delete": "Delete",
+      "deleteError": "Failed to delete shop",
+      "deleteMessage": "Are you sure you want to delete this shop?",
+      "edit": "Edit",
+      "editShop": "Edit Shop",
+      "endTime": "End Time",
+      "fetchError": "Failed to load shops",
+      "grid": {
+        "actions": "Actions",
+        "address": "Address",
+        "district": "District",
+        "name": "Shop Name",
+        "phone": "Phone"
+      },
+      "noShops": "No shops found",
+      "operatingHours": "Operating Hours",
+      "refresh": "Refresh",
+      "region": "Region",
+      "shopAdded": "Shop added successfully",
+      "shopDeleted": "Shop deleted successfully",
+      "shopDetails": "Shop Details",
+      "shopName": "Shop Name",
+      "shopUpdated": "Shop updated successfully",
+      "startTime": "Start Time",
+      "title": "Shop Management",
+      "updateError": "Failed to update shop"
+    },
+    "joinPage": {
+      "title": "Join team",
+      "subtitle": "Join a team using an invite link"
+    }
+  },
+  "terms": {
+    "title": "Terms of service",
+    "sections": [
+      {
+        "title": "Article 1 (Purpose)",
+        "content": [
+          "These terms define the rights, obligations, and responsibilities between the company and members, and other necessary matters related to use of the service."
+        ]
+      }
+    ]
+  },
+  "home": {
+    "badge": "Funeral service scheduling",
+    "titleLine1": "Work schedule",
+    "titleLine2": "automated",
+    "subtitleLine1": "From funeral hall staffing to requests and approvals",
+    "subtitleLine2": "manage everything in one team-based hub",
+    "cta": {
+      "taskManage": "Task management",
+      "funeralBoard": "Funeral board"
+    },
+    "stats": {
+      "automation": {
+        "value": "Automated",
+        "label": "Schedule generation"
+      },
+      "realtime": {
+        "value": "Real-time",
+        "label": "Notification system"
+      },
+      "teamBased": {
+        "value": "Team-based",
+        "label": "Role permissions"
+      }
+    },
+    "features": {
+      "task": {
+        "title": "Task management",
+        "desc": "Register funeral hall shifts and manage staffing requests and approvals. Supports check-in and check-out.",
+        "item1": "Create and edit shift schedules",
+        "item2": "Staff requests / approve / reject",
+        "item3": "Check-in and check-out"
+      },
+      "team": {
+        "title": "Team management",
+        "desc": "Create teams and add members via invite links. Separate permissions for leaders and helpers.",
+        "item1": "Invite-link onboarding",
+        "item2": "LEADER / HELPER roles",
+        "item3": "Funeral hall (shop) management"
+      },
+      "funeral": {
+        "title": "Funeral board scraper",
+        "desc": "Collects real-time room availability from 21 funeral halls in Incheon and Bucheon for faster staffing.",
+        "item1": "Auto-scrape 21 sites",
+        "item2": "Incheon / Bucheon filters",
+        "item3": "Direct link to tasks"
+      }
+    },
+    "nav": {
+      "task": {
+        "title": "Task management",
+        "desc": "Register shifts and assign staff"
+      },
+      "team": {
+        "title": "Team management",
+        "desc": "Create teams and invite members"
+      },
+      "funeral": {
+        "title": "Funeral board",
+        "desc": "Real-time funeral hall status"
+      }
+    }
+  },
+  "funeral": {
+    "title": "Funeral board",
+    "subtitle": "Incheon · Bucheon funeral halls",
+    "lastUpdated": "Last updated: {date}",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search funeral halls",
+    "scrapeComplete": "Scrape complete · {total} records · {sites} sites",
+    "scrapeErrors": " · {count} errors",
+    "loading": "Loading...",
+    "empty": "No funeral room data to display.",
+    "emptyLeaderHint": "Press Refresh to collect funeral hall information.",
+    "linked": "Assigned",
+    "labels": {
+      "room": "Room",
+      "chiefMourner": "Chief mourner",
+      "funeralDate": "Funeral date"
+    },
+    "region": {
+      "all": "All",
+      "incheon": "Incheon",
+      "bucheon": "Bucheon"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "time": {
+      "justNow": "Just now",
+      "minutesAgo": "{count} min ago",
+      "hoursAgo": "{count} hr ago",
+      "daysAgo": "{count} days ago"
+    },
+    "detail": {
+      "website": "Website ↗",
+      "deceasedLabel": "Deceased",
+      "burialDate": "Burial date",
+      "burialPlace": "Burial place",
+      "religion": "Religion",
+      "funeralDate": "Funeral date",
+      "workManagement": "Shift management",
+      "linkedTask": "Assigned task #{id}",
+      "linkedTaskSub": "A task is linked to this room.",
+      "manage": "Manage",
+      "createDescription": "Register this room as a work task to assign funeral assistants.",
+      "workerCount": "Required staff",
+      "taskTitle": "Task title",
+      "taskTitlePlaceholder": "Wake shift for 故 {name}",
+      "registering": "Registering...",
+      "registerTask": "Register task",
+      "workApply": "Apply for shift",
+      "noTaskYet": "No work task has been registered yet.",
+      "appliedAt": "Applied {date}",
+      "applying": "Applying...",
+      "applyWork": "Apply for shift",
+      "taskDescription": "Funeral hall: {funeralHome}\nRoom: {room}\nFuneral date: {date}"
+    },
+    "admin": {
+      "title": "Staff management",
+      "taskSubtitle": "Task #{id}",
+      "status": "Status",
+      "workers": "Staff",
+      "workersCount": "{current} / {total}",
+      "titleLabel": "Title",
+      "applicants": "Applicants ({count})",
+      "userFallback": "User #{id}",
+      "appliedAt": "Applied {date}",
+      "approve": "Approve",
+      "reject": "Reject",
+      "confirmed": "✓ Confirmed",
+      "noApplicants": "No applicants.",
+      "filter": {
+        "all": "All",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+    "taskStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled",
+      "OPEN": "Open",
+      "CLOSED": "Closed",
+      "COMPLETED": "Completed"
+    },
+    "applicationStatus": {
+      "PENDING": "Pending approval",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "taskList": {
+    "viewList": "List",
+    "viewCalendar": "Calendar",
+    "filterAllTasks": "All tasks",
+    "filterMyRequests": "My requests",
+    "calendarStub": "Calendar view coming soon. (Stub)",
+    "calendarDay": "Day {day}",
+    "searchPlaceholder": "Search tasks",
+    "statusFilter": "Status filter",
+    "all": "All",
+    "workerCount": "{current} / {total} staff",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "checkedInAt": "Checked in: {time}",
+    "joinRequest": "Request to join",
+    "teamLabel": "Team: {name}",
+    "notify": {
+      "loadFailed": "Failed to load tasks.",
+      "joinSuccess": "Join request submitted.",
+      "joinFailed": "Failed to submit join request.",
+      "cancelSuccess": "Task cancelled.",
+      "cancelFailed": "Failed to cancel task.",
+      "checkInSuccess": "Checked in successfully.",
+      "checkInFailed": "Check-in failed.",
+      "checkOutSuccess": "Checked out successfully.",
+      "checkOutFailed": "Check-out failed."
+    },
+    "pageTitle": "My tasks",
+    "pageSubtitle": "View your requests and all schedules"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "currentPlan": "Current plan",
+    "choose": "Choose",
+    "allAccountsIncluded": "All accounts include:",
+    "notifySuccess": "Subscribed to the {plan} plan.",
+    "notifyError": "Error during subscription. Please try again.",
+    "plans": {
+      "premium": {
+        "description": "Premium features and support for advanced users"
+      },
+      "basic": {
+        "description": "Standard features for regular users"
+      },
+      "starter": {
+        "description": "Essential features for beginners"
+      },
+      "small": {
+        "description": "Basic features for small needs"
+      }
+    },
+    "features": {
+      "oneUser": "One user included",
+      "basicSupport": "Basic support",
+      "mainFeatures": "Access to main features",
+      "regularUpdates": "Regular updates",
+      "communityAccess": "Community access",
+      "emailSupport": "Email support",
+      "apiAccess": "API access",
+      "developerTools": "Developer tools"
+    }
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "No notifications",
+    "viewAll": "View all",
+    "types": {
+      "TASK_CREATED": "New task created",
+      "JOIN_REQUEST": "Join request received",
+      "JOIN_APPROVED": "Join request approved",
+      "JOIN_REJECTED": "Join request rejected",
+      "TASK_CLOSED": "Task closed",
+      "TASK_UPDATED": "Task updated",
+      "TASK_CANCELLED": "Task cancelled",
+      "default": "Notification"
+    },
+    "markRead": "Mark read",
+    "delete": "Delete"
+  },
+  "admin": {
+    "title": "Admin dashboard",
+    "subtitle": "WorkSchd system overview",
+    "refresh": "Refresh",
+    "stats": {
+      "totalTasks": "Total tasks",
+      "openTasks": "Open tasks",
+      "closedTasks": "Closed tasks",
+      "cancelledTasks": "Cancelled tasks",
+      "totalWorkers": "Total workers",
+      "activeWorkers": "Active workers (7d)",
+      "totalTeams": "Total teams",
+      "activeTeams": "Active teams (30d)"
+    },
+    "taskStatusDistribution": "Task status distribution",
+    "tasksByRegion": "Tasks by region",
+    "noData": "No data available",
+    "recentActivity": "Recent activity",
+    "noRecentActivity": "No recent activities",
+    "teamsOverview": "Teams overview",
+    "adminMenu": "Admin menu",
+    "rbacManage": "RBAC management",
+    "systemSettings": "System settings",
+    "columns": {
+      "id": "ID",
+      "teamName": "Team name",
+      "region": "Region",
+      "members": "Members",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "notifyLoadFailed": "Failed to load dashboard statistics"
+  },
+  "rbac": {
+    "title": "RBAC management",
+    "subtitle": "Manage roles, permissions, and subjects in one place",
+    "tabs": {
+      "roles": "Roles",
+      "permissions": "Permissions",
+      "rolePermissions": "Role-permission mapping",
+      "subjects": "Subject-role mapping"
+    },
+    "common": {
+      "module": "Module",
+      "type": "Type",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "resource": "Resource",
+      "save": "Save",
+      "add": "Add",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "revoke": "Revoke",
+      "assign": "Assign",
+      "typePage": "Page",
+      "typeApi": "API",
+      "system": "System",
+      "custom": "Custom",
+      "permissionsCount": "{count} permissions",
+      "subjectsCount": "{count} subjects",
+      "connections": "Links",
+      "roleType": "Type",
+      "error": "An error occurred.",
+      "deleteFailed": "Delete failed",
+      "saveFailed": "Save failed",
+      "deleted": "Deleted."
+    },
+    "roles": {
+      "listTitle": "Roles",
+      "addRole": "Add role",
+      "editRole": "Edit role",
+      "roleCode": "Role code *",
+      "roleCodeHint": "e.g. TEAM_MANAGER (uppercase letters/underscores)",
+      "roleName": "Role name *",
+      "updated": "Role updated.",
+      "created": "Role created.",
+      "deleteTitle": "Delete role",
+      "deleteMessage": "Delete role \"{name}\"? Linked permissions and subject mappings will also be removed."
+    },
+    "permissions": {
+      "listTitle": "Permissions",
+      "moduleFilter": "Module filter",
+      "typeFilter": "Type filter",
+      "declaredOnly": "Code-declared only",
+      "syncCodeToDb": "Sync code → DB",
+      "syncTooltip": "Sync code-declared permissions to the DB and assign default roles",
+      "addPermission": "Add permission",
+      "editPermission": "Edit permission",
+      "syncBanner": "Sync complete — created: {created}, updated: {updated}, role assignments: {rolesAssigned} / total declared: {total}",
+      "codeDeclared": "Code declared",
+      "dbOnlyUndeclared": "DB only (not in code): {codes}",
+      "unsyncedTitle": "Declared in code, not synced to DB ({count})",
+      "syncNow": "Sync now",
+      "permissionCode": "Permission code *",
+      "permissionCodeHint": "e.g. workschd:page:admin-dashboard",
+      "permissionName": "Permission name *",
+      "resourcePath": "Resource path *",
+      "resourceHintPage": "e.g. /workschd/admin/dashboard",
+      "resourceHintApi": "e.g. GET:/api/workschd/admin/config",
+      "permissionCodeColumn": "Permission code",
+      "updated": "Permission updated.",
+      "created": "Permission created.",
+      "deleteTitle": "Delete permission",
+      "deleteMessage": "Delete permission \"{name}\"?",
+      "syncNotify": "Sync complete: {created} created, {rolesAssigned} role assignments",
+      "syncFailed": "Sync failed"
+    },
+    "rolePermissions": {
+      "selectRole": "Select role",
+      "selectRoleHint": "Select a role",
+      "searchPermission": "Search permissions",
+      "permissionName": "Permission name",
+      "loadFailed": "Failed to load permissions.",
+      "saved": "Permission mapping saved."
+    },
+    "subjects": {
+      "searchSubjectId": "Search subject ID",
+      "assignRole": "Assign role",
+      "assignDialogTitle": "Assign role",
+      "subjectId": "Subject ID *",
+      "subjectIdHint": "workschd: accountId (number), aipr: admin ID (string)",
+      "role": "Role *",
+      "subjectIdColumn": "Subject ID",
+      "viewPermissions": "View permissions",
+      "revokeTooltip": "Revoke role",
+      "effectivePermissions": "Effective permissions for {module}:{subjectId}",
+      "noPermissions": "No permissions assigned",
+      "assigned": "Role assigned.",
+      "revokeTitle": "Revoke role",
+      "revokeMessage": "Revoke role \"{role}\" from {module}:{subjectId}?",
+      "revoked": "Role revoked.",
+      "revokeFailed": "Revoke failed",
+      "error": "An error occurred"
+    }
+  },
+  "workschdSignup": {
+    "brandIcon": "F",
+    "title": "Sign up",
+    "subtitle": "Funeral staffing platform",
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password (8+ characters)",
+    "passwordConfirmPlaceholder": "Confirm password",
+    "submitting": "Signing up…",
+    "submit": "Sign up",
+    "hasAccount": "Already have an account?",
+    "login": "Log in",
+    "errorPasswordMismatch": "Passwords do not match.",
+    "errorEmailTaken": "Email is already in use.",
+    "errorFailed": "Sign-up failed."
+  }
+}

@@ -1,35 +1,81 @@
 {
-  "login": {
-    "title": "Sign in",
-    "email": { "label": "Email" },
-    "password": { "label": "Password" },
-    "validation": {
-      "required": "This field is required",
-      "email": "Invalid email address"
+  "common": {
+    "invalidId": "Invalid ID"
+  },
+  "auth": {
+    "signupFailed": "Sign-up failed",
+    "invalidCredentials": "Invalid email or password.",
+    "googleFailed": "Google sign-in failed",
+    "kakaoFailed": "Kakao sign-in failed",
+    "googleAuthFailed": "Google authentication failed",
+    "kakaoAuthFailed": "Kakao authentication failed",
+    "codeRequired": "Authorization code is required",
+    "server": "A server error occurred. Please contact an administrator."
+  },
+  "workschd": {
+    "task": {
+      "alreadyApplied": "You have already requested to join",
+      "funeralNotFound": "Funeral not found",
+      "funeralClosed": "This funeral is closed",
+      "capacityFull": "Capacity is full",
+      "approvePendingOnly": "Only pending join requests can be approved",
+      "joinNotFound": "Join request not found",
+      "forbidden": "You do not have permission",
+      "cancelPendingOnly": "Only pending requests can be cancelled",
+      "participationNotFound": "Participation record not found",
+      "checkInApprovedOnly": "Only approved participants can check in",
+      "alreadyCheckedIn": "Already checked in",
+      "checkOutApprovedOnly": "Only approved participants can check out",
+      "checkInFirst": "Check in before checking out",
+      "alreadyCheckedOut": "Already checked out",
+      "completeLeadersOnly": "Only team leaders or admins can mark this complete"
     },
-    "form": {
-      "rememberMe": "Remember me",
-      "forgotPassword": "Forgot password"
+    "team": {
+      "leadersOnly": "Only team leaders or admins can perform this action",
+      "invalidInvite": "Invalid invitation link",
+      "inviteExpired": "Invitation link has expired",
+      "alreadyMember": "You are already a member of this team",
+      "joinNotFound": "Join request not found",
+      "joinApproved": "Join request approved",
+      "joinRejected": "Join request rejected",
+      "notFound": "Team not found",
+      "nameRegionRequired": "Name and region are required",
+      "unauthorized": "Authentication required"
     },
-    "button": { "submit": "Sign in" },
-    "signup": {
-      "prompt": "Don't have an account?",
-      "link": "Sign up"
+    "account": {
+      "notFound": "Account not found",
+      "wrongPassword": "Current password is incorrect"
     },
-    "success": "Signed in successfully.",
-    "error": {
-      "default": "An error occurred while signing in.",
-      "invalid": "Invalid email or password."
+    "feedback": {
+      "pageUrl": "pageUrl must start with http:// or https://",
+      "attachmentSize": "Attachment exceeds the 5MB size limit",
+      "invalidStatus": "Invalid status: {status}",
+      "notFound": "Feedback not found",
+      "attachmentNotFound": "Attachment not found"
     }
   },
-  "notFound": {
-    "title": "Page not found",
-    "message": "The page you requested does not exist or may have been moved",
-    "button": { "home": "Back to home" }
+  "vision": {
+    "saved": "Saved.",
+    "saveFailed": "Failed to save settings.",
+    "invalidRecordId": "Record id is invalid.",
+    "invalidImageName": "Image filename is invalid.",
+    "imageRequired": "An image is required.",
+    "upstream": "Upstream response error ({status})",
+    "connectFailed": "Connection failed: {detail}",
+    "badUpstream": "Invalid upstream address.",
+    "urlEmpty": "Address is empty.",
+    "urlInvalid": "Not a valid http(s) address.",
+    "urlProtocol": "Only http or https addresses are allowed."
   },
-  "common": {
-    "cancel": "Cancel",
-    "submit": "Submit",
-    "save": "Save"
+  "aviation": {
+    "topicsRequired": "A topics array is required",
+    "nameRequired": "Name is required",
+    "invalidId": "Invalid ID",
+    "restored": "Knowledge restore acknowledged",
+    "weatherCollect": "Weather collection triggered",
+    "weatherCleanup": "Weather cleanup triggered",
+    "gatheringUpdated": "Weather gathering status updated",
+    "searchRequired": "Search query (q) is required",
+    "abbrevNotFound": "Abbreviation '{code}' not found"
   }
 }

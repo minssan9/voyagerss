@@ -12,19 +12,19 @@ const routes: RouteRecordRaw[] = [
                 path: '',
                 name: 'vision-home',
                 component: () => import('@/modules/vision/views/VisionHome.vue'),
-                meta: { icon: 'dashboard', title: '구성' }
+                meta: { icon: 'dashboard', titleKey: 'routes.visionHome' }
             },
             {
                 path: 'cam',
                 name: 'vision-cam',
                 component: () => import('@/modules/vision/views/VisionCamTest.vue'),
-                meta: { icon: 'videocam', title: '카메라 테스트' }
+                meta: { icon: 'videocam', titleKey: 'routes.visionCam' }
             },
             {
                 path: 'judge',
                 name: 'vision-judge',
                 component: () => import('@/modules/vision/views/VisionJudgeTest.vue'),
-                meta: { icon: 'psychology', title: '판정 테스트' }
+                meta: { icon: 'psychology', titleKey: 'routes.visionJudge' }
             }
         ]
     }

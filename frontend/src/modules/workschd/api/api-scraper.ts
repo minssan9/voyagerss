@@ -39,6 +39,11 @@ export interface FuneralHome {
   homeUrl: string;
   listingUrl: string;
   region: 'INCHEON' | 'BUCHEON';
+  district?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  roomCount?: number | null;
+  hasScraper?: boolean;
   isActive: boolean;
   lastScrapedAt?: string;
   createdAt: string;

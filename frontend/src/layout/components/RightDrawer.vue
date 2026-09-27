@@ -13,7 +13,7 @@
           <q-avatar size="32px">
             <img :src="userStore.user.profileImageUrl" />
           </q-avatar>
-          <span class="q-ml-sm">{{ userStore.user.username || 'Guest' }}</span>
+          <span class="q-ml-sm">{{ userStore.user.username || t('common.drawer.guest') }}</span>
         </div>
         <div class="col-12">
           <q-list>
@@ -21,13 +21,13 @@
               <q-item-section avatar>
                 <q-icon name="login" />
               </q-item-section>
-              <q-item-section>Login</q-item-section>
+              <q-item-section>{{ t('common.drawer.login') }}</q-item-section>
             </q-item>
             <q-item v-else clickable v-ripple @click="logout">
               <q-item-section avatar>
                 <q-icon name="logout" />
               </q-item-section>
-              <q-item-section>Logout</q-item-section>
+              <q-item-section>{{ t('common.drawer.logout') }}</q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -38,18 +38,18 @@
       <q-list padding >
         <!-- Account Section -->
         <div v-if="userStore.user.accountId">
-          <q-item-label header>Account</q-item-label>
+          <q-item-label header>{{ t('common.drawer.account') }}</q-item-label>
           <q-item clickable v-ripple :to="{ name: 'AccountProfile' }">
             <q-item-section avatar>
               <q-icon name="person" />
             </q-item-section>
-            <q-item-section>Profile</q-item-section>
+            <q-item-section>{{ t('common.drawer.profile') }}</q-item-section>
           </q-item>
           <q-item clickable v-ripple :to="{ name: 'AccountSchedule' }">
             <q-item-section avatar>
               <q-icon name="person" />
             </q-item-section>
-            <q-item-section>Account Schedule</q-item-section>
+            <q-item-section>{{ t('common.drawer.accountSchedule') }}</q-item-section>
           </q-item>
           
           <!-- Team Selector -->
@@ -65,14 +65,14 @@
                 outlined
                 emit-value
                 map-options
-                label="Select Team"
+                :label="t('common.drawer.selectTeam')"
                 @update:model-value="handleTeamChange"
               />
             </q-item-section>
           </q-item>
         </div>
         <!-- Settings Section -->
-        <q-item-label header>Settings</q-item-label>
+        <q-item-label header>{{ t('common.settings') }}</q-item-label>
         
         <!-- Language Selector -->
         <q-item>
@@ -97,31 +97,31 @@
             <q-icon :name="$q.dark.isActive ? 'light_mode' : 'dark_mode'" />
           </q-item-section>
           <q-item-section>
-            {{ $q.dark.isActive ? 'Light Mode' : 'Dark Mode' }}
+            {{ $q.dark.isActive ? t('common.lightMode') : t('common.darkMode') }}
           </q-item-section>
         </q-item>
 
         <!-- System Section -->
-        <q-item-label header>System</q-item-label>
+        <q-item-label header>{{ t('common.drawer.system') }}</q-item-label>
         <q-item clickable v-ripple @click="openHelp">
           <q-item-section avatar>
             <q-icon name="help" />
           </q-item-section>
-          <q-item-section>Help</q-item-section>
+          <q-item-section>{{ t('common.drawer.help') }}</q-item-section>
         </q-item>
         
         <q-item clickable v-ripple @click="openFeedback">
           <q-item-section avatar>
             <q-icon name="feedback" />
           </q-item-section>
-          <q-item-section>Feedback</q-item-section>
+          <q-item-section>{{ t('common.drawer.feedback') }}</q-item-section>
         </q-item>
 
         <q-item v-if="isAdmin" clickable v-ripple :to="{ name: 'feedback-admin' }">
           <q-item-section avatar>
             <q-icon name="rate_review" />
           </q-item-section>
-          <q-item-section>기능 개선 요청 관리</q-item-section>
+          <q-item-section>{{ t('routes.feedbackAdmin') }}</q-item-section>
         </q-item>
       </q-list>
     </q-scroll-area>
@@ -151,7 +151,7 @@ const teamStore = useTeamStore()
 const { drawerRight } = storeToRefs(layoutStore)
 const { teamOptions } = storeToRefs(userStore)
 const $q = useQuasar()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const isAdmin = computed(() =>
   userStore.user.accountRoles?.map(ar => ar.roleType).includes('ADMIN') ?? false
@@ -165,13 +165,10 @@ const handleTeamChange = (teamId: number | null) => {
   teamStore.setTeam(teamId)
 }
 
-const languageOptions = [
-  { label: 'English', value: 'en' },
-  { label: 'Korean', value: 'ko' },
-  { label: 'French', value: 'fr' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Japanese', value: 'ja' }
-]
+const languageOptions = computed(() => [
+  { label: t('common.language.korean'), value: 'ko' },
+  { label: t('common.language.english'), value: 'en' },
+])
 
 // Load translations whenever the locale is changed via the selector
 watch(locale, (newLocale) => {

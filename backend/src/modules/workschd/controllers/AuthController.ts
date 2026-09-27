@@ -3,6 +3,12 @@ import { AccountService } from '../services/AccountService';
 import { AuthService } from '../services/AuthService';
 import { OAuth2Service } from '../services/OAuth2Service';
 import { configService } from '../../../config/config-service';
+import { IdentityPrismaService } from '../../identity/identity-prisma.service';
+import { IdentityService } from '../../identity/identity.service';
+import { IdentityOAuthService } from '../../identity/identity-oauth.service';
+import { RbacPrismaService } from '../../../prisma/rbac-prisma.service';
+import { RbacAssignmentService } from '../../rbac/rbac-assignment.service';
+import { tApi } from '../../common/i18n-locale';
 
 export class AuthController {
     private accountService: AccountService;
@@ -10,9 +16,12 @@ export class AuthController {
     private oauth2Service: OAuth2Service;
 
     constructor() {
+        const identityPrisma = new IdentityPrismaService();
+        const identityService = new IdentityService(identityPrisma, new RbacAssignmentService(new RbacPrismaService()));
+        const identityOAuthService = new IdentityOAuthService(identityService);
         this.accountService = new AccountService();
-        this.authService = new AuthService();
-        this.oauth2Service = new OAuth2Service();
+        this.authService = new AuthService(identityService);
+        this.oauth2Service = new OAuth2Service(identityOAuthService);
     }
 
     getUserByAuth = async (req: Request, res: Response) => {
@@ -72,7 +81,7 @@ export class AuthController {
             res.redirect(authUrl);
         } catch (error) {
             console.error('Google auth error:', error);
-            return res.status(500).json({ message: 'Google 인증 실패' });
+            return res.status(500).json({ message: tApi('auth.googleAuthFailed') });
         }
     };
 
@@ -84,7 +93,7 @@ export class AuthController {
             const { code } = req.query;
 
             if (!code || typeof code !== 'string') {
-                return res.status(400).json({ message: 'Code가 필요합니다' });
+                return res.status(400).json({ message: tApi('auth.codeRequired') });
             }
 
             const result = await this.oauth2Service.handleGoogleCallback(code);
@@ -112,7 +121,7 @@ export class AuthController {
             res.redirect(authUrl);
         } catch (error) {
             console.error('Kakao auth error:', error);
-            return res.status(500).json({ message: 'Kakao 인증 실패' });
+            return res.status(500).json({ message: tApi('auth.kakaoAuthFailed') });
         }
     };
 
@@ -124,7 +133,7 @@ export class AuthController {
             const { code } = req.query;
 
             if (!code || typeof code !== 'string') {
-                return res.status(400).json({ message: 'Code가 필요합니다' });
+                return res.status(400).json({ message: tApi('auth.codeRequired') });
             }
 
             const result = await this.oauth2Service.handleKakaoCallback(code);

@@ -3,9 +3,23 @@ import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { RbacPrismaService } from '../../prisma/rbac-prisma.service';
 
 export type PermissionType = 'PAGE' | 'API';
-export type ModuleScope = 'workschd' | 'investand' | 'aipr' | 'aviation' | 'ALL';
+export type ModuleScope = 'workschd' | 'aipr' | 'aviation' | 'vision' | 'ALL';
 
-export const VALID_MODULES: ReadonlySet<string> = new Set(['workschd', 'investand', 'aipr', 'aviation', 'ALL']);
+export const VALID_MODULES: ReadonlySet<string> = new Set([
+  'workschd',
+  'aipr',
+  'aviation',
+  'vision',
+  'ALL',
+]);
+
+export interface RbacMeProfile {
+  userId: string;
+  roles: { code: string; module: string }[];
+  pages: { code: string; module: string; resource: string }[];
+  modules: string[];
+  isAdmin: boolean;
+}
 export const VALID_TYPES: ReadonlySet<string> = new Set(['PAGE', 'API']);
 
 function assertValidModule(module: string) {
@@ -35,7 +49,7 @@ export class CreatePermissionDto {
   @IsString() @IsNotEmpty() code: string;
   @IsString() @IsNotEmpty() name: string;
   @IsEnum(['PAGE', 'API']) type: PermissionType;
-  @IsEnum(['workschd', 'investand', 'aipr', 'aviation', 'ALL']) module: ModuleScope;
+  @IsEnum(['workschd', 'aipr', 'aviation', 'vision', 'ALL']) module: ModuleScope;
   @IsString() @IsNotEmpty() resource: string;
   @IsString() @IsOptional() description?: string;
 }
@@ -43,7 +57,7 @@ export class CreatePermissionDto {
 export class UpdatePermissionDto {
   @IsString() @IsOptional() name?: string;
   @IsEnum(['PAGE', 'API']) @IsOptional() type?: PermissionType;
-  @IsEnum(['workschd', 'investand', 'aipr', 'aviation', 'ALL']) @IsOptional() module?: ModuleScope;
+  @IsEnum(['workschd', 'aipr', 'aviation', 'vision', 'ALL']) @IsOptional() module?: ModuleScope;
   @IsString() @IsOptional() resource?: string;
   @IsString() @IsOptional() description?: string;
 }
@@ -77,6 +91,54 @@ export class RbacService {
       where: { roleId: { in: roleIds }, permissionId: targetPerm.id },
     });
     return link !== null;
+  }
+
+  async isAdmin(subjectId: string): Promise<boolean> {
+    const subjectRoles = await this.rbac.subjectRole.findMany({
+      where: { subjectId },
+      include: { role: true },
+    });
+    return subjectRoles.some(
+      (sr) => sr.role.code === 'ADMIN' || sr.role.code === 'SUPER_ADMIN',
+    );
+  }
+
+  async getMeProfile(identityUserId: string): Promise<RbacMeProfile> {
+    const subjectRoles = await this.rbac.subjectRole.findMany({
+      where: { subjectId: identityUserId },
+      include: { role: true },
+    });
+
+    const roles = subjectRoles.map((sr) => ({ code: sr.role.code, module: sr.module }));
+    const isAdmin = subjectRoles.some(
+      (sr) => sr.role.code === 'ADMIN' || sr.role.code === 'SUPER_ADMIN',
+    );
+
+    if (subjectRoles.length === 0) {
+      return { userId: identityUserId, roles: [], pages: [], modules: [], isAdmin: false };
+    }
+
+    const roleIds = subjectRoles.map((sr) => sr.roleId);
+    const rolePerms = await this.rbac.rolePermission.findMany({
+      where: { roleId: { in: roleIds } },
+      include: { permission: true },
+    });
+
+    const pageMap = new Map<string, { code: string; module: string; resource: string }>();
+    for (const rp of rolePerms) {
+      if (rp.permission.type === 'PAGE') {
+        pageMap.set(rp.permission.code, {
+          code: rp.permission.code,
+          module: rp.permission.module,
+          resource: rp.permission.resource,
+        });
+      }
+    }
+
+    const pages = Array.from(pageMap.values());
+    const modules = [...new Set(pages.map((p) => p.module))];
+
+    return { userId: identityUserId, roles, pages, modules, isAdmin };
   }
 
   async getSubjectPermissions(module: string, subjectId: string) {

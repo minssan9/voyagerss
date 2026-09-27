@@ -1,13 +1,13 @@
 <template>
   <div class="page-vision">
     <header class="page-vision__header">
-      <h1 class="page-vision__title">판정 테스트</h1>
-      <p class="page-vision__lead">이미지를 올려 bool 또는 choice 판정을 요청하고 최근 이력을 봅니다.</p>
+      <h1 class="page-vision__title">{{ t('vision.judge.title') }}</h1>
+      <p class="page-vision__lead">{{ t('vision.judge.lead') }}</p>
     </header>
 
     <div class="page-vision__actions">
-      <q-btn outline no-caps label="구성" @click="router.push('/vision')" />
-      <q-btn outline no-caps label="이력 새로고침" :loading="isLoadingRecords" @click="loadRecords" />
+      <q-btn outline no-caps :label="t('vision.judge.config')" @click="router.push('/vision')" />
+      <q-btn outline no-caps :label="t('vision.judge.refreshRecords')" :loading="isLoadingRecords" @click="loadRecords" />
     </div>
 
     <q-banner v-if="healthMessage" rounded :class="healthOk ? 'bg-green-1 text-green-10' : 'bg-red-1 text-red-10'">
@@ -18,18 +18,18 @@
       <div class="col-12 col-md-5">
         <q-card flat bordered>
           <q-card-section class="q-gutter-md">
-            <q-file v-model="imageFile" outlined dense label="이미지" accept="image/*" />
-            <q-input v-model="question" outlined dense label="질문" />
+            <q-file v-model="imageFile" outlined dense :label="t('vision.judge.image')" accept="image/*" />
+            <q-input v-model="question" outlined dense :label="t('vision.judge.question')" />
             <q-btn-toggle
               v-model="mode"
               no-caps
               spread
               unelevated
               toggle-color="primary"
-              :options="[{ label: 'bool', value: 'bool' }, { label: 'choice', value: 'choice' }]"
+              :options="modeOptions"
             />
-            <q-input v-if="mode === 'choice'" v-model="choices" outlined dense label="선택지 (쉼표로 구분)" />
-            <q-btn color="primary" unelevated no-caps label="판정 요청" :loading="isJudging" @click="submitJudge" />
+            <q-input v-if="mode === 'choice'" v-model="choices" outlined dense :label="t('vision.judge.choices')" />
+            <q-btn color="primary" unelevated no-caps :label="t('vision.judge.submit')" :loading="isJudging" @click="submitJudge" />
             <q-banner v-if="judgeMessage" rounded :class="judgeOk ? 'bg-green-1 text-green-10' : 'bg-red-1 text-red-10'">
               {{ judgeMessage }}
             </q-banner>
@@ -39,7 +39,7 @@
       <div class="col-12 col-md-7">
         <q-card flat bordered>
           <q-card-section>
-            <div class="page-vision__card-title">최근 이력</div>
+            <div class="page-vision__card-title">{{ t('vision.judge.recentRecords') }}</div>
             <p v-if="recordsMessage" class="page-vision__meta">{{ recordsMessage }}</p>
             <div v-for="record in records" :key="record.id" class="page-vision__record">
               <img class="page-vision__thumb" :src="imageSrc(record.image_filename)" :alt="record.question" />
@@ -58,8 +58,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   getJudgeHealth,
   listJudgeRecords,
@@ -70,6 +71,7 @@ import {
 } from '@/modules/vision/api/api-vision'
 
 const router = useRouter()
+const { t } = useI18n()
 const imageFile = ref<File | null>(null)
 const question = ref('')
 const choices = ref('yes,no')
@@ -82,6 +84,11 @@ const healthOk = ref(false)
 const healthMessage = ref('')
 const records = ref<JudgeRecord[]>([])
 const recordsMessage = ref('')
+
+const modeOptions = computed(() => [
+  { label: t('vision.judge.modeBool'), value: 'bool' },
+  { label: t('vision.judge.modeChoice'), value: 'choice' },
+])
 
 function imageSrc(filename: string): string {
   return visionAssetUrl(`/vision/judge/images/${encodeURIComponent(filename)}`)
@@ -109,7 +116,7 @@ async function loadRecords() {
   isLoadingRecords.value = false
   if (listed.result === 'SUCCESS' && listed.data) {
     records.value = listed.data
-    recordsMessage.value = listed.data.length === 0 ? '이력이 없습니다.' : ''
+    recordsMessage.value = listed.data.length === 0 ? t('vision.judge.noRecords') : ''
   } else {
     records.value = []
     recordsMessage.value = listed.message
@@ -120,7 +127,7 @@ async function submitJudge() {
   judgeMessage.value = ''
   if (!imageFile.value) {
     judgeOk.value = false
-    judgeMessage.value = '이미지를 선택하세요.'
+    judgeMessage.value = t('vision.judge.selectImage')
     return
   }
   isJudging.value = true
@@ -128,7 +135,9 @@ async function submitJudge() {
     const result = await postJudgeBool(imageFile.value, question.value)
     judgeOk.value = result.result === 'SUCCESS'
     if (result.result === 'SUCCESS' && result.data) {
-      judgeMessage.value = `Yes ${(result.data.probability * 100).toFixed(1)}%`
+      judgeMessage.value = t('vision.judge.yesProbability', {
+        percent: (result.data.probability * 100).toFixed(1),
+      })
     } else {
       judgeMessage.value = result.message
     }

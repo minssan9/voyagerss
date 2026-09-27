@@ -1,3 +1,5 @@
+import { tApi } from '../common/i18n-locale';
+
 export interface ApiEnvelope<T> {
   result: 'SUCCESS' | 'ERROR';
   message: string;
@@ -29,16 +31,16 @@ export function failure(message: string): ApiEnvelope<null> {
 export function normalizeBaseUrl(value: string): string {
   const trimmed = value.trim().replace(/\/+$/, '');
   if (!trimmed) {
-    throw new Error('주소가 비어 있습니다.');
+    throw new Error(tApi('vision.urlEmpty'));
   }
   let url: URL;
   try {
     url = new URL(trimmed);
   } catch {
-    throw new Error('올바른 http(s) 주소가 아닙니다.');
+    throw new Error(tApi('vision.urlInvalid'));
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error('http 또는 https 주소만 사용할 수 있습니다.');
+    throw new Error(tApi('vision.urlProtocol'));
   }
   return trimmed;
 }

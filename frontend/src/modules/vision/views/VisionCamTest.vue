@@ -1,13 +1,13 @@
 <template>
   <div class="page-vision">
     <header class="page-vision__header">
-      <h1 class="page-vision__title">카메라 테스트</h1>
-      <p class="page-vision__lead">MJPEG 스트림과 /status 결정을 1초마다 읽습니다.</p>
+      <h1 class="page-vision__title">{{ t('vision.cam.title') }}</h1>
+      <p class="page-vision__lead">{{ t('vision.cam.lead') }}</p>
     </header>
 
     <div class="page-vision__actions">
-      <q-btn outline no-caps label="구성" @click="router.push('/vision')" />
-      <q-btn outline no-caps label="스트림 다시 열기" @click="reloadStream" />
+      <q-btn outline no-caps :label="t('vision.cam.config')" @click="router.push('/vision')" />
+      <q-btn outline no-caps :label="t('vision.cam.reloadStream')" @click="reloadStream" />
     </div>
 
     <q-banner v-if="statusMessage && !statusOk" rounded class="bg-red-1 text-red-10">{{ statusMessage }}</q-banner>
@@ -16,14 +16,14 @@
       <div class="col-12 col-md-7">
         <q-card flat bordered>
           <q-card-section>
-            <img class="page-vision__stream" :src="streamSrc" alt="vision_cam stream" />
+            <img class="page-vision__stream" :src="streamSrc" :alt="t('vision.cam.streamAlt')" />
           </q-card-section>
         </q-card>
       </div>
       <div class="col-12 col-md-5">
         <q-card flat bordered>
           <q-card-section>
-            <div class="page-vision__card-title">status</div>
+            <div class="page-vision__card-title">{{ t('vision.cam.status') }}</div>
             <p v-if="statusOk" class="page-vision__meta">fps {{ fpsText }}</p>
             <pre class="page-vision__mono">{{ statusText }}</pre>
           </q-card-section>
@@ -36,9 +36,11 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getCamStatus, visionAssetUrl } from '@/modules/vision/api/api-vision'
 
 const router = useRouter()
+const { t } = useI18n()
 const streamToken = ref(Date.now())
 const statusPayload = ref<Record<string, unknown> | null>(null)
 const statusMessage = ref('')

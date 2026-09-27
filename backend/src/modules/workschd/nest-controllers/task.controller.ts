@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { TaskOwnerGuard } from '../guards/task-owner.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { CurrentUser, AuthUser } from '../decorators/user.decorator';
+import { CurrentWorkschdUser, WorkschdAuthUser } from '../decorators/user.decorator';
 
 @Controller('workschd')
 @UseGuards(JwtAuthGuard)
@@ -17,7 +17,7 @@ export class TaskNestController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'TEAM_LEADER')
   @HttpCode(HttpStatus.CREATED)
-  createTask(@Body() body: any, @CurrentUser() user: AuthUser) {
+  createTask(@Body() body: any, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.createTask(body, user.accountId);
   }
 
@@ -25,7 +25,7 @@ export class TaskNestController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'TEAM_LEADER')
   @HttpCode(HttpStatus.CREATED)
-  createMultipleTasks(@Body() body: any, @CurrentUser() user: AuthUser) {
+  createMultipleTasks(@Body() body: any, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.createTasks(body, user.accountId);
   }
 
@@ -72,7 +72,7 @@ export class TaskNestController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'TEAM_LEADER', 'HELPER')
   @HttpCode(HttpStatus.CREATED)
-  createJoinRequest(@Param('taskId') taskId: string, @CurrentUser() user: AuthUser) {
+  createJoinRequest(@Param('taskId') taskId: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.createJoinRequest(parseInt(taskId), user.accountId);
   }
 
@@ -93,19 +93,27 @@ export class TaskNestController {
   }
 
   @Delete('task/request/:requestId')
-  cancelJoinRequest(@Param('requestId') requestId: string, @CurrentUser() user: AuthUser) {
+  cancelJoinRequest(@Param('requestId') requestId: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.cancelJoinRequest(parseInt(requestId), user.accountId);
   }
 
   @Post('task-employee/:taskEmployeeId/check-in')
   @HttpCode(HttpStatus.OK)
-  checkIn(@Param('taskEmployeeId') taskEmployeeId: string, @CurrentUser() user: AuthUser) {
+  checkIn(@Param('taskEmployeeId') taskEmployeeId: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.checkIn(parseInt(taskEmployeeId), user.accountId);
   }
 
   @Post('task-employee/:taskEmployeeId/check-out')
   @HttpCode(HttpStatus.OK)
-  checkOut(@Param('taskEmployeeId') taskEmployeeId: string, @CurrentUser() user: AuthUser) {
+  checkOut(@Param('taskEmployeeId') taskEmployeeId: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.taskService.checkOut(parseInt(taskEmployeeId), user.accountId);
+  }
+
+  @Post('task/:id/complete')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN', 'TEAM_LEADER')
+  @HttpCode(HttpStatus.OK)
+  completeTask(@Param('id') id: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
+    return this.taskService.completeTask(parseInt(id, 10), user.accountId, user.roles);
   }
 }

@@ -5,7 +5,7 @@
       <div class="col-12 col-sm-12 col-md-6">
         <q-card style="height: 100%" class="accountWorkHour-card">
           <q-card-section class="bg-primary text-white q-py-sm">
-            <div class="text-subtitle1">{{ t('accountWorkHour.preferences.title', '스케줄 설정 (근무 가능 시간)') }}</div>
+            <div class="text-subtitle1">{{ t('accountWorkHour.preferences.title') }}</div>
           </q-card-section>
 
           <q-card-section class="q-pa-sm-md card-content" style="height: 80%; position: relative; padding-bottom: 20px;">
@@ -20,7 +20,7 @@
                     <div class="col-6">
                       <q-select
                         v-model="daySchedules[day.value].startTime"
-                        :label="t('accountWorkHour.preferences.startTime', '시작 시간')"
+                        :label="t('accountWorkHour.preferences.startTime')"
                         :options="timeOptions"
                         dense
                         outlined
@@ -32,7 +32,7 @@
                     <div class="col-6">
                       <q-select
                         v-model="daySchedules[day.value].endTime"
-                        :label="t('accountWorkHour.preferences.endTime', '종료 시간')"
+                        :label="t('accountWorkHour.preferences.endTime')"
                         :options="timeOptions"
                         dense
                         outlined
@@ -48,7 +48,7 @@
 
             <div class="row justify-end" style="margin-top: 16px; bottom: 16px; right: 16px; width: calc(100% - 32px);">
               <q-btn
-                :label="t('accountWorkHour.preferences.save', '설정 저장')"
+                :label="t('accountWorkHour.preferences.save')"
                 @click="handleScheduleUpdate"
                 color="primary"
                 :loading="isSaving"
@@ -63,7 +63,7 @@
       <div class="col-12 col-sm-12 col-md-6">
         <q-card style="height: 100%" class="accountWorkHour-card">
           <q-card-section class="bg-red text-white q-py-sm">
-            <div class="text-subtitle1">{{ t('accountWorkHour.unavailable.title', '근무 불가능 일정') }}</div>
+            <div class="text-subtitle1">{{ t('accountWorkHour.unavailable.title') }}</div>
           </q-card-section>
 
           <q-card-section class="q-pa-sm-md card-content" style="height: 80%; position: relative; padding-bottom: 20px;">            
@@ -76,8 +76,8 @@
               align="justify"
               narrow-indicator
             >
-              <q-tab name="calendar" :label="t('accountWorkHour.view.calendar', '달력')" />
-              <q-tab name="grid" :label="t('accountWorkHour.view.grid', '목록')" />
+              <q-tab name="calendar" :label="t('accountWorkHour.view.calendar')" />
+              <q-tab name="grid" :label="t('accountWorkHour.view.grid')" />
             </q-tabs>
 
             <q-separator />
@@ -106,7 +106,7 @@
 
             <div class="row justify-end" style="margin-top: 16px; bottom: 16px; right: 16px; width: calc(100% - 32px);">
               <q-btn
-                :label="t('accountWorkHour.unavailable.save', '저장')"
+                :label="t('accountWorkHour.unavailable.save')"
                 color="primary"
                 :loading="isSavingDates"
                 @click="handleUnavailableDatesUpdate"
@@ -186,13 +186,13 @@ const timeOptions = (() => {
 const isSaving = ref(false)
 
 const daysOfWeek = [
-  { label: t('days.monday', '월요일'), value: 'MONDAY' },
-  { label: t('days.tuesday', '화요일'), value: 'TUESDAY' },
-  { label: t('days.wednesday', '수요일'), value: 'WEDNESDAY' },
-  { label: t('days.thursday', '목요일'), value: 'THURSDAY' },
-  { label: t('days.friday', '금요일'), value: 'FRIDAY' },
-  { label: t('days.saturday', '토요일'), value: 'SATURDAY' },
-  { label: t('days.sunday', '일요일'), value: 'SUNDAY' }
+  { label: t('days.monday'), value: 'MONDAY' },
+  { label: t('days.tuesday'), value: 'TUESDAY' },
+  { label: t('days.wednesday'), value: 'WEDNESDAY' },
+  { label: t('days.thursday'), value: 'THURSDAY' },
+  { label: t('days.friday'), value: 'FRIDAY' },
+  { label: t('days.saturday'), value: 'SATURDAY' },
+  { label: t('days.sunday'), value: 'SUNDAY' }
 ]
 
 const activeTab = ref('calendar')
@@ -200,9 +200,9 @@ const selectedDates = ref<string[]>([])
 const isSavingDates = ref(false)
 
 const columnDefs = ref<ColDef[]>([
-  { headerName: t('accountWorkHour.grid.date', '날짜'), field: 'date', sortable: true, filter: true, editable: false },
-  { headerName: t('accountWorkHour.grid.dayOfWeek', '요일'), field: 'dayOfWeek', sortable: true, filter: true, editable: false },
-  { headerName: t('accountWorkHour.grid.reason', '사유'), field: 'reason', sortable: true, filter: true, editable: true }
+  { headerName: t('accountWorkHour.grid.date'), field: 'date', sortable: true, filter: true, editable: false },
+  { headerName: t('accountWorkHour.grid.dayOfWeek'), field: 'dayOfWeek', sortable: true, filter: true, editable: false },
+  { headerName: t('accountWorkHour.grid.reason'), field: 'reason', sortable: true, filter: true, editable: true }
 ])
 
 // Transform selected dates for grid display
@@ -228,10 +228,10 @@ async function handleUnavailableDatesUpdate() {
     
     await apiAccountSchedule.saveUnavailableDates(accountId.value, unavailableDates)
     
-    $q.notify({ type: 'positive', message: t('accountWorkHour.unavailable.saveSuccess', '근무 불가능 일정이 저장되었습니다') })
+    $q.notify({ type: 'positive', message: t('accountWorkHour.unavailable.saveSuccess') })
   } catch (error) {
     console.error('Failed to update unavailable dates:', error)
-    $q.notify({ type: 'negative', message: t('accountWorkHour.unavailable.saveError', '근무 불가능 일정 저장에 실패했습니다') })
+    $q.notify({ type: 'negative', message: t('accountWorkHour.unavailable.saveError') })
   } finally {
     isSavingDates.value = false
   }
@@ -246,7 +246,7 @@ async function loadUnavailableDates() {
     }
   } catch (error) {
     console.error('Failed to load unavailable dates:', error)
-    $q.notify({ type: 'negative', message: t('accountWorkHour.unavailable.loadError', '근무 불가능 일정 로드에 실패했습니다') })
+    $q.notify({ type: 'negative', message: t('accountWorkHour.unavailable.loadError') })
   }
 }
 
@@ -290,9 +290,9 @@ const handleScheduleUpdate = async () => {
     const formattedPreferences = formatSchedulePreferencesForApi()
     await apiAccountSchedule.saveSchedulePreferences(accountId.value, formattedPreferences)
     
-    $q.notify({ type: 'positive', message: t('accountWorkHour.preferences.saveSuccess', '스케줄 설정이 저장되었습니다') })
+    $q.notify({ type: 'positive', message: t('accountWorkHour.preferences.saveSuccess') })
   } catch (error) {
-    $q.notify({ type: 'negative', message: t('accountWorkHour.preferences.saveError', '스케줄 설정 저장에 실패했습니다') })
+    $q.notify({ type: 'negative', message: t('accountWorkHour.preferences.saveError') })
   } finally {
     isSaving.value = false
   }

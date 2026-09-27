@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page padding data-testid="profile-page">
     <div class="row justify-center">
       <div class="col-12 col-md-8 col-lg-6">
         <!-- Page Header -->

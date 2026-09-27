@@ -1,16 +1,19 @@
 # Multi-Schema Database Setup Guide
 
-This project uses a multi-schema architecture with Prisma to support three distinct database schemas: `workschd`, `investand`, and `aviation`.
+This project uses a multi-schema architecture with Prisma. Each active module has its own schema file and generated Prisma client.
 
 ## Architecture Overview
 
-Instead of a single `schema.prisma` file, the schemas are split into three separate files located in `backend/prisma/`:
+Schemas are split into separate files in `backend/prisma/`:
 
-1.  **`workschd.prisma`**: Schema for the scheduler and team management module.
-2.  **`investand.prisma`**: Schema for the investment and market data module.
-3.  **`aviation.prisma`**: Schema for the aviation bot module.
+1.  **`workschd.prisma`**: Scheduler and team management module.
+2.  **`aviation.prisma`**: Aviation bot module.
+3.  **`aipr.prisma`**: AIPR module.
+4.  **`rbac.prisma`**: Role-based access control.
 
-Each schema is configured to generate a separate Prisma Client in a custom output path within `node_modules`.
+Each schema generates a separate Prisma Client in a custom output path within `node_modules`.
+
+The legacy Investand module has been removed. Historical tables are dropped idempotently at boot via `backend/prisma/sql/drop-investand-tables.sql`.
 
 ## configuration
 
@@ -34,46 +37,32 @@ datasource db {
 
 ### Prisma Configuration (`backend/src/config/prisma.ts`)
 
-We instantiate and export three separate Prisma Client instances:
+We instantiate and export separate Prisma Client instances:
 
 ```typescript
 import { PrismaClient as WorkschdClient } from '@prisma/client-workschd';
-import { PrismaClient as InvestandClient } from '@prisma/client-investand';
 import { PrismaClient as AviationClient } from '@prisma/client-aviation';
+import { PrismaClient as AiprClient } from '@prisma/client-aipr';
+import { PrismaClient as RbacClient } from '@prisma/client-rbac';
 
 export const workschdPrisma = new WorkschdClient();
-export const investandPrisma = new InvestandClient();
 export const aviationPrisma = new AviationClient();
-```
-
-### TypeScript Configuration (`tsconfig.json`)
-
-To ensure TypeScript resolves the custom client paths correctly, we've updated `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@prisma/client-workschd": ["node_modules/@prisma/client-workschd"],
-      "@prisma/client-investand": ["node_modules/@prisma/client-investand"],
-      "@prisma/client-aviation": ["node_modules/@prisma/client-aviation"]
-    }
-  }
-}
+export const aiprPrisma = new AiprClient();
+export const rbacPrisma = new RbacClient();
 ```
 
 ## How to Use
 
 ### 1. Generating Clients
 
-When you make changes to a schema, you must regenerate the specific client:
+When you make changes to a schema, regenerate the specific client:
 
 ```bash
-# Generate all
+# Generate all active clients
 npx prisma generate --schema=prisma/workschd.prisma
-npx prisma generate --schema=prisma/investand.prisma
 npx prisma generate --schema=prisma/aviation.prisma
+npx prisma generate --schema=prisma/aipr.prisma
+npx prisma generate --schema=prisma/rbac.prisma
 ```
 
 ### 2. Using in Services
@@ -93,10 +82,4 @@ export class AccountService {
 
 ## Database Connections
 
-Ensure your `.env` file contains the distinct connection strings:
-
-```env
-DATABASE_URL_WORKSCHD="mysql://..."
-DATABASE_URL_INVESTAND="mysql://..."
-DATABASE_URL_AVIATION="mysql://..."
-```
+Ensure your `.env` file contains the connection strings required by the active schemas. See [setup.md](../setup.md) for the current boot env vs DB config split.

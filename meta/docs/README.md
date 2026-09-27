@@ -23,13 +23,12 @@
 
 - [PRD-aipr.md](prd/PRD-aipr.md)
 - [PRD-aviation.md](prd/PRD-aviation.md)
-- [PRD-investand.md](prd/PRD-investand.md)
 - [PRD-workschd.md](prd/PRD-workschd.md)
 - [workschd-gap-analysis.md](prd/workschd-gap-analysis.md)
 
 ## Specs / API / Test
 
-- [specs/](specs/) — 기능 명세 (investand, workschd)
+- [specs/](specs/) — 기능 명세 (workschd)
 - [api/](api/) — API 동기화·테스트 계획
 - [test/](test/) — 모듈별 테스트 계획
 - [templates/PR-TEMPLATE.md](templates/PR-TEMPLATE.md)

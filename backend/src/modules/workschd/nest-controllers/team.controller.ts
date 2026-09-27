@@ -5,7 +5,7 @@ import { TeamService } from '../services/TeamService';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { CurrentUser, AuthUser } from '../decorators/user.decorator';
+import { CurrentWorkschdUser, WorkschdAuthUser } from '../decorators/user.decorator';
 
 @Controller('workschd')
 @UseGuards(JwtAuthGuard)
@@ -21,7 +21,7 @@ export class TeamNestController {
   @Post('team')
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'TEAM_LEADER')
-  createTeam(@Body() body: any, @CurrentUser() user: AuthUser) {
+  createTeam(@Body() body: any, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.teamService.createTeam(body, user.accountId);
   }
 
@@ -29,15 +29,23 @@ export class TeamNestController {
   @UseGuards(RolesGuard)
   @Roles('ADMIN', 'TEAM_LEADER')
   async generateInviteLink(@Body() body: any) {
-    const { teamName, region } = body;
+    const { teamName, region, teamId } = body;
+    if (teamId) {
+      return this.teamService.generateInviteLink(parseInt(teamId, 10));
+    }
     const result = await this.teamService.getTeams({ name: teamName, region });
     if (!result.content.length) return { message: 'Team not found' };
     return this.teamService.generateInviteLink(result.content[0].id);
   }
 
   @Get('team/join/:hash')
-  joinByInvite(@Param('hash') hash: string, @CurrentUser() user: AuthUser) {
+  joinByInvite(@Param('hash') hash: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
     return this.teamService.joinByInviteHash(hash, user.accountId);
+  }
+
+  @Get('team/:teamId/join-requests')
+  getJoinRequests(@Param('teamId') teamId: string, @CurrentWorkschdUser() user: WorkschdAuthUser) {
+    return this.teamService.getPendingJoinRequests(parseInt(teamId, 10), user.accountId, user.roles);
   }
 
   @Get('team/:teamId/members')
@@ -49,11 +57,35 @@ export class TeamNestController {
   }
 
   @Post('team/:teamId/approve/:requestId')
-  @UseGuards(RolesGuard)
-  @Roles('ADMIN', 'TEAM_LEADER')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  approveJoinRequest(@Param('teamId') teamId: string, @Param('requestId') requestId: string) {
-    return this.teamService.approveJoinRequest(parseInt(teamId), parseInt(requestId));
+  approveJoinRequest(
+    @Param('teamId') teamId: string,
+    @Param('requestId') requestId: string,
+    @CurrentWorkschdUser() user: WorkschdAuthUser,
+  ) {
+    return this.teamService.approveJoinRequest(
+      parseInt(teamId, 10),
+      parseInt(requestId, 10),
+      user.accountId,
+      user.roles,
+    );
+  }
+
+  @Post('team/:teamId/reject/:requestId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  rejectJoinRequest(
+    @Param('teamId') teamId: string,
+    @Param('requestId') requestId: string,
+    @CurrentWorkschdUser() user: WorkschdAuthUser,
+  ) {
+    return this.teamService.rejectJoinRequest(
+      parseInt(teamId, 10),
+      parseInt(requestId, 10),
+      user.accountId,
+      user.roles,
+    );
   }
 
   @Get('team/:teamId/schedule-config')

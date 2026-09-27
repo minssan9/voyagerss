@@ -1,8 +1,14 @@
-﻿import { useUserStore } from '@/stores/common/store_user'
+import { useUserStore } from '@/stores/common/store_user'
 import axios from 'axios'
 import router from "@/router"
 import Cookies from 'js-cookie'
 import { Notify } from 'quasar'
+
+import { i18n } from '@/locales/i18n'
+
+function apiErrorMessage(err, fallbackKey) {
+  return err.response?.data?.message || i18n.global.t(fallbackKey)
+}
 
 // create an axios instance
 const service = axios.create({
@@ -27,7 +33,8 @@ service.interceptors.request.use(
     }
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      const raw = String(token).replace(/^Bearer\s+/i, '')
+      config.headers.Authorization = `Bearer ${raw}`
       config.headers.refreshToken = `${refreshToken}`
       config.headers.$accountId = userStore.accountId
     }
@@ -43,9 +50,10 @@ service.interceptors.response.use(
   response => {
     const userStore = useUserStore()
     if (response.headers.authorization) {
-      window.sessionStorage.setItem('$accessToken', response.headers.authorization)
-      Cookies.set('accessToken', response.headers.authorization)
-      userStore.setAccessToken(response.headers.authorization)
+      const raw = String(response.headers.authorization).replace(/^Bearer\s+/i, '')
+      window.sessionStorage.setItem('$accessToken', raw)
+      Cookies.set('accessToken', raw)
+      userStore.setAccessToken(raw)
     }
 
     if (response.status < 200 || response.status >= 300) {
@@ -115,27 +123,27 @@ const apiError = {
   onUnauthorized(err) {
     const userStore = useUserStore()
     userStore.logout()
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 인증되지 않았습니다. \n   `
+    err.message = apiErrorMessage(err, 'common.errors.unauthenticated')
     return Promise.reject(err)
   },
   onMethodNotAllowed(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 권한이 없습니다. \n   `
+    err.message = apiErrorMessage(err, 'common.errors.forbidden')
     return Promise.reject(err)
   },
   onForbidden(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 권한이 없습니다. \n   `
+    err.message = apiErrorMessage(err, 'common.errors.forbidden')
     return Promise.reject(err)
   },
   onBadRequest(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 잘못된 요청입니다. \n   `
+    err.message = apiErrorMessage(err, 'common.errors.badRequest')
     return Promise.reject(err)
   },
   onNotFound(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 잘못된 접근입니다. \n`
+    err.message = apiErrorMessage(err, 'common.errors.badAccess')
     return Promise.reject(err)
   },
   onServerError(err) {
-    err.message = err.response.data.message ? err.response.data.message : '' + `\n 서버 문제입니다. 관리자에게 문의 부탁드립니다. \n`
+    err.message = apiErrorMessage(err, 'common.errors.server')
     return Promise.reject(err)
   },
 }

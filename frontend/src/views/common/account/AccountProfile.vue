@@ -5,7 +5,7 @@
       <div class="col-12 col-sm-10 col-md-8">
         <q-card class="q-mb-md">
           <q-card-section class="bg-primary text-white q-py-sm">
-            <div class="text-subtitle1">{{ t('profile.title', '프로필 설정') }}</div>
+            <div class="text-subtitle1">{{ t('profile.title') }}</div>
           </q-card-section>
 
           <q-card-section class="q-pa-sm-md">
@@ -19,7 +19,7 @@
                     @click="$refs.fileInput.click()"
                   >
                     <div class="absolute-bottom text-caption text-center bg-black q-pa-xs" style="opacity: 0.7">
-                      {{ t('profile.image.change', '이미지 변경') }}
+                      {{ t('profile.image.change') }}
                     </div>
                   </q-img>
                 </q-avatar>
@@ -37,10 +37,10 @@
                 <div class="col-12">
                   <q-input
                     v-model="profileForm.username"
-                    :label="t('profile.label.username', '사용자 이름')"
+                    :label="t('profile.label.username')"
                     dense
                     outlined
-                    :rules="[val => !!val || t('profile.validation.usernameRequired', '사용자 이름을 입력해주세요')]"
+                    :rules="[val => !!val || t('profile.validation.usernameRequired')]"
                   >
                     <template v-slot:prepend>
                       <q-icon size="sm" name="person" />
@@ -51,13 +51,13 @@
                 <div class="col-12">
                   <q-input
                     v-model="profileForm.email"
-                    :label="t('profile.label.email', '이메일')"
+                    :label="t('profile.label.email')"
                     dense
                     outlined
                     type="email"
                     :rules="[
-                      val => !!val || t('profile.validation.emailRequired', '이메일을 입력해주세요'),
-                      val => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val) || t('profile.validation.emailInvalid', '올바른 이메일 형식이 아닙니다')
+                      val => !!val || t('profile.validation.emailRequired'),
+                      val => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(val) || t('profile.validation.emailInvalid')
                     ]"
                     :readonly="!userStore.isManager"
                   >
@@ -70,12 +70,12 @@
                 <div class="col-12">
                   <q-input
                     v-model="profileForm.phone"
-                    :label="t('profile.label.phone', '전화번호')"
+                    :label="t('profile.label.phone')"
                     dense
                     outlined
                     type="tel"
                     mask="###-####-####"
-                    :rules="[val => !val || /^\d{3}-\d{4}-\d{4}$/.test(val) || t('profile.validation.phoneInvalid', '올바른 전화번호 형식이 아닙니다')]"
+                    :rules="[val => !val || /^\d{3}-\d{4}-\d{4}$/.test(val) || t('profile.validation.phoneInvalid')]"
                   >
                     <template v-slot:prepend>
                       <q-icon size="sm" name="phone" />
@@ -86,7 +86,7 @@
                 <div class="col-12">
                   <q-input
                     v-model="userStore.user.role"
-                    :label="t('profile.label.role', '역할')"
+                    :label="t('profile.label.role')"
                     dense
                     outlined
                     readonly
@@ -101,7 +101,7 @@
               <!-- Submit Button -->
               <div class="row justify-end q-mt-sm">
                 <q-btn
-                  :label="t('profile.button.update', '프로필 업데이트')"
+                  :label="t('profile.button.update')"
                   type="submit"
                   color="primary"
                   :loading="isUpdating"
@@ -115,16 +115,16 @@
         <!-- Notification Settings Card -->
         <q-card>
           <q-card-section class="bg-primary text-white q-py-sm">
-            <div class="text-subtitle1">{{ t('profile.notifications.title', '알림 설정') }}</div>
+            <div class="text-subtitle1">{{ t('profile.notifications.title') }}</div>
           </q-card-section>
 
           <q-card-section class="q-pa-sm-md">
             <div class="q-gutter-y-sm">
               <q-item dense tag="label" v-ripple>
                 <q-item-section>
-                  <q-item-label class="text-subtitle2">{{ t('profile.notifications.email', '이메일 알림') }}</q-item-label>
+                  <q-item-label class="text-subtitle2">{{ t('profile.notifications.email') }}</q-item-label>
                   <q-item-label caption>
-                    {{ t('profile.notifications.emailDesc', '스케줄 변경 및 중요 알림을 이메일로 받습니다') }}
+                    {{ t('profile.notifications.emailDesc') }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
@@ -134,9 +134,9 @@
 
               <q-item tag="label" v-ripple>
                 <q-item-section>
-                  <q-item-label>{{ t('profile.notifications.push', '푸시 알림') }}</q-item-label>
+                  <q-item-label>{{ t('profile.notifications.push') }}</q-item-label>
                   <q-item-label caption>
-                    {{ t('profile.notifications.pushDesc', '실시간 알림을 브라우저로 받습니다') }}
+                    {{ t('profile.notifications.pushDesc') }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
@@ -146,9 +146,9 @@
 
               <q-item tag="label" v-ripple>
                 <q-item-section>
-                  <q-item-label>{{ t('profile.notifications.accountWorkHour', '스케줄 알림') }}</q-item-label>
+                  <q-item-label>{{ t('profile.notifications.accountWorkHour') }}</q-item-label>
                   <q-item-label caption>
-                    {{ t('profile.notifications.scheduleDesc', '근무 시작 전 알림을 받습니다') }}
+                    {{ t('profile.notifications.scheduleDesc') }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
@@ -159,7 +159,7 @@
 
             <div class="row justify-end q-mt-sm">
               <q-btn
-                :label="t('profile.notifications.saveButton', '알림 설정 저장')"
+                :label="t('profile.notifications.saveButton')"
                 color="primary"
                 :loading="isSavingNotifications"
                 @click="handleNotificationUpdate"
@@ -229,7 +229,7 @@ onMounted(async () => {
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: t('profile.notifications.loadError', '알림 설정을 불러오는데 실패했습니다')
+      message: t('profile.notifications.loadError')
     })
   }
 })
@@ -249,13 +249,13 @@ const handleImageUpload = async (event: Event) => {
         await userStore.updateProfileImage(response.data.imageUrl)
         $q.notify({
           type: 'positive',
-          message: t('profile.notification.imageUpdateSuccess', '프로필 이미지가 업데이트되었습니다')
+          message: t('profile.notification.imageUpdateSuccess')
         })
       }
     } catch (error) {
       $q.notify({
         type: 'negative',
-        message: t('profile.notification.imageUpdateError', '이미지 업로드 중 오류가 발생했습니다')
+        message: t('profile.notification.imageUpdateError')
       })
     } finally {
       isUpdating.value = false
@@ -279,12 +279,12 @@ const handleProfileUpdate = async () => {
 
     $q.notify({
       type: 'positive',
-      message: t('profile.notification.updateSuccess', '프로필이 성공적으로 업데이트되었습니다')
+      message: t('profile.notification.updateSuccess')
     })
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: t('profile.notification.updateError', '프로필 업데이트 중 오류가 발생했습니다')
+      message: t('profile.notification.updateError')
     })
   } finally {
     isUpdating.value = false
@@ -299,12 +299,12 @@ const handleNotificationUpdate = async () => {
     
     $q.notify({
       type: 'positive',
-      message: t('profile.notifications.updateSuccess', '알림 설정이 저장되었습니다')
+      message: t('profile.notifications.updateSuccess')
     })
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: t('profile.notifications.updateError', '알림 설정 저장에 실패했습니다')
+      message: t('profile.notifications.updateError')
     })
   } finally {
     isSavingNotifications.value = false

@@ -1,4 +1,6 @@
-﻿// Task status enum
+﻿import { i18n } from '@/locales/i18n'
+
+// Task status enum
 export enum TaskStatus {
   SCHEDULED = 'SCHEDULED',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -15,28 +17,11 @@ export enum RequestStatus {
   INACTIVE = 'INACTIVE'
 }
 
-// Task status display mappings
-export const taskStatusLabels: Record<TaskStatus, string> = {
-  [TaskStatus.SCHEDULED]: '예정됨',
-  [TaskStatus.IN_PROGRESS]: '진행중',
-  [TaskStatus.COMPLETED]: '완료됨',
-  [TaskStatus.CANCELLED]: '취소됨'
-}
-
 export const taskStatusColors: Record<TaskStatus, string> = {
   [TaskStatus.SCHEDULED]: 'blue',
   [TaskStatus.IN_PROGRESS]: 'green',
   [TaskStatus.COMPLETED]: 'purple',
   [TaskStatus.CANCELLED]: 'grey'
-}
-
-// Request status display mappings
-export const requestStatusLabels: Record<RequestStatus, string> = {
-  [RequestStatus.PENDING]: '승인 대기중',
-  [RequestStatus.APPROVED]: '승인됨',
-  [RequestStatus.REJECTED]: '거절됨',
-  [RequestStatus.ACTIVE]: '참여 중',
-  [RequestStatus.INACTIVE]: '참여 종료'
 }
 
 export const requestStatusColors: Record<RequestStatus, string> = {
@@ -47,10 +32,15 @@ export const requestStatusColors: Record<RequestStatus, string> = {
   [RequestStatus.INACTIVE]: 'grey'
 }
 
-// Helper functions for status display
+function translateStatus(keyPrefix: string, status: string): string {
+  const key = `${keyPrefix}.${status}`
+  const translated = i18n.global.t(key)
+  return translated === key ? status : translated
+}
+
 export function getTaskStatusLabel(status?: string): string {
   if (!status) return ''
-  return taskStatusLabels[status as TaskStatus] || status
+  return translateStatus('task.statusLabels', status)
 }
 
 export function getTaskStatusColor(status?: string): string {
@@ -60,11 +50,10 @@ export function getTaskStatusColor(status?: string): string {
 
 export function getRequestStatusLabel(status?: string | null): string {
   if (!status) return ''
-  return requestStatusLabels[status as RequestStatus] || status
+  return translateStatus('task.requestStatusLabels', status)
 }
 
 export function getRequestStatusColor(status?: string | null): string {
   if (!status) return 'grey'
   return requestStatusColors[status as RequestStatus] || 'grey'
-} 
-
+}

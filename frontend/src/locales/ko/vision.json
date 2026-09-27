@@ -1,0 +1,44 @@
+{
+  "vision": {
+    "home": {
+      "title": "Vision 구성",
+      "lead": "실행 중인 vision_cam, vision_judge 프로세스 주소를 저장하고 연결을 확인합니다.",
+      "camTitle": "vision_cam",
+      "judgeTitle": "vision_judge",
+      "baseUrl": "Base URL",
+      "connected": "연결됨",
+      "connectedWithFps": "연결됨 · fps {fps}",
+      "connectedWithDevice": "연결됨 · {device} · {model}",
+      "saveAndCheck": "저장 후 연결 확인",
+      "camTest": "카메라 테스트",
+      "judgeTest": "판정 테스트"
+    },
+    "cam": {
+      "title": "카메라 테스트",
+      "lead": "MJPEG 스트림과 /status 결정을 1초마다 읽습니다.",
+      "config": "구성",
+      "reloadStream": "스트림 다시 열기",
+      "status": "status",
+      "streamAlt": "vision_cam stream"
+    },
+    "judge": {
+      "title": "판정 테스트",
+      "lead": "이미지를 올려 bool 또는 choice 판정을 요청하고 최근 이력을 봅니다.",
+      "config": "구성",
+      "refreshRecords": "이력 새로고침",
+      "image": "이미지",
+      "question": "질문",
+      "modeBool": "bool",
+      "modeChoice": "choice",
+      "choices": "선택지 (쉼표로 구분)",
+      "submit": "판정 요청",
+      "recentRecords": "최근 이력",
+      "noRecords": "이력이 없습니다.",
+      "selectImage": "이미지를 선택하세요.",
+      "yesProbability": "Yes {percent}%"
+    },
+    "errors": {
+      "requestFailed": "요청에 실패했습니다."
+    }
+  }
+}

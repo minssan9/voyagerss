@@ -115,25 +115,7 @@ function seedLocalAll() {
         catch (err) {
             console.error('[seed-local] Error seeding workschd database:', err);
         }
-        // 2. Seed investand
-        try {
-            const investandCount = yield prisma_1.investandPrisma.adminUser.count();
-            if (investandCount === 0 || force) {
-                console.log('[seed-local] Seeding investand database with SQL...');
-                const statements = parseSqlFile(path_1.default.resolve(__dirname, 'seed-investand.sql'));
-                for (const stmt of statements) {
-                    yield prisma_1.investandPrisma.$executeRawUnsafe(stmt);
-                }
-                console.log('[seed-local] investand database seeded.');
-            }
-            else {
-                console.log('[seed-local] investand database already contains data. Skipping.');
-            }
-        }
-        catch (err) {
-            console.error('[seed-local] Error seeding investand database:', err);
-        }
-        // 3. Seed aipr
+        // 2. Seed aipr
         try {
             const aiprCount = yield prisma_1.aiprPrisma.admin.count();
             if (aiprCount === 0 || force) {

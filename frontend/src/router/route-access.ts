@@ -7,12 +7,33 @@ export interface EffectiveRouteMeta {
   public: boolean
   requiresAuth: boolean
   adminAuth: boolean
+  /** Integrated hub (`/`) — gated by RBAC module membership */
+  integrated: boolean
   /** Deepest non-empty `meta.roles` array, if any */
   requiredRoles: string[] | undefined
   /** Deepest `meta.loginPath` string, if any */
   loginPath: string | undefined
   /** RBAC permission code required to access this page (e.g. 'workschd:page:admin-rbac') */
   rbacPermission: string | undefined
+}
+
+export const MODULE_LANDING_PATHS: Record<string, string> = {
+  workschd: '/workschd',
+  aviation: '/aviation',
+  aipr: '/aipr',
+  vision: '/vision'
+}
+
+/** Integrated hub is visible to admins or users with two or more modules. */
+export function canSeeIntegrated(isAdmin: boolean, modules: readonly string[]): boolean {
+  return isAdmin || modules.length >= 2
+}
+
+/** Redirect target when the user has exactly one module. */
+export function landingPath(modules: readonly string[]): string {
+  const mod = modules[0]
+  if (!mod) return '/403'
+  return MODULE_LANDING_PATHS[mod] ?? '/403'
 }
 
 export function normalizePathForAccess(path: string): string {
@@ -30,6 +51,7 @@ export function getEffectiveMeta(matched: readonly MatchedWithMeta[]): Effective
   let publicMeta = false
   let requiresAuth = false
   let adminAuth = false
+  let integrated = false
   let requiredRoles: string[] | undefined
   let loginPath: string | undefined
   let rbacPermission: string | undefined
@@ -40,6 +62,7 @@ export function getEffectiveMeta(matched: readonly MatchedWithMeta[]): Effective
     if (meta.public === true) publicMeta = true
     if (meta.requiresAuth === true) requiresAuth = true
     if (meta.adminAuth === true) adminAuth = true
+    if (meta.integrated === true) integrated = true
     if (typeof meta.loginPath === 'string' && meta.loginPath.length > 0) {
       loginPath = meta.loginPath
     }
@@ -52,7 +75,7 @@ export function getEffectiveMeta(matched: readonly MatchedWithMeta[]): Effective
     }
   }
 
-  return { public: publicMeta, requiresAuth, adminAuth, requiredRoles, loginPath, rbacPermission }
+  return { public: publicMeta, requiresAuth, adminAuth, integrated, requiredRoles, loginPath, rbacPermission }
 }
 
 export function userRoleTypes(
@@ -106,8 +129,35 @@ export function decideRouteAccess(input: {
   accountRoles: ReadonlyArray<{ roleType: string }> | null | undefined
   /** RBAC page permission codes loaded from the server for the current user */
   rbacPagePermissions?: readonly string[]
+  /** Module codes from GET /api/rbac/me */
+  rbacModules?: readonly string[]
+  /** Platform admin flag from GET /api/rbac/me */
+  rbacIsAdmin?: boolean
 }): RouteAccessDecision {
   const meta = getEffectiveMeta(input.matched)
+
+  if (meta.integrated) {
+    const hasMain = hasMainAccessToken(input.storeAccessToken, input.cookieAccessToken)
+    if (!hasMain) {
+      return {
+        action: 'redirect',
+        path: '/login',
+        query: { redirect: input.fullPath }
+      }
+    }
+
+    const modules = input.rbacModules ?? []
+    const isAdmin = input.rbacIsAdmin ?? false
+
+    if (canSeeIntegrated(isAdmin, modules)) {
+      return { action: 'allow' }
+    }
+    if (modules.length === 1) {
+      return { action: 'redirect', path: landingPath(modules) }
+    }
+    return { action: 'redirect', path: '/403' }
+  }
+
   const wl = isWhitelisted(input.path, input.whiteList)
 
   if (meta.public || wl) {
@@ -122,7 +172,7 @@ export function decideRouteAccess(input: {
       return {
         action: 'redirect',
         path: '/login',
-        query: { service: 'investand', redirect: input.fullPath }
+        query: { redirect: input.fullPath }
       }
     }
     if (meta.requiresAuth && !hasMain) {

@@ -2,13 +2,13 @@
   <q-page class="column items-center justify-center">
     <div class="text-center">
       <div class="text-h1 text-grey-4 q-mb-md">403</div>
-      <div class="text-h4 q-mb-md">{{ t('forbidden.title', '접근 권한이 없습니다') }}</div>
+      <div class="text-h4 q-mb-md">{{ t('forbidden.title') }}</div>
       <div class="text-subtitle1 text-grey-7 q-mb-xl">
-        {{ t('forbidden.message', '해당 페이지에 대한 접근 권한이 없습니다') }}
+        {{ t('forbidden.message') }}
       </div>
       <q-btn
         color="primary"
-        :label="t('forbidden.button.home', '홈으로 돌아가기')"
+        :label="t('forbidden.button.home')"
         to="/"
         class="q-mb-md"
       />

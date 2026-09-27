@@ -29,6 +29,7 @@ model Account {
   accountRoles    AccountRole[]
   accountInfo     AccountInfo?
   teamMembers     TeamMember[]
+  teamJoinRequests TeamJoinRequest[]
   taskEmployees   TaskEmployee[]
   notifications   Notification[]
   createdTasks    Task[]        @relation("TaskCreator")
@@ -86,6 +87,7 @@ model Team {
   location            String?
   
   teamMembers         TeamMember[]
+  teamJoinRequests    TeamJoinRequest[]
   shops               Shop[]
   tasks               Task[]
 
@@ -106,6 +108,22 @@ model TeamMember {
   account   Account @relation(fields: [accountId], references: [accountId])
 
   @@map("team_member")
+}
+
+model TeamJoinRequest {
+  id        Int       @id @default(autoincrement())
+  teamId    Int       @map("team_id")
+  accountId Int       @map("account_id")
+  status    String    @default("PENDING")
+  createdAt DateTime  @default(now()) @map("created_at")
+  decidedAt DateTime? @map("decided_at")
+  decidedBy Int?      @map("decided_by")
+
+  team    Team    @relation(fields: [teamId], references: [id])
+  account Account @relation(fields: [accountId], references: [accountId])
+
+  @@unique([teamId, accountId])
+  @@map("team_join_request")
 }
 
 model Shop {
@@ -196,6 +214,11 @@ model FuneralHome {
   homeUrl       String   @map("home_url") @db.VarChar(512)
   listingUrl    String   @map("listing_url") @db.VarChar(512)
   region        String   @map("region") @db.VarChar(20) // INCHEON, BUCHEON
+  district      String?  @map("district") @db.VarChar(50)
+  address       String?  @map("address") @db.VarChar(255)
+  phone         String?  @map("phone") @db.VarChar(30)
+  roomCount     Int?     @map("room_count")
+  hasScraper    Boolean  @default(false) @map("has_scraper")
   isActive      Boolean  @default(true) @map("is_active")
   lastScrapedAt DateTime? @map("last_scraped_at")
 

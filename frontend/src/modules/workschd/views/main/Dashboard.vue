@@ -3,12 +3,12 @@
     <!-- Dashboard Header -->
     <div class="row items-center justify-between q-mb-lg">
       <div>
-        <h1 class="text-h4 q-my-none">{{ t('dashboard.title', 'Dashboard') }}</h1>
+        <h1 class="text-h4 q-my-none">{{ t('dashboard.title') }}</h1>
         <p class="text-subtitle1 q-my-sm">{{ formattedDate }}</p>
       </div>
       <q-btn
         color="primary"
-        :label="t('dashboard.weeklySchedule', 'WEEKLY SCHEDULE')"
+        :label="t('dashboard.weeklySchedule')"
         icon="calendar_today"
         class="q-px-md"
         @click="navigateToSchedule"
@@ -21,12 +21,12 @@
       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="card card-stat">
           <q-card-section>
-            <div class="stat-label">{{ t('dashboard.shiftsToday', 'Shifts Today') }}</div>
+            <div class="stat-label">{{ t('dashboard.shiftsToday') }}</div>
             <div class="stat-value text-primary">{{ statistics.shiftsToday }}</div>
             <q-btn
               flat
               color="primary"
-              :label="t('dashboard.viewSchedule', 'VIEW SCHEDULE')"
+              :label="t('dashboard.viewSchedule')"
               class="full-width"
               @click="navigateToSchedule"
             />
@@ -38,12 +38,12 @@
       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="card card-stat">
           <q-card-section>
-            <div class="stat-label">{{ t('dashboard.activeEmployees', 'Active Employees') }}</div>
+            <div class="stat-label">{{ t('dashboard.activeEmployees') }}</div>
             <div class="stat-value text-teal">{{ statistics.activeEmployees }}</div>
             <q-btn
               flat
               color="teal"
-              :label="t('dashboard.viewEmployees', 'VIEW EMPLOYEES')"
+              :label="t('dashboard.viewEmployees')"
               class="full-width"
               @click="navigateToEmployees"
             />
@@ -55,12 +55,12 @@
       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="card card-stat">
           <q-card-section>
-            <div class="stat-label">{{ t('dashboard.weeklyLabor', 'Weekly Labor') }}</div>
+            <div class="stat-label">{{ t('dashboard.weeklyLabor') }}</div>
             <div class="stat-value text-orange">${{ statistics.weeklyLabor.toFixed(2) }}</div>
             <q-btn
               flat
               color="orange"
-              :label="t('dashboard.viewReports', 'VIEW REPORTS')"
+              :label="t('dashboard.viewReports')"
               class="full-width"
               @click="navigateToReports"
             />
@@ -72,12 +72,12 @@
       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="card card-stat">
           <q-card-section>
-            <div class="stat-label">{{ t('dashboard.attendanceRate', 'Attendance Rate') }}</div>
+            <div class="stat-label">{{ t('dashboard.attendanceRate') }}</div>
             <div class="stat-value text-green">{{ statistics.attendanceRate }}%</div>
             <q-btn
               flat
               color="green"
-              :label="t('dashboard.attendance', 'ATTENDANCE')"
+              :label="t('dashboard.attendance')"
               class="full-width"
               @click="navigateToAttendance"
             />
@@ -88,32 +88,32 @@
 
     <!-- Quick Actions Section -->
     <div class="q-mb-lg">
-      <h2 class="text-h5 q-mb-md">{{ t('dashboard.quickActions', 'Quick Actions') }}</h2>
+      <h2 class="text-h5 q-mb-md">{{ t('dashboard.quickActions') }}</h2>
       <div class="row q-col-gutter-md">
         <!-- Only show Add Employee and Create Schedule for Managers -->
         <div v-if="isManager" class="col-12 col-sm-6 col-md-3">
           <q-card class="card card-action" @click="navigateToAddEmployee">
             <q-icon name="person_add" class="action-icon" color="primary" />
-            <div class="action-label text-primary">{{ t('dashboard.addEmployee', 'Add Employee') }}</div>
+            <div class="action-label text-primary">{{ t('dashboard.addEmployee') }}</div>
           </q-card>
         </div>
         <div v-if="isManager" class="col-12 col-sm-6 col-md-3">
           <q-card class="card card-action" @click="navigateToCreateSchedule">
             <q-icon name="event" class="action-icon" color="teal" />
-            <div class="action-label text-teal">{{ t('dashboard.createSchedule', 'Create Schedule') }}</div>
+            <div class="action-label text-teal">{{ t('dashboard.createSchedule') }}</div>
           </q-card>
         </div>
         <!-- Show for all users -->
         <div class="col-12 col-sm-6 col-md-3">
           <q-card class="card card-action" @click="navigateToTrackAttendance">
             <q-icon name="schedule" class="action-icon" color="orange" />
-            <div class="action-label text-orange">{{ t('dashboard.trackAttendance', 'Track Attendance') }}</div>
+            <div class="action-label text-orange">{{ t('dashboard.trackAttendance') }}</div>
           </q-card>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
           <q-card class="card card-action" @click="navigateToReports">
             <q-icon name="bar_chart" class="action-icon" color="blue" />
-            <div class="action-label text-blue">{{ t('dashboard.viewReports', 'View Reports') }}</div>
+            <div class="action-label text-blue">{{ t('dashboard.viewReports') }}</div>
           </q-card>
         </div>
       </div>
@@ -121,7 +121,7 @@
 
     <!-- Today's Schedule Section -->
     <div>
-      <h2 class="text-h5 q-mb-md">{{ t('dashboard.todaysSchedule', "Today's Schedule") }}</h2>
+      <h2 class="text-h5 q-mb-md">{{ t('dashboard.todaysSchedule') }}</h2>
       <div v-if="todayShifts.length > 0">
         <q-card v-for="shift in todayShifts" :key="shift.id" class="q-mb-sm">
           <q-card-section class="row items-center">
@@ -140,7 +140,7 @@
       </div>
       <div v-else class="text-center q-pa-md">
         <q-icon name="event_busy" size="3rem" color="grey-7" />
-        <p class="text-subtitle1">{{ t('dashboard.noShifts', 'No shifts scheduled for today') }}</p>
+        <p class="text-subtitle1">{{ t('dashboard.noShifts') }}</p>
       </div>
     </div>
   </q-page>
@@ -239,7 +239,7 @@ onMounted(async () => {
   } catch (error) {
     $q.notify({
       color: 'negative',
-      message: t('dashboard.error.loading', 'Failed to load dashboard data'),
+      message: t('dashboard.error.loading'),
       icon: 'error'
     })
   }

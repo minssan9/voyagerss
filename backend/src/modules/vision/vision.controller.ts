@@ -15,6 +15,7 @@ import type { Response } from 'express';
 import { VisionConfigStore } from './vision-config.store';
 import { VisionService } from './vision.service';
 import { failure, success, UploadedImage, VisionEndpoints } from './vision.types';
+import { tApi } from '../common/i18n-locale';
 
 @Controller('vision')
 export class VisionController {
@@ -32,9 +33,9 @@ export class VisionController {
   updateConfig(@Body() body: Partial<VisionEndpoints>) {
     try {
       const data = this.config.update(body ?? {});
-      return success(data, '저장했습니다.');
+      return success(data, tApi('vision.saved'));
     } catch (error) {
-      const message = error instanceof Error ? error.message : '설정 저장에 실패했습니다.';
+      const message = error instanceof Error ? error.message : tApi('vision.saveFailed');
       return failure(message);
     }
   }

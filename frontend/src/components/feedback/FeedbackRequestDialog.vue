@@ -2,7 +2,7 @@
   <q-dialog v-model="isOpen" persistent>
     <q-card class="feedback-dialog-card">
       <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">기능 개선 요청</div>
+        <div class="text-h6">{{ t('feedback.title') }}</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -11,40 +11,40 @@
         <q-card-section class="q-gutter-md">
           <q-input
             v-model="form.title"
-            label="제목"
+            :label="t('feedback.columns.title')"
             outlined
             dense
-            :rules="[val => !!val || '제목을 입력해주세요']"
+            :rules="[val => !!val || t('feedback.form.titleRequired')]"
           />
           <q-input
             v-model="form.content"
-            label="내용"
+            :label="t('feedback.columns.content')"
             type="textarea"
             outlined
             autogrow
-            :rules="[val => (val && val.length >= 10) || '내용을 10자 이상 입력해주세요']"
+            :rules="[val => (val && val.length >= 10) || t('feedback.form.contentMinLength')]"
           />
           <q-file
             v-model="form.file"
-            label="첨부 파일 (선택)"
+            :label="t('feedback.form.attachmentOptional')"
             outlined
             dense
             clearable
             accept="image/*,.pdf,.zip"
-            :rules="[val => !val || val.size <= 5242880 || '파일 크기는 5MB를 초과할 수 없습니다']"
+            :rules="[val => !val || val.size <= 5242880 || t('feedback.form.fileSizeLimit')]"
           >
             <template v-slot:prepend>
               <q-icon name="attach_file" />
             </template>
           </q-file>
-          <q-input v-model="form.pageUrl" label="요청 페이지" outlined dense readonly />
+          <q-input v-model="form.pageUrl" :label="t('feedback.columns.pageUrl')" outlined dense readonly />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="취소" color="grey-7" v-close-popup />
+          <q-btn flat :label="t('common.cancel')" color="grey-7" v-close-popup />
           <q-btn
             unelevated
-            label="등록"
+            :label="t('common.submit')"
             color="primary"
             type="submit"
             :loading="loading"
@@ -57,6 +57,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
 import { useFeedback } from '@/composables/useFeedback'
@@ -64,6 +65,7 @@ import { useFeedback } from '@/composables/useFeedback'
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue', 'submitted'])
 
+const { t } = useI18n()
 const $q = useQuasar()
 const route = useRoute()
 const { loading, createFeedback } = useFeedback()
@@ -101,12 +103,12 @@ async function submit() {
       pageUrl: form.pageUrl,
       file: form.file,
     })
-    $q.notify({ type: 'positive', message: '기능 개선 요청이 등록되었습니다. 감사합니다!' })
+    $q.notify({ type: 'positive', message: t('feedback.submitSuccess') })
     emit('submitted')
     resetForm()
     isOpen.value = false
   } catch (e: any) {
-    $q.notify({ type: 'negative', message: e?.message ?? '등록에 실패했습니다. 잠시 후 다시 시도해주세요.' })
+    $q.notify({ type: 'negative', message: e?.message ?? t('feedback.submitFailed') })
   }
 }
 

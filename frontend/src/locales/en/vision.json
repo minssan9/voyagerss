@@ -1,0 +1,44 @@
+{
+  "vision": {
+    "home": {
+      "title": "Vision Configuration",
+      "lead": "Save and verify connection addresses for running vision_cam and vision_judge processes.",
+      "camTitle": "vision_cam",
+      "judgeTitle": "vision_judge",
+      "baseUrl": "Base URL",
+      "connected": "Connected",
+      "connectedWithFps": "Connected · fps {fps}",
+      "connectedWithDevice": "Connected · {device} · {model}",
+      "saveAndCheck": "Save & verify connection",
+      "camTest": "Camera test",
+      "judgeTest": "Judge test"
+    },
+    "cam": {
+      "title": "Camera Test",
+      "lead": "Reads the MJPEG stream and /status every second.",
+      "config": "Configuration",
+      "reloadStream": "Reload stream",
+      "status": "status",
+      "streamAlt": "vision_cam stream"
+    },
+    "judge": {
+      "title": "Judge Test",
+      "lead": "Upload an image to request bool or choice judgments and view recent history.",
+      "config": "Configuration",
+      "refreshRecords": "Refresh history",
+      "image": "Image",
+      "question": "Question",
+      "modeBool": "bool",
+      "modeChoice": "choice",
+      "choices": "Choices (comma-separated)",
+      "submit": "Request judgment",
+      "recentRecords": "Recent history",
+      "noRecords": "No history yet.",
+      "selectImage": "Please select an image.",
+      "yesProbability": "Yes {percent}%"
+    },
+    "errors": {
+      "requestFailed": "The request failed."
+    }
+  }
+}

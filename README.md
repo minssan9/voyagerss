@@ -19,6 +19,29 @@ npm run setup
 pnpm dev
 ```
 
+## Local ports
+
+`pnpm dev` starts these four processes. `predev` frees the same ports first.
+
+| Port | Service | Config |
+|------|---------|--------|
+| 9002 | NestJS API | `BACKEND_PORT` |
+| 9003 | Vue / Quasar / Vite | `FRONTEND_PORT` — proxies `/api` and `/socket.io` to 9002 |
+| 8000 | vision_judge (Qwen3-VL) | `PORT`, `VISION_JUDGE_BASE_URL` |
+| 8080 | vision_cam MJPEG stream | `VISION_CAM_STREAM_PORT` |
+
+Open the app at http://localhost:9003.
+
+## Local test accounts
+
+Password for every account below is `password123!`.
+
+| Email | Role |
+|-------|------|
+| `leader@example.com` | workschd team leader |
+| `member@example.com` | workschd worker |
+| `admin@workschd.test` | administrator |
+
 ## Environment
 
 Single production template: [`.env.example`](.env.example). Local overrides go in `.env.local` (gitignored).

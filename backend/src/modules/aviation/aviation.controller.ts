@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Put, Param, Query, Body, HttpCode } from '@nestjs/common';
 import { AviationService } from './aviation.service';
+import { tApi } from '../common/i18n-locale';
 
 @Controller('aviation')
 export class AviationNestController {
@@ -75,13 +76,13 @@ export class AviationNestController {
   @Post('knowledge/restore')
   @HttpCode(200)
   restoreKnowledge(@Body() body: { topics: any[] }) {
-    if (!Array.isArray(body.topics)) return { error: 'topics array is required' };
-    return { success: true, data: { restored: body.topics.length, message: 'Knowledge restore acknowledged' } };
+    if (!Array.isArray(body.topics)) return { error: tApi('aviation.topicsRequired') };
+    return { success: true, data: { restored: body.topics.length, message: tApi('aviation.restored') } };
   }
 
   @Post('topics')
   async createTopic(@Body() body: { name: string; description?: string; day_of_month?: number }) {
-    if (!body.name) return { error: 'name is required' };
+    if (!body.name) return { error: tApi('aviation.nameRequired') };
     try {
       const created = await this.svc.createTopic(body);
       return { success: true, data: created };
@@ -91,7 +92,7 @@ export class AviationNestController {
   @Put('topics/:id')
   async updateTopicById(@Param('id') id: string, @Body() body: any) {
     const idNum = parseInt(id);
-    if (isNaN(idNum)) return { error: 'Invalid ID' };
+    if (isNaN(idNum)) return { error: tApi('aviation.invalidId') };
     try {
       const updated = await this.svc.updateTopic(idNum, body);
       return { success: true, data: updated };
@@ -101,10 +102,10 @@ export class AviationNestController {
   // ── Weather (stubs) ────────────────────────────────────────────────────
 
   @Post('weather/collect') @HttpCode(200)
-  collectWeather() { return { success: true, data: { message: 'Weather collection triggered', collected: 0 } }; }
+  collectWeather() { return { success: true, data: { message: tApi('aviation.weatherCollect'), collected: 0 } }; }
 
   @Post('weather/cleanup') @HttpCode(200)
-  cleanupWeather() { return { success: true, data: { message: 'Weather cleanup triggered', removed: 0 } }; }
+  cleanupWeather() { return { success: true, data: { message: tApi('aviation.weatherCleanup'), removed: 0 } }; }
 
   @Get('weather/images')
   getWeatherImages() { return { success: true, data: { images: [], count: 0 } }; }
@@ -116,7 +117,7 @@ export class AviationNestController {
   getGatheringEnabled() { return { success: true, data: { enabled: false } }; }
 
   @Post('weather/gathering/enabled') @HttpCode(200)
-  setGatheringEnabled(@Body() body: { enabled: boolean }) { return { success: true, data: { enabled: body.enabled, message: 'Weather gathering status updated' } }; }
+  setGatheringEnabled(@Body() body: { enabled: boolean }) { return { success: true, data: { enabled: body.enabled, message: tApi('aviation.gatheringUpdated') } }; }
 
   // ── Abbreviations ──────────────────────────────────────────────────────
 
@@ -139,7 +140,7 @@ export class AviationNestController {
 
   @Get('abbreviations/search')
   searchAbbreviations(@Query('q') q: string) {
-    if (!q) return { error: 'Search query (q) is required' };
+    if (!q) return { error: tApi('aviation.searchRequired') };
     try {
       const results = this.svc.abbreviationService.searchAbbreviations(q);
       return { success: true, data: { results, count: results.length, query: q } };
@@ -158,7 +159,7 @@ export class AviationNestController {
   getAbbreviationByCode(@Param('code') code: string) {
     try {
       const abbrev = this.svc.abbreviationService.getByCode(code);
-      if (!abbrev) return { error: `Abbreviation '${code}' not found` };
+      if (!abbrev) return { error: tApi('aviation.abbrevNotFound', { code }) };
       return { success: true, data: abbrev };
     } catch (e: any) { return { error: e.message }; }
   }

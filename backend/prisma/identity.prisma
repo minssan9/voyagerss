@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/client-identity"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id           String         @id @default(cuid()) @map("id")
+  email        String?        @unique
+  displayName  String?        @map("display_name")
+  status       String         @default("ACTIVE")
+  passwordHash String?        @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  oauthAccounts OauthAccount[]
+  moduleLinks  ModuleLink[]
+
+  @@map("identity_user")
+}
+
+model OauthAccount {
+  id         Int      @id @default(autoincrement())
+  userId     String   @map("user_id")
+  provider   String
+  providerId String   @map("provider_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerId])
+  @@map("identity_oauth_account")
+}
+
+model ModuleLink {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  module    String
+  subjectId String   @map("subject_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, module])
+  @@unique([module, subjectId])
+  @@map("identity_module_link")
+}

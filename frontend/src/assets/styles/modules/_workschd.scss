@@ -1,0 +1,436 @@
+.workschd-page {
+  background: #f5f5f7;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  color: #1d1d1f;
+}
+
+.workschd-page__inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 16px 24px;
+}
+
+.workschd-page__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+}
+
+.workschd-page__heading {
+  min-width: 0;
+}
+
+.workschd-page__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #1d1d1f;
+}
+
+.workschd-page__subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: #6e6e73;
+}
+
+.workschd-page__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.workschd-page__actions:not(:has(.q-btn, .workschd-page__meta)) {
+  display: none;
+}
+
+.workschd-page__toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.workschd-page__toolbar:not(:has(.q-btn, .q-field, .q-chip, .q-toggle, .q-tabs)) {
+  display: none;
+}
+
+.workschd-page__header .q-btn:not(.q-btn--round) {
+  min-height: 28px !important;
+  height: 28px;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
+.workschd-page__header .q-field .q-field__control,
+.workschd-page__header .q-field .q-field__marginal {
+  height: 28px;
+  min-height: 28px;
+}
+
+.workschd-page__header .q-field {
+  width: 168px;
+  font-size: 12px;
+}
+
+.workschd-page__header .q-chip {
+  height: 22px;
+  font-size: 12px;
+}
+
+.workschd-page__header .q-tab {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.workschd-page__meta {
+  font-size: 12px;
+  color: #6e6e73;
+}
+
+.workschd-page .q-card,
+.workschd-page .lp-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.workschd-btn,
+.workschd-page .q-btn.bg-primary:not(.q-btn--outline):not(.q-btn--flat) {
+  background: #1d1d1f !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+}
+
+.workschd-page__header .workschd-btn,
+.workschd-page__header .q-btn.bg-primary:not(.q-btn--outline):not(.q-btn--flat),
+.workschd-page__header .q-btn:not(.q-btn--round) {
+  min-height: 28px !important;
+  height: 28px;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  border-radius: 8px !important;
+}
+
+.workschd-page__header .q-tabs {
+  width: auto;
+  min-height: 28px;
+}
+
+.workschd-grid {
+  width: 100%;
+  min-height: 280px;
+}
+
+.workschd-page .clickable-cell {
+  cursor: pointer;
+  color: #0071e3;
+}
+
+.workschd-page__body + .workschd-page__body,
+.workschd-page .lp-card + .lp-card {
+  margin-top: 16px;
+}
+
+@media (max-width: 700px) {
+  .workschd-page__header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workschd-page__actions {
+    justify-content: flex-start;
+  }
+}
+
+.funeral-board__filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.funeral-board__search {
+  width: 220px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.funeral-board__toast {
+  margin-bottom: 16px;
+}
+
+.funeral-board__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.funeral-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.funeral-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.funeral-card__header,
+.funeral-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.funeral-card__header {
+  margin-bottom: 12px;
+}
+
+.funeral-card__footer {
+  border-top: 1px solid #f2f2f7;
+  padding-top: 12px;
+  margin-top: 16px;
+}
+
+.funeral-card__name {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.funeral-card__home {
+  font-size: 13px;
+  color: #6e6e73;
+  margin-bottom: 12px;
+}
+
+.funeral-card__row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.funeral-card__label {
+  color: #aeaeb2;
+  min-width: 28px;
+  font-size: 12px;
+}
+
+.funeral-card__time {
+  font-size: 12px;
+  color: #aeaeb2;
+}
+
+.region-badge {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.region-badge.incheon {
+  background: rgba(0, 113, 227, 0.1);
+  color: #0071e3;
+}
+
+.region-badge.bucheon {
+  background: #fce8e6;
+  color: #d93025;
+}
+
+.linked-badge {
+  font-size: 11px;
+  font-weight: 500;
+  background: #e6f4ea;
+  color: #137333;
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.funeral-catalog__row {
+  padding: 10px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.funeral-catalog__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.funeral-board__empty {
+  text-align: center;
+  padding: 64px 16px;
+  color: #6e6e73;
+}
+
+.admin-dashboard .chart-container {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-members .ag-theme-alpine {
+  width: 100%;
+}
+
+.team-schedule {
+  .config-card {
+    height: 100%;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .config-card:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.team-shop {
+  .shop-grid {
+    margin-bottom: 16px;
+  }
+
+  .ag-theme-alpine {
+    --ag-header-height: 36px;
+    --ag-row-height: 36px;
+    --ag-font-size: 13px;
+    --ag-header-foreground-color: #5c5c5c;
+    --ag-header-background-color: #f5f5f5;
+    --ag-odd-row-background-color: #fcfcfc;
+  }
+
+  .q-card {
+    box-shadow: none;
+    border-radius: 8px;
+  }
+
+  .clickable-cell {
+    cursor: pointer;
+    color: var(--q-primary);
+    text-decoration: underline;
+  }
+
+  .detail-item {
+    margin-bottom: 12px;
+  }
+
+  .detail-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+.layout-worker {
+  .workschd-page__inner {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .q-page-container {
+    padding-bottom: 0;
+  }
+}
+
+.layout-mobile {
+  .workschd-page__body .q-btn:not(.q-btn--round) {
+    min-height: 48px;
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 16px;
+  }
+}
+
+.worker-tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 2000;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: min(480px, 100%);
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateX(-50%);
+  background: #fff;
+  border-top: 1px solid #e8e8ed;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.worker-tabbar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #6e6e73;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.worker-tabbar__item--active {
+  color: #0071e3;
+}
+
+.worker-task-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .q-btn-toggle {
+    width: 100%;
+  }
+}
+
+.worker-task-list {
+  border: none;
+  background: transparent;
+
+  .q-item {
+    margin-bottom: 12px;
+    padding: 16px;
+    border: 1px solid #e8e8ed;
+    border-radius: 16px;
+    background: #fff;
+  }
+}
+
+.task-calendar-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+
+  .col {
+    flex: 0 0 140px;
+    max-width: 140px;
+  }
+}

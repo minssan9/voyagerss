@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { I18nHttpException } from '../../common/i18n-http.exception';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { Account } from '@prisma/client-workschd';
 
@@ -87,13 +88,13 @@ export class AccountService {
     async changePassword(accountId: number, oldPassword: string, newPassword: string): Promise<void> {
         const account = await this.getAccountById(accountId);
         if (!account) {
-            throw new Error('Account not found');
+            throw new I18nHttpException('workschd.account.notFound', HttpStatus.NOT_FOUND);
         }
 
         const bcrypt = require('bcrypt');
         const isPasswordValid = await bcrypt.compare(oldPassword, account.password);
         if (!isPasswordValid) {
-            throw new Error('Current password is incorrect');
+            throw new I18nHttpException('workschd.account.wrongPassword', HttpStatus.BAD_REQUEST);
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);

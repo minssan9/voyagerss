@@ -15,7 +15,7 @@
           <q-icon :name="onlyOneChild.meta.icon || item.meta?.icon" size="18px" />
         </q-item-section>
         <q-item-section>
-          {{ onlyOneChild.meta.title || formatRouteName(onlyOneChild.name) }}
+          {{ sidebarLabel(onlyOneChild.meta, onlyOneChild.name) }}
         </q-item-section>
       </q-item>
     </template>
@@ -24,7 +24,7 @@
     <q-expansion-item
       v-else
       :icon="item.meta?.icon"
-      :label="item.meta?.title || formatRouteName(item.name)"
+      :label="sidebarLabel(item.meta, item.name)"
       header-class="nav-expansion-header"
       :default-opened="hasActiveChild(item, basePath)"
     >
@@ -43,6 +43,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { routeLabel } from '@/utils/head'
 
 defineOptions({ name: 'SidebarItem' })
 
@@ -54,12 +56,26 @@ const props = defineProps({
 
 const router = useRouter()
 const route  = useRoute()
+const { locale, t } = useI18n()
 const onlyOneChild = ref<any>(null)
+
+function routeTitle(meta: any) {
+  void locale.value
+  return routeLabel(meta)
+}
+
+function sidebarLabel(meta: any, name?: string | symbol | null) {
+  const base = routeTitle(meta) || formatRouteName(name)
+  const surface = meta?.surface
+  if (surface === 'admin') return `${t('routes.prefixAdmin')} · ${base}`
+  if (surface === 'worker') return `${t('routes.prefixWorker')} · ${base}`
+  return base
+}
 
 function isVisible(item: any) {
   if (item.hidden || item.meta?.hidden) return false
   if (item.path === '' && item.redirect) return false
-  if (!item.name && (!item.meta?.title) && (!item.children?.length)) return false
+  if (!item.name && !item.meta?.title && !item.meta?.titleKey && (!item.children?.length)) return false
   return true
 }
 

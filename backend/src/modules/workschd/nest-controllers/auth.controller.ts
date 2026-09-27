@@ -1,15 +1,14 @@
-import { Controller, Post, Get, Body, Query, Req, Res, HttpCode, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Post, Get, Body, Query, Res, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { AuthService } from '../services/AuthService';
-import { AccountService } from '../services/AccountService';
 import { OAuth2Service } from '../services/OAuth2Service';
 import { ConfigService } from '../../../config/config-service';
+import { tApi } from '../../common/i18n-locale';
 
 @Controller('workschd/auth')
 export class AuthNestController {
   constructor(
     private readonly authService: AuthService,
-    private readonly accountService: AccountService,
     private readonly oauth2Service: OAuth2Service,
     private readonly configService: ConfigService,
   ) {}
@@ -22,7 +21,7 @@ export class AuthNestController {
       return res.status(201).json({ accountId: account.accountId, email: account.email });
     } catch (err: any) {
       if (err.status === 409) return res.status(409).json({ message: err.message });
-      return res.status(500).json({ message: '회원가입에 실패했습니다' });
+      return res.status(500).json({ message: tApi('auth.signupFailed') });
     }
   }
 
@@ -31,7 +30,7 @@ export class AuthNestController {
   async login(@Body() body: { email: string; password: string }, @Res() res: Response) {
     const result = await this.authService.login(body.email, body.password);
     if (!result) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: tApi('auth.invalidCredentials') });
     }
     res.setHeader('Authorization', `Bearer ${result.accessToken}`);
     res.setHeader('RefreshToken', result.refreshToken);
@@ -39,9 +38,9 @@ export class AuthNestController {
   }
 
   @Get('google')
-  googleAuth(@Res() res: Response) {
-    const authUrl = this.oauth2Service.getGoogleAuthUrl();
-    return res.redirect(authUrl);
+  googleAuth(@Req() req: Request, @Res() res: Response) {
+    const prefix = req.protocol + '://' + req.get('host');
+    return res.redirect(`${prefix}/api/identity/auth/google`);
   }
 
   @Get('google/callback')
@@ -59,9 +58,9 @@ export class AuthNestController {
   }
 
   @Get('kakao')
-  kakaoAuth(@Res() res: Response) {
-    const authUrl = this.oauth2Service.getKakaoAuthUrl();
-    return res.redirect(authUrl);
+  kakaoAuth(@Req() req: Request, @Res() res: Response) {
+    const prefix = req.protocol + '://' + req.get('host');
+    return res.redirect(`${prefix}/api/identity/auth/kakao`);
   }
 
   @Get('kakao/callback')

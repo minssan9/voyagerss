@@ -8,56 +8,90 @@
         </li>
       </ul>
     </div>
-    <q-layout 
-      view="hHh LpR fFf" 
+    <q-layout
+      view="hHh LpR fFf"
       container
       style="height: 100vh"
-      :class="['shadow-2 rounded-borders', { 'with-sidebar': layoutStore.drawerLeft }]"
+      :class="layoutClasses"
     >
       <MainHeader />
-      <LeftDrawer />
+      <LeftDrawer v-if="!userStore.isWorker" />
       <RightDrawer />
       <q-page-container style="padding-bottom: 10px;">
-        <q-page padding>
+        <q-page>
           <slot></slot>
         </q-page>
       </q-page-container>
-      <FeedbackFloatingButton v-if="userStore.user.accountId" />
-      <Footer />
+      <WorkerBottomNav v-if="userStore.isWorker" />
+      <FeedbackFloatingButton v-if="userStore.user.accountId && !userStore.isWorker" />
+      <Footer v-if="!userStore.isWorker" />
     </q-layout>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import MainHeader from './components/MainHeader.vue'
 import LeftDrawer from './components/LeftDrawer.vue'
 import RightDrawer from './components/RightDrawer.vue'
 import Footer from './components/Footer.vue'
+import WorkerBottomNav from './components/WorkerBottomNav.vue'
 import FeedbackFloatingButton from '@/components/feedback/FeedbackFloatingButton.vue'
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
 import { useTeamStore } from '@/modules/workschd/store/store_team'
-import * as ChannelService from '@channel.io/channel-web-sdk-loader'
 import Cookies from 'js-cookie'
+
 const layoutStore = useLayoutStore()
 const userStore = useUserStore()
 const teamStore = useTeamStore()
+const route = useRoute()
 const notifications = ref([])
+
+const isMobileLayout = computed(() => {
+  for (let i = route.matched.length - 1; i >= 0; i--) {
+    if (route.matched[i].meta?.mobile) return true
+  }
+  const path = route.path.replace(/\/$/, '')
+  return path.startsWith('/workschd/m/') || path === '/workschd/admin/tasks/mobile'
+})
+
+const layoutClasses = computed(() => [
+  'shadow-2 rounded-borders',
+  {
+    'with-sidebar': layoutStore.drawerLeft && !userStore.isWorker,
+    'layout-worker': userStore.isWorker,
+    'layout-mobile': isMobileLayout.value,
+  },
+])
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  const tag = target.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true
+  if (target.isContentEditable) return true
+  return false
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (userStore.isWorker) return
+  if (event.key !== 'F4') return
+  if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return
+  if (isEditableTarget(event.target)) return
+  event.preventDefault()
+  layoutStore.toggleLeftDrawer()
+}
 
 onMounted(() => {
   layoutStore.resetDrawers()
   if (Cookies.get('accessToken')) {
     userStore.fetchUser()
-    // teamStore.
   }
+  window.addEventListener('keydown', onKeydown)
+})
 
-
-  
-  // ChannelService.loadScript()
-  // ChannelService.boot({
-  //   "pluginKey": useAppConfigStore().get('VITE_CHANNEL_TALK_PLUGIN_KEY')
-  // })
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydown)
 })
 </script>
-

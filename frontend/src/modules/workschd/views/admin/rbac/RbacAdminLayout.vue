@@ -1,35 +1,25 @@
 <template>
-  <q-page padding>
-    <div class="row items-center q-mb-md">
-      <q-icon name="admin_panel_settings" size="32px" color="primary" class="q-mr-sm" />
-      <div>
-        <h5 class="q-my-none">RBAC 권한 관리</h5>
-        <p class="text-grey-6 q-mb-none text-caption">역할·권한·대상을 통합 관리합니다</p>
-      </div>
-    </div>
-
-    <q-tabs
-      v-model="activeTab"
-      dense
-      align="left"
-      class="q-mb-md text-primary"
-      indicator-color="primary"
-    >
-      <q-tab name="roles" icon="badge" label="역할 관리" @click="$router.push('/workschd/admin/rbac/roles')" />
-      <q-tab name="permissions" icon="lock" label="권한 관리" @click="$router.push('/workschd/admin/rbac/permissions')" />
-      <q-tab name="role-permissions" icon="link" label="역할-권한 매핑" @click="$router.push('/workschd/admin/rbac/role-permissions')" />
-      <q-tab name="subjects" icon="manage_accounts" label="대상-역할 매핑" @click="$router.push('/workschd/admin/rbac/subjects')" />
-    </q-tabs>
-
+  <WorkschdPage :title="t('rbac.title')" :subtitle="t('rbac.subtitle')">
+    <template #toolbar>
+      <q-tabs v-model="activeTab" dense no-caps align="left" indicator-color="primary" class="text-primary">
+        <q-tab name="roles" :label="t('rbac.tabs.roles')" @click="$router.push('/workschd/admin/rbac/roles')" />
+        <q-tab name="permissions" :label="t('rbac.tabs.permissions')" @click="$router.push('/workschd/admin/rbac/permissions')" />
+        <q-tab name="role-permissions" :label="t('rbac.tabs.rolePermissions')" @click="$router.push('/workschd/admin/rbac/role-permissions')" />
+        <q-tab name="subjects" :label="t('rbac.tabs.subjects')" @click="$router.push('/workschd/admin/rbac/subjects')" />
+      </q-tabs>
+    </template>
     <router-view />
-  </q-page>
+  </WorkschdPage>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import WorkschdPage from '@/modules/workschd/components/WorkschdPage.vue'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const activeTab = computed(() => {
   const p = route.path

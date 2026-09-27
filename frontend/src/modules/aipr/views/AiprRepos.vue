@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api/api-aipr';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
+const { t, locale } = useI18n();
 const router = useRouter();
 
 interface Provider {
@@ -29,10 +31,10 @@ interface Repo {
   buildRunner: RunnerMode;
 }
 
-const runnerModeOptions = [
-  { label: 'SDK (Anthropic API)', value: 'SDK' },
-  { label: 'CLI (Claude Code CLI)', value: 'CLI' },
-];
+const runnerModeOptions = computed(() => [
+  { label: t('aipr.repos.runnerModes.sdk'), value: 'SDK' },
+  { label: t('aipr.repos.runnerModes.cli'), value: 'CLI' },
+]);
 
 const providers = ref<Provider[]>([]);
 const repos = ref<Repo[]>([]);
@@ -48,7 +50,7 @@ async function fetchProviders() {
       await fetchRepos();
     }
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '불러오기 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.common.loadFailed'), position: 'top-right' });
   }
 }
 
@@ -59,7 +61,7 @@ async function fetchRepos() {
     const res = await api.get<{ items: Repo[]; total: number }>(`/admin/providers/${selectedProviderId.value}/repos`);
     repos.value = res.items;
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '저장소 불러오기 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repos.notify.loadFailed'), position: 'top-right' });
   } finally {
     isLoading.value = false;
   }
@@ -70,10 +72,10 @@ async function syncRepos() {
   isSyncing.value = true;
   try {
     const res = await api.post<{ synced: number }>(`/admin/providers/${selectedProviderId.value}/repos/sync`, {});
-    $q.notify({ type: 'positive', message: `${res.synced}개 저장소 동기화 완료`, position: 'top-right' });
+    $q.notify({ type: 'positive', message: t('aipr.repos.notify.syncSuccess', { count: res.synced }), position: 'top-right' });
     await fetchRepos();
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '동기화 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repos.notify.syncFailed'), position: 'top-right' });
   } finally {
     isSyncing.value = false;
   }
@@ -97,13 +99,13 @@ async function toggleAutoPilot(repo: Repo, value: boolean) {
     $q.notify({
       type: 'positive',
       message: value
-        ? `${repo.fullName}: 이슈 생성 시 자동으로 계획+빌드가 실행됩니다.`
-        : `${repo.fullName}: Auto-pilot이 비활성화되었습니다.`,
+        ? t('aipr.repos.notify.autoPilotEnabled', { repo: repo.fullName })
+        : t('aipr.repos.notify.autoPilotDisabled', { repo: repo.fullName }),
       position: 'top-right',
     });
   } catch (err: any) {
     repo.autoPilot = !value;
-    $q.notify({ type: 'negative', message: err.message || 'Auto-pilot 변경 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repos.notify.autoPilotFailed'), position: 'top-right' });
   }
 }
 
@@ -113,12 +115,24 @@ async function updateRunnerMode(repo: Repo, field: 'planRunner' | 'buildRunner',
   repo[field] = mode;
   try {
     await api.patch(`/admin/providers/${selectedProviderId.value}/repos/${repo.id}/runner-mode`, { field, mode });
-    $q.notify({ type: 'positive', message: `${repo.fullName}: ${field === 'planRunner' ? 'Plan' : 'Build'} 실행 방식이 ${mode}로 변경되었습니다.`, position: 'top-right' });
+    $q.notify({ type: 'positive', message: t('aipr.repos.notify.runnerChanged', { repo: repo.fullName, field: field === 'planRunner' ? t('aipr.repos.notify.runnerFieldPlan') : t('aipr.repos.notify.runnerFieldBuild'), mode }), position: 'top-right' });
   } catch (err: any) {
     repo[field] = previous;
-    $q.notify({ type: 'negative', message: err.message || '실행 방식 변경 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.repos.notify.runnerFailed'), position: 'top-right' });
   }
 }
+
+
+const tableColumns = computed(() => [
+  { name: 'fullName', label: t('aipr.repos.columns.fullName'), field: 'fullName', align: 'left' },
+  { name: 'defaultBranch', label: t('aipr.repos.columns.defaultBranch'), field: 'defaultBranch', align: 'left' },
+  { name: 'isPrivate', label: t('aipr.common.private'), field: 'isPrivate', align: 'center' },
+  { name: 'autoPilot', label: t('aipr.repos.columns.autoPilot'), field: 'autoPilot', align: 'center' },
+  { name: 'planRunner', label: t('aipr.repos.columns.planRunner'), field: 'planRunner', align: 'center' },
+  { name: 'buildRunner', label: t('aipr.repos.columns.buildRunner'), field: 'buildRunner', align: 'center' },
+  { name: 'syncedAt', label: t('aipr.repos.columns.syncedAt'), field: 'syncedAt', align: 'right' },
+  { name: 'actions', label: '', field: '', align: 'right' },
+]);
 
 onMounted(fetchProviders);
 </script>
@@ -127,11 +141,11 @@ onMounted(fetchProviders);
   <div class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <h1 class="text-h5 text-weight-bold q-my-none">Repositories</h1>
-        <p class="text-caption text-grey-7 q-my-none">Provider별 저장소 목록</p>
+        <h1 class="text-h5 text-weight-bold q-my-none">{{ t('aipr.repos.title') }}</h1>
+        <p class="text-caption text-grey-7 q-my-none">{{ t('aipr.repos.subtitle') }}</p>
       </div>
       <q-btn
-        unelevated color="secondary" icon="sync" label="동기화"
+        unelevated color="secondary" icon="sync" :label="t('aipr.repos.sync')"
         :loading="isSyncing" :disable="!selectedProviderId"
         @click="syncRepos"
       />
@@ -148,32 +162,23 @@ onMounted(fetchProviders);
         @click="selectProvider(p.id)"
       />
     </div>
-    <div v-else class="text-grey-6 q-mb-md">Provider를 먼저 등록하세요.</div>
+    <div v-else class="text-grey-6 q-mb-md">{{ t('aipr.repos.registerProviderFirst') }}</div>
 
     <q-spinner v-if="isLoading" color="primary" size="2rem" />
 
     <div v-else-if="repos.length === 0 && selectedProviderId" class="text-grey-6 text-center q-mt-xl">
-      저장소가 없습니다. 동기화 버튼을 눌러 불러오세요.
+      {{ t('aipr.repos.empty') }}
     </div>
 
     <q-table
       v-else-if="repos.length"
       :rows="repos"
-      :columns="[
-        { name: 'fullName', label: '저장소', field: 'fullName', align: 'left' },
-        { name: 'defaultBranch', label: 'Default Branch', field: 'defaultBranch', align: 'left' },
-        { name: 'isPrivate', label: 'Private', field: 'isPrivate', align: 'center' },
-        { name: 'autoPilot', label: 'Auto-pilot', field: 'autoPilot', align: 'center' },
-        { name: 'planRunner', label: 'Plan 실행 방식', field: 'planRunner', align: 'center' },
-        { name: 'buildRunner', label: 'Build 실행 방식', field: 'buildRunner', align: 'center' },
-        { name: 'syncedAt', label: '동기화', field: 'syncedAt', align: 'right' },
-        { name: 'actions', label: '', field: '', align: 'right' },
-      ]"
+      :columns="tableColumns"
       row-key="id"
       flat bordered
       class="rounded-borders shadow-1"
       :loading="isLoading"
-      no-data-label="저장소 없음"
+      :no-data-label="t('aipr.repos.noData')"
     >
       <template v-slot:body-cell-fullName="props">
         <q-td :props="props">
@@ -183,7 +188,7 @@ onMounted(fetchProviders);
       </template>
       <template v-slot:body-cell-isPrivate="props">
         <q-td :props="props">
-          <q-badge :color="props.row.isPrivate ? 'warning' : 'positive'" :label="props.row.isPrivate ? '비공개' : '공개'" />
+          <q-badge :color="props.row.isPrivate ? 'warning' : 'positive'" :label="props.row.isPrivate ? t('aipr.common.privateBadge') : t('aipr.common.public')" />
         </q-td>
       </template>
       <template v-slot:body-cell-autoPilot="props">
@@ -219,12 +224,12 @@ onMounted(fetchProviders);
       </template>
       <template v-slot:body-cell-syncedAt="props">
         <q-td :props="props" class="text-caption text-grey-6">
-          {{ props.row.syncedAt ? new Date(props.row.syncedAt).toLocaleDateString('ko-KR') : '—' }}
+          {{ props.row.syncedAt ? new Date(props.row.syncedAt).toLocaleDateString(locale.value === 'ko' ? 'ko-KR' : 'en-US') : '—' }}
         </q-td>
       </template>
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
-          <q-btn flat dense size="sm" color="primary" label="이슈 보기" icon="bug_report" @click="browseIssues(props.row.id)" />
+          <q-btn flat dense size="sm" color="primary" :label="t('aipr.repos.viewIssues')" icon="bug_report" @click="browseIssues(props.row.id)" />
         </q-td>
       </template>
     </q-table>

@@ -13,11 +13,11 @@
         <div class="q-mt-sm">
           <q-badge color="primary" class="q-mr-sm">{{ member.team }}</q-badge>
           <q-badge :color="member.status === 'active' ? 'positive' : 'negative'">
-            {{ member.status === 'active' ? t('common.active', 'Active') : t('common.inactive', 'Inactive') }}
+            {{ member.status === 'active' ? t('common.active') : t('common.inactive') }}
           </q-badge>
         </div>
         <div class="q-mt-sm text-caption text-grey-6">
-          {{ t('team.member.joinedAt', 'Joined') }}: {{ member.joinedAt }}
+          {{ t('team.member.joinedAt') }}: {{ member.joinedAt }}
         </div>
       </div>
     </div>

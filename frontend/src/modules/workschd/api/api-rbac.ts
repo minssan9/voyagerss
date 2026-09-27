@@ -47,7 +47,30 @@ export interface SyncResult {
   total: number;
 }
 
+export interface RbacMeRole {
+  code: string;
+  module: string;
+}
+
+export interface RbacMePage {
+  code: string;
+  module: string;
+  resource: string;
+}
+
+export interface RbacProfile {
+  userId: string;
+  roles: RbacMeRole[];
+  pages: RbacMePage[];
+  modules: string[];
+  isAdmin: boolean;
+}
+
 const apiRbac = {
+  getMe(): Promise<AxiosResponse<{ result: string; data: RbacProfile }>> {
+    return service.get('/rbac/me');
+  },
+
   // Roles
   listRoles(): Promise<AxiosResponse<{ data: RbacRole[] }>> {
     return service.get('/rbac/roles');

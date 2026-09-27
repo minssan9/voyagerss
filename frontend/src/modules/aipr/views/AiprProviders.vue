@@ -2,8 +2,10 @@
 import { ref, reactive, onMounted } from 'vue';
 import api from '../api/api-aipr';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
+const { t } = useI18n();
 
 interface Provider {
   id: number;
@@ -32,7 +34,7 @@ async function fetchProviders() {
   try {
     providers.value = await api.get<Provider[]>('/admin/providers');
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '불러오기 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.common.loadFailed'), position: 'top-right' });
   } finally {
     isLoading.value = false;
   }
@@ -41,12 +43,12 @@ async function fetchProviders() {
 async function addProvider() {
   try {
     await api.post('/admin/providers', { ...form });
-    $q.notify({ type: 'positive', message: 'Provider 추가됨', position: 'top-right' });
+    $q.notify({ type: 'positive', message: t('aipr.providers.notify.added'), position: 'top-right' });
     showAddDialog.value = false;
     Object.assign(form, { type: 'GITLAB', displayName: '', baseUrl: 'http://192.168.10.10:8929', token: '' });
     await fetchProviders();
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '추가 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.providers.notify.addFailed'), position: 'top-right' });
   }
 }
 
@@ -54,9 +56,9 @@ async function testProvider(id: number) {
   isTesting.value[id] = true;
   try {
     const result = await api.post<{ ok: boolean; login: string; name: string }>(`/admin/providers/${id}/test`, {});
-    $q.notify({ type: 'positive', message: `연결 성공: ${result.login} (${result.name})`, position: 'top-right' });
+    $q.notify({ type: 'positive', message: t('aipr.providers.notify.testSuccess', { login: result.login, name: result.name }), position: 'top-right' });
   } catch (err: any) {
-    $q.notify({ type: 'negative', message: err.message || '연결 실패', position: 'top-right' });
+    $q.notify({ type: 'negative', message: err.message || t('aipr.providers.notify.testFailed'), position: 'top-right' });
   } finally {
     isTesting.value[id] = false;
   }
@@ -64,17 +66,17 @@ async function testProvider(id: number) {
 
 async function deleteProvider(id: number) {
   $q.dialog({
-    title: '확인',
-    message: 'Provider와 연결된 저장소/이슈가 모두 삭제됩니다. 계속하시겠습니까?',
+    title: t('aipr.common.confirm'),
+    message: t('aipr.providers.deleteConfirm'),
     cancel: true,
     persistent: true,
   }).onOk(async () => {
     try {
       await api.delete(`/admin/providers/${id}`);
-      $q.notify({ type: 'positive', message: '삭제됨', position: 'top-right' });
+      $q.notify({ type: 'positive', message: t('aipr.providers.notify.deleted'), position: 'top-right' });
       await fetchProviders();
     } catch (err: any) {
-      $q.notify({ type: 'negative', message: err.message || '삭제 실패', position: 'top-right' });
+      $q.notify({ type: 'negative', message: err.message || t('aipr.providers.notify.deleteFailed'), position: 'top-right' });
     }
   });
 }
@@ -86,16 +88,16 @@ onMounted(fetchProviders);
   <div class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <h1 class="text-h5 text-weight-bold q-my-none">Git Providers</h1>
-        <p class="text-caption text-grey-7 q-my-none">GitHub / GitLab PAT 연결 관리</p>
+        <h1 class="text-h5 text-weight-bold q-my-none">{{ t('aipr.providers.title') }}</h1>
+        <p class="text-caption text-grey-7 q-my-none">{{ t('aipr.providers.subtitle') }}</p>
       </div>
-      <q-btn unelevated color="primary" icon="add" label="Provider 추가" @click="showAddDialog = true" />
+      <q-btn unelevated color="primary" icon="add" :label="t('aipr.providers.addProvider')" @click="showAddDialog = true" />
     </div>
 
     <q-spinner v-if="isLoading" color="primary" size="2rem" class="q-mt-lg" />
 
     <div v-else-if="providers.length === 0" class="text-grey-6 text-center q-mt-xl">
-      등록된 Provider가 없습니다.
+      {{ t('aipr.providers.empty') }}
     </div>
 
     <q-list v-else bordered separator class="rounded-borders shadow-1">
@@ -106,12 +108,12 @@ onMounted(fetchProviders);
         <q-item-section>
           <q-item-label class="text-weight-bold">{{ p.displayName }}</q-item-label>
           <q-item-label caption>{{ p.baseUrl }}</q-item-label>
-          <q-item-label caption class="text-grey-6 font-mono">token: {{ p.token }}</q-item-label>
+          <q-item-label caption class="text-grey-6 font-mono">{{ t('aipr.providers.tokenPrefix') }} {{ p.token }}</q-item-label>
         </q-item-section>
         <q-item-section side>
           <div class="row q-gutter-xs items-center">
             <q-badge :color="p.type === 'GITLAB' ? 'orange' : 'purple'" :label="p.type" />
-            <q-badge color="grey-5" :label="`${p._count.repositories} repos`" text-color="grey-9" />
+            <q-badge color="grey-5" :label="`${p._count.repositories} ${t('aipr.common.repos')}`" text-color="grey-9" />
           </div>
           <div class="row q-gutter-xs q-mt-sm justify-end">
             <q-btn
@@ -119,10 +121,10 @@ onMounted(fetchProviders);
               :loading="isTesting[p.id]"
               @click="testProvider(p.id)"
             >
-              <q-tooltip>연결 테스트</q-tooltip>
+              <q-tooltip>{{ t('aipr.providers.testConnection') }}</q-tooltip>
             </q-btn>
             <q-btn flat dense size="sm" icon="delete" color="negative" @click="deleteProvider(p.id)">
-              <q-tooltip>삭제</q-tooltip>
+              <q-tooltip>{{ t('aipr.common.delete') }}</q-tooltip>
             </q-btn>
           </div>
         </q-item-section>
@@ -133,30 +135,30 @@ onMounted(fetchProviders);
     <q-dialog v-model="showAddDialog" persistent>
       <q-card style="min-width: 420px;">
         <q-card-section>
-          <div class="text-h6">Provider 추가</div>
+          <div class="text-h6">{{ t('aipr.providers.addDialogTitle') }}</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-form @submit.prevent="addProvider" class="q-gutter-md">
             <q-select
               v-model="form.type"
               :options="['GITLAB', 'GITHUB']"
-              label="Type"
+              :label="t('aipr.common.type')"
               outlined dense
             />
-            <q-input v-model="form.displayName" label="이름" outlined dense required />
-            <q-input v-model="form.baseUrl" label="Base URL" outlined dense required
-              hint="GitLab: http://192.168.10.10:8929  GitHub: https://github.com"
+            <q-input v-model="form.displayName" :label="t('aipr.common.name')" outlined dense required />
+            <q-input v-model="form.baseUrl" :label="t('aipr.common.baseUrl')" outlined dense required
+              :hint="t('aipr.providers.baseUrlHint')"
             />
             <q-input
               v-model="form.token"
-              label="PAT Token"
+              :label="t('aipr.common.patToken')"
               type="password"
               outlined dense required
-              hint="GitLab: Settings > Access Tokens  GitHub: Settings > Developer > PAT"
+              :hint="t('aipr.providers.patHint')"
             />
             <div class="row justify-end q-gutter-sm q-mt-sm">
-              <q-btn flat label="취소" color="grey-7" @click="showAddDialog = false" />
-              <q-btn unelevated label="추가" color="primary" type="submit" />
+              <q-btn flat :label="t('aipr.common.cancel')" color="grey-7" @click="showAddDialog = false" />
+              <q-btn unelevated :label="t('aipr.common.add')" color="primary" type="submit" />
             </div>
           </q-form>
         </q-card-section>

@@ -3,11 +3,11 @@
     <q-card>
       <q-card-section>
         <div class="row items-center justify-between">
-          <div class="text-h6">토픽 관리</div>
+          <div class="text-h6">{{ t('aviation.topics.title') }}</div>
           <q-btn
             color="primary"
             icon="add"
-            label="새 토픽 추가"
+            :label="t('aviation.topics.addTopic')"
             @click="showCreateDialog = true"
           />
         </div>
@@ -31,7 +31,7 @@
                 @click="editTopic(props.row)"
                 color="primary"
               >
-                <q-tooltip>편집</q-tooltip>
+                <q-tooltip>{{ t('aviation.common.edit') }}</q-tooltip>
               </q-btn>
             </q-td>
           </template>
@@ -43,35 +43,35 @@
     <q-dialog v-model="showCreateDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">{{ editingTopic ? '토픽 편집' : '새 토픽 추가' }}</div>
+          <div class="text-h6">{{ editingTopic ? t('aviation.topics.editTopic') : t('aviation.topics.addTopic') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-input
             v-model="topicForm.name"
-            label="토픽명"
-            :rules="[val => !!val || '토픽명은 필수입니다']"
+            :label="t('aviation.topics.name')"
+            :rules="[val => !!val || t('aviation.topics.validation.nameRequired')]"
           />
           <q-input
             v-model="topicForm.description"
-            label="설명"
+            :label="t('aviation.common.description')"
             type="textarea"
             class="q-mt-md"
           />
           <q-select
             v-model="topicForm.dayOfWeek"
             :options="dayOptions"
-            label="요일"
+            :label="t('aviation.common.dayOfWeek')"
             class="q-mt-md"
-            :rules="[val => val !== null || '요일을 선택하세요']"
+            :rules="[val => val !== null || t('aviation.topics.validation.dayRequired')]"
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="취소" color="primary" v-close-popup />
+          <q-btn flat :label="t('aviation.common.cancel')" color="primary" v-close-popup />
           <q-btn
             flat
-            label="저장"
+            :label="t('aviation.common.save')"
             color="primary"
             @click="saveTopic"
             :loading="saving"
@@ -83,12 +83,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { topicsApi } from '@/modules/aviation/api/client';
 import { useQuasar, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import type { Topic } from '@/types/aviation/api';
 
 const $q = useQuasar();
+const { t, tm } = useI18n();
 const topics = ref<Topic[]>([]);
 const loading = ref(false);
 const saving = ref(false);
@@ -101,21 +103,20 @@ const topicForm = ref({
   dayOfWeek: null as number | null
 });
 
-const dayOptions = [
-  { label: '일요일', value: 0 },
-  { label: '월요일', value: 1 },
-  { label: '화요일', value: 2 },
-  { label: '수요일', value: 3 },
-  { label: '목요일', value: 4 },
-  { label: '금요일', value: 5 },
-  { label: '토요일', value: 6 }
-].map(opt => ({ label: opt.label, value: opt.value }));
+const dayNamesShort = computed(() => tm('aviation.common.daysShort') as string[]);
 
-const columns: QTableColumn[] = [
+const dayOptions = computed(() =>
+  [0, 1, 2, 3, 4, 5, 6].map((value) => ({
+    label: t(`aviation.common.days.${value}`),
+    value,
+  }))
+);
+
+const columns = computed<QTableColumn[]>(() => [
   {
     name: 'id',
     required: true,
-    label: 'ID',
+    label: t('aviation.common.id'),
     align: 'left',
     field: 'id',
     sortable: true
@@ -123,36 +124,33 @@ const columns: QTableColumn[] = [
   {
     name: 'name',
     required: true,
-    label: '토픽명',
+    label: t('aviation.topics.columns.name'),
     align: 'left',
     field: 'name',
     sortable: true
   },
   {
     name: 'description',
-    label: '설명',
+    label: t('aviation.common.description'),
     align: 'left',
     field: 'description',
     sortable: false
   },
   {
     name: 'day_of_month',
-    label: '요일',
+    label: t('aviation.common.dayOfWeek'),
     align: 'center',
     field: 'day_of_month',
-    format: (val: any) => {
-      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-      return dayNames[val] || val;
-    },
+    format: (val: any) => dayNamesShort.value[val] || val,
     sortable: true
   },
   {
     name: 'actions',
-    label: '작업',
+    label: t('aviation.common.actions'),
     align: 'center',
     field: 'actions'
   }
-];
+]);
 
 async function loadTopics() {
   loading.value = true;
@@ -161,7 +159,7 @@ async function loadTopics() {
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '토픽 로딩 실패: ' + error.message
+      message: t('aviation.topics.notify.loadFailed', { message: error.message })
     });
   } finally {
     loading.value = false;
@@ -182,7 +180,7 @@ async function saveTopic() {
   if (!topicForm.value.name || topicForm.value.dayOfWeek === null) {
     $q.notify({
       type: 'negative',
-      message: '모든 필수 필드를 입력하세요'
+      message: t('aviation.topics.notify.requiredFields')
     });
     return;
   }
@@ -197,7 +195,7 @@ async function saveTopic() {
       });
       $q.notify({
         type: 'positive',
-        message: '토픽이 업데이트되었습니다'
+        message: t('aviation.topics.notify.updated')
       });
     } else {
       await topicsApi.create({
@@ -207,7 +205,7 @@ async function saveTopic() {
       });
       $q.notify({
         type: 'positive',
-        message: '토픽이 생성되었습니다'
+        message: t('aviation.topics.notify.created')
       });
     }
     showCreateDialog.value = false;
@@ -216,7 +214,7 @@ async function saveTopic() {
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '저장 실패: ' + error.message
+      message: t('aviation.topics.notify.saveFailed', { message: error.message })
     });
   } finally {
     saving.value = false;
@@ -239,9 +237,3 @@ onMounted(() => {
 
 <style scoped lang="sass">
 </style>
-
-
-
-
-
-

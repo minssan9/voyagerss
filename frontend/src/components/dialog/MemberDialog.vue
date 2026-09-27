@@ -1,16 +1,15 @@
 ﻿<template>
   <q-dialog v-model="isOpen" persistent>
-    <q-card class="member-dialog-card">
-      <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">{{ t('team.member.info', 'Member Information') }}</div>
-        <q-space />
+    <q-card class="dialog-card small">
+      <q-card-section class="dialog-title">
+        <div class="text-h6">{{ t('team.member.info') }}</div>
         <q-btn icon="close" flat round dense v-close-popup @click="closeDialog" />
       </q-card-section>
-      <q-card-section>
+      <q-card-section class="dialog-content">
         <MemberCard :member="member" />
       </q-card-section>
-      <q-card-actions align="right">
-        <q-btn flat :label="t('common.close', 'Close')" color="primary" v-close-popup @click="closeDialog" />
+      <q-card-actions class="dialog-actions">
+        <q-btn flat :label="t('common.close')" color="primary" v-close-popup @click="closeDialog" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -46,10 +45,3 @@ function closeDialog() {
 }
 </script>
 
-<style scoped>
-/* Uses global .dialog-card styles from dialog.scss */
-.member-dialog-card {
-  width: 400px;
-  max-width: 90vw;
-}
-</style>

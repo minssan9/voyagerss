@@ -1,0 +1,136 @@
+{
+  "aviation": {
+    "common": {
+      "daysShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "days": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+      },
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "actions": "Actions",
+      "id": "ID",
+      "description": "Description",
+      "dayOfWeek": "Day of week"
+    },
+    "dashboard": {
+      "badge": "Aviation knowledge",
+      "title": "Aviation Quiz &\nWeather Management",
+      "subtitle": "Manage daily aviation topic schedules\nand automatically collect and store weather images.",
+      "topicsManage": "Manage topics",
+      "weatherStatus": "Weather status",
+      "totalTopics": "Total topics",
+      "activeTopics": "Active topics",
+      "weeklySchedule": "This week's schedule",
+      "weeklyScheduleTitle": "Weekly topic schedule",
+      "noSchedule": "No schedule registered",
+      "navTopicsTitle": "Manage topics",
+      "navTopicsDesc": "Register aviation topics and edit schedules",
+      "navWeatherTitle": "Weather status",
+      "navWeatherDesc": "Collect and view weather images",
+      "navBackupsTitle": "Backup management",
+      "navBackupsDesc": "Back up and restore aviation knowledge data",
+      "notify": {
+        "statsLoadFailed": "Failed to load stats: {message}",
+        "scheduleLoadFailed": "Failed to load schedule: {message}"
+      }
+    },
+    "topics": {
+      "title": "Topic management",
+      "addTopic": "Add topic",
+      "editTopic": "Edit topic",
+      "name": "Topic name",
+      "validation": {
+        "nameRequired": "Topic name is required",
+        "dayRequired": "Please select a day"
+      },
+      "columns": {
+        "name": "Topic name"
+      },
+      "notify": {
+        "loadFailed": "Failed to load topics: {message}",
+        "requiredFields": "Please fill in all required fields",
+        "updated": "Topic updated",
+        "created": "Topic created",
+        "saveFailed": "Save failed: {message}"
+      }
+    },
+    "weather": {
+      "title": "Weather image management",
+      "collectImages": "Collect images",
+      "cleanup": "Clean up",
+      "autoGatherTitle": "Auto-collection settings",
+      "autoGatherDesc": "The scheduler automatically collects weather images (every 10 minutes)",
+      "serviceStatus": "Service status",
+      "statusLabel": "Status",
+      "latestTimestamp": "Latest timestamp",
+      "errorLabel": "Error",
+      "dateFilterTitle": "Date range filter",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "search": "Search",
+      "reset": "Reset",
+      "quickToday": "Today",
+      "quick7days": "Last 7 days",
+      "quick30days": "Last 30 days",
+      "quickThisMonth": "This month",
+      "quickLastMonth": "Last month",
+      "cleanupTitle": "Image cleanup",
+      "retentionDays": "Days to retain",
+      "retentionValidation": "Enter a value of 1 or greater",
+      "runCleanup": "Run cleanup",
+      "capturedAt": "Captured at",
+      "fileSize": "File size",
+      "imageLoadFailed": "Unable to load image",
+      "columns": {
+        "filename": "Filename",
+        "size": "Size",
+        "capturedAt": "Captured at",
+        "created": "Created"
+      },
+      "notify": {
+        "loadFailed": "Failed to load images: {message}",
+        "fetchFailed": "Failed to fetch images",
+        "collectSuccess": "Image collection completed",
+        "collectFailed": "Image collection failed: {message}",
+        "collectError": "Collection failed",
+        "cleanupSuccess": "{count} files deleted",
+        "cleanupFailed": "Cleanup failed: {message}",
+        "cleanupError": "Cleanup failed",
+        "gatheringEnabled": "Auto-collection enabled",
+        "gatheringDisabled": "Auto-collection disabled",
+        "settingsFailed": "Failed to change settings: {message}",
+        "settingsError": "Failed to change settings"
+      }
+    },
+    "backups": {
+      "title": "Backup management",
+      "createBackup": "Create backup",
+      "restoreBackup": "Restore backup",
+      "dataValidation": "Data validation",
+      "runValidation": "Run data validation",
+      "dataValid": "Data is valid",
+      "dataInvalid": "Data has errors:",
+      "restoreTitle": "Restore backup",
+      "selectFile": "Select backup file",
+      "fileRequired": "Please select a file",
+      "restore": "Restore",
+      "notify": {
+        "createSuccess": "Backup created: {filename}",
+        "createFailed": "Failed to create backup: {message}",
+        "selectFile": "Please select a file",
+        "restoreSuccess": "Backup restored",
+        "restoreFailed": "Failed to restore backup: {message}",
+        "validationSuccess": "Data is valid",
+        "validationFailed": "Data validation failed",
+        "validateFailed": "Validation failed: {message}"
+      }
+    }
+  }
+}

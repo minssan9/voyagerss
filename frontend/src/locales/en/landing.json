@@ -1,0 +1,82 @@
+{
+  "landing": {
+    "hero": {
+      "title": "VoyagerSS",
+      "subtitle": "Unified work platform",
+      "description": "Connect scheduling, aviation data, AI operations, and vision analysis\nin one platform for your team",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "Learn more"
+    },
+    "stats": {
+      "title": "Domain-specific solutions",
+      "subtitle": "VoyagerSS delivers specialized modules for each domain on a single platform",
+      "modules": {
+        "value": "4+",
+        "label": "Integrated modules",
+        "description": "Expert features per domain"
+      },
+      "realtime": {
+        "value": "Real-time",
+        "label": "Updates",
+        "description": "Operational data reflected live"
+      },
+      "access": {
+        "value": "24/7",
+        "label": "Platform access",
+        "description": "Anytime, anywhere"
+      }
+    },
+    "products": {
+      "title": "Our solutions",
+      "subtitle": "An integrated platform designed by domain experts",
+      "startLink": "Get started",
+      "modules": {
+        "workschd": {
+          "title": "WorkSchd",
+          "description": "Intelligent workforce scheduling. Maximize productivity with AI scheduling, team collaboration, and attendance management."
+        },
+        "aviation": {
+          "title": "Aviation",
+          "description": "Comprehensive aviation data platform with real-time weather, topic management, and secure backup solutions."
+        },
+        "aipr": {
+          "title": "AI Operations",
+          "description": "AI-powered operations automation. Improve efficiency with workflow management and intelligent process optimization."
+        },
+        "vision": {
+          "title": "Vision",
+          "description": "Computer vision analysis platform with camera integration, judgment testing, and real-time monitoring."
+        }
+      }
+    },
+    "why": {
+      "title": "Why VoyagerSS?",
+      "subtitle": "Use a modular platform and choose only the features you need",
+      "verified": {
+        "title": "Proven capabilities",
+        "text": "Each module is validated by domain experts. Handle your work with tools you can trust."
+      },
+      "realtime": {
+        "title": "Real-time integration",
+        "text": "Connect data and workflows across modules and manage team collaboration in one place."
+      },
+      "support": {
+        "title": "Expert support",
+        "text": "From rollout to daily operations, our expert team supports your success."
+      }
+    },
+    "footer": {
+      "description": "An integrated solution for scheduling, aviation data, AI operations, and vision analysis. A modular platform built for your work.",
+      "services": "Services",
+      "resources": "Resources",
+      "company": "Company",
+      "docs": "Documentation",
+      "apiReference": "API reference",
+      "blog": "Blog",
+      "about": "About",
+      "contact": "Contact",
+      "privacy": "Privacy policy",
+      "copyright": "© 2024 VoyagerSS Platform. All rights reserved."
+    }
+  }
+}

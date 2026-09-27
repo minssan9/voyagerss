@@ -1,0 +1,50 @@
+/* Loaded after Quasar so login fields stay readable in dark mode. */
+.auth-page {
+  background-color: #eef1f6 !important;
+  color: #1d1d1f !important;
+}
+
+.auth-page .auth-container {
+  background: #ffffff !important;
+  border: 1px solid #c5cedb !important;
+}
+
+.auth-page .q-btn.social-login-btn--kakao,
+.auth-page .q-btn.social-login-btn--kakao .q-btn__content {
+  background: #fee500 !important;
+  color: #191919 !important;
+}
+
+.auth-page .q-btn.social-login-btn--google,
+.auth-page .q-btn.social-login-btn--google .q-btn__content {
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+}
+
+.auth-page .q-btn.social-login-btn--google {
+  border: 1px solid #667085 !important;
+}
+
+.auth-page .q-btn.social-login-btn--google .q-btn__content {
+  border: none !important;
+}
+
+.auth-page .q-field--outlined .q-field__control {
+  background: #f8fafc !important;
+}
+
+.auth-page .q-field--outlined .q-field__control:before {
+  border: 1px solid #667085 !important;
+}
+
+.auth-page .q-field__label,
+.auth-page .q-field__native,
+.auth-page .q-field__marginal .q-icon,
+.auth-page .q-checkbox__label,
+.auth-page .text-grey-7 {
+  color: #1d1d1f !important;
+}
+
+.auth-page .q-field__label {
+  color: #475467 !important;
+}

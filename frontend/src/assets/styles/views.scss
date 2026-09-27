@@ -5,41 +5,74 @@
 // --------------------------------------------
 
 .auth-page {
-    background-color: $background-color;
-    background-image: radial-gradient($gray-200 1px, transparent 1px);
+    background-color: #eef1f6;
+    background-image: radial-gradient(#c5cedb 1px, transparent 1px);
     background-size: 20px 20px;
+    color: #1d1d1f;
 }
 
 .auth-container {
     width: 100%;
     max-width: 450px;
+    background: #ffffff !important;
+    border: 1px solid #c5cedb;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
 }
 
-.social-login-btn {
-    width: 300px;
-    height: 45px;
+.auth-page .social-login-btn {
+    width: 100%;
+    max-width: 320px;
+    min-height: 48px;
     border-radius: $border-radius-md;
-    overflow: hidden;
-    transition: transform $transition-fast;
-
-    &:hover {
-        transform: translateY(-2px);
-    }
+    font-weight: 700;
 
     img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
     }
 }
 
-.auth-input {
-    font-size: 1.1em;
+.auth-page .q-btn.social-login-btn--kakao {
+    background: #fee500 !important;
+    color: #191919 !important;
+}
 
-    :deep(.q-field__control),
-    :deep(.q-field__marginal) {
-        height: 56px;
-    }
+.auth-page .q-btn.social-login-btn--google {
+    background: #ffffff !important;
+    color: #1d1d1f !important;
+    border: 1px solid #667085 !important;
+}
+
+.auth-page .q-field--outlined .q-field__control {
+    background: #f8fafc;
+}
+
+.auth-page .q-field--outlined .q-field__control:before {
+    border: 1px solid #667085 !important;
+}
+
+.auth-page .q-field--outlined.q-field--focused .q-field__control:before,
+.auth-page .q-field--outlined.q-field--highlighted .q-field__control:after {
+    border-color: #0037eb !important;
+    border-width: 2px;
+}
+
+.auth-page .q-field__label,
+.auth-page .q-field__native,
+.auth-page .q-field__marginal,
+.auth-page .q-field__prepend,
+.auth-page .q-checkbox__label,
+.auth-page .text-grey-7 {
+    color: #1d1d1f !important;
+}
+
+.auth-page .q-field__label {
+    color: #475467 !important;
+}
+
+.auth-page .q-separator {
+    background: #c5cedb;
 }
 
 // --------------------------------------------
@@ -543,10 +576,6 @@
         &:hover {
             transform: scale(1.02);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        &--investand {
-            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
         }
 
         &--workschd {

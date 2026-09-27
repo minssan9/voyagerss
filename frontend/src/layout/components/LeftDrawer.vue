@@ -10,8 +10,8 @@
           <span>V</span>
         </div>
         <div class="logo-text">
-          <h1>Voyager</h1>
-          <span class="logo-badge">Enterprise</span>
+          <h1>{{ t('layout.brandName') }}</h1>
+          <span class="logo-badge">{{ t('layout.enterprise') }}</span>
         </div>
       </div>
       <q-btn flat round dense icon="close" class="close-btn" @click="closeSidebar" />
@@ -20,7 +20,7 @@
     <q-scroll-area class="sidebar-nav-wrapper">
       <nav class="sidebar-nav">
         <!-- Common Section -->
-        <div class="nav-section-label">Platform</div>
+        <div class="nav-section-label">{{ t('layout.platform') }}</div>
         <sidebar-item
           v-for="route in commonFilteredRoutes"
           :key="route.path"
@@ -49,12 +49,40 @@
           </template>
 
           <div class="nav-project-children">
-            <sidebar-item
-              v-for="child in proj.children"
-              :key="child.path"
-              :item="child"
-              :base-path="resolveSectionPath(proj.basePath, child.path)"
-            />
+            <template v-if="hasSurfaceGroups(proj.children)">
+              <div v-if="surfaceChildren(proj.children, 'worker').length" class="nav-surface-group">
+                <div class="nav-surface-label">{{ t('routes.prefixWorker') }}</div>
+                <sidebar-item
+                  v-for="child in surfaceChildren(proj.children, 'worker')"
+                  :key="child.path"
+                  :item="child"
+                  :base-path="resolveSectionPath(proj.basePath, child.path)"
+                />
+              </div>
+              <div v-if="surfaceChildren(proj.children, 'admin').length" class="nav-surface-group">
+                <div class="nav-surface-label">{{ t('routes.prefixAdmin') }}</div>
+                <sidebar-item
+                  v-for="child in surfaceChildren(proj.children, 'admin')"
+                  :key="child.path"
+                  :item="child"
+                  :base-path="resolveSectionPath(proj.basePath, child.path)"
+                />
+              </div>
+              <sidebar-item
+                v-for="child in unsurfacedChildren(proj.children)"
+                :key="child.path"
+                :item="child"
+                :base-path="resolveSectionPath(proj.basePath, child.path)"
+              />
+            </template>
+            <template v-else>
+              <sidebar-item
+                v-for="child in proj.children"
+                :key="child.path"
+                :item="child"
+                :base-path="resolveSectionPath(proj.basePath, child.path)"
+              />
+            </template>
           </div>
         </q-expansion-item>
       </nav>
@@ -64,12 +92,14 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n'
 import { useLayoutStore } from '@/stores/common/store_layout'
 import { useUserStore } from '@/stores/common/store_user'
 import { storeToRefs } from 'pinia'
 import { useRouter, useRoute } from 'vue-router'
 import SidebarItem from './SidebarItem.vue'
 
+const { t } = useI18n()
 const layoutStore = useLayoutStore()
 const userStore = useUserStore()
 const { drawerLeft } = storeToRefs(layoutStore)
@@ -82,7 +112,6 @@ const isMobile = ref(window.innerWidth < 1024)
 const currentProject = computed(() => {
   const path = route.path
   if (path.startsWith('/aviation')) return 'aviation'
-  if (path.startsWith('/investand')) return 'investand'
   if (path.startsWith('/workschd')) return 'workschd'
   if (path.startsWith('/aipr')) return 'aipr'
   if (path.startsWith('/vision')) return 'vision'
@@ -97,25 +126,34 @@ interface ProjectSection {
   children: any[]
 }
 
+function canAccessModule(moduleCode: string): boolean {
+  if (userStore.isWorker) return moduleCode === 'workschd'
+  if (import.meta.env.DEV) return true
+  const profile = userStore.rbacProfile
+  if (!profile) return false
+  if (profile.isAdmin) return true
+  return profile.modules.includes(moduleCode)
+}
+
 const projectSections = computed<ProjectSection[]>(() => {
   const allRoutes = [...router.options.routes]
-  const projectMeta: Record<string, { label: string; icon: string }> = {
-    aviation:  { label: 'Aviation',      icon: 'flight'           },
-    investand: { label: 'Investand',     icon: 'show_chart'       },
-    workschd:  { label: 'WorkSchd',      icon: 'business_center'  },
-    aipr:      { label: 'AI Operations', icon: 'settings_suggest' },
-    vision:    { label: 'Vision',        icon: 'visibility'       },
+  const projectMeta: Record<string, { labelKey: string; icon: string }> = {
+    aviation:  { labelKey: 'modules.aviation', icon: 'flight'           },
+    workschd:  { labelKey: 'modules.workschd', icon: 'business_center'  },
+    aipr:      { labelKey: 'modules.aipr',     icon: 'settings_suggest' },
+    vision:    { labelKey: 'modules.vision',   icon: 'visibility'       },
   }
 
   const sections: ProjectSection[] = []
 
   for (const r of allRoutes) {
     const project = (r.meta as any)?.project as string | undefined
-    if (project && projectMeta[project]) {
+    if (project && projectMeta[project] && canAccessModule(project)) {
       const info = projectMeta[project]
       const visibleChildren = (r.children || []).filter((child: any) => {
         if (child.hidden || child.meta?.hidden) return false
         if (child.path === '' && child.redirect) return false
+        if (userStore.isWorker) return Boolean(child.meta?.workerNav)
         if (child.meta?.roles?.length) {
           if (!userStore.user?.accountRoles) return false
           const hasRole = child.meta.roles.some((role: string) =>
@@ -127,7 +165,7 @@ const projectSections = computed<ProjectSection[]>(() => {
       })
       sections.push({
         key: project,
-        label: info.label,
+        label: t(info.labelKey),
         icon: info.icon,
         basePath: r.path as string,
         children: visibleChildren,
@@ -143,11 +181,12 @@ const commonFilteredRoutes = computed(() => {
   const excludedNames = [
     'PrivacyPolicy', 'Terms', 'login', 'redirect', 'Signup',
     'AccountProfile', 'AccountSchedule', 'Unauthorized', 'Forbidden',
-    'NotFound', 'Aviation', 'Investand', 'Workschd', 'WorkschdLogin',
+    'NotFound', 'Aviation', 'Workschd', 'WorkschdLogin',
     'Aipr', 'Vision', 'AuthCallback', 'Dashboard'
   ]
 
   return allRoutes.filter((r: any) => {
+    if (userStore.isWorker) return false
     if (excludedNames.includes(r.name as string)) return false
     if (r.hidden || r.meta?.hidden) return false
     if (r.meta?.project) return false
@@ -159,6 +198,20 @@ function resolveSectionPath(basePath: string, childPath: string) {
   if (childPath.startsWith('/')) return childPath
   const base = basePath.endsWith('/') ? basePath : basePath + '/'
   return (base + childPath).replace(/\/+/g, '/')
+}
+
+function surfaceChildren(children: any[], surface: 'admin' | 'worker') {
+  return children.filter((child) => child.meta?.surface === surface)
+}
+
+function unsurfacedChildren(children: any[]) {
+  return children.filter((child) => !child.meta?.surface)
+}
+
+function hasSurfaceGroups(children: any[]) {
+  const worker = surfaceChildren(children, 'worker')
+  const admin = surfaceChildren(children, 'admin')
+  return worker.length > 0 && admin.length > 0
 }
 
 const handleResize = () => {
@@ -232,6 +285,19 @@ defineExpose({
 
 .nav-project-children {
   padding-left: 8px;
+}
+
+.nav-surface-group {
+  margin-bottom: 4px;
+}
+
+.nav-surface-label {
+  padding: 4px 12px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--voy-sidebar-text-muted, rgba(255, 255, 255, 0.45));
 }
 
 .nav-divider {

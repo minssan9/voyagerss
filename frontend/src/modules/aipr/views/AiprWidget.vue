@@ -1,47 +1,18 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { loadLanaguageAsync } from '@/locales/i18n';
 import { useRoute } from 'vue-router';
 import { z } from 'zod';
 import api from '../api/api-aipr';
 
 const route = useRoute();
+const { t } = useI18n();
 
-// ── Localized Strings ────────────────────────────────────────────────────────
-const strings = {
-  ko: {
-    title: '피드백 보내기',
-    close: '닫기',
-    success: '피드백이 성공적으로 전송되었습니다. 감사합니다!',
-    submit: '보내기',
-    submitting: '전송 중...',
-    labelTitle: '제목',
-    labelBody: '내용 (최소 10자)',
-    labelEmail: '이메일 주소 (선택사항)',
-    labelFile: '스크린샷 첨부 (선택사항)',
-    errorFile: '10MB 이하의 이미지 파일만 첨부 가능합니다.',
-  },
-  en: {
-    title: 'Send Feedback',
-    close: 'Close',
-    success: 'Feedback submitted successfully. Thank you!',
-    submit: 'Submit',
-    submitting: 'Submitting...',
-    labelTitle: 'Title',
-    labelBody: 'Description (min 10 chars)',
-    labelEmail: 'Email address (optional)',
-    labelFile: 'Attach screenshot (optional)',
-    errorFile: 'Only image files up to 10MB are allowed.',
-  }
-};
-
-const locale = computed(() => {
-  const q = route.query.locale as string;
-  return (q === 'en' || q === 'ko') ? q : 'ko';
-});
-
-const t = (key: keyof typeof strings.ko) => {
-  return strings[locale.value][key] || strings.en[key];
-};
+const queryLocale = route.query.locale as string;
+if (queryLocale === 'ko' || queryLocale === 'en') {
+  void loadLanaguageAsync(queryLocale);
+}
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 const Schema = z.object({
@@ -95,12 +66,12 @@ function onFileChange(e: Event) {
   errors.file = '';
   if (f) {
     if (!f.type.startsWith('image/')) {
-      errors.file = t('errorFile');
+      errors.file = t('aipr.widget.errorFile');
       file.value = null;
       return;
     }
     if (f.size > 10 * 1024 * 1024) {
-      errors.file = t('errorFile');
+      errors.file = t('aipr.widget.errorFile');
       file.value = null;
       return;
     }
@@ -149,7 +120,7 @@ async function handleFormSubmit() {
     sendToParent({ type: 'submitted', payload: { issueId: res.id } });
     setTimeout(() => sendToParent({ type: 'close' }), 2000);
   } catch (err: any) {
-    errors.body = err.message || 'Submission failed. Please try again.';
+    errors.body = err.message || t('aipr.widget.submitFailed');
   } finally {
     isSubmitting.value = false;
   }
@@ -157,12 +128,12 @@ async function handleFormSubmit() {
 </script>
 
 <template>
-  <div class="widget-root" role="dialog" aria-modal="true" :aria-label="t('title')">
+  <div class="widget-root" role="dialog" aria-modal="true" :aria-label="t('aipr.widget.title')">
     <header class="widget-header">
-      <h1 class="widget-title">{{ t('title') }}</h1>
+      <h1 class="widget-title">{{ t('aipr.widget.title') }}</h1>
       <button
         class="btn-close"
-        :aria-label="t('close')"
+        :aria-label="t('aipr.widget.close')"
         @click="sendToParent({ type: 'close' })"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -177,13 +148,13 @@ async function handleFormSubmit() {
         <circle cx="12" cy="12" r="11" stroke="#30d158" stroke-width="1.5"/>
         <path d="M7 12l3.5 3.5L17 8" stroke="#30d158" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <p class="success-msg">{{ t('success') }}</p>
+      <p class="success-msg">{{ t('aipr.widget.success') }}</p>
     </div>
 
     <!-- Form -->
     <form v-else class="widget-form" novalidate @submit.prevent="handleFormSubmit">
       <div class="field">
-        <label for="fb-title" class="label">{{ t('labelTitle') }} <span aria-hidden="true">*</span></label>
+        <label for="fb-title" class="label">{{ t('aipr.widget.labelTitle') }} <span aria-hidden="true">*</span></label>
         <input
           id="fb-title"
           v-model="form.title"
@@ -198,7 +169,7 @@ async function handleFormSubmit() {
       </div>
 
       <div class="field">
-        <label for="fb-body" class="label">{{ t('labelBody') }} <span aria-hidden="true">*</span></label>
+        <label for="fb-body" class="label">{{ t('aipr.widget.labelBody') }} <span aria-hidden="true">*</span></label>
         <textarea
           id="fb-body"
           v-model="form.body"
@@ -212,7 +183,7 @@ async function handleFormSubmit() {
       </div>
 
       <div class="field">
-        <label for="fb-email" class="label">{{ t('labelEmail') }}</label>
+        <label for="fb-email" class="label">{{ t('aipr.widget.labelEmail') }}</label>
         <input
           id="fb-email"
           v-model="form.reporterEmail"
@@ -226,7 +197,7 @@ async function handleFormSubmit() {
       </div>
 
       <div class="field">
-        <label for="fb-file" class="label">{{ t('labelFile') }}</label>
+        <label for="fb-file" class="label">{{ t('aipr.widget.labelFile') }}</label>
         <input
           id="fb-file"
           type="file"
@@ -245,7 +216,7 @@ async function handleFormSubmit() {
         :disabled="isSubmitting"
         :aria-busy="isSubmitting"
       >
-        {{ isSubmitting ? t('submitting') : t('submit') }}
+        {{ isSubmitting ? t('aipr.widget.submitting') : t('aipr.widget.submit') }}
       </button>
     </form>
   </div>

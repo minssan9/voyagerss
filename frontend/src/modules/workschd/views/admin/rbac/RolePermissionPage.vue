@@ -3,7 +3,7 @@
     <!-- Left: Role list -->
     <q-card flat bordered style="min-width: 240px; width: 240px">
       <q-card-section class="q-pb-xs">
-        <div class="text-subtitle2">역할 선택</div>
+        <div class="text-subtitle2">{{ t('rbac.rolePermissions.selectRole') }}</div>
       </q-card-section>
       <q-list dense>
         <q-item
@@ -32,23 +32,22 @@
     <div class="col">
       <div v-if="!selectedRole" class="column items-center justify-center" style="height: 300px">
         <q-icon name="arrow_back" size="48px" color="grey-4" />
-        <p class="text-grey-6 q-mt-sm">역할을 선택해 주세요</p>
+        <p class="text-grey-6 q-mt-sm">{{ t('rbac.rolePermissions.selectRoleHint') }}</p>
       </div>
 
       <div v-else>
-        <div class="row items-center justify-between q-mb-sm">
-          <div class="text-subtitle1 text-bold">{{ selectedRole.name }} <span class="text-grey-6 text-body2">({{ selectedRole.code }})</span></div>
-          <q-btn color="primary" label="저장" icon="save" :loading="saving" @click="save" />
-        </div>
-
-        <div class="row q-gutter-sm q-mb-sm">
-          <q-input v-model="searchPerm" label="권한 검색" dense outlined clearable style="min-width: 200px">
-            <template v-slot:prepend><q-icon name="search" /></template>
+        <div class="text-subtitle1 text-bold q-mb-sm">{{ selectedRole.name }} <span class="text-grey-6 text-body2">({{ selectedRole.code }})</span></div>
+        <teleport v-if="docked" to="#workschd-page-actions">
+          <q-btn class="workschd-btn" unelevated no-caps dense :label="t('rbac.common.save')" icon="save" :loading="saving" @click="save" />
+        </teleport>
+        <teleport v-if="docked" to="#workschd-page-toolbar">
+          <q-input v-model="searchPerm" :label="t('rbac.rolePermissions.searchPermission')" dense outlined clearable>
+            <template #prepend><q-icon name="search" size="16px" /></template>
           </q-input>
           <q-select
             v-model="filterType"
             :options="typeOptions"
-            label="유형"
+            :label="t('rbac.common.type')"
             dense outlined clearable
             emit-value map-options
             style="min-width: 120px"
@@ -56,12 +55,12 @@
           <q-select
             v-model="filterModule"
             :options="moduleOptions"
-            label="모듈"
+            :label="t('rbac.common.module')"
             dense outlined clearable
             emit-value map-options
             style="min-width: 130px"
           />
-        </div>
+        </teleport>
 
         <q-card flat bordered>
           <q-table
@@ -81,7 +80,7 @@
               <q-td :props="props">
                 <q-chip dense :color="props.row.type === 'PAGE' ? 'purple-2' : 'blue-2'"
                   :text-color="props.row.type === 'PAGE' ? 'purple-9' : 'blue-9'" size="sm">
-                  {{ props.row.type === 'PAGE' ? '페이지' : 'API' }}
+                  {{ props.row.type === 'PAGE' ? t('rbac.common.typePage') : t('rbac.common.typeApi') }}
                 </q-chip>
               </q-td>
             </template>
@@ -99,9 +98,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import apiRbac, { RbacRole, RbacPermission } from '@/modules/workschd/api/api-rbac'
+import { useWorkschdHeaderDock } from '@/modules/workschd/composables/useWorkschdHeaderDock'
 
+const { t } = useI18n()
+const docked = useWorkschdHeaderDock()
 const $q = useQuasar()
 const roles = ref<RbacRole[]>([])
 const allPermissions = ref<RbacPermission[]>([])
@@ -115,24 +118,23 @@ const filterModule = ref<string | null>(null)
 
 const moduleOptions = [
   { label: 'workschd', value: 'workschd' },
-  { label: 'investand', value: 'investand' },
   { label: 'aipr', value: 'aipr' },
   { label: 'aviation', value: 'aviation' },
 ]
 
-const typeOptions = [
-  { label: '페이지', value: 'PAGE' },
-  { label: 'API', value: 'API' },
-]
+const typeOptions = computed(() => [
+  { label: t('rbac.common.typePage'), value: 'PAGE' },
+  { label: t('rbac.common.typeApi'), value: 'API' },
+])
 
-const permColumns = [
+const permColumns = computed(() => [
   { name: 'check', label: '', field: 'check', align: 'center' as const, style: 'width: 40px' },
-  { name: 'name', label: '권한 이름', field: 'name', align: 'left' as const, sortable: true },
-  { name: 'code', label: '코드', field: 'code', align: 'left' as const, sortable: true },
-  { name: 'type', label: '유형', field: 'type', align: 'center' as const },
-  { name: 'module', label: '모듈', field: 'module', align: 'center' as const },
-  { name: 'resource', label: '리소스', field: 'resource', align: 'left' as const },
-]
+  { name: 'name', label: t('rbac.rolePermissions.permissionName'), field: 'name', align: 'left' as const, sortable: true },
+  { name: 'code', label: t('rbac.common.code'), field: 'code', align: 'left' as const, sortable: true },
+  { name: 'type', label: t('rbac.common.type'), field: 'type', align: 'center' as const },
+  { name: 'module', label: t('rbac.common.module'), field: 'module', align: 'center' as const },
+  { name: 'resource', label: t('rbac.common.resource'), field: 'resource', align: 'left' as const },
+])
 
 const filteredPermissions = computed(() => {
   let list = allPermissions.value
@@ -164,7 +166,7 @@ async function selectRole(role: RbacRole) {
   } catch (e: any) {
     selectedPermIds.value = []
     selectedRole.value = null
-    $q.notify({ type: 'negative', message: e.response?.data?.message ?? '권한 목록을 불러오지 못했습니다.' })
+    $q.notify({ type: 'negative', message: e.response?.data?.message ?? t('rbac.rolePermissions.loadFailed') })
   } finally {
     loadingPerms.value = false
   }
@@ -175,11 +177,11 @@ async function save() {
   saving.value = true
   try {
     await apiRbac.setRolePermissions(selectedRole.value.id, selectedPermIds.value)
-    $q.notify({ type: 'positive', message: '권한 매핑이 저장되었습니다.' })
+    $q.notify({ type: 'positive', message: t('rbac.rolePermissions.saved') })
     await loadRoles()
     await selectRole(selectedRole.value)
   } catch (e: any) {
-    $q.notify({ type: 'negative', message: e.response?.data?.message ?? '저장 실패' })
+    $q.notify({ type: 'negative', message: e.response?.data?.message ?? t('rbac.common.saveFailed') })
   } finally {
     saving.value = false
   }

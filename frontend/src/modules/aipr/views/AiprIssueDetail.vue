@@ -5,10 +5,12 @@ import api from '../api/api-aipr';
 import StatusChip from './components/StatusChip.vue';
 import AiprRunTimeline from './components/AiprRunTimeline.vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
+const { t, locale } = useI18n();
 const id = route.params.id as string;
 
 interface Attachment { id: string; s3Key: string; mime: string; size: number; }
@@ -50,7 +52,7 @@ async function fetchIssueDetail() {
   } catch (err: any) {
     $q.notify({
       type: 'negative',
-      message: err.message || '이슈 상세 정보를 불러오지 못했습니다.',
+      message: err.message || t('aipr.issue.loadFailed'),
       position: 'top-right',
     });
   } finally {
@@ -88,18 +90,17 @@ const latestPlan = computed(() => {
   return issue.value.planningDocs[0];
 });
 
-const TRANSITION_MAP: Record<string, { label: string; to: string; color: string }[]> = {
-  NEW:        [{ label: 'Triage',      to: 'TRIAGED',  color: 'grey-7' }],
-  TRIAGED:    [{ label: 'Approve',     to: 'QUEUED',   color: 'primary' },
-               { label: 'Close',       to: 'CLOSED',   color: 'negative' }],
-  PLAN_READY: [{ label: 'Start Build', to: 'BUILDING', color: 'primary' },
-               { label: 'Close',       to: 'CLOSED',   color: 'negative' }],
-  FAILED:     [{ label: 'Retry',       to: 'QUEUED',   color: 'secondary' }],
-};
-
 const actions = computed(() => {
   if (!issue.value) return [];
-  return TRANSITION_MAP[issue.value.status] ?? [];
+  const map: Record<string, { label: string; to: string; color: string }[]> = {
+    NEW:        [{ label: t('aipr.issue.actions.triage'), to: 'TRIAGED', color: 'grey-7' }],
+    TRIAGED:    [{ label: t('aipr.issue.actions.approve'), to: 'QUEUED', color: 'primary' },
+                 { label: t('aipr.issue.actions.close'), to: 'CLOSED', color: 'negative' }],
+    PLAN_READY: [{ label: t('aipr.issue.actions.startBuild'), to: 'BUILDING', color: 'primary' },
+                 { label: t('aipr.issue.actions.close'), to: 'CLOSED', color: 'negative' }],
+    FAILED:     [{ label: t('aipr.issue.actions.retry'), to: 'QUEUED', color: 'secondary' }],
+  };
+  return map[issue.value.status] ?? [];
 });
 
 async function transition(to: string) {
@@ -110,7 +111,7 @@ async function transition(to: string) {
     await fetchIssueDetail();
     $q.notify({
       type: 'positive',
-      message: `상태가 ${to}로 변경되었습니다.`,
+      message: t('aipr.issue.statusChanged', { status: to }),
       position: 'top-right',
     });
     if (!TERMINAL_STATUSES.has(to)) {
@@ -119,7 +120,7 @@ async function transition(to: string) {
   } catch (err: any) {
     $q.notify({
       type: 'negative',
-      message: err.message || '상태 변경 중 오류가 발생했습니다.',
+      message: err.message || t('aipr.issue.transitionFailed'),
       position: 'top-right',
     });
   } finally {
@@ -129,7 +130,7 @@ async function transition(to: string) {
 
 function fmtDate(d: string | null) {
   if (!d) return '—';
-  return new Date(d).toLocaleString('ko-KR');
+  return new Date(d).toLocaleString(locale.value === 'ko' ? 'ko-KR' : 'en-US');
 }
 
 onMounted(() => {
@@ -154,7 +155,7 @@ onUnmounted(stopPolling);
           no-caps
           color="primary"
           icon="arrow_back"
-          label="Issues"
+          :label="t('aipr.issue.backToIssues')"
           class="q-mb-sm"
           @click="router.push({ name: 'aipr-issues' })"
         />
@@ -189,7 +190,7 @@ onUnmounted(stopPolling);
         <!-- Body -->
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-xs">Description</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-xs">{{ t('aipr.issue.description') }}</div>
             <p class="text-body2 text-black q-my-none whitespace-pre-wrap leading-relaxed">
               {{ issue.body }}
             </p>
@@ -199,7 +200,7 @@ onUnmounted(stopPolling);
         <!-- Attachments -->
         <q-card flat bordered v-if="issue.attachments.length">
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">Attachments</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">{{ t('aipr.issue.attachments') }}</div>
             <div class="row q-col-gutter-sm">
               <div
                 v-for="att in issue.attachments"
@@ -229,7 +230,7 @@ onUnmounted(stopPolling);
         <q-card flat bordered v-if="latestPlan">
           <q-card-section>
             <div class="row items-center justify-between q-mb-sm">
-              <div class="text-subtitle2 text-grey-7 text-uppercase">Plan v{{ latestPlan.version }}</div>
+              <div class="text-subtitle2 text-grey-7 text-uppercase">{{ t('aipr.issue.planVersion', { version: latestPlan.version }) }}</div>
               <span class="text-caption text-grey-6">{{ fmtDate(latestPlan.createdAt) }}</span>
             </div>
             <pre class="bg-grey-2 q-pa-md rounded font-mono text-caption text-black whitespace-pre-wrap scroll-x">{{ latestPlan.content }}</pre>
@@ -239,7 +240,7 @@ onUnmounted(stopPolling);
         <!-- Timeline console -->
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">Run Log</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">{{ t('aipr.issue.runLog') }}</div>
             <AiprRunTimeline :issue-id="id" :run-id="activeRunId" />
           </q-card-section>
         </q-card>
@@ -250,17 +251,17 @@ onUnmounted(stopPolling);
         <!-- Metadata -->
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">Details</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">{{ t('aipr.issue.details') }}</div>
             <q-list dense>
               <q-item class="q-px-none">
                 <q-item-section>
-                  <q-item-label caption>Repository</q-item-label>
+                  <q-item-label caption>{{ t('aipr.issue.repository') }}</q-item-label>
                   <q-item-label class="text-weight-medium">{{ issue.repoFullName ?? '—' }}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-item class="q-px-none">
                 <q-item-section>
-                  <q-item-label caption>Base branch</q-item-label>
+                  <q-item-label caption>{{ t('aipr.issue.baseBranch') }}</q-item-label>
                   <q-item-label class="text-weight-medium">{{ issue.baseBranch }}</q-item-label>
                 </q-item-section>
               </q-item>
@@ -271,7 +272,7 @@ onUnmounted(stopPolling);
         <!-- Runs -->
         <q-card flat bordered v-if="issue.runs.length">
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">Runs</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">{{ t('aipr.issue.runs') }}</div>
             <q-list bordered separator class="rounded-borders">
               <q-item v-for="run in issue.runs" :key="run.id">
                 <q-item-section avatar>
@@ -289,7 +290,7 @@ onUnmounted(stopPolling);
         <!-- PR cards -->
         <q-card flat bordered v-if="issue.pullRequests.length">
           <q-card-section>
-            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">Pull Requests</div>
+            <div class="text-subtitle2 text-grey-7 text-uppercase q-mb-md">{{ t('aipr.issue.pullRequests') }}</div>
             <q-list bordered separator class="rounded-borders">
               <q-item
                 v-for="pr in issue.pullRequests"

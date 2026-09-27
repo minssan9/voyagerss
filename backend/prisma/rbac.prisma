@@ -30,7 +30,7 @@ model Permission {
   code        String @unique @db.VarChar(200)
   name        String @db.VarChar(100)
   type        String @db.VarChar(10)  // PAGE | API
-  module      String @db.VarChar(50)  // workschd | investand | aipr | aviation | ALL
+  module      String @db.VarChar(50)  // workschd | aipr | aviation | ALL
   resource    String @db.VarChar(500) // frontend route path or HTTP METHOD:path pattern
   description String? @db.VarChar(500)
 
@@ -62,8 +62,8 @@ model RolePermission {
 
 model SubjectRole {
   id        Int    @id @default(autoincrement())
-  module    String @db.VarChar(50)  // workschd | investand | aipr | aviation
-  subjectId String @db.VarChar(100) // numeric accountId or cuid admin id as string
+  module    String @db.VarChar(50)  // workschd | aipr | aviation
+  subjectId String @db.VarChar(100) // identity user id (JWT sub)
   roleId    Int    @map("role_id")
 
   role Role @relation(fields: [roleId], references: [id])

@@ -2,9 +2,9 @@
   <div class="signup-page">
     <div class="signup-card">
       <div class="brand">
-        <div class="brand-icon">상</div>
-        <h1 class="brand-name">회원가입</h1>
-        <p class="brand-sub">상조 근무 플랫폼</p>
+        <div class="brand-icon">{{ t('workschdSignup.brandIcon') }}</div>
+        <h1 class="brand-name">{{ t('workschdSignup.title') }}</h1>
+        <p class="brand-sub">{{ t('workschdSignup.subtitle') }}</p>
       </div>
 
       <div class="divider"></div>
@@ -14,7 +14,7 @@
           v-model="username"
           type="text"
           class="input-field"
-          placeholder="이름"
+          :placeholder="t('workschdSignup.namePlaceholder')"
           required
           autocomplete="name"
         />
@@ -22,7 +22,7 @@
           v-model="email"
           type="email"
           class="input-field"
-          placeholder="이메일"
+          :placeholder="t('workschdSignup.emailPlaceholder')"
           required
           autocomplete="email"
         />
@@ -30,7 +30,7 @@
           v-model="password"
           type="password"
           class="input-field"
-          placeholder="비밀번호 (8자 이상)"
+          :placeholder="t('workschdSignup.passwordPlaceholder')"
           minlength="8"
           required
           autocomplete="new-password"
@@ -39,7 +39,7 @@
           v-model="passwordConfirm"
           type="password"
           class="input-field"
-          placeholder="비밀번호 확인"
+          :placeholder="t('workschdSignup.passwordConfirmPlaceholder')"
           required
           autocomplete="new-password"
         />
@@ -47,13 +47,13 @@
         <div v-if="error" class="error-notice">{{ error }}</div>
 
         <button type="submit" class="submit-btn" :disabled="loading">
-          {{ loading ? '가입 중…' : '회원가입' }}
+          {{ loading ? t('workschdSignup.submitting') : t('workschdSignup.submit') }}
         </button>
       </form>
 
       <p class="login-note">
-        이미 계정이 있으신가요?
-        <router-link to="/login?service=workschd" class="link">로그인</router-link>
+        {{ t('workschdSignup.hasAccount') }}
+        <router-link to="/login?service=workschd" class="link">{{ t('workschdSignup.login') }}</router-link>
       </p>
     </div>
   </div>
@@ -61,10 +61,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const username = ref('');
 const email = ref('');
@@ -79,7 +81,7 @@ async function submit() {
   error.value = '';
 
   if (password.value !== passwordConfirm.value) {
-    error.value = '비밀번호가 일치하지 않습니다.';
+    error.value = t('workschdSignup.errorPasswordMismatch');
     return;
   }
 
@@ -93,9 +95,9 @@ async function submit() {
     router.push('/login?service=workschd&registered=1');
   } catch (e: any) {
     if (e.response?.status === 409) {
-      error.value = '이미 사용 중인 이메일입니다.';
+      error.value = t('workschdSignup.errorEmailTaken');
     } else {
-      error.value = e.response?.data?.message || '회원가입에 실패했습니다.';
+      error.value = e.response?.data?.message || t('workschdSignup.errorFailed');
     }
   } finally {
     loading.value = false;

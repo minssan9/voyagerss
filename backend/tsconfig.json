@@ -15,11 +15,7 @@
         "experimentalDecorators": true,
         "strictPropertyInitialization": false,
         "baseUrl": ".",
-        "paths": {
-            "@investand/*": [
-                "src/modules/investand/*"
-            ]
-        }
+        "paths": {}
     },
     "include": [
         "src/**/*"

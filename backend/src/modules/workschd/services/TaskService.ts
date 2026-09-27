@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { I18nHttpException } from '../../common/i18n-http.exception';
 import { Task, TaskEmployee } from '@prisma/client-workschd';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { NotificationService } from './NotificationService';
@@ -205,7 +206,7 @@ export class TaskService {
         });
 
         if (existing) {
-            throw new Error('이미 참여 신청했습니다');
+            throw new I18nHttpException('workschd.task.alreadyApplied', HttpStatus.CONFLICT);
         }
 
         const task = await prisma.task.findUnique({
@@ -213,15 +214,15 @@ export class TaskService {
         });
 
         if (!task) {
-            throw new Error('장례식을 찾을 수 없습니다');
+            throw new I18nHttpException('workschd.task.funeralNotFound', HttpStatus.NOT_FOUND);
         }
 
         if (task.status !== 'OPEN') {
-            throw new Error('마감된 장례식입니다');
+            throw new I18nHttpException('workschd.task.funeralClosed', HttpStatus.BAD_REQUEST);
         }
 
         if (task.currentWorkerCount >= task.workerCount) {
-            throw new Error('인원이 마감되었습니다');
+            throw new I18nHttpException('workschd.task.capacityFull', HttpStatus.BAD_REQUEST);
         }
 
         const taskEmployee = await prisma.taskEmployee.create({
@@ -250,6 +251,30 @@ export class TaskService {
      */
     async approveJoinRequest(requestId: number): Promise<TaskEmployee> {
         return await prisma.$transaction(async (tx) => {
+            const pending = await tx.taskEmployee.findUnique({
+                where: { id: requestId },
+            });
+
+            if (!pending || pending.status !== 'PENDING') {
+                throw new I18nHttpException('workschd.task.approvePendingOnly', HttpStatus.BAD_REQUEST);
+            }
+
+            const task = await tx.task.findUnique({
+                where: { id: pending.taskId },
+            });
+
+            if (!task) {
+                throw new I18nHttpException('workschd.task.funeralNotFound', HttpStatus.NOT_FOUND);
+            }
+
+            const approvedCount = await tx.taskEmployee.count({
+                where: { taskId: pending.taskId, status: 'APPROVED' },
+            });
+
+            if (approvedCount >= task.workerCount) {
+                throw new I18nHttpException('workschd.task.capacityFull', HttpStatus.BAD_REQUEST);
+            }
+
             const taskEmployee = await tx.taskEmployee.update({
                 where: { id: requestId },
                 data: {
@@ -258,7 +283,7 @@ export class TaskService {
                 }
             });
 
-            const task = await tx.task.update({
+            const updatedTask = await tx.task.update({
                 where: { id: taskEmployee.taskId },
                 data: {
                     currentWorkerCount: { increment: 1 }
@@ -278,16 +303,16 @@ export class TaskService {
             });
 
             // 인원 마감 체크
-            if (task.currentWorkerCount >= task.workerCount) {
+            if (updatedTask.currentWorkerCount >= updatedTask.workerCount) {
                 await tx.task.update({
-                    where: { id: task.id },
+                    where: { id: updatedTask.id },
                     data: { status: 'CLOSED' }
                 });
 
                 // 마감 알림
                 setImmediate(async () => {
                     try {
-                        await this.notificationService.sendTaskClosedNotification(task.id);
+                        await this.notificationService.sendTaskClosedNotification(updatedTask.id);
                     } catch (error) {
                         console.error('[TaskService] Failed to send task closed notification:', error);
                     }
@@ -331,15 +356,15 @@ export class TaskService {
         });
 
         if (!taskEmployee) {
-            throw new Error('참여 신청을 찾을 수 없습니다');
+            throw new I18nHttpException('workschd.task.joinNotFound', HttpStatus.NOT_FOUND);
         }
 
         if (taskEmployee.accountId !== accountId) {
-            throw new Error('권한이 없습니다');
+            throw new I18nHttpException('workschd.task.forbidden', HttpStatus.FORBIDDEN);
         }
 
         if (taskEmployee.status !== 'PENDING') {
-            throw new Error('대기 중인 신청만 취소할 수 있습니다');
+            throw new I18nHttpException('workschd.task.cancelPendingOnly', HttpStatus.BAD_REQUEST);
         }
 
         await prisma.taskEmployee.delete({
@@ -378,19 +403,19 @@ export class TaskService {
             });
 
             if (!taskEmployee) {
-                throw new Error('참여 정보를 찾을 수 없습니다');
+                throw new I18nHttpException('workschd.task.participationNotFound', HttpStatus.NOT_FOUND);
             }
 
             if (taskEmployee.accountId !== accountId) {
-                throw new Error('권한이 없습니다');
+                throw new I18nHttpException('workschd.task.forbidden', HttpStatus.FORBIDDEN);
             }
 
             if (taskEmployee.status !== 'APPROVED') {
-                throw new Error('승인된 참여만 체크인할 수 있습니다');
+                throw new I18nHttpException('workschd.task.checkInApprovedOnly', HttpStatus.BAD_REQUEST);
             }
 
             if (taskEmployee.joinedAt) {
-                throw new Error('이미 체크인 되었습니다');
+                throw new I18nHttpException('workschd.task.alreadyCheckedIn', HttpStatus.BAD_REQUEST);
             }
 
             // Update within transaction
@@ -423,19 +448,23 @@ export class TaskService {
             });
 
             if (!taskEmployee) {
-                throw new Error('참여 정보를 찾을 수 없습니다');
+                throw new I18nHttpException('workschd.task.participationNotFound', HttpStatus.NOT_FOUND);
             }
 
             if (taskEmployee.accountId !== accountId) {
-                throw new Error('권한이 없습니다');
+                throw new I18nHttpException('workschd.task.forbidden', HttpStatus.FORBIDDEN);
+            }
+
+            if (taskEmployee.status !== 'APPROVED') {
+                throw new I18nHttpException('workschd.task.checkOutApprovedOnly', HttpStatus.BAD_REQUEST);
             }
 
             if (!taskEmployee.joinedAt) {
-                throw new Error('체크인을 먼저 해야 합니다');
+                throw new I18nHttpException('workschd.task.checkInFirst', HttpStatus.BAD_REQUEST);
             }
 
             if (taskEmployee.leftAt) {
-                throw new Error('이미 체크아웃 되었습니다');
+                throw new I18nHttpException('workschd.task.alreadyCheckedOut', HttpStatus.BAD_REQUEST);
             }
 
             // Update within transaction
@@ -455,5 +484,43 @@ export class TaskService {
         });
 
         return result;
+    }
+
+    /**
+     * 팀장/관리자가 장례식 완료 처리
+     */
+    async completeTask(taskId: number, accountId: number, userRoles: string[]): Promise<Task> {
+        const task = await prisma.task.findUnique({
+            where: { id: taskId },
+            include: {
+                team: {
+                    include: {
+                        teamMembers: true,
+                    },
+                },
+            },
+        });
+
+        if (!task) {
+            throw new I18nHttpException('workschd.task.funeralNotFound', HttpStatus.NOT_FOUND);
+        }
+
+        const isAdmin = userRoles.includes('ADMIN');
+        const isTeamLeader = task.team.teamMembers.some(
+            (member) => member.accountId === accountId && member.role === 'LEADER',
+        );
+
+        if (!isAdmin && !isTeamLeader) {
+            throw new I18nHttpException('workschd.task.completeLeadersOnly', HttpStatus.FORBIDDEN);
+        }
+
+        return prisma.task.update({
+            where: { id: taskId },
+            data: { status: 'COMPLETED' },
+            include: {
+                shop: true,
+                team: true,
+            },
+        });
     }
 }

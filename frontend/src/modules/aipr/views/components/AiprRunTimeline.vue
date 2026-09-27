@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   issueId: string;
   runId:   string | null;
 }>();
+
+const { t } = useI18n();
 
 interface LogLine {
   id: string;
@@ -61,11 +64,11 @@ const streamColor = {
            overflow-y-auto max-h-80 text-[#e5e5e7]"
     role="log"
     aria-live="polite"
-    aria-label="Run log timeline"
+    :aria-label="t('aipr.runTimeline.ariaLabel')"
   >
-    <div v-if="!runId" class="text-grey-6 italic">No active run.</div>
+    <div v-if="!runId" class="text-grey-6 italic">{{ t('aipr.runTimeline.noActiveRun') }}</div>
     <div v-else-if="lines.length === 0" class="text-grey-6 italic animate-pulse">
-      Waiting for output…
+      {{ t('aipr.runTimeline.waiting') }}
     </div>
     <div
       v-for="line in lines"

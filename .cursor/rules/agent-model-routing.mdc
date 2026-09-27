@@ -1,0 +1,14 @@
+---
+description: Delegate work to the subagent whose model matches the task
+alwaysApply: true
+---
+
+# Agent model routing
+
+The parent chat model stays as selected in the model picker. Route the work by delegating.
+
+- Explore: use the built-in explore subagent for codebase search and analysis.
+- Implement: use the implementer subagent for scoped edits, bugfixes, and refactors once the approach is known. Model is `composer-2.5[fast=false]`.
+- Plan: use the planner subagent for architecture, migrations, and multi-file design before edits. Model is `claude-opus-5[effort=high]`. Do not edit files in that subagent.
+
+Delegate when the task matches. Do the work in the parent only when none of these apply. Invoke explicitly with `/implementer` or `/planner` when the user names one.

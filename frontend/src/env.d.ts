@@ -12,9 +12,14 @@ declare module 'vue-router' {
     hidden?: boolean
     icon?: string
     title?: string
+    titleKey?: string
     tabTitle?: string
     description?: string
     layout?: 'default' | 'blank' | 'minimal'
     project?: string
+    surface?: 'admin' | 'worker'
+    mobile?: boolean
+    workerNav?: boolean
+    rbacPermission?: string
   }
 }

@@ -7,7 +7,6 @@ Disallow: /auth/
 Disallow: /account/
 Disallow: /feedback-admin
 Disallow: /workschd/admin/
-Disallow: /investand/admin/
 Disallow: /aipr/widget
 
 Sitemap: https://voyagerss.com/sitemap.xml

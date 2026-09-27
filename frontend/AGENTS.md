@@ -53,7 +53,6 @@ The frontend layer of Voyagerss is a single-page application built with **Vue 3*
   - `utilities.scss`: Helper classes (Margins, Padding, Animations, Responsive).
   - `variables.scss`: Global styling tokens (Colors, Spacing, Fonts).
 - **Module Identity**: Use defined gradient classes for branding:
-  - Investand: `.investand-gradient` (Blue/Purple)
   - WorkSchd: `.workschd-gradient` (Cyan/Blue)
   - Aviation: `.aviation-gradient` (Green/Teal)
 - **Component Patterns**:

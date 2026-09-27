@@ -3,12 +3,12 @@
     <q-card>
       <q-card-section>
         <div class="row items-center justify-between">
-          <div class="text-h6">백업 관리</div>
+          <div class="text-h6">{{ t('aviation.backups.title') }}</div>
           <div>
             <q-btn
               color="primary"
               icon="backup"
-              label="백업 생성"
+              :label="t('aviation.backups.createBackup')"
               @click="createBackup"
               :loading="creating"
               class="q-mr-md"
@@ -16,7 +16,7 @@
             <q-btn
               color="warning"
               icon="restore"
-              label="백업 복원"
+              :label="t('aviation.backups.restoreBackup')"
               @click="showRestoreDialog = true"
             />
           </div>
@@ -26,12 +26,12 @@
       <q-card-section>
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-subtitle2">데이터 검증</div>
+            <div class="text-subtitle2">{{ t('aviation.backups.dataValidation') }}</div>
             <div class="q-mt-md">
               <q-btn
                 color="info"
                 icon="check_circle"
-                label="데이터 검증 실행"
+                :label="t('aviation.backups.runValidation')"
                 @click="validateData"
                 :loading="validating"
               />
@@ -48,10 +48,10 @@
                   />
                 </template>
                 <div v-if="validationResult.valid">
-                  데이터가 유효합니다
+                  {{ t('aviation.backups.dataValid') }}
                 </div>
                 <div v-else>
-                  데이터에 오류가 있습니다:
+                  {{ t('aviation.backups.dataInvalid') }}
                   <ul>
                     <li v-for="error in validationResult.errors" :key="error">
                       {{ error }}
@@ -69,24 +69,24 @@
     <q-dialog v-model="showRestoreDialog" persistent>
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">백업 복원</div>
+          <div class="text-h6">{{ t('aviation.backups.restoreTitle') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-file
             v-model="backupFile"
-            label="백업 파일 선택"
+            :label="t('aviation.backups.selectFile')"
             accept=".json"
             outlined
-            :rules="[val => !!val || '파일을 선택하세요']"
+            :rules="[val => !!val || t('aviation.backups.fileRequired')]"
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="취소" color="primary" v-close-popup />
+          <q-btn flat :label="t('aviation.common.cancel')" color="primary" v-close-popup />
           <q-btn
             flat
-            label="복원"
+            :label="t('aviation.backups.restore')"
             color="warning"
             @click="restoreBackup"
             :loading="restoring"
@@ -102,9 +102,11 @@
 import { ref } from 'vue';
 import { backupsApi, knowledgeApi } from '@/modules/aviation/api/client';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import type { ValidationResult } from '@/types/aviation/api';
 
 const $q = useQuasar();
+const { t } = useI18n();
 const creating = ref(false);
 const restoring = ref(false);
 const validating = ref(false);
@@ -118,12 +120,12 @@ async function createBackup() {
     const result = await backupsApi.create();
     $q.notify({
       type: 'positive',
-      message: `백업이 생성되었습니다: ${result.filename}`
+      message: t('aviation.backups.notify.createSuccess', { filename: result.filename })
     });
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '백업 생성 실패: ' + error.message
+      message: t('aviation.backups.notify.createFailed', { message: error.message })
     });
   } finally {
     creating.value = false;
@@ -134,7 +136,7 @@ async function restoreBackup() {
   if (!backupFile.value) {
     $q.notify({
       type: 'negative',
-      message: '파일을 선택하세요'
+      message: t('aviation.backups.notify.selectFile')
     });
     return;
   }
@@ -144,7 +146,7 @@ async function restoreBackup() {
     await backupsApi.restore(backupFile.value);
     $q.notify({
       type: 'positive',
-      message: '백업이 복원되었습니다'
+      message: t('aviation.backups.notify.restoreSuccess')
     });
     showRestoreDialog.value = false;
     backupFile.value = null;
@@ -152,7 +154,7 @@ async function restoreBackup() {
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '백업 복원 실패: ' + error.message
+      message: t('aviation.backups.notify.restoreFailed', { message: error.message })
     });
   } finally {
     restoring.value = false;
@@ -166,18 +168,18 @@ async function validateData() {
     if (validationResult.value.valid) {
       $q.notify({
         type: 'positive',
-        message: '데이터가 유효합니다'
+        message: t('aviation.backups.notify.validationSuccess')
       });
     } else {
       $q.notify({
         type: 'negative',
-        message: '데이터 검증 실패'
+        message: t('aviation.backups.notify.validationFailed')
       });
     }
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '검증 실패: ' + error.message
+      message: t('aviation.backups.notify.validateFailed', { message: error.message })
     });
   } finally {
     validating.value = false;
@@ -187,9 +189,3 @@ async function validateData() {
 
 <style scoped lang="sass">
 </style>
-
-
-
-
-
-

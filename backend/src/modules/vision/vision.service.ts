@@ -12,6 +12,7 @@ import {
   success,
   UploadedImage,
 } from './vision.types';
+import { tApi } from '../common/i18n-locale';
 
 @Injectable()
 export class VisionService {
@@ -32,7 +33,7 @@ export class VisionService {
 
   getJudgeRecord(id: string): Promise<ApiEnvelope<unknown>> {
     if (!/^\d+$/.test(id)) {
-      return Promise.resolve(failure('기록 id가 올바르지 않습니다.'));
+      return Promise.resolve(failure(tApi('vision.invalidRecordId')));
     }
     return this.requestJson(this.config.get().judgeBaseUrl, `/api/records/${id}`);
   }
@@ -68,19 +69,19 @@ export class VisionService {
     | { ok: false; message: string }
   > {
     if (!isSafeImageFilename(filename)) {
-      return { ok: false, message: '이미지 파일명이 올바르지 않습니다.' };
+      return { ok: false, message: tApi('vision.invalidImageName') };
     }
     const url = `${this.config.get().judgeBaseUrl}/images/${encodeURIComponent(filename)}`;
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
       if (!response.ok) {
-        return { ok: false, message: `업스트림 응답 오류 (${response.status})` };
+        return { ok: false, message: tApi('vision.upstream', { status: response.status }) };
       }
       const contentType = response.headers.get('content-type') || 'application/octet-stream';
       const body = Buffer.from(await response.arrayBuffer());
       return { ok: true, contentType, body };
     } catch (error) {
-      return { ok: false, message: `연결에 실패했습니다: ${errorText(error)}` };
+      return { ok: false, message: tApi('vision.connectFailed', { detail: errorText(error) }) };
     }
   }
 
@@ -93,7 +94,7 @@ export class VisionService {
     question: string,
   ): { ok: true; data: FormData } | { ok: false; message: string } {
     if (!image || !image.buffer || image.buffer.length === 0) {
-      return { ok: false, message: '이미지가 필요합니다.' };
+      return { ok: false, message: tApi('vision.imageRequired') };
     }
     const form = new FormData();
     const blob = new Blob([new Uint8Array(image.buffer)], {
@@ -129,7 +130,7 @@ export class VisionService {
       }
       return success(body);
     } catch (error) {
-      return failure(`연결에 실패했습니다: ${errorText(error)}`);
+      return failure(tApi('vision.connectFailed', { detail: errorText(error) }));
     }
   }
 
@@ -138,7 +139,7 @@ export class VisionService {
     try {
       parsed = new URL(targetUrl);
     } catch {
-      res.status(200).json(failure('잘못된 업스트림 주소입니다.'));
+      res.status(200).json(failure(tApi('vision.badUpstream')));
       return;
     }
     const client = parsed.protocol === 'https:' ? https : http;
@@ -155,7 +156,7 @@ export class VisionService {
         if (status >= 400) {
           upstream.resume();
           if (!res.headersSent) {
-            res.status(200).json(failure(`업스트림 응답 오류 (${status})`));
+            res.status(200).json(failure(tApi('vision.upstream', { status })));
           }
           return;
         }
@@ -169,7 +170,7 @@ export class VisionService {
     );
     req.on('error', (error) => {
       if (!res.headersSent) {
-        res.status(200).json(failure(`연결에 실패했습니다: ${error.message}`));
+        res.status(200).json(failure(tApi('vision.connectFailed', { detail: error.message })));
       } else {
         res.end();
       }

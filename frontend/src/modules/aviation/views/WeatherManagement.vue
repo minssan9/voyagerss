@@ -5,12 +5,12 @@
         <q-card>
           <q-card-section>
             <div class="row items-center justify-between">
-              <div class="text-h6">날씨 이미지 관리</div>
+              <div class="text-h6">{{ t('aviation.weather.title') }}</div>
               <div>
                 <q-btn
                   color="primary"
                   icon="refresh"
-                  label="이미지 수집"
+                  :label="t('aviation.weather.collectImages')"
                   @click="collectImage"
                   :loading="collecting"
                   class="q-mr-md"
@@ -18,7 +18,7 @@
                 <q-btn
                   color="warning"
                   icon="delete_sweep"
-                  label="정리"
+                  :label="t('aviation.weather.cleanup')"
                   @click="showCleanupDialog = true"
                 />
               </div>
@@ -30,9 +30,9 @@
               <q-card-section>
                 <div class="row items-center justify-between">
                   <div>
-                    <div class="text-subtitle2">자동 수집 설정</div>
+                    <div class="text-subtitle2">{{ t('aviation.weather.autoGatherTitle') }}</div>
                     <div class="text-caption text-grey">
-                      스케줄러가 자동으로 날씨 이미지를 수집합니다 (10분마다)
+                      {{ t('aviation.weather.autoGatherDesc') }}
                     </div>
                   </div>
                   <q-toggle
@@ -50,12 +50,12 @@
           <q-card-section>
             <q-card flat bordered class="q-mb-md">
               <q-card-section>
-                <div class="text-subtitle2">서비스 상태</div>
+                <div class="text-subtitle2">{{ t('aviation.weather.serviceStatus') }}</div>
                 <div v-if="status">
-                  <div>상태: {{ status.status }}</div>
-                  <div>최근 타임스탬프: {{ status.currentTimestamp }}</div>
+                  <div>{{ t('aviation.weather.statusLabel') }}: {{ status.status }}</div>
+                  <div>{{ t('aviation.weather.latestTimestamp') }}: {{ status.currentTimestamp }}</div>
                   <div v-if="status.error" class="text-negative">
-                    오류: {{ status.error }}
+                    {{ t('aviation.weather.errorLabel') }}: {{ status.error }}
                   </div>
                 </div>
               </q-card-section>
@@ -64,12 +64,12 @@
             <!-- Date Range Filter -->
             <q-card flat bordered class="q-mb-md">
               <q-card-section>
-                <div class="text-subtitle2 q-mb-md">날짜 범위 필터</div>
+                <div class="text-subtitle2 q-mb-md">{{ t('aviation.weather.dateFilterTitle') }}</div>
                 <div class="row q-col-gutter-md">
                   <div class="col-12 col-sm-4">
                     <q-input
                       v-model="startDate"
-                      label="시작 날짜"
+                      :label="t('aviation.weather.startDate')"
                       type="date"
                       outlined
                       dense
@@ -79,7 +79,7 @@
                   <div class="col-12 col-sm-4">
                     <q-input
                       v-model="endDate"
-                      label="종료 날짜"
+                      :label="t('aviation.weather.endDate')"
                       type="date"
                       outlined
                       dense
@@ -90,7 +90,7 @@
                     <q-btn
                       color="primary"
                       icon="search"
-                      label="조회"
+                      :label="t('aviation.weather.search')"
                       @click="loadImages"
                       :loading="loading"
                       class="full-width"
@@ -101,7 +101,7 @@
                       flat
                       color="primary"
                       icon="clear"
-                      label="초기화"
+                      :label="t('aviation.weather.reset')"
                       @click="clearDateFilter"
                       class="full-width"
                     />
@@ -144,23 +144,23 @@
     <q-dialog v-model="showCleanupDialog" persistent>
       <q-card style="min-width: 300px">
         <q-card-section>
-          <div class="text-h6">이미지 정리</div>
+          <div class="text-h6">{{ t('aviation.weather.cleanupTitle') }}</div>
         </q-card-section>
 
         <q-card-section class="q-pt-none">
           <q-input
             v-model.number="cleanupDays"
             type="number"
-            label="보관할 일수"
-            :rules="[val => val > 0 || '1 이상의 값을 입력하세요']"
+            :label="t('aviation.weather.retentionDays')"
+            :rules="[val => val > 0 || t('aviation.weather.retentionValidation')]"
           />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn flat label="취소" color="primary" v-close-popup />
+          <q-btn flat :label="t('aviation.common.cancel')" color="primary" v-close-popup />
           <q-btn
             flat
-            label="정리 실행"
+            :label="t('aviation.weather.runCleanup')"
             color="warning"
             @click="performCleanup"
             :loading="cleaning"
@@ -181,11 +181,11 @@
         <q-card-section class="q-pt-sm">
           <div class="row q-col-gutter-sm q-mb-md">
             <div class="col-12 col-sm-6">
-              <div class="text-caption text-grey">촬영일시</div>
-              <div>{{ selectedImage?.capturedAt ? new Date(selectedImage.capturedAt).toLocaleString('ko-KR') : '-' }}</div>
+              <div class="text-caption text-grey">{{ t('aviation.weather.capturedAt') }}</div>
+              <div>{{ selectedImage?.capturedAt ? new Date(selectedImage.capturedAt).toLocaleString(dateLocale) : '-' }}</div>
             </div>
             <div class="col-12 col-sm-6">
-              <div class="text-caption text-grey">파일 크기</div>
+              <div class="text-caption text-grey">{{ t('aviation.weather.fileSize') }}</div>
               <div>{{ selectedImage?.sizeMB }} MB</div>
             </div>
           </div>
@@ -201,7 +201,7 @@
               <q-spinner color="primary" size="3em" />
             </div>
             <div v-else class="flex flex-center text-negative" style="min-height: 400px">
-              이미지를 불러올 수 없습니다
+              {{ t('aviation.weather.imageLoadFailed') }}
             </div>
           </div>
         </q-card-section>
@@ -211,12 +211,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { weatherApi } from '@/modules/aviation/api/client';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import type { WeatherImage, WeatherStatus } from '@/types/aviation/api';
 
 const $q = useQuasar();
+const { t, locale } = useI18n();
 const weatherImages = ref<WeatherImage[]>([]);
 const status = ref<WeatherStatus | null>(null);
 const loading = ref(false);
@@ -231,7 +233,8 @@ const imageLoading = ref(false);
 const gatheringEnabled = ref(true);
 const togglingGathering = ref(false);
 
-// Helper function to format date for input field
+const dateLocale = computed(() => (locale.value === 'ko' ? 'ko-KR' : 'en-US'));
+
 function formatDateForInput(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -239,15 +242,14 @@ function formatDateForInput(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-// Set default dates: 2 weeks ago and today
 function getDefaultDates() {
   const today = new Date();
-  today.setHours(23, 59, 59, 999); // End of today
-  
+  today.setHours(23, 59, 59, 999);
+
   const twoWeeksAgo = new Date(today);
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-  twoWeeksAgo.setHours(0, 0, 0, 0); // Start of day
-  
+  twoWeeksAgo.setHours(0, 0, 0, 0);
+
   return {
     start: formatDateForInput(twoWeeksAgo),
     end: formatDateForInput(today)
@@ -259,54 +261,53 @@ const startDate = ref<string>(defaultDates.start);
 const endDate = ref<string>(defaultDates.end);
 const quickDateRange = ref<string>('');
 
-const imageColumns = [
+const imageColumns = computed(() => [
   {
     name: 'filename',
     required: true,
-    label: '파일명',
+    label: t('aviation.weather.columns.filename'),
     align: 'left' as const,
     field: 'filename',
     sortable: true
   },
   {
     name: 'size',
-    label: '크기',
+    label: t('aviation.weather.columns.size'),
     align: 'right' as const,
     field: 'sizeMB',
     sortable: true
   },
   {
     name: 'capturedAt',
-    label: '촬영일시',
+    label: t('aviation.weather.columns.capturedAt'),
     align: 'left' as const,
     field: 'capturedAt',
-    format: (val: string) => val ? new Date(val).toLocaleString('ko-KR') : '-',
+    format: (val: string) => val ? new Date(val).toLocaleString(dateLocale.value) : '-',
     sortable: true
   },
   {
     name: 'created',
-    label: '생성일',
+    label: t('aviation.weather.columns.created'),
     align: 'left' as const,
     field: 'created',
-    format: (val: string) => new Date(val).toLocaleString('ko-KR'),
+    format: (val: string) => new Date(val).toLocaleString(dateLocale.value),
     sortable: true
   }
-];
+]);
 
-const quickDateOptions = [
-  { label: '오늘', value: 'today' },
-  { label: '최근 7일', value: '7days' },
-  { label: '최근 30일', value: '30days' },
-  { label: '이번 달', value: 'thisMonth' },
-  { label: '지난 달', value: 'lastMonth' }
-];
+const quickDateOptions = computed(() => [
+  { label: t('aviation.weather.quickToday'), value: 'today' },
+  { label: t('aviation.weather.quick7days'), value: '7days' },
+  { label: t('aviation.weather.quick30days'), value: '30days' },
+  { label: t('aviation.weather.quickThisMonth'), value: 'thisMonth' },
+  { label: t('aviation.weather.quickLastMonth'), value: 'lastMonth' }
+]);
 
 async function loadImages() {
   loading.value = true;
   try {
     const response = await weatherApi.getImages(50, startDate.value || undefined, endDate.value || undefined);
     if (response.success) {
-      // Handle both response.data.images and response.images formats
       if (response.data && response.data.images) {
         weatherImages.value = response.data.images;
       } else if (response.images) {
@@ -315,12 +316,12 @@ async function loadImages() {
         weatherImages.value = [];
       }
     } else {
-      throw new Error(response.error || '이미지 조회 실패');
+      throw new Error(response.error || t('aviation.weather.notify.fetchFailed'));
     }
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '이미지 로딩 실패: ' + (error.message || error)
+      message: t('aviation.weather.notify.loadFailed', { message: error.message || error })
     });
     weatherImages.value = [];
   } finally {
@@ -339,7 +340,7 @@ function clearDateFilter() {
 function applyQuickDateRange(value: string) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   switch (value) {
     case 'today':
       startDate.value = formatDateForInput(today);
@@ -369,7 +370,7 @@ function applyQuickDateRange(value: string) {
       endDate.value = formatDateForInput(lastDayOfLastMonth);
       break;
   }
-  
+
   loadImages();
 }
 
@@ -391,17 +392,17 @@ async function collectImage() {
     if (response.success) {
       $q.notify({
         type: 'positive',
-        message: '이미지 수집이 완료되었습니다'
+        message: t('aviation.weather.notify.collectSuccess')
       });
       await loadImages();
       await loadStatus();
     } else {
-      throw new Error(response.error || '수집 실패');
+      throw new Error(response.error || t('aviation.weather.notify.collectError'));
     }
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '이미지 수집 실패: ' + error.message
+      message: t('aviation.weather.notify.collectFailed', { message: error.message })
     });
   } finally {
     collecting.value = false;
@@ -415,17 +416,17 @@ async function performCleanup() {
     if (response.success && response.data) {
       $q.notify({
         type: 'positive',
-        message: `${response.data.deletedCount}개 파일이 삭제되었습니다`
+        message: t('aviation.weather.notify.cleanupSuccess', { count: response.data.deletedCount })
       });
       showCleanupDialog.value = false;
       await loadImages();
     } else {
-      throw new Error(response.error || '정리 실패');
+      throw new Error(response.error || t('aviation.weather.notify.cleanupError'));
     }
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '정리 실패: ' + error.message
+      message: t('aviation.weather.notify.cleanupFailed', { message: error.message })
     });
   } finally {
     cleaning.value = false;
@@ -437,8 +438,7 @@ function openImageDialog(row: WeatherImage) {
   imageLoading.value = true;
   imageUrl.value = '';
   showImageDialog.value = true;
-  
-  // Load image
+
   if (row.filename) {
     imageUrl.value = `/api/weather/image/${encodeURIComponent(row.filename)}`;
     imageLoading.value = false;
@@ -450,7 +450,7 @@ function handleImageError() {
   imageUrl.value = '';
   $q.notify({
     type: 'negative',
-    message: '이미지를 불러올 수 없습니다'
+    message: t('aviation.weather.imageLoadFailed')
   });
 }
 
@@ -473,17 +473,18 @@ async function toggleGathering(enabled: boolean) {
       gatheringEnabled.value = enabled;
       $q.notify({
         type: 'positive',
-        message: response.data?.message || `자동 수집이 ${enabled ? '활성화' : '비활성화'}되었습니다`
+        message: enabled
+          ? t('aviation.weather.notify.gatheringEnabled')
+          : t('aviation.weather.notify.gatheringDisabled')
       });
     } else {
-      // Revert toggle on error
       gatheringEnabled.value = !enabled;
-      throw new Error(response.error || '설정 변경 실패');
+      throw new Error(response.error || t('aviation.weather.notify.settingsError'));
     }
   } catch (error: any) {
     $q.notify({
       type: 'negative',
-      message: '설정 변경 실패: ' + (error.message || error)
+      message: t('aviation.weather.notify.settingsFailed', { message: error.message || error })
     });
   } finally {
     togglingGathering.value = false;
@@ -491,7 +492,6 @@ async function toggleGathering(enabled: boolean) {
 }
 
 onMounted(() => {
-  // Load images with default date range (2 weeks ago to today)
   loadImages();
   loadStatus();
   loadGatheringStatus();
@@ -515,7 +515,3 @@ onMounted(() => {
   border-radius: 4px
   padding: 16px
 </style>
-
-
-
-

@@ -1,0 +1,82 @@
+{
+  "landing": {
+    "hero": {
+      "title": "VoyagerSS",
+      "subtitle": "통합 업무 플랫폼",
+      "description": "일정 관리, 항공 데이터, AI 운영, 비전 분석까지\n하나의 플랫폼에서 업무를 연결하세요",
+      "ctaPrimary": "시작하기",
+      "ctaSecondary": "더 알아보기"
+    },
+    "stats": {
+      "title": "모듈별 전문 솔루션",
+      "subtitle": "VoyagerSS는 각 도메인에 맞춘 모듈을 하나의 플랫폼에서 제공합니다",
+      "modules": {
+        "value": "4+",
+        "label": "통합 모듈",
+        "description": "도메인별 전문 기능"
+      },
+      "realtime": {
+        "value": "실시간",
+        "label": "업데이트",
+        "description": "운영 데이터 반영"
+      },
+      "access": {
+        "value": "24/7",
+        "label": "플랫폼 접근",
+        "description": "언제 어디서나"
+      }
+    },
+    "products": {
+      "title": "우리의 솔루션",
+      "subtitle": "각 분야 전문가가 설계한 통합 플랫폼",
+      "startLink": "시작하기",
+      "modules": {
+        "workschd": {
+          "title": "WorkSchd",
+          "description": "지능형 근무 일정 관리 시스템. AI 기반 자동 스케줄링, 팀 협업, 출퇴근 관리로 생산성을 극대화하세요."
+        },
+        "aviation": {
+          "title": "Aviation",
+          "description": "종합 항공 데이터 플랫폼. 실시간 기상 정보, 토픽 관리, 안전한 백업 솔루션을 제공합니다."
+        },
+        "aipr": {
+          "title": "AI Operations",
+          "description": "AI 기반 운영 자동화. 워크플로 관리와 지능형 프로세스 최적화로 운영 효율을 높이세요."
+        },
+        "vision": {
+          "title": "Vision",
+          "description": "컴퓨터 비전 분석 플랫폼. 카메라 연동, 판정 테스트, 실시간 모니터링을 지원합니다."
+        }
+      }
+    },
+    "why": {
+      "title": "왜 VoyagerSS인가?",
+      "subtitle": "모듈형 플랫폼으로 필요한 기능만 선택해 사용하세요",
+      "verified": {
+        "title": "검증된 기능",
+        "text": "각 모듈은 도메인 전문가의 검증을 거쳐 제공됩니다. 신뢰할 수 있는 도구로 업무를 처리하세요."
+      },
+      "realtime": {
+        "title": "실시간 연동",
+        "text": "모듈 간 데이터와 워크플로를 연결해 팀 협업을 한곳에서 관리하세요."
+      },
+      "support": {
+        "title": "전문가 지원",
+        "text": "도입부터 운영까지. 전문가 팀이 여러분의 성공을 지원합니다."
+      }
+    },
+    "footer": {
+      "description": "일정 관리, 항공 데이터, AI 운영, 비전 분석을 위한 통합 솔루션. 모듈형 플랫폼으로 여러분의 업무를 지원합니다.",
+      "services": "서비스",
+      "resources": "리소스",
+      "company": "회사",
+      "docs": "문서",
+      "apiReference": "API 레퍼런스",
+      "blog": "블로그",
+      "about": "소개",
+      "contact": "연락처",
+      "privacy": "개인정보처리방침",
+      "copyright": "© 2024 VoyagerSS Platform. All rights reserved."
+    }
+  }
+}

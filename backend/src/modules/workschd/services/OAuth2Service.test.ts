@@ -1,113 +1,41 @@
 import { OAuth2Service } from './OAuth2Service';
-import { workschdPrisma } from '../../../config/prisma';
-import axios from 'axios';
+import { IdentityOAuthService } from '../../identity/identity-oauth.service';
 
-jest.mock('axios');
-jest.mock('../../../config/prisma', () => ({
-  workschdPrisma: {
-    accountOAuth: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-    },
-    account: {
-      findFirst: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-    },
-  },
-}));
-jest.mock('../../../config/config-service', () => ({
-  configService: {
-    get: jest.fn((key: string, def: string) => def || 'mock-value'),
-  },
-}));
-jest.mock('bcrypt', () => ({ hash: jest.fn().mockResolvedValue('hashed') }));
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn().mockReturnValue('mock-token'),
-}));
+jest.mock('../../identity/identity-oauth.service');
 
-const prisma = workschdPrisma as any;
-const axiosMock = axios as jest.Mocked<typeof axios>;
-
-const mockGoogleTokenRes = { data: { access_token: 'gtoken' } };
-const mockGoogleUserRes = {
-  data: { id: 'g123', email: 'google@test.com', name: 'Google User', picture: 'pic.jpg' },
-};
-
-describe('OAuth2Service - handleGoogleCallback', () => {
+describe('OAuth2Service', () => {
   let service: OAuth2Service;
+  let identityOAuthService: jest.Mocked<IdentityOAuthService>;
 
   beforeEach(() => {
-    service = new OAuth2Service();
+    identityOAuthService = {
+      getGoogleAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/v2/auth?mock=1'),
+      handleGoogleCallback: jest.fn(),
+      getKakaoAuthUrl: jest.fn().mockReturnValue('https://kauth.kakao.com/oauth/authorize?mock=1'),
+      handleKakaoCallback: jest.fn(),
+    } as unknown as jest.Mocked<IdentityOAuthService>;
+    service = new OAuth2Service(identityOAuthService);
     jest.clearAllMocks();
-    axiosMock.post = jest.fn().mockResolvedValue(mockGoogleTokenRes);
-    axiosMock.get = jest.fn().mockResolvedValue(mockGoogleUserRes);
   });
 
-  it('returns existing linked account if provider already registered', async () => {
-    const existingAccount = {
-      accountId: 1,
-      email: 'google@test.com',
-      accountRoles: [{ roleType: 'USER' }],
-    };
-    (prisma.accountOAuth.findUnique as jest.Mock).mockResolvedValue({
-      id: 10,
-      accountId: 1,
-      account: existingAccount,
+  it('delegates google callback to identity oauth service', async () => {
+    identityOAuthService.handleGoogleCallback.mockResolvedValue({
+      tokens: { accessToken: 'mock-token', refreshToken: 'mock-refresh' },
+      user: { id: 'user-1' } as any,
     });
-    (prisma.account.update as jest.Mock).mockResolvedValue(existingAccount);
 
     const result = await service.handleGoogleCallback('auth-code');
 
-    expect(prisma.accountOAuth.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { provider_providerId: { provider: 'GOOGLE', providerId: 'g123' } } })
-    );
-    expect(prisma.account.create).not.toHaveBeenCalled();
-    expect(result.accessToken).toBe('mock-token');
+    expect(identityOAuthService.handleGoogleCallback).toHaveBeenCalledWith('auth-code');
+    expect(result).toEqual({
+      accessToken: 'mock-token',
+      refreshToken: 'mock-refresh',
+      user: { id: 'user-1' },
+    });
   });
 
-  it('links OAuth to existing account if email matches', async () => {
-    const existingAccount = {
-      accountId: 2,
-      email: 'google@test.com',
-      accountRoles: [{ roleType: 'USER' }],
-    };
-    (prisma.accountOAuth.findUnique as jest.Mock).mockResolvedValue(null);
-    (prisma.account.findFirst as jest.Mock).mockResolvedValue(existingAccount);
-    (prisma.accountOAuth.create as jest.Mock).mockResolvedValue({ id: 11 });
-    (prisma.account.update as jest.Mock).mockResolvedValue(existingAccount);
-
-    const result = await service.handleGoogleCallback('auth-code');
-
-    expect(prisma.account.create).not.toHaveBeenCalled();
-    expect(prisma.accountOAuth.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ accountId: 2, provider: 'GOOGLE', providerId: 'g123' }),
-      })
-    );
-    expect(result.accessToken).toBe('mock-token');
-  });
-
-  it('creates new account and AccountOAuth if email is new', async () => {
-    const newAccount = {
-      accountId: 3,
-      email: 'google@test.com',
-      accountRoles: [{ roleType: 'USER' }],
-    };
-    (prisma.accountOAuth.findUnique as jest.Mock).mockResolvedValue(null);
-    (prisma.account.findFirst as jest.Mock).mockResolvedValue(null);
-    (prisma.account.create as jest.Mock).mockResolvedValue(newAccount);
-    (prisma.accountOAuth.create as jest.Mock).mockResolvedValue({ id: 12 });
-    (prisma.account.update as jest.Mock).mockResolvedValue(newAccount);
-
-    const result = await service.handleGoogleCallback('auth-code');
-
-    expect(prisma.account.create).toHaveBeenCalled();
-    expect(prisma.accountOAuth.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ accountId: 3, provider: 'GOOGLE', providerId: 'g123' }),
-      })
-    );
-    expect(result.accessToken).toBe('mock-token');
+  it('returns google auth url from identity oauth service', () => {
+    expect(service.getGoogleAuthUrl()).toContain('accounts.google.com');
+    expect(identityOAuthService.getGoogleAuthUrl).toHaveBeenCalled();
   });
 });
