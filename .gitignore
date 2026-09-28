@@ -1,4 +1,4 @@
-﻿*/node_modules
+*/node_modules
 **/node_modules/
 */dist
 **/dist/
@@ -19,3 +19,4 @@ _bmad-output
 .idea
 .omc
 *.iml
+frontend/test-results
