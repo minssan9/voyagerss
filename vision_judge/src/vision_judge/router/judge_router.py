@@ -30,12 +30,13 @@ async def judge_bool(
     request: Request,
     image: UploadFile = File(...),
     question: str = Form(...),
+    save: bool = Form(True),
 ):
     _validate_question(question)
     data = await image.read()
     pil_image = _load_image(data)
     service = _get_service(request)
-    probability = service.judge_bool(pil_image, data, image.filename or "upload.png", question)
+    probability = service.judge_bool(pil_image, data, image.filename or "upload.png", question, save)
     return BoolJudgeResponse(probability=probability)
 
 
@@ -45,6 +46,7 @@ async def judge_choice(
     image: UploadFile = File(...),
     question: str = Form(...),
     choices: str = Form(...),
+    save: bool = Form(True),
 ):
     _validate_question(question)
     choice_list = [c.strip() for c in choices.split(",") if c.strip()]
@@ -53,5 +55,5 @@ async def judge_choice(
     data = await image.read()
     pil_image = _load_image(data)
     service = _get_service(request)
-    probabilities = service.judge_choice(pil_image, data, image.filename or "upload.png", question, choice_list)
+    probabilities = service.judge_choice(pil_image, data, image.filename or "upload.png", question, choice_list, save)
     return ChoiceJudgeResponse(probabilities=probabilities)

@@ -70,14 +70,29 @@ export function listJudgeRecords(): Promise<ApiEnvelope<JudgeRecord[]>> {
   return unwrap(service.get('/vision/judge/records'))
 }
 
-function judgeForm(image: File, question: string, choices?: string): FormData {
+export interface JudgeOptions {
+  /** false면 vision_judge 이력에 저장하지 않음 (라이브 분석용) */
+  save?: boolean
+  signal?: AbortSignal
+}
+
+export type JudgeMode = 'bool' | 'choice'
+
+function judgeForm(image: Blob, question: string, choices?: string, save?: boolean): FormData {
   const form = new FormData()
-  form.append('image', image)
+  form.append('image', image, image instanceof File ? image.name : 'frame.jpg')
   form.append('question', question)
   if (choices !== undefined) {
     form.append('choices', choices)
   }
+  if (save !== undefined) {
+    form.append('save', String(save))
+  }
   return form
+}
+
+function multipartConfig(signal?: AbortSignal) {
+  return { ...multipart, signal }
 }
 
 const multipart = {
@@ -90,14 +105,35 @@ const multipart = {
   }],
 }
 
-export function postJudgeBool(image: File, question: string): Promise<ApiEnvelope<{ probability: number }>> {
-  return unwrap(service.post('/vision/judge/bool', judgeForm(image, question), multipart))
+export function postJudgeBool(
+  image: Blob,
+  question: string,
+  options: JudgeOptions = {},
+): Promise<ApiEnvelope<{ probability: number }>> {
+  return unwrap(service.post(
+    '/vision/judge/bool',
+    judgeForm(image, question, undefined, options.save),
+    multipartConfig(options.signal),
+  ))
 }
 
 export function postJudgeChoice(
-  image: File,
+  image: Blob,
   question: string,
   choices: string,
+  options: JudgeOptions = {},
 ): Promise<ApiEnvelope<{ probabilities: Record<string, number> }>> {
-  return unwrap(service.post('/vision/judge/choice', judgeForm(image, question, choices), multipart))
+  return unwrap(service.post(
+    '/vision/judge/choice',
+    judgeForm(image, question, choices, options.save),
+    multipartConfig(options.signal),
+  ))
+}
+
+/** 서버(BE)가 vision_cam 최신 프레임을 직접 가져와 판정 */
+export function postJudgeCam(
+  body: { mode: JudgeMode; question: string; choices?: string; save?: boolean },
+  signal?: AbortSignal,
+): Promise<ApiEnvelope<{ probability?: number; probabilities?: Record<string, number> }>> {
+  return unwrap(service.post('/vision/judge/cam', body, { timeout: 180000, signal }))
 }

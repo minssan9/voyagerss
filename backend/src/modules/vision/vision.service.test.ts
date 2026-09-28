@@ -4,7 +4,7 @@ import { Writable } from 'node:stream';
 import type { Response } from 'express';
 import { VisionConfigStore } from './vision-config.store';
 import { VisionService } from './vision.service';
-import { normalizeBaseUrl } from './vision.types';
+import { extractJpegFrame, normalizeBaseUrl } from './vision.types';
 
 describe('normalizeBaseUrl', () => {
   it('strips a trailing slash and keeps http urls', () => {
@@ -13,6 +13,18 @@ describe('normalizeBaseUrl', () => {
 
   it('rejects non-http schemes', () => {
     expect(() => normalizeBaseUrl('ftp://example.com')).toThrow('http 또는 https');
+  });
+});
+
+describe('extractJpegFrame', () => {
+  it('returns the first complete jpeg in an mjpeg chunk', () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0x01, 0x02, 0xff, 0xd9]);
+    const chunk = Buffer.concat([Buffer.from('--frame\r\nContent-Type: image/jpeg\r\n\r\n'), jpeg, Buffer.from('\r\n')]);
+    expect(extractJpegFrame(chunk)).toEqual(jpeg);
+  });
+
+  it('returns null while the frame is incomplete', () => {
+    expect(extractJpegFrame(Buffer.from([0xff, 0xd8, 0x01]))).toBeNull();
   });
 });
 
@@ -137,5 +149,58 @@ describe('VisionService', () => {
     expect(jsonBody).toBeUndefined();
     expect(headers['content-type']).toContain('multipart/x-mixed-replace');
     expect(Buffer.concat(chunks).toString()).toBe('frame-bytes');
+  });
+
+  async function mjpegServer(body: (res: http.ServerResponse) => void) {
+    const server = http.createServer((req, res) => {
+      if (req.url === '/stream.mjpg') {
+        res.writeHead(200, { 'Content-Type': 'multipart/x-mixed-replace; boundary=frame' });
+        body(res);
+        return;
+      }
+      res.writeHead(404);
+      res.end();
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    return { server, url: `http://127.0.0.1:${(server.address() as AddressInfo).port}` };
+  }
+
+  it('grabs one jpeg frame from a never-ending mjpeg stream', async () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0x10, 0x20, 0xff, 0xd9]);
+    const { server, url } = await mjpegServer((res) => {
+      res.write('--frame\r\nContent-Type: image/jpeg\r\n\r\n');
+      res.write(jpeg.subarray(0, 3));
+      setTimeout(() => res.write(jpeg.subarray(3)), 10);
+    });
+    const result = await serviceWith(url).grabCamFrame(2000);
+    server.closeAllConnections();
+    server.close();
+    expect(result).toEqual({ ok: true, contentType: 'image/jpeg', body: jpeg });
+  });
+
+  it('times out when the stream never delivers a frame', async () => {
+    const { server, url } = await mjpegServer((res) => res.write('--frame\r\n'));
+    const result = await serviceWith(url).grabCamFrame(100);
+    server.closeAllConnections();
+    server.close();
+    expect(result.ok).toBe(false);
+  });
+
+  it('judges the latest cam frame server-side', async () => {
+    const jpeg = Buffer.from([0xff, 0xd8, 0x00, 0xff, 0xd9]);
+    const { server, url } = await mjpegServer((res) => res.write(jpeg));
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ probability: 0.9 }),
+    }) as unknown as typeof fetch;
+
+    const result = await serviceWith(url).judgeCamFrame({ mode: 'bool', question: 'door open?' });
+    server.closeAllConnections();
+    server.close();
+    expect(result).toEqual({ result: 'SUCCESS', message: 'ok', data: { probability: 0.9 } });
+    expect(global.fetch).toHaveBeenCalledWith('http://judge.test/judge/bool', expect.objectContaining({ method: 'POST' }));
+    const form = (global.fetch as jest.Mock).mock.calls[0][1].body as FormData;
+    expect(form.get('save')).toBe('false');
   });
 });

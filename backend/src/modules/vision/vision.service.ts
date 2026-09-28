@@ -6,9 +6,12 @@ import type { Response } from 'express';
 import { VisionConfigStore } from './vision-config.store';
 import {
   ApiEnvelope,
+  CamJudgeInput,
+  extractJpegFrame,
   failure,
   isSafeImageFilename,
   messageFromUpstream,
+  saveFlag,
   success,
   UploadedImage,
 } from './vision.types';
@@ -38,8 +41,8 @@ export class VisionService {
     return this.requestJson(this.config.get().judgeBaseUrl, `/api/records/${id}`);
   }
 
-  judgeBool(image: UploadedImage | undefined, question: string): Promise<ApiEnvelope<unknown>> {
-    const form = this.buildJudgeForm(image, question);
+  judgeBool(image: UploadedImage | undefined, question: string, save?: unknown): Promise<ApiEnvelope<unknown>> {
+    const form = this.buildJudgeForm(image, question, save);
     if (!form.ok) {
       return Promise.resolve(failure(form.message));
     }
@@ -50,8 +53,9 @@ export class VisionService {
     image: UploadedImage | undefined,
     question: string,
     choices: string,
+    save?: unknown,
   ): Promise<ApiEnvelope<unknown>> {
-    const form = this.buildJudgeForm(image, question);
+    const form = this.buildJudgeForm(image, question, save);
     if (!form.ok) {
       return Promise.resolve(failure(form.message));
     }
@@ -89,9 +93,88 @@ export class VisionService {
     this.pipeGet(`${this.config.get().camBaseUrl}/stream.mjpg`, res);
   }
 
+  /** Grabs a single JPEG frame from the vision_cam MJPEG stream. */
+  grabCamFrame(timeoutMs = 5000): Promise<
+    | { ok: true; contentType: string; body: Buffer }
+    | { ok: false; message: string }
+  > {
+    const targetUrl = `${this.config.get().camBaseUrl}/stream.mjpg`;
+    return new Promise((resolve) => {
+      let parsed: URL;
+      try {
+        parsed = new URL(targetUrl);
+      } catch {
+        resolve({ ok: false, message: tApi('vision.badUpstream') });
+        return;
+      }
+      let settled = false;
+      const finish = (
+        result: { ok: true; contentType: string; body: Buffer } | { ok: false; message: string },
+      ) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        req.destroy();
+        resolve(result);
+      };
+      const client = parsed.protocol === 'https:' ? https : http;
+      const req = client.request(
+        {
+          protocol: parsed.protocol,
+          hostname: parsed.hostname,
+          port: parsed.port,
+          path: `${parsed.pathname}${parsed.search}`,
+          method: 'GET',
+        },
+        (upstream) => {
+          const status = upstream.statusCode ?? 500;
+          if (status >= 400) {
+            upstream.resume();
+            finish({ ok: false, message: tApi('vision.upstream', { status }) });
+            return;
+          }
+          let buffered = Buffer.alloc(0);
+          upstream.on('data', (chunk: Buffer) => {
+            buffered = Buffer.concat([buffered, chunk]);
+            const frame = extractJpegFrame(buffered);
+            if (frame) {
+              finish({ ok: true, contentType: 'image/jpeg', body: Buffer.from(frame) });
+            } else if (buffered.length > MAX_FRAME_BYTES) {
+              finish({ ok: false, message: tApi('vision.frameNotFound') });
+            }
+          });
+          upstream.on('end', () => finish({ ok: false, message: tApi('vision.frameNotFound') }));
+          upstream.on('error', (error) => finish({ ok: false, message: tApi('vision.connectFailed', { detail: error.message }) }));
+        },
+      );
+      const timer = setTimeout(() => finish({ ok: false, message: tApi('vision.frameTimeout') }), timeoutMs);
+      req.on('error', (error) => finish({ ok: false, message: tApi('vision.connectFailed', { detail: error.message }) }));
+      req.end();
+    });
+  }
+
+  /** Server-side realtime path: grab the latest cam frame and judge it in one call. */
+  async judgeCamFrame(input: CamJudgeInput): Promise<ApiEnvelope<unknown>> {
+    const mode = input.mode === 'choice' ? 'choice' : 'bool';
+    const frame = await this.grabCamFrame();
+    if (!frame.ok) {
+      return failure(frame.message);
+    }
+    const image: UploadedImage = { buffer: frame.body, mimetype: frame.contentType, originalname: 'cam-frame.jpg' };
+    const question = input.question ?? '';
+    // Live cam frames are not persisted unless the caller opts in.
+    const save = input.save ?? false;
+    return mode === 'choice'
+      ? this.judgeChoice(image, question, input.choices ?? '', save)
+      : this.judgeBool(image, question, save);
+  }
+
   private buildJudgeForm(
     image: UploadedImage | undefined,
     question: string,
+    save?: unknown,
   ): { ok: true; data: FormData } | { ok: false; message: string } {
     if (!image || !image.buffer || image.buffer.length === 0) {
       return { ok: false, message: tApi('vision.imageRequired') };
@@ -102,6 +185,7 @@ export class VisionService {
     });
     form.append('image', blob, image.originalname || 'image');
     form.append('question', question ?? '');
+    form.append('save', saveFlag(save));
     return { ok: true, data: form };
   }
 
@@ -179,6 +263,8 @@ export class VisionService {
     req.end();
   }
 }
+
+const MAX_FRAME_BYTES = 8 * 1024 * 1024;
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : 'unknown error';
