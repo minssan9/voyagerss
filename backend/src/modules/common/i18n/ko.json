@@ -65,7 +65,9 @@
     "badUpstream": "잘못된 업스트림 주소입니다.",
     "urlEmpty": "주소가 비어 있습니다.",
     "urlInvalid": "올바른 http(s) 주소가 아닙니다.",
-    "urlProtocol": "http 또는 https 주소만 사용할 수 있습니다."
+    "urlProtocol": "http 또는 https 주소만 사용할 수 있습니다.",
+    "frameNotFound": "카메라 스트림에서 프레임을 찾지 못했습니다.",
+    "frameTimeout": "카메라 프레임 수신 시간이 초과되었습니다."
   },
   "aviation": {
     "topicsRequired": "토픽 배열이 필요합니다",

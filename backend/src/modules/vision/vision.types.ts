@@ -17,6 +17,20 @@ export interface UploadedImage {
   originalname: string;
 }
 
+export type JudgeMode = 'bool' | 'choice';
+
+export interface CamJudgeInput {
+  mode?: string;
+  question?: string;
+  choices?: string;
+  save?: boolean | string;
+}
+
+/** Form value for vision_judge `save`; anything but an explicit false keeps the record. */
+export function saveFlag(value: unknown): 'true' | 'false' {
+  return value === false || value === 'false' || value === '0' ? 'false' : 'true';
+}
+
 export const DEFAULT_CAM_BASE_URL = 'http://127.0.0.1:8080';
 export const DEFAULT_JUDGE_BASE_URL = 'http://127.0.0.1:8000';
 
@@ -57,4 +71,23 @@ export function messageFromUpstream(status: number, body: unknown): string {
 
 export function isSafeImageFilename(filename: string): boolean {
   return /^[A-Za-z0-9._-]+$/.test(filename) && !filename.includes('..');
+}
+
+const JPEG_SOI = Buffer.from([0xff, 0xd8]);
+const JPEG_EOI = Buffer.from([0xff, 0xd9]);
+
+/**
+ * Returns the first complete JPEG (SOI..EOI) inside an MJPEG byte buffer,
+ * or null while the frame is still incomplete.
+ */
+export function extractJpegFrame(buffer: Buffer): Buffer | null {
+  const start = buffer.indexOf(JPEG_SOI);
+  if (start < 0) {
+    return null;
+  }
+  const end = buffer.indexOf(JPEG_EOI, start + JPEG_SOI.length);
+  if (end < 0) {
+    return null;
+  }
+  return buffer.subarray(start, end + JPEG_EOI.length);
 }

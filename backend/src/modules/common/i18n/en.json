@@ -65,7 +65,9 @@
     "badUpstream": "Invalid upstream address.",
     "urlEmpty": "Address is empty.",
     "urlInvalid": "Not a valid http(s) address.",
-    "urlProtocol": "Only http or https addresses are allowed."
+    "urlProtocol": "Only http or https addresses are allowed.",
+    "frameNotFound": "No frame found in the camera stream.",
+    "frameTimeout": "Timed out waiting for a camera frame."
   },
   "aviation": {
     "topicsRequired": "A topics array is required",

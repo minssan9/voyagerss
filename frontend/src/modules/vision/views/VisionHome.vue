@@ -34,6 +34,7 @@
       <q-btn color="primary" unelevated no-caps :label="t('vision.home.saveAndCheck')" :loading="isSaving" @click="saveAndCheck" />
       <q-btn outline no-caps :label="t('vision.home.camTest')" @click="router.push('/vision/cam')" />
       <q-btn outline no-caps :label="t('vision.home.judgeTest')" @click="router.push('/vision/judge')" />
+      <q-btn outline no-caps :label="t('vision.home.liveTest')" @click="router.push('/vision/live')" />
     </div>
     <q-banner v-if="saveMessage" rounded class="bg-red-1 text-red-10">{{ saveMessage }}</q-banner>
   </div>

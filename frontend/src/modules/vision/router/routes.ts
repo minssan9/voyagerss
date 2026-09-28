@@ -21,6 +21,12 @@ const routes: RouteRecordRaw[] = [
                 meta: { icon: 'videocam', titleKey: 'routes.visionCam' }
             },
             {
+                path: 'live',
+                name: 'vision-live',
+                component: () => import('@/modules/vision/views/VisionLiveTest.vue'),
+                meta: { icon: 'sensors', titleKey: 'routes.visionLive' }
+            },
+            {
                 path: 'judge',
                 name: 'vision-judge',
                 component: () => import('@/modules/vision/views/VisionJudgeTest.vue'),
