@@ -15,12 +15,12 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px 12px;
-  margin-bottom: 16px;
-  padding: 12px 14px;
+  gap: 2px 8px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 16px;
+  border-radius: 12px;
 }
 
 .workschd-page__heading {
@@ -29,15 +29,17 @@
 
 .workschd-page__title {
   margin: 0;
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
   color: #1d1d1f;
 }
 
 .workschd-page__subtitle {
-  margin: 4px 0 0;
-  font-size: 14px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.3;
   color: #6e6e73;
 }
 
@@ -53,46 +55,26 @@
   display: none;
 }
 
-.workschd-page__toolbar {
-  grid-column: 1 / -1;
+.workschd-page__toolbar,
+#workschd-page-toolbar,
+#workschd-page-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
 
-.workschd-page__toolbar:not(:has(.q-btn, .q-field, .q-chip, .q-toggle, .q-tabs)) {
+.workschd-page__toolbar {
+  grid-column: 1 / -1;
+}
+
+#workschd-page-toolbar:empty,
+#workschd-page-actions:empty {
   display: none;
 }
 
-.workschd-page__header .q-btn:not(.q-btn--round) {
-  min-height: 28px !important;
-  height: 28px;
-  padding: 0 8px !important;
-  font-size: 12px !important;
-  border-radius: 8px !important;
-}
-
-.workschd-page__header .q-field .q-field__control,
-.workschd-page__header .q-field .q-field__marginal {
-  height: 28px;
-  min-height: 28px;
-}
-
-.workschd-page__header .q-field {
-  width: 168px;
-  font-size: 12px;
-}
-
-.workschd-page__header .q-chip {
-  height: 22px;
-  font-size: 12px;
-}
-
-.workschd-page__header .q-tab {
-  min-height: 28px;
-  padding: 0 8px;
-  font-size: 12px;
+.workschd-page__toolbar:not(:has(.q-btn, .q-field, .q-chip, .q-toggle, .q-tabs)) {
+  display: none;
 }
 
 .workschd-page__meta {
@@ -116,19 +98,120 @@
   font-weight: 600 !important;
 }
 
+.workschd-page__header .q-btn:not(.q-btn--round),
 .workschd-page__header .workschd-btn,
-.workschd-page__header .q-btn.bg-primary:not(.q-btn--outline):not(.q-btn--flat),
-.workschd-page__header .q-btn:not(.q-btn--round) {
+.workschd-page__header .q-btn.bg-primary:not(.q-btn--outline):not(.q-btn--flat) {
   min-height: 28px !important;
-  height: 28px;
+  height: 28px !important;
   padding: 0 8px !important;
   font-size: 12px !important;
+  line-height: 28px !important;
   border-radius: 8px !important;
+}
+
+.workschd-page__header .q-btn--round {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px !important;
+  padding: 0 !important;
+}
+
+.workschd-page__header .q-btn .q-icon,
+.workschd-page__header .q-chip .q-icon,
+.workschd-page__header .q-field__marginal .q-icon,
+.workschd-page__header .q-tab__icon {
+  font-size: 16px;
+}
+
+.workschd-page__header .q-btn .q-icon.on-left {
+  margin-right: 4px;
+}
+
+.workschd-page__header .q-btn .q-icon.on-right {
+  margin-left: 4px;
+}
+
+.workschd-page__header .q-btn-group,
+.workschd-page__header .q-btn-toggle {
+  height: 28px;
+  border-radius: 8px;
+}
+
+.workschd-page__header .q-chip {
+  height: 28px;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 8px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.workschd-page__header .q-field {
+  width: 160px;
+  margin: 0;
+  padding: 0 !important;
+  font-size: 12px;
+}
+
+.workschd-page__header .q-field__control,
+.workschd-page__header .q-field__marginal,
+.workschd-page__header .q-field__prepend,
+.workschd-page__header .q-field__append {
+  min-height: 28px !important;
+  height: 28px !important;
+}
+
+.workschd-page__header .q-field__control {
+  padding: 0 8px;
+  border-radius: 8px;
+}
+
+.workschd-page__header .q-field__native,
+.workschd-page__header .q-field__input {
+  min-height: 0 !important;
+  height: 28px !important;
+  padding: 0 !important;
+  line-height: 28px !important;
+}
+
+.workschd-page__header .q-field__label {
+  font-size: 12px;
+}
+
+.workschd-page__header .q-field__bottom {
+  display: none;
+}
+
+.workschd-page__header .q-toggle {
+  height: 28px;
+  margin: 0;
+}
+
+.workschd-page__header .q-toggle__label {
+  font-size: 12px;
+  padding-left: 6px;
+}
+
+.workschd-page__header .q-tabs,
+.workschd-page__header .q-tab,
+.workschd-page__header .q-tab__content,
+.workschd-page__header .q-tabs__content {
+  min-height: 28px !important;
+  height: 28px !important;
 }
 
 .workschd-page__header .q-tabs {
   width: auto;
-  min-height: 28px;
+}
+
+.workschd-page__header .q-tab {
+  padding: 0 8px !important;
+  font-size: 12px;
+}
+
+.workschd-page__header .q-tab__content {
+  padding: 0 !important;
 }
 
 .workschd-grid {
