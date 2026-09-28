@@ -11,7 +11,8 @@
       "connectedWithDevice": "연결됨 · {device} · {model}",
       "saveAndCheck": "저장 후 연결 확인",
       "camTest": "카메라 테스트",
-      "judgeTest": "판정 테스트"
+      "judgeTest": "판정 테스트",
+      "liveTest": "실시간 테스트"
     },
     "cam": {
       "title": "카메라 테스트",
@@ -39,6 +40,40 @@
     },
     "errors": {
       "requestFailed": "요청에 실패했습니다."
+    },
+    "live": {
+      "title": "실시간 판정 테스트",
+      "lead": "웹캠·동영상·사진·IP 카메라 프레임을 연속으로 판정합니다. 응답이 오면 최신 프레임을 바로 다시 보내므로 요청이 쌓이지 않습니다.",
+      "config": "구성",
+      "judgeTest": "판정 테스트",
+      "sourceWebcam": "웹캠",
+      "sourceVideo": "동영상",
+      "sourceImage": "사진",
+      "sourceCam": "IP 카메라",
+      "device": "카메라 장치",
+      "restartWebcam": "웹캠 다시 연결",
+      "pickVideo": "동영상 파일을 선택하세요",
+      "pickImage": "사진 파일을 선택하세요",
+      "camHint": "IP 카메라 모드는 백엔드가 vision_cam 최신 프레임을 직접 가져와 판정합니다 (브라우저 캡처 없음).",
+      "interval": "판정 간격",
+      "intervalMax": "최대 속도",
+      "resolution": "전송 해상도 (긴 변)",
+      "saveRecords": "판정 이력에 저장",
+      "start": "실시간 시작",
+      "stop": "중지",
+      "once": "1회 판정",
+      "reset": "초기화",
+      "latency": "최근 지연",
+      "avgLatency": "평균 지연",
+      "throughput": "판정/초",
+      "count": "판정 수 · 오류 {errors}",
+      "scores": "최근 결과",
+      "timeline": "타임라인",
+      "noResult": "아직 결과가 없습니다.",
+      "questionRequired": "질문을 입력하세요.",
+      "frameNotReady": "프레임이 아직 준비되지 않았습니다.",
+      "webcamUnsupported": "이 브라우저에서는 웹캠을 사용할 수 없습니다. HTTPS 또는 localhost 에서 접속하세요.",
+      "webcamFailed": "웹캠을 열지 못했습니다: {detail}"
     }
   }
 }

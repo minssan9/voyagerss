@@ -14,7 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { VisionConfigStore } from './vision-config.store';
 import { VisionService } from './vision.service';
-import { failure, success, UploadedImage, VisionEndpoints } from './vision.types';
+import { CamJudgeInput, failure, success, UploadedImage, VisionEndpoints } from './vision.types';
 import { tApi } from '../common/i18n-locale';
 
 @Controller('vision')
@@ -50,6 +50,18 @@ export class VisionController {
     this.svc.pipeCamStream(res);
   }
 
+  @Get('cam/snapshot')
+  async camSnapshot(@Res() res: Response) {
+    const frame = await this.svc.grabCamFrame();
+    if (!frame.ok) {
+      res.status(200).json(failure(frame.message));
+      return;
+    }
+    res.setHeader('Content-Type', frame.contentType);
+    res.setHeader('Cache-Control', 'no-cache, no-store');
+    res.send(frame.body);
+  }
+
   @Get('judge/health')
   judgeHealth() {
     return this.svc.getJudgeHealth();
@@ -57,8 +69,12 @@ export class VisionController {
 
   @Post('judge/bool')
   @UseInterceptors(FileInterceptor('image'))
-  judgeBool(@UploadedFile() file: UploadedImage | undefined, @Body('question') question: string) {
-    return this.svc.judgeBool(file, question);
+  judgeBool(
+    @UploadedFile() file: UploadedImage | undefined,
+    @Body('question') question: string,
+    @Body('save') save?: string,
+  ) {
+    return this.svc.judgeBool(file, question, save);
   }
 
   @Post('judge/choice')
@@ -67,8 +83,14 @@ export class VisionController {
     @UploadedFile() file: UploadedImage | undefined,
     @Body('question') question: string,
     @Body('choices') choices: string,
+    @Body('save') save?: string,
   ) {
-    return this.svc.judgeChoice(file, question, choices);
+    return this.svc.judgeChoice(file, question, choices, save);
+  }
+
+  @Post('judge/cam')
+  judgeCam(@Body() body: CamJudgeInput) {
+    return this.svc.judgeCamFrame(body ?? {});
   }
 
   @Get('judge/records')

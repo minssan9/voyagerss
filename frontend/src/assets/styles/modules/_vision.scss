@@ -64,3 +64,129 @@
   border-radius: 8px;
   background: #e2e8f0;
 }
+
+// ---- live judge ----
+.page-vision__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  overflow: hidden;
+  background: #0f172a;
+  border-radius: 16px;
+}
+
+.page-vision__stage-media {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.page-vision__stage-empty {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.page-vision__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+  padding: 6px 12px;
+  color: #fff;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.2s;
+}
+
+.page-vision__badge--busy {
+  opacity: 0.75;
+}
+
+.page-vision__badge-label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.page-vision__source-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-vision__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.page-vision__stat {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.page-vision__stat-value {
+  font-size: 1.35rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-vision__score {
+  display: grid;
+  grid-template-columns: 88px 1fr 56px;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.page-vision__score-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-vision__score-track {
+  height: 8px;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.page-vision__score-fill {
+  height: 100%;
+  background: #0a84ff;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+.page-vision__score-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-vision__timeline {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 64px;
+  margin-top: 8px;
+  padding: 4px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.page-vision__timeline-bar {
+  flex: 1;
+  min-height: 2px;
+  max-width: 12px;
+  background: #0a84ff;
+  border-radius: 2px 2px 0 0;
+}

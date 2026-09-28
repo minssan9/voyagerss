@@ -11,7 +11,8 @@
       "connectedWithDevice": "Connected · {device} · {model}",
       "saveAndCheck": "Save & verify connection",
       "camTest": "Camera test",
-      "judgeTest": "Judge test"
+      "judgeTest": "Judge test",
+      "liveTest": "Live test"
     },
     "cam": {
       "title": "Camera Test",
@@ -39,6 +40,40 @@
     },
     "errors": {
       "requestFailed": "The request failed."
+    },
+    "live": {
+      "title": "Live judge test",
+      "lead": "Continuously judges frames from a webcam, video, photo or IP camera. The latest frame is sent as soon as the previous answer arrives, so requests never pile up.",
+      "config": "Config",
+      "judgeTest": "Judge test",
+      "sourceWebcam": "Webcam",
+      "sourceVideo": "Video",
+      "sourceImage": "Photo",
+      "sourceCam": "IP camera",
+      "device": "Camera device",
+      "restartWebcam": "Reconnect webcam",
+      "pickVideo": "Choose a video file",
+      "pickImage": "Choose an image file",
+      "camHint": "In IP camera mode the backend pulls the latest vision_cam frame and judges it directly (no browser capture).",
+      "interval": "Interval",
+      "intervalMax": "As fast as possible",
+      "resolution": "Upload size (long edge)",
+      "saveRecords": "Save to judge history",
+      "start": "Start live",
+      "stop": "Stop",
+      "once": "Judge once",
+      "reset": "Reset",
+      "latency": "Last latency",
+      "avgLatency": "Avg latency",
+      "throughput": "Judgements/s",
+      "count": "Judged · errors {errors}",
+      "scores": "Latest result",
+      "timeline": "Timeline",
+      "noResult": "No results yet.",
+      "questionRequired": "Enter a question.",
+      "frameNotReady": "The frame is not ready yet.",
+      "webcamUnsupported": "Webcam is not available in this browser. Use HTTPS or localhost.",
+      "webcamFailed": "Could not open the webcam: {detail}"
     }
   }
 }
