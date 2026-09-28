@@ -75,7 +75,7 @@ body {
   }
 
   &-header {
-    padding: $spacing-lg;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -131,7 +131,7 @@ body {
       }
 
       @media (min-width: $breakpoint-lg) {
-        display: none;
+        display: inline-flex;
       }
     }
   }
@@ -208,16 +208,43 @@ body {
 
 // Standard Drawers (Quasar)
 .drawer-header {
-  padding: $spacing-base;
+  padding: 8px 12px;
   background: linear-gradient(135deg, $primary-color, $secondary-color);
   color: $white;
-  font-size: $text-lg;
+  font-size: 13px;
   font-weight: $font-bold;
   border-bottom: 1px solid $border-color;
 }
 
 .drawer-side {
-  height: calc(100vh - 250px);
+  height: calc(100vh - var(--voy-header-height, 44px) - 88px);
+}
+
+.app-drawer--right {
+  .q-item {
+    min-height: 32px;
+    padding: 0 8px;
+    margin: 1px 6px;
+    font-size: 13px;
+  }
+
+  .q-item__section--avatar {
+    min-width: 28px;
+    padding-right: 6px;
+  }
+
+  .q-item__label--header {
+    min-height: 0;
+    padding: 8px 12px 2px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .q-btn:not(.q-btn--round) {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
 }
 
 .drawer-footer {
@@ -237,10 +264,10 @@ body {
   padding-bottom: $footer-height;
 }
 
-@media (min-width: 1024px) {
-  .q-layout.with-sidebar .q-page-container {
-    margin-left: var(--voy-sidebar-width, 260px);
-  }
+.q-header.app-header,
+.q-header.app-header .q-toolbar {
+  min-height: var(--voy-header-height, 44px);
+  height: var(--voy-header-height, 44px);
 }
 
 // Sidebar q-expansion-item global overrides
@@ -248,7 +275,7 @@ body {
   .q-expansion-item__container > .q-item {
     border-radius: 8px;
     margin: 0 8px;
-    min-height: 40px;
+    min-height: 32px;
     color: var(--voy-sidebar-text-muted, rgba(255,255,255,0.5));
     font-size: 12px;
     font-weight: 700;

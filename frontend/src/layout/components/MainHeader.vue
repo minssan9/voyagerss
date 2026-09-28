@@ -47,7 +47,7 @@
 
       <!-- User button -->
       <q-btn flat round dense class="app-header__user-btn" @click="layoutStore.toggleRightDrawer()">
-        <q-avatar size="30px" color="primary" text-color="white">
+        <q-avatar size="22px" color="primary" text-color="white">
           <img v-if="userStore.user?.profileImageUrl" :src="userStore.user.profileImageUrl" />
           <q-icon v-else name="person" size="18px" />
         </q-avatar>
@@ -137,7 +137,8 @@ function formatRouteLabel(routeRecord: RouteRecordNormalized) {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--voy-header-text, #1d1d1f);
-  height: var(--voy-header-height, 64px);
+  min-height: var(--voy-header-height, 44px);
+  height: var(--voy-header-height, 44px);
   transition: background var(--voy-transition, 220ms), border-color var(--voy-transition, 220ms);
 
   &--dark {
@@ -147,9 +148,10 @@ function formatRouteLabel(routeRecord: RouteRecordNormalized) {
 }
 
 .app-toolbar {
-  height: var(--voy-header-height, 64px);
-  padding: 0 16px;
-  gap: 8px;
+  min-height: var(--voy-header-height, 44px);
+  height: var(--voy-header-height, 44px);
+  padding: 0 10px;
+  gap: 4px;
 }
 
 .app-header__menu-btn {
@@ -161,7 +163,7 @@ function formatRouteLabel(routeRecord: RouteRecordNormalized) {
 
 .app-header__brand {
   font-family: 'Poppins', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--voy-primary, #0037EB);
@@ -181,9 +183,9 @@ function formatRouteLabel(routeRecord: RouteRecordNormalized) {
 .module-link {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 2px 8px;
   border-radius: var(--voy-radius-sm, 8px);
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--voy-text-secondary, #6e6e73);
   text-decoration: none;
@@ -211,9 +213,9 @@ function formatRouteLabel(routeRecord: RouteRecordNormalized) {
 }
 
 .common-link {
-  padding: 6px 10px;
+  padding: 2px 8px;
   border-radius: var(--voy-radius-sm, 8px);
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--voy-text-secondary, #6e6e73);
   text-decoration: none;

@@ -1,6 +1,6 @@
 <template>
   <!-- Mobile Overlay -->
-  <div v-if="sidebarOpen && isMobile" class="mobile-overlay" @click="closeSidebar" />
+  <div v-if="sidebarOpen" class="mobile-overlay" @click="closeSidebar" />
 
   <!-- Sidebar Navigation -->
   <aside :class="['sidebar', { open: sidebarOpen }]">

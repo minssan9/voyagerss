@@ -1,16 +1,18 @@
 ﻿<template>
-  <q-drawer 
-    side="right" 
+  <q-drawer
+    class="app-drawer app-drawer--right"
+    side="right"
     v-model="drawerRight"
-    :width="200" 
-    :breakpoint="700" 
+    :width="320"
+    behavior="mobile"
+    overlay
     bordered
     @update:model-value="layoutStore.setRightDrawer"
   >
     <div class="drawer-header">      
       <div class="row ">      
         <div class="col-12" v-if="userStore.user.accountId">
-          <q-avatar size="32px">
+          <q-avatar size="22px">
             <img :src="userStore.user.profileImageUrl" />
           </q-avatar>
           <span class="q-ml-sm">{{ userStore.user.username || t('common.drawer.guest') }}</span>
