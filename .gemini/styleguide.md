@@ -4,7 +4,7 @@
 
 ## 프로젝트 구성
 
-- **백엔드**: NestJS + TypeScript, Prisma ORM (다중 데이터베이스 스키마: 메인/workschd/investand/aviation/aipr)
+- **백엔드**: NestJS + TypeScript, Prisma ORM (다중 데이터베이스 스키마: workschd/aviation/aipr/rbac)
 - **프론트엔드**: Vue 3 + Quasar + Vite + Pinia, TypeScript
 
 ## 리뷰 시 중점 사항
