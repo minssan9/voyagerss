@@ -25,6 +25,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'vision-judge',
                 component: () => import('@/modules/vision/views/VisionJudgeTest.vue'),
                 meta: { icon: 'psychology', titleKey: 'routes.visionJudge' }
+            },
+            {
+                path: 'airspace',
+                name: 'vision-airspace',
+                component: () => import('@/modules/vision/views/AirspaceMonitor.vue'),
+                meta: { icon: 'radar', titleKey: 'routes.visionAirspace' }
             }
         ]
     }

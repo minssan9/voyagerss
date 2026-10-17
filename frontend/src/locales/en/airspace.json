@@ -1,0 +1,52 @@
+{
+  "routes": {
+    "visionAirspace": "Airspace monitor"
+  },
+  "airspace": {
+    "title": "Airspace monitor",
+    "lead": "Detects and tracks drones with a camera and mmWave radar, and follows them with the pan-tilt mount for recording. Observation and alerting only.",
+    "online": "Receiving",
+    "offline": "No data",
+    "radar": "Radar {mode}",
+    "gimbal": "Pan {pan}° · Tilt {tilt}°",
+    "offlineHint": "No snapshots are arriving from the observer. To try it without hardware, run this in the vision_cam folder:",
+    "threat": {
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "source": {
+      "camera": "Camera",
+      "radar": "Radar"
+    },
+    "scope": {
+      "title": "Radar plan view",
+      "aria": "Target positions seen from above the mount",
+      "legend": "Up is straight ahead. Rings are 50 m of ground range, outer ticks are camera targets with unknown range, and the blue line and wedge are the camera heading and field of view."
+    },
+    "tracks": {
+      "title": "Tracked targets",
+      "empty": "No confirmed targets.",
+      "following": "Gimbal is following",
+      "id": "ID",
+      "label": "Class",
+      "threat": "Alert",
+      "azimuth": "Azimuth",
+      "elevation": "Elevation",
+      "range": "Range (m)",
+      "velocity": "Radial velocity (m/s)",
+      "sources": "Sensors"
+    },
+    "events": {
+      "title": "Alert log",
+      "empty": "No events yet.",
+      "new": "T{id} new target · {level} · {where}",
+      "threatUp": "T{id} alert raised → {level} · {where}",
+      "lost": "T{id} track ended",
+      "where": "az {az}° el {el}° {range}"
+    },
+    "errors": {
+      "requestFailed": "Request failed."
+    }
+  }
+}

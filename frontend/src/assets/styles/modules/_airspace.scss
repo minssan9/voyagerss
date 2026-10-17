@@ -1,0 +1,153 @@
+.page-airspace__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.page-airspace__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid var(--voy-border-strong);
+  border-radius: var(--voy-radius-sm);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--voy-text);
+}
+
+.page-airspace__pill--online {
+  border-color: transparent;
+  background: var(--voy-success);
+  color: #fff;
+}
+
+.page-airspace__pill--offline {
+  border-color: transparent;
+  background: var(--voy-text-muted);
+  color: #fff;
+}
+
+.page-airspace__count--high {
+  border-color: transparent;
+  background: var(--voy-error);
+  color: #fff;
+}
+
+.page-airspace__count--medium {
+  border-color: transparent;
+  background: var(--voy-warning);
+  color: #fff;
+}
+
+.page-airspace__count--low {
+  border-color: transparent;
+  background: var(--voy-success);
+  color: #fff;
+}
+
+.page-airspace__hint {
+  background: var(--voy-primary-muted);
+  color: var(--voy-text);
+}
+
+.page-airspace__code {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.page-airspace__legend {
+  font-size: 0.78rem;
+}
+
+.page-airspace__events {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.page-airspace__threat {
+  font-weight: 650;
+}
+
+.page-airspace__threat--high {
+  color: var(--voy-error);
+}
+
+.page-airspace__threat--medium {
+  color: var(--voy-warning);
+}
+
+.page-airspace__threat--low {
+  color: var(--voy-success);
+}
+
+.airspace-scope {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 8px auto;
+  font-family: inherit;
+}
+
+.airspace-scope__disc {
+  fill: #0b1220;
+}
+
+.airspace-scope__coverage {
+  fill: rgba(77, 110, 252, 0.08);
+}
+
+.airspace-scope__fov {
+  fill: rgba(77, 110, 252, 0.28);
+}
+
+.airspace-scope__ring,
+.airspace-scope__axis {
+  fill: none;
+  stroke: rgba(148, 163, 184, 0.35);
+  stroke-width: 0.006;
+}
+
+.airspace-scope__ring-label {
+  fill: rgba(148, 163, 184, 0.8);
+  font-size: 0.055px;
+}
+
+.airspace-scope__heading {
+  stroke: var(--voy-primary-light);
+  stroke-width: 0.012;
+}
+
+.airspace-scope__track {
+  --scope-color: var(--voy-success);
+
+  fill: var(--scope-color);
+  stroke: var(--scope-color);
+  stroke-width: 0.01;
+}
+
+.airspace-scope__track--medium {
+  --scope-color: var(--voy-warning);
+}
+
+.airspace-scope__track--high {
+  --scope-color: var(--voy-error);
+}
+
+.airspace-scope__track-target {
+  stroke: #fff;
+  stroke-width: 0.012;
+}
+
+.airspace-scope__bearing {
+  stroke-width: 0.02;
+}
+
+.airspace-scope__track-label {
+  stroke: none;
+  font-size: 0.06px;
+  font-weight: 600;
+}

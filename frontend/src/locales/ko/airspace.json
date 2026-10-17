@@ -1,0 +1,52 @@
+{
+  "routes": {
+    "visionAirspace": "공역 감시"
+  },
+  "airspace": {
+    "title": "공역 감시",
+    "lead": "카메라와 mmWave 레이더로 드론을 탐지·추적하고 팬틸트로 따라가며 기록합니다. 관측·경보 전용입니다.",
+    "online": "수신 중",
+    "offline": "수신 없음",
+    "radar": "레이더 {mode}",
+    "gimbal": "팬 {pan}° · 틸트 {tilt}°",
+    "offlineHint": "관측기에서 스냅샷이 들어오지 않습니다. 하드웨어 없이 확인하려면 vision_cam 폴더에서 실행하세요:",
+    "threat": {
+      "HIGH": "높음",
+      "MEDIUM": "보통",
+      "LOW": "낮음"
+    },
+    "source": {
+      "camera": "카메라",
+      "radar": "레이더"
+    },
+    "scope": {
+      "title": "레이더 평면도",
+      "aria": "마운트 기준 위에서 본 표적 위치",
+      "legend": "위쪽이 정면입니다. 링은 50 m 간격 수평거리, 바깥 눈금은 거리를 모르는 카메라 표적, 파란 선과 부채꼴은 현재 카메라 방향과 화각입니다."
+    },
+    "tracks": {
+      "title": "추적 표적",
+      "empty": "확정된 표적이 없습니다.",
+      "following": "짐벌이 따라가는 중",
+      "id": "ID",
+      "label": "분류",
+      "threat": "경보",
+      "azimuth": "방위각",
+      "elevation": "고각",
+      "range": "거리(m)",
+      "velocity": "시선속도(m/s)",
+      "sources": "센서"
+    },
+    "events": {
+      "title": "경보 기록",
+      "empty": "기록이 없습니다.",
+      "new": "T{id} 새 표적 · {level} · {where}",
+      "threatUp": "T{id} 경보 상승 → {level} · {where}",
+      "lost": "T{id} 추적 종료",
+      "where": "방위 {az}° 고각 {el}° {range}"
+    },
+    "errors": {
+      "requestFailed": "요청에 실패했습니다."
+    }
+  }
+}
