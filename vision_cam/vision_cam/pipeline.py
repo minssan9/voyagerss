@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from .decision import Decision, DrivingDecider
     from .roi import Zone
 
-_COLORS = {"motion": (0, 200, 255), "face": (80, 220, 80), "object": (255, 140, 0)}
+_COLORS = {"motion": (0, 200, 255), "face": (80, 220, 80), "object": (255, 140, 0), "drone": (0, 0, 255)}
 _ACTION_COLORS = {"STOP": (0, 0, 255), "SLOW": (0, 200, 255), "GO": (0, 200, 0)}
 
 
