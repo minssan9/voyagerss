@@ -3,6 +3,3 @@
 # venv 는 --system-site-packages 로 만들어야 picamera2 를 import 할 수 있음
 opencv-python-headless>=4.8,<5
 numpy>=1.24
-# airspace: PCA9685 팬틸트(I2C), IWR6843 레이더(UART)
-smbus2>=0.4
-pyserial>=3.5

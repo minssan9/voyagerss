@@ -281,34 +281,8 @@ class EdgeAnalyzer(Analyzer):
 
 ## 공역 감시 (airspace)
 
-카메라 드론 탐지 + TI IWR6843 mmWave 레이더를 융합해 추적하고, 팬틸트 마운트
-(`hardware/airspace_tracker`)로 카메라를 표적에 돌려 기록·경보한다. **관측·경보 전용**이며
-무력화·발사 장치는 제어하지 않는다.
-
-```bash
-python -m vision_cam.airspace --simulate --stream 8090              # 가상 표적·레이더, 하드웨어 불필요
-python -m vision_cam.airspace --radar /dev/ttyUSB1 --gimbal pca9685 \
-    --stream 8090 --backend http://localhost:3000 --events airspace.jsonl --snapshot-dir snaps
-```
-
-| 모듈 | 역할 |
-|---|---|
-| `analyzers/drone.py` | 하늘 영역 소형 이동체 탐지 |
-| `radar/iwr6843.py` | mmWave SDK 데모 UART TLV 파서 (점 x,y,z,doppler + SNR) |
-| `radar/__init__.py` | 극좌표 군집화, `SerialRadar` (pyserial) |
-| `radar/simulator.py` | 가상 공역: 레이더 점/UART 바이트, 하늘 카메라 프레임 |
-| `tracking/` | (방위각, 고각, 거리) 칼만 필터 + 헝가리안 매칭 + 트랙 병합·수명 + 경보 등급 |
-| `gimbal.py` | PCA9685(smbus2)/mock 드라이버, 경보 최고 트랙 추종 (속도·기구 한계, 놓치면 대기 후 홈) |
-| `airspace.py` | 실행기: `/`, `/stream.mjpg`, `/status`, `/tracks`, 백엔드 `POST /api/airspace/ingest` |
-
-- 각도는 마운트 기준 월드 좌표: 팬 0° = 정면, 오른쪽 +, 틸트 0° = 수평, 위 +.
-  카메라·레이더 측정은 촬영 시점의 팬틸트 자세로 월드 좌표로 바꾼 뒤 추적한다.
-- 레이더 chirp 설정(.cfg)은 TI mmWave 데모 도구로 CLI 포트에 미리 보낸다. `--radar` 는 데이터 포트.
-- 경보 점수 = 0.55·근접도(30–150 m) + 0.35·접근 속도(8 m/s 만점) + 분류 가중치. `bird` 는 0.3배.
-  거리를 모르는 카메라 단독 트랙은 근접도 0.3 으로 본다. HIGH ≥ 0.65, MEDIUM ≥ 0.35.
-- 이벤트(JSONL): `track_new`, `threat_up`(그 트랙의 최고 등급을 넘을 때만), `track_lost`. HIGH 진입 시 화면 저장.
-- 한계: 배경 차분은 팬틸트가 움직이는 동안 배경이 흔들리면 오검출이 늘어난다(하늘이 균일할수록 덜함).
-  드론/새 구분은 `--drone-model` ONNX 분류기(64×64 입력, [drone, bird, other] 출력)가 있어야 한다.
+드론 공역 감시(카메라+레이더 융합 추적, 팬틸트 추종)는 Go 로 만든 `airspace_edge/` 가 담당한다.
+이 모듈의 `drone` 분석기(`--analyzers drone`)는 일반 분석기로 남아 있다.
 
 ## 참고
 
