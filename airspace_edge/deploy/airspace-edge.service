@@ -1,0 +1,14 @@
+[Unit]
+Description=Airspace monitor edge (camera + radar tracking, pan-tilt follow)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=pi
+EnvironmentFile=/etc/airspace-edge.env
+ExecStart=/usr/local/bin/airspace-edge --camera rpicam --gimbal pca9685
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
