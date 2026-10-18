@@ -11,6 +11,7 @@ module.exports = {
     '^@prisma/client-aviation$': '<rootDir>/node_modules/@prisma/client-aviation',
     '^@prisma/client-aipr$': '<rootDir>/node_modules/@prisma/client-aipr',
     '^@prisma/client-identity$': '<rootDir>/node_modules/@prisma/client-identity',
+    '^@prisma/client-airspace$': '<rootDir>/node_modules/@prisma/client-airspace',
   },
   collectCoverageFrom: [
     'src/**/*.ts',

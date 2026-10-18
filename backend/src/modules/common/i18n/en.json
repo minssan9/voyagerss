@@ -80,6 +80,11 @@
   },
   "airspace": {
     "unauthorized": "Airspace ingest token is invalid.",
-    "invalidPayload": "Airspace snapshot payload is invalid."
+    "invalidPayload": "Airspace snapshot payload is invalid.",
+    "invalidCommand": "Gimbal command is invalid.",
+    "commandQueued": "Gimbal command sent. The observer picks it up on its next report.",
+    "invalidQuery": "Query parameters are invalid.",
+    "frameTooLarge": "Video frame is too large.",
+    "noFrame": "No video frame received."
   }
 }
