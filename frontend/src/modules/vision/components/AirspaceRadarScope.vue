@@ -12,6 +12,7 @@
     <line class="airspace-scope__heading" x1="0" y1="0" :x2="polar(pan, 1)[0]" :y2="polar(pan, 1)[1]" />
 
     <g v-for="m in markers" :key="m.id" :class="['airspace-scope__track', `airspace-scope__track--${m.threat.toLowerCase()}`]">
+      <polyline v-if="m.trail" :points="m.trail" class="airspace-scope__trail" />
       <template v-if="m.ranged">
         <circle :cx="m.x" :cy="m.y" :r="m.target ? 0.05 : 0.035" :class="{ 'airspace-scope__track-target': m.target }" />
         <text :x="m.x + 0.06" :y="m.y - 0.04" class="airspace-scope__track-label">T{{ m.id }}</text>
@@ -53,14 +54,26 @@ function sector(fromDeg: number, toDeg: number, radius: number): string {
   return `M0 0 L${x0} ${y0} A${radius} ${radius} 0 ${large} 1 ${x1} ${y1} Z`
 }
 
+function groundRadius(range: number, elevation: number): number {
+  return Math.min(1, (range * Math.cos((elevation * Math.PI) / 180)) / props.maxRange)
+}
+
+// Past positions with a known range, as an SVG polyline (camera-only points have no range).
+function trailPoints(tr: AirspaceTrack): string | null {
+  const pts = (tr.trail ?? [])
+    .filter((p): p is [number, number, number] => p[2] !== null)
+    .map(([az, el, r]) => polar(az, groundRadius(r, el)).map((v) => v.toFixed(4)).join(','))
+  return pts.length >= 2 ? pts.join(' ') : null
+}
+
 const markers = computed(() =>
   props.tracks
     .filter((tr) => tr.status === 'confirmed')
     .map((tr) => {
       const ranged = tr.range !== null
-      const ground = ranged ? Math.min(1, (tr.range! * Math.cos((tr.elevation * Math.PI) / 180)) / props.maxRange) : 1
+      const ground = ranged ? groundRadius(tr.range!, tr.elevation) : 1
       const [x, y] = polar(tr.azimuth, ground)
-      return { id: tr.id, threat: tr.threat, ranged, x, y, target: tr.id === props.targetId }
+      return { id: tr.id, threat: tr.threat, ranged, x, y, target: tr.id === props.targetId, trail: trailPoints(tr) }
     }),
 )
 </script>

@@ -17,14 +17,34 @@
           {{ t(`airspace.threat.${level}`) }} {{ counts[level] }}
         </span>
       </div>
+      <div class="page-vision__actions">
+        <q-toggle
+          :model-value="alerts.enabled.value"
+          icon="notifications_active"
+          :label="t('airspace.alerts.toggle')"
+          class="page-airspace__toggle"
+          data-test="airspace-alert-toggle"
+          @update:model-value="alerts.toggle"
+        />
+        <q-btn flat no-caps icon="history" :label="t('airspace.history.open')" @click="router.push('/vision/airspace/history')" />
+      </div>
     </header>
 
     <q-banner v-if="!online" rounded class="page-airspace__hint" data-test="airspace-offline-hint">
       {{ t('airspace.offlineHint') }}
-      <code class="page-airspace__code">python -m vision_cam.airspace --simulate --backend {{ backendHint }}</code>
+      <code class="page-airspace__code">cd airspace_edge && go run ./cmd/airspace-edge --simulate --server {{ backendHint }}</code>
     </q-banner>
 
     <div class="row q-col-gutter-md">
+      <div class="col-12 col-md-7">
+        <q-card flat bordered class="page-vision__card">
+          <q-card-section>
+            <div class="page-vision__card-title">{{ t('airspace.camera.title') }}</div>
+            <AirspaceCameraPanel :live="cameraLive" />
+          </q-card-section>
+        </q-card>
+      </div>
+
       <div class="col-12 col-md-5">
         <q-card flat bordered class="page-vision__card page-airspace__scope-card">
           <q-card-section>
@@ -40,7 +60,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-md-7">
+      <div class="col-12 col-md-8">
         <q-card flat bordered class="page-vision__card">
           <q-card-section>
             <div class="page-vision__card-title">{{ t('airspace.tracks.title') }}</div>
@@ -70,7 +90,33 @@
                   </span>
                 </q-td>
               </template>
+              <template #body-cell-actions="props">
+                <q-td :props="props">
+                  <q-btn
+                    dense flat no-caps size="sm" icon="my_location"
+                    :label="t('airspace.control.lock')"
+                    :disable="!canControl || commandBusy"
+                    :data-test="`airspace-lock-${props.row.id}`"
+                    @click="command({ mode: 'lock', trackId: props.row.id })"
+                  />
+                </q-td>
+              </template>
             </q-table>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <q-card flat bordered class="page-vision__card">
+          <q-card-section>
+            <div class="page-vision__card-title">{{ t('airspace.control.title') }}</div>
+            <AirspaceGimbalControl
+              :gimbal="snapshot?.gimbal ?? null"
+              :pending="pendingCommand"
+              :can-control="canControl"
+              :busy="commandBusy"
+              @command="command"
+            />
           </q-card-section>
         </q-card>
       </div>
@@ -78,12 +124,21 @@
       <div class="col-12">
         <q-card flat bordered class="page-vision__card">
           <q-card-section>
-            <div class="page-vision__card-title">{{ t('airspace.events.title') }}</div>
+            <div class="page-airspace__events-head">
+              <div class="page-vision__card-title">{{ t('airspace.events.title') }}</div>
+              <q-select
+                v-model="eventFilter"
+                dense outlined emit-value map-options
+                :options="eventFilterOptions"
+                class="page-airspace__filter"
+                data-test="airspace-event-filter"
+              />
+            </div>
             <q-list dense separator class="page-airspace__events" data-test="airspace-events">
-              <q-item v-if="!events.length">
+              <q-item v-if="!filteredEvents.length">
                 <q-item-section class="page-vision__meta">{{ t('airspace.events.empty') }}</q-item-section>
               </q-item>
-              <q-item v-for="ev in events" :key="ev.seq">
+              <q-item v-for="ev in filteredEvents" :key="`${ev.sessionId}-${ev.seq}`">
                 <q-item-section avatar>
                   <q-icon :name="eventIcon(ev)" :class="ev.threat ? `page-airspace__threat--${ev.threat.toLowerCase()}` : ''" />
                 </q-item-section>
@@ -102,15 +157,24 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { Notify } from 'quasar'
 import type { QTableColumn } from 'quasar'
 import AirspaceRadarScope from '@/modules/vision/components/AirspaceRadarScope.vue'
+import AirspaceCameraPanel from '@/modules/vision/components/AirspaceCameraPanel.vue'
+import AirspaceGimbalControl from '@/modules/vision/components/AirspaceGimbalControl.vue'
+import { useAirspaceAlerts } from '@/modules/vision/composables/useAirspaceAlerts'
+import { useUserStore } from '@/stores/common/store_user'
 import {
   getAirspaceEvents,
   getAirspaceStatus,
   openAirspaceStream,
+  sendGimbalCommand,
   type AirspaceEvent,
   type AirspaceSnapshot,
+  type GimbalCommand,
+  type GimbalCommandInput,
   type ThreatLevel,
 } from '@/modules/vision/api/api-airspace'
 
@@ -118,14 +182,22 @@ const STALE_MS = 3000
 const MAX_EVENTS = 100
 
 const { t } = useI18n()
+const router = useRouter()
+const userStore = useUserStore()
 const snapshot = ref<AirspaceSnapshot | null>(null)
 const events = ref<AirspaceEvent[]>([])
 const lastSnapshotAt = ref(0)
 const now = ref(Date.now())
+const cameraLiveAt = ref(0)
+const pendingCommand = ref<GimbalCommand | null>(null)
+const commandBusy = ref(false)
+const eventFilter = ref<'all' | 'HIGH' | 'MEDIUM' | 'lost'>('all')
 const levels: ThreatLevel[] = ['HIGH', 'MEDIUM', 'LOW']
 const backendHint = window.location.origin
 
 const online = computed(() => snapshot.value !== null && now.value - lastSnapshotAt.value <= STALE_MS)
+const cameraLive = computed(() => online.value && now.value - cameraLiveAt.value <= STALE_MS)
+const canControl = computed(() => !!userStore.accessToken)
 
 const tracks = computed(() =>
   (snapshot.value?.tracks ?? [])
@@ -150,7 +222,23 @@ const columns = computed<QTableColumn[]>(() => [
   { name: 'range', label: t('airspace.tracks.range'), field: 'range', format: (v: number | null) => fmt(v, 0) },
   { name: 'radialVelocity', label: t('airspace.tracks.velocity'), field: 'radialVelocity', format: (v: number | null) => fmt(v) },
   { name: 'sources', label: t('airspace.tracks.sources'), field: 'sources', format: (v: string[]) => v.map((s) => t(`airspace.source.${s}`)).join(' + '), align: 'left' },
+  { name: 'actions', label: '', field: 'id', align: 'right' },
 ])
+
+const eventFilterOptions = computed(() => [
+  { value: 'all', label: t('airspace.events.filter.all') },
+  { value: 'HIGH', label: t('airspace.events.filter.high') },
+  { value: 'MEDIUM', label: t('airspace.events.filter.medium') },
+  { value: 'lost', label: t('airspace.events.filter.lost') },
+])
+
+const filteredEvents = computed(() =>
+  events.value.filter((ev) => {
+    if (eventFilter.value === 'all') return true
+    if (eventFilter.value === 'lost') return ev.type === 'track_lost'
+    return ev.threat === eventFilter.value
+  }),
+)
 
 function eventIcon(ev: AirspaceEvent): string {
   return ev.type === 'track_lost' ? 'flight_land' : ev.type === 'threat_up' ? 'warning' : 'flight_takeoff'
@@ -168,32 +256,64 @@ function describe(ev: AirspaceEvent): string {
   return t(key, { id: ev.trackId, level, where })
 }
 
+const alerts = useAirspaceAlerts(describe, () => t('airspace.alerts.title'))
+
+async function command(input: GimbalCommandInput) {
+  commandBusy.value = true
+  const res = await sendGimbalCommand(input)
+  commandBusy.value = false
+  if (res.result === 'SUCCESS' && res.data) {
+    pendingCommand.value = res.data
+    Notify.create({ type: 'positive', message: res.message, timeout: 1500 })
+  } else {
+    Notify.create({ type: 'negative', message: res.message })
+  }
+}
+
+function onSnapshot(s: AirspaceSnapshot) {
+  snapshot.value = s
+  lastSnapshotAt.value = Date.now()
+  if (pendingCommand.value && (s.gimbal.commandSeq ?? 0) >= pendingCommand.value.seq) {
+    pendingCommand.value = null
+  }
+}
+
 let close: (() => void) | null = null
 let ticker: ReturnType<typeof setInterval> | null = null
+let cameraPoll: ReturnType<typeof setInterval> | null = null
+
+async function refreshStatus() {
+  const status = await getAirspaceStatus()
+  if (status.result !== 'SUCCESS' || !status.data) return
+  if (status.data.cameraLive) cameraLiveAt.value = Date.now()
+  if (status.data.pendingCommand && !pendingCommand.value) pendingCommand.value = status.data.pendingCommand
+  return status.data
+}
 
 onMounted(async () => {
-  const [status, recent] = await Promise.all([getAirspaceStatus(), getAirspaceEvents(MAX_EVENTS)])
-  if (status.result === 'SUCCESS' && status.data?.snapshot) {
-    snapshot.value = status.data.snapshot
-    lastSnapshotAt.value = status.data.online ? Date.now() : 0
+  const [status, recent] = await Promise.all([refreshStatus(), getAirspaceEvents(MAX_EVENTS)])
+  if (status?.snapshot) {
+    snapshot.value = status.snapshot
+    lastSnapshotAt.value = status.online ? Date.now() : 0
   }
   if (recent.result === 'SUCCESS' && recent.data) events.value = recent.data
 
   close = openAirspaceStream({
-    onSnapshot: (s) => {
-      snapshot.value = s
-      lastSnapshotAt.value = Date.now()
-    },
+    onSnapshot,
     onEvent: (ev) => {
       events.value = [ev, ...events.value].slice(0, MAX_EVENTS)
+      alerts.notify(ev)
     },
+    onCommand: (c) => (pendingCommand.value = c),
     onConnection: () => {},
   })
   ticker = setInterval(() => (now.value = Date.now()), 1000)
+  cameraPoll = setInterval(refreshStatus, 2000)
 })
 
 onBeforeUnmount(() => {
   close?.()
   if (ticker) clearInterval(ticker)
+  if (cameraPoll) clearInterval(cameraPoll)
 })
 </script>

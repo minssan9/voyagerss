@@ -31,6 +31,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'vision-airspace',
                 component: () => import('@/modules/vision/views/AirspaceMonitor.vue'),
                 meta: { icon: 'radar', titleKey: 'routes.visionAirspace' }
+            },
+            {
+                path: 'airspace/history',
+                name: 'vision-airspace-history',
+                component: () => import('@/modules/vision/views/AirspaceHistory.vue'),
+                meta: { icon: 'history', titleKey: 'routes.visionAirspaceHistory' }
             }
         ]
     }

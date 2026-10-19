@@ -55,3 +55,19 @@ describe('AirspaceRadarScope', () => {
     expect(wrapper.find('.airspace-scope__track-target').exists()).toBe(true)
   })
 })
+
+describe('AirspaceRadarScope trails', () => {
+  it('draws a polyline through ranged trail points and skips camera-only ones', () => {
+    const wrapper = render([
+      track({ id: 1, trail: [[0, 0, 75], [45, 0, null], [90, 0, 75]] }),
+      track({ id: 2, range: null, trail: [[10, 5, null], [11, 5, null]] }),
+    ])
+    const lines = wrapper.findAll('.airspace-scope__trail')
+    expect(lines).toHaveLength(1)
+    const pts = lines[0].attributes('points')!.split(' ').map((p) => p.split(',').map(Number))
+    expect(pts).toHaveLength(2)
+    expect(pts[0][0]).toBeCloseTo(0, 3)
+    expect(pts[0][1]).toBeCloseTo(-0.5, 3)
+    expect(pts[1][0]).toBeCloseTo(0.5, 3)
+  })
+})

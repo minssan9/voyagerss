@@ -1,6 +1,7 @@
 {
   "routes": {
-    "visionAirspace": "공역 감시"
+    "visionAirspace": "공역 감시",
+    "visionAirspaceHistory": "공역 기록"
   },
   "airspace": {
     "title": "공역 감시",
@@ -9,7 +10,7 @@
     "offline": "수신 없음",
     "radar": "레이더 {mode}",
     "gimbal": "팬 {pan}° · 틸트 {tilt}°",
-    "offlineHint": "관측기에서 스냅샷이 들어오지 않습니다. 하드웨어 없이 확인하려면 vision_cam 폴더에서 실행하세요:",
+    "offlineHint": "관측기(airspace_edge)에서 스냅샷이 들어오지 않습니다. 하드웨어 없이 확인하려면 저장소 루트에서 실행하세요:",
     "threat": {
       "HIGH": "높음",
       "MEDIUM": "보통",
@@ -43,10 +44,68 @@
       "new": "T{id} 새 표적 · {level} · {where}",
       "threatUp": "T{id} 경보 상승 → {level} · {where}",
       "lost": "T{id} 추적 종료",
-      "where": "방위 {az}° 고각 {el}° {range}"
+      "where": "방위 {az}° 고각 {el}° {range}",
+      "filter": {
+        "all": "전체",
+        "high": "높음",
+        "medium": "보통",
+        "lost": "추적 종료"
+      }
     },
     "errors": {
       "requestFailed": "요청에 실패했습니다."
+    },
+    "camera": {
+      "title": "카메라",
+      "alt": "관측기 카메라 오버레이 영상",
+      "offline": "영상이 들어오지 않습니다"
+    },
+    "gimbalMode": {
+      "auto": "자동 추종",
+      "lock": "표적 고정",
+      "manual": "수동",
+      "home": "홈"
+    },
+    "control": {
+      "title": "짐벌 제어",
+      "auto": "자동 추종",
+      "home": "홈",
+      "lock": "고정",
+      "pan": "팬",
+      "tilt": "틸트",
+      "point": "이 방향으로",
+      "pending": "명령 #{seq} 전달 대기",
+      "loginRequired": "짐벌 제어는 로그인한 사용자만 할 수 있습니다."
+    },
+    "alerts": {
+      "toggle": "경보 알림",
+      "title": "공역 경보: 높음"
+    },
+    "history": {
+      "open": "기록",
+      "title": "공역 기록",
+      "lead": "저장된 경보 이벤트와 표적 요약을 기간별로 조회하고 CSV로 내보냅니다.",
+      "disabled": "서버에 DB가 설정되지 않아 기록이 저장되지 않습니다.",
+      "from": "시작",
+      "to": "끝",
+      "threat": "경보 등급",
+      "search": "조회",
+      "csv": "CSV",
+      "back": "실시간 화면",
+      "events": "경보 이벤트",
+      "tracks": "표적 요약",
+      "empty": "기록이 없습니다.",
+      "at": "시각",
+      "type": "유형",
+      "firstSeen": "처음 감지",
+      "lastSeen": "마지막 감지",
+      "maxThreat": "최고 등급",
+      "minRange": "최소 거리(m)",
+      "eventType": {
+        "track_new": "새 표적",
+        "threat_up": "경보 상승",
+        "track_lost": "추적 종료"
+      }
     }
   }
 }

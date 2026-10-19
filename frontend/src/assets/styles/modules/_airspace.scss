@@ -142,6 +142,13 @@
   stroke-width: 0.012;
 }
 
+.airspace-scope__trail {
+  fill: none;
+  stroke-width: 0.008;
+  stroke-opacity: 0.55;
+  stroke-linejoin: round;
+}
+
 .airspace-scope__bearing {
   stroke-width: 0.02;
 }
@@ -150,4 +157,86 @@
   stroke: none;
   font-size: 0.06px;
   font-weight: 600;
+}
+
+.page-airspace__pill--pending {
+  border-color: var(--voy-warning);
+  color: var(--voy-warning);
+}
+
+// utilities.scss forces `.inline { display: inline !important }`, which breaks q-toggle's
+// `.row.inline` layout (label drops below the switch).
+.page-airspace__toggle {
+  display: inline-flex !important;
+}
+
+.page-airspace__events-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.page-airspace__filter {
+  min-width: 140px;
+}
+
+.page-airspace__history-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-airspace__history-tabs {
+  color: var(--voy-text-secondary);
+}
+
+.airspace-camera {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--voy-radius-sm);
+  overflow: hidden;
+  background: #0b1220;
+}
+
+.airspace-camera__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.airspace-camera__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 100%;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.airspace-gimbal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.airspace-gimbal__state,
+.airspace-gimbal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.airspace-gimbal__manual {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.airspace-gimbal__slider {
+  font-size: 0.85rem;
+  color: var(--voy-text-secondary);
 }

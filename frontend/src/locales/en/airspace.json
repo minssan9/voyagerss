@@ -1,6 +1,7 @@
 {
   "routes": {
-    "visionAirspace": "Airspace monitor"
+    "visionAirspace": "Airspace monitor",
+    "visionAirspaceHistory": "Airspace history"
   },
   "airspace": {
     "title": "Airspace monitor",
@@ -9,7 +10,7 @@
     "offline": "No data",
     "radar": "Radar {mode}",
     "gimbal": "Pan {pan}° · Tilt {tilt}°",
-    "offlineHint": "No snapshots are arriving from the observer. To try it without hardware, run this in the vision_cam folder:",
+    "offlineHint": "No snapshots are arriving from the observer (airspace_edge). To try it without hardware, run from the repository root:",
     "threat": {
       "HIGH": "High",
       "MEDIUM": "Medium",
@@ -43,10 +44,68 @@
       "new": "T{id} new target · {level} · {where}",
       "threatUp": "T{id} alert raised → {level} · {where}",
       "lost": "T{id} track ended",
-      "where": "az {az}° el {el}° {range}"
+      "where": "az {az}° el {el}° {range}",
+      "filter": {
+        "all": "All",
+        "high": "High",
+        "medium": "Medium",
+        "lost": "Track ended"
+      }
     },
     "errors": {
       "requestFailed": "Request failed."
+    },
+    "camera": {
+      "title": "Camera",
+      "alt": "Observer camera overlay",
+      "offline": "No video"
+    },
+    "gimbalMode": {
+      "auto": "Auto follow",
+      "lock": "Target lock",
+      "manual": "Manual",
+      "home": "Home"
+    },
+    "control": {
+      "title": "Gimbal control",
+      "auto": "Auto follow",
+      "home": "Home",
+      "lock": "Lock",
+      "pan": "Pan",
+      "tilt": "Tilt",
+      "point": "Point here",
+      "pending": "Command #{seq} waiting for the observer",
+      "loginRequired": "Sign in to control the gimbal."
+    },
+    "alerts": {
+      "toggle": "Alert sound",
+      "title": "Airspace alert: high"
+    },
+    "history": {
+      "open": "History",
+      "title": "Airspace history",
+      "lead": "Browse stored alert events and target summaries by period and export them as CSV.",
+      "disabled": "No database is configured on the server, so history is not stored.",
+      "from": "From",
+      "to": "To",
+      "threat": "Alert level",
+      "search": "Search",
+      "csv": "CSV",
+      "back": "Live view",
+      "events": "Alert events",
+      "tracks": "Target summaries",
+      "empty": "No records.",
+      "at": "Time",
+      "type": "Type",
+      "firstSeen": "First seen",
+      "lastSeen": "Last seen",
+      "maxThreat": "Peak level",
+      "minRange": "Closest (m)",
+      "eventType": {
+        "track_new": "New target",
+        "threat_up": "Alert raised",
+        "track_lost": "Track ended"
+      }
     }
   }
 }
