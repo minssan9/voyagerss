@@ -37,6 +37,7 @@ vision_cam/
 | `face` | Haar cascade (frontal face) | 얼굴 1개 이상 | `faces` |
 | `brightness` | 평균 밝기 + Laplacian variance | 어두움(<40) 또는 흐림(<30) | `brightness`, `sharpness` |
 | `object` | MobileNet-SSD (Caffe, VOC 21클래스) via `cv2.dnn` | `trigger_classes` 클래스 검출 | `objects`, `classes`, `inference_ms`, `stale` |
+| `drone` | 하늘 영역 소형 blob + 프레임 간 지속성 (+ 선택 ONNX 분류기) | 같은 물체가 `persist_window` 중 `persist_min` 프레임 이상 | `blobs`, `candidates` |
 
 ## 1. macOS 에서 테스트
 
@@ -277,6 +278,11 @@ class EdgeAnalyzer(Analyzer):
 위치 정보가 의미 없는 분석기(프레임 전체 지표 등)는 `spatial = False` 로 선언하면 ROI
 필터링 대상에서 제외됩니다. 생성자 인자는 `build_analyzers(names, {"edge": {...}})` 처럼
 `options` 딕셔너리로 전달할 수 있습니다.
+
+## 공역 감시 (airspace)
+
+드론 공역 감시(카메라+레이더 융합 추적, 팬틸트 추종)는 Go 로 만든 `airspace_edge/` 가 담당한다.
+이 모듈의 `drone` 분석기(`--analyzers drone`)는 일반 분석기로 남아 있다.
 
 ## 참고
 

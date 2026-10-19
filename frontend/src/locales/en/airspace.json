@@ -1,0 +1,111 @@
+{
+  "routes": {
+    "visionAirspace": "Airspace monitor",
+    "visionAirspaceHistory": "Airspace history"
+  },
+  "airspace": {
+    "title": "Airspace monitor",
+    "lead": "Detects and tracks drones with a camera and mmWave radar, and follows them with the pan-tilt mount for recording. Observation and alerting only.",
+    "online": "Receiving",
+    "offline": "No data",
+    "radar": "Radar {mode}",
+    "gimbal": "Pan {pan}° · Tilt {tilt}°",
+    "offlineHint": "No snapshots are arriving from the observer (airspace_edge). To try it without hardware, run from the repository root:",
+    "threat": {
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "source": {
+      "camera": "Camera",
+      "radar": "Radar"
+    },
+    "scope": {
+      "title": "Radar plan view",
+      "aria": "Target positions seen from above the mount",
+      "legend": "Up is straight ahead. Rings are 50 m of ground range, outer ticks are camera targets with unknown range, and the blue line and wedge are the camera heading and field of view."
+    },
+    "tracks": {
+      "title": "Tracked targets",
+      "empty": "No confirmed targets.",
+      "following": "Gimbal is following",
+      "id": "ID",
+      "label": "Class",
+      "threat": "Alert",
+      "azimuth": "Azimuth",
+      "elevation": "Elevation",
+      "range": "Range (m)",
+      "velocity": "Radial velocity (m/s)",
+      "sources": "Sensors"
+    },
+    "events": {
+      "title": "Alert log",
+      "empty": "No events yet.",
+      "new": "T{id} new target · {level} · {where}",
+      "threatUp": "T{id} alert raised → {level} · {where}",
+      "lost": "T{id} track ended",
+      "where": "az {az}° el {el}° {range}",
+      "filter": {
+        "all": "All",
+        "high": "High",
+        "medium": "Medium",
+        "lost": "Track ended"
+      }
+    },
+    "errors": {
+      "requestFailed": "Request failed."
+    },
+    "camera": {
+      "title": "Camera",
+      "alt": "Observer camera overlay",
+      "offline": "No video"
+    },
+    "gimbalMode": {
+      "auto": "Auto follow",
+      "lock": "Target lock",
+      "manual": "Manual",
+      "home": "Home"
+    },
+    "control": {
+      "title": "Gimbal control",
+      "auto": "Auto follow",
+      "home": "Home",
+      "lock": "Lock",
+      "pan": "Pan",
+      "tilt": "Tilt",
+      "point": "Point here",
+      "pending": "Command #{seq} waiting for the observer",
+      "loginRequired": "Sign in to control the gimbal."
+    },
+    "alerts": {
+      "toggle": "Alert sound",
+      "title": "Airspace alert: high"
+    },
+    "history": {
+      "open": "History",
+      "title": "Airspace history",
+      "lead": "Browse stored alert events and target summaries by period and export them as CSV.",
+      "disabled": "No database is configured on the server, so history is not stored.",
+      "from": "From",
+      "to": "To",
+      "threat": "Alert level",
+      "search": "Search",
+      "csv": "CSV",
+      "back": "Live view",
+      "events": "Alert events",
+      "tracks": "Target summaries",
+      "empty": "No records.",
+      "at": "Time",
+      "type": "Type",
+      "firstSeen": "First seen",
+      "lastSeen": "Last seen",
+      "maxThreat": "Peak level",
+      "minRange": "Closest (m)",
+      "eventType": {
+        "track_new": "New target",
+        "threat_up": "Alert raised",
+        "track_lost": "Track ended"
+      }
+    }
+  }
+}

@@ -29,6 +29,8 @@ RUN apt-get update \
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+# Versioned SQL applied at startup by src/config/schema-migrator.ts (dist/config -> ../../db/migration)
+COPY db ./db
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 
