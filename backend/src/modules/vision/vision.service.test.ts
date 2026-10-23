@@ -79,6 +79,28 @@ describe('VisionService', () => {
     expect(result.message).toBe('choices must contain at least 2 items, comma-separated');
   });
 
+  it('posts a camera frame to the upstream /frame endpoint', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ fps: 8, results: [] }),
+    }) as unknown as typeof fetch;
+
+    const image = { buffer: Buffer.from('img'), mimetype: 'image/jpeg', originalname: 'frame.jpg' };
+    const result = await serviceWith().postCamFrame(image);
+    expect(result.result).toBe('SUCCESS');
+    expect(result.data).toEqual({ fps: 8, results: [] });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://cam.test/frame',
+      expect.objectContaining({ method: 'POST', body: expect.any(FormData) }),
+    );
+  });
+
+  it('rejects a camera frame without an image', async () => {
+    const result = await serviceWith().postCamFrame(undefined);
+    expect(result.message).toBe('이미지가 필요합니다.');
+  });
+
   it('rejects a judge call without an image', async () => {
     const result = await serviceWith().judgeBool(undefined, 'is it a cat?');
     expect(result.message).toBe('이미지가 필요합니다.');

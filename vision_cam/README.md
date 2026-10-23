@@ -8,7 +8,7 @@
 vision_cam/
 ├── vision_cam/
 │   ├── __main__.py        # CLI 진입점 (python -m vision_cam)
-│   ├── sources.py         # 카메라 입력: OpenCV(맥/USB/파일/RTSP), picamera2(파이 CSI)
+│   ├── sources.py         # 카메라 입력: OpenCV(맥/USB/파일/RTSP), picamera2(파이 CSI), browser(POST /frame)
 │   ├── pipeline.py        # 축소 → 분석기 실행 → 좌표 복원 → 오버레이
 │   ├── stream.py          # 헤드리스용 MJPEG 스트리밍 + /status JSON
 │   ├── roi.py             # ROI(관심 영역) 구역 정의/필터링
@@ -51,6 +51,26 @@ pytest -q                                             # 카메라 없이 테스�
 ```
 
 > 처음 실행 시 macOS 가 카메라 권한을 묻습니다. 거부했다면 **시스템 설정 → 개인정보 보호 및 보안 → 카메라** 에서 터미널(iTerm/VS Code) 허용.
+
+### 웹 카메라 · 사진 · 동영상 (`VISION_CAM_SOURCE=browser`)
+
+브라우저가 맥북 카메라를 쓰는 동안 이 프로세스가 `--source auto` 로 같은 장치를 열면 한쪽이 실패합니다. 웹 테스트는 장치를 열지 않는 `browser` 소스를 씁니다. `POST /frame` 으로 받은 최신 JPEG 만 기존 분석 루프가 처리하고, 오버레이는 그대로 `GET /stream.mjpg`, 결과는 `GET /status` 와 응답 JSON 입니다.
+
+```bash
+cd vision_cam
+cp .env.example .env
+# .env 에서 VISION_CAM_SOURCE=browser
+```
+
+저장소 루트의 `pnpm dev` 는 `scripts/dev-vision-cam.sh` 가 `vision_cam/.env` 를 읽은 뒤 `--no-display --stream 8080` 으로 띄웁니다. CLI 기본값이 환경변수이므로 장치를 열지 않습니다.
+
+1. 브라우저(Chrome 또는 개발 화면에 쓰는 브라우저)에 **시스템 설정 → 개인정보 보호 및 보안 → 카메라** 권한을 줍니다. 서버 스트림 모드만 쓸 때는 기존처럼 터미널 권한입니다.
+2. http://localhost:9003/vision/cam 을 엽니다.
+3. **맥북 카메라**: 미리보기, 분석 화면(오버레이), status 의 `motion` / `face` / `brightness` 를 확인합니다.
+4. **사진**: 파일 또는 "카메라로 한 장". **동영상**: 재생 중에만 프레임을 보냅니다. 멈추면 전송도 멈춥니다.
+5. 질문 입력 후 **이 프레임 판정** 은 마지막 JPEG 를 `vision_judge` 에 한 번 보냅니다. 프레임마다 자동 판정하지 않습니다.
+
+`object` 분석은 `bash deploy/download-models.sh` 이후입니다. 기본 테스트는 `motion,face,brightness` 입니다.
 
 ## 2. 라즈베리파이로 이관
 

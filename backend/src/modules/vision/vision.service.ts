@@ -89,6 +89,18 @@ export class VisionService {
     this.pipeGet(`${this.config.get().camBaseUrl}/stream.mjpg`, res);
   }
 
+  postCamFrame(image: UploadedImage | undefined): Promise<ApiEnvelope<unknown>> {
+    if (!image || !image.buffer || image.buffer.length === 0) {
+      return Promise.resolve(failure(tApi('vision.imageRequired')));
+    }
+    const form = new FormData();
+    const blob = new Blob([new Uint8Array(image.buffer)], {
+      type: image.mimetype || 'image/jpeg',
+    });
+    form.append('image', blob, image.originalname || 'frame.jpg');
+    return this.requestJson(this.config.get().camBaseUrl, '/frame', { method: 'POST', body: form }, 10000);
+  }
+
   private buildJudgeForm(
     image: UploadedImage | undefined,
     question: string,

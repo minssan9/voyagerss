@@ -90,6 +90,12 @@ const multipart = {
   }],
 }
 
+export function postCamFrame(image: File): Promise<ApiEnvelope<Record<string, unknown>>> {
+  const form = new FormData()
+  form.append('image', image)
+  return unwrap(service.post('/vision/cam/frame', form, { ...multipart, timeout: 15000 }))
+}
+
 export function postJudgeBool(image: File, question: string): Promise<ApiEnvelope<{ probability: number }>> {
   return unwrap(service.post('/vision/judge/bool', judgeForm(image, question), multipart))
 }

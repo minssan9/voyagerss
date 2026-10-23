@@ -50,6 +50,12 @@ export class VisionController {
     this.svc.pipeCamStream(res);
   }
 
+  @Post('cam/frame')
+  @UseInterceptors(FileInterceptor('image'))
+  camFrame(@UploadedFile() file: UploadedImage | undefined) {
+    return this.svc.postCamFrame(file);
+  }
+
   @Get('judge/health')
   judgeHealth() {
     return this.svc.getJudgeHealth();
