@@ -27,6 +27,14 @@ const pages: PermissionDef[] = [
     defaultRoles: ['ADMIN', 'SUPER_ADMIN'],
   },
   {
+    code: 'workschd:page:admin-config',
+    name: '시스템 설정',
+    type: 'PAGE',
+    module: 'workschd',
+    resource: '/workschd/admin/config',
+    defaultRoles: ['ADMIN', 'SUPER_ADMIN'],
+  },
+  {
     code: 'workschd:page:team-manage',
     name: '팀 관리',
     type: 'PAGE',
@@ -104,6 +112,14 @@ const configApis: PermissionDef[] = [
     type: 'API',
     module: 'workschd',
     resource: 'PUT|DELETE:/api/workschd/admin/config/:key',
+    defaultRoles: ['ADMIN', 'SUPER_ADMIN'],
+  },
+  {
+    code: 'workschd:api:config:manage',
+    name: '시스템 설정 카탈로그/리로드',
+    type: 'API',
+    module: 'workschd',
+    resource: 'POST:/api/workschd/admin/config/*',
     defaultRoles: ['ADMIN', 'SUPER_ADMIN'],
   },
 ];
