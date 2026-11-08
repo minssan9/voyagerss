@@ -34,4 +34,4 @@
 - FRED: https://fred.stlouisfed.org/docs/api/fred/
 - TWSE OpenAPI: https://openapi.twse.com.tw/v1/swagger.json
 - OpenDART: https://opendart.fss.or.kr/
-- 관세청 수출입 (data.go.kr): https://www.data.go.kr/data/15101609/openapi.do
+- 관세청 품목·국가별 수출입 (data.go.kr): https://www.data.go.kr/data/15100475/openapi.do

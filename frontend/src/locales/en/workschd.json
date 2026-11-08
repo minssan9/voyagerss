@@ -627,6 +627,7 @@
     "subtitle": "Primary-source ingestion API keys and schedule options (stored encrypted in DB)",
     "apiKeysSection": "External API credentials",
     "apiKeysHint": "DART, FRED, Korea data.go.kr (customs) — saved to DB; reload cache after save.",
+    "guideOfficialLinks": "Official docs & application URLs",
     "primaryDataSection": "Primary data collection options",
     "ingestionEnabled": "Enable daily ingestion scheduler (PD_INGESTION_ENABLED)",
     "tradeUniverseHint": "JSON array: [{\"hsSgn\":\"8542\",\"cntyCd\":\"US\"}] — bounds collection scope",

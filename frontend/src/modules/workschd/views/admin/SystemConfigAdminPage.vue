@@ -39,7 +39,8 @@
       </q-card-section>
       <q-separator />
       <q-card-section class="q-gutter-md">
-        <div v-for="field in apiKeyFields" :key="field.key">
+        <div v-for="field in apiKeyFields" :key="field.key" class="q-mb-lg">
+          <ApiKeyAcquisitionGuide :config-key="field.key" />
           <q-input
             v-model="values[field.key]"
             :type="field.isSecret ? 'password' : 'text'"
@@ -48,6 +49,8 @@
             outlined
             dense
             autocomplete="off"
+            class="q-mt-sm"
+            :data-testid="`config-input-${field.key}`"
           />
         </div>
       </q-card-section>
@@ -107,6 +110,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import WorkschdPage from '@/modules/workschd/components/WorkschdPage.vue';
+import ApiKeyAcquisitionGuide from '@/modules/workschd/components/admin/ApiKeyAcquisitionGuide.vue';
 import {
   ensureConfigCatalog,
   fetchConfigCatalog,
