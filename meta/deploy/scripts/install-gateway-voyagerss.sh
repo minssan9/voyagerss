@@ -1,65 +1,56 @@
 #!/usr/bin/env bash
-# Install Voyagerss into Docker gateway nginx (/data/gateway).
-# Single source: meta/deploy/nginx/voyagerss.conf → conf.d/voyagerss.conf
-# Default upstream: voyagerss containers on shared en9door_net.
+# Ensure Voyagerss stacks can reach the shared L7 gateway (en9door-net).
+# Nginx vhost definitions live in the en9door repo: gateway/nginx/conf.d/voyagerss*.conf
+# Deploy gateway with: en9door .github/workflows/gateway-en9door.yml (release branch).
 set -euo pipefail
 
 GATEWAY_DIR="${GATEWAY_DIR:-/data/gateway}"
-VOYAGERSS_API_UPSTREAM="${VOYAGERSS_API_UPSTREAM:-voyagerss-backend:9002}"
-VOYAGERSS_FE_UPSTREAM="${VOYAGERSS_FE_UPSTREAM:-voyagerss-frontend:80}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-SOURCE_FILE="${NGINX_SOURCE_FILE:-${REPO_ROOT}/meta/deploy/nginx/voyagerss.conf}"
-TARGET_FILE="${GATEWAY_DIR}/nginx/conf.d/voyagerss.conf"
-STALE_SSL_FILE="${GATEWAY_DIR}/nginx/conf.d/voyagerss-ssl.conf"
+OVERRIDE_SRC="${REPO_ROOT}/meta/deploy/nginx/gateway-docker-compose.voyagerss.override.yml"
+OVERRIDE_DST="${GATEWAY_DIR}/docker-compose.voyagerss.override.yml"
 
-if [[ ! -f "${SOURCE_FILE}" ]]; then
-  echo "Missing nginx source: ${SOURCE_FILE}" >&2
+if [[ ! -d "${GATEWAY_DIR}" ]]; then
+  echo "Gateway directory not found: ${GATEWAY_DIR}" >&2
+  echo "Deploy en9door gateway to /data/gateway first." >&2
   exit 1
 fi
 
-if [[ ! -d "${GATEWAY_DIR}/nginx/conf.d" ]]; then
-  echo "Gateway conf.d not found: ${GATEWAY_DIR}/nginx/conf.d" >&2
-  echo "Ensure /data/gateway stack is deployed (see en9door gateway README)." >&2
+if ! sudo docker network inspect en9door-net >/dev/null 2>&1; then
+  echo "Docker network en9door-net is missing. Start /data/gateway (en9door stack) first." >&2
   exit 1
 fi
 
-mkdir -p "${GATEWAY_DIR}/nginx/conf.d"
-sed -e "s/__VOYAGERSS_API_UPSTREAM__/${VOYAGERSS_API_UPSTREAM}/g" \
-    -e "s/__VOYAGERSS_FE_UPSTREAM__/${VOYAGERSS_FE_UPSTREAM}/g" \
-    "${SOURCE_FILE}" > "${TARGET_FILE}"
-echo "Installed ${TARGET_FILE} (api=${VOYAGERSS_API_UPSTREAM}, fe=${VOYAGERSS_FE_UPSTREAM})"
-
-if [[ -f "${STALE_SSL_FILE}" ]]; then
-  rm -f "${STALE_SSL_FILE}"
-  echo "Removed stale ${STALE_SSL_FILE} (merged into voyagerss.conf)"
-fi
-
-OVERRIDE_FILE="${GATEWAY_DIR}/docker-compose.voyagerss.override.yml"
-if [[ ! -f "${OVERRIDE_FILE}" ]] || ! grep -q 'en9door_net' "${OVERRIDE_FILE}" 2>/dev/null; then
-  cat > "${OVERRIDE_FILE}" <<'EOF'
+if [[ -f "${OVERRIDE_SRC}" ]]; then
+  cp "${OVERRIDE_SRC}" "${OVERRIDE_DST}"
+  echo "Synced ${OVERRIDE_DST}"
+elif [[ ! -f "${OVERRIDE_DST}" ]]; then
+  cat > "${OVERRIDE_DST}" <<'EOF'
 services:
   nginx:
-    networks:
-      - en9door_net
-
-networks:
-  en9door_net:
-    external: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 EOF
-  echo "Created ${OVERRIDE_FILE} (gateway nginx → en9door_net)"
+  echo "Created ${OVERRIDE_DST} (host.docker.internal for legacy host upstreams)"
 fi
 
-COMPOSE_ARGS=(-f docker-compose.yml -f docker-compose.voyagerss.override.yml)
+COMPOSE_ARGS=(-f docker-compose.yml)
+if [[ -f "${OVERRIDE_DST}" ]]; then
+  COMPOSE_ARGS+=(-f docker-compose.voyagerss.override.yml)
+fi
 
 cd "${GATEWAY_DIR}"
 sudo docker compose "${COMPOSE_ARGS[@]}" up -d
 
-sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -t
-sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -s reload
-echo "Gateway nginx reloaded."
+if [[ -f "${GATEWAY_DIR}/nginx/conf.d/voyagerss.conf" ]]; then
+  sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -t
+  sudo docker compose "${COMPOSE_ARGS[@]}" exec -T nginx nginx -s reload
+  echo "Gateway nginx reloaded (voyagerss vhosts from conf.d)."
+else
+  echo "Warning: ${GATEWAY_DIR}/nginx/conf.d/voyagerss.conf missing." >&2
+  echo "Merge en9door gateway/nginx (voyagerss.conf) and redeploy gateway CD." >&2
+fi
 
 echo ""
 echo "Verify:"
 echo "  curl -fsS -H \"Host: api.voyagerss.com\" http://127.0.0.1/health"
 echo "  curl -fsS -o /dev/null -w \"FE %{http_code}\\n\" -H \"Host: voyagerss.com\" http://127.0.0.1/"
-echo "  curl -kfsS -H \"Host: api.voyagerss.com\" https://127.0.0.1/health"

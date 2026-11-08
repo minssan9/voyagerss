@@ -73,14 +73,15 @@ services:
 cd /data/gateway && sudo docker compose up -d
 ```
 
-3. Install Voyagerss server blocks:
+3. Voyagerss L7 vhosts are versioned in **[`minssan9/en9door`](https://github.com/minssan9/en9door)** under `gateway/nginx/conf.d/voyagerss.conf` (+ `voyagerss-ssl.conf`). Deploy via **gateway-en9door CD** (`release` branch) or rsync `gateway/nginx` to `/data/gateway`.
+
+4. Voyagerss app containers must join Docker network **`en9door-net`** (same as gateway). After gateway deploy, reload from voyagerss:
 
 ```bash
-cd /opt/voyagerss   # or use files under /data/voyagerss/scripts
 GATEWAY_DIR=/data/gateway bash meta/deploy/scripts/install-gateway-voyagerss.sh
 ```
 
-CI deploy runs the same `install-gateway-voyagerss.sh` after each `docker compose up`.
+CI voyagerss deploy runs the same script after `docker compose up` (reload only; does not overwrite gateway conf.d).
 
 ### Host nginx (no Docker gateway)
 
