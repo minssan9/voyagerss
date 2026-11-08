@@ -8,6 +8,7 @@ import { configService } from './config/config-service';
 import { aiprConfigService } from './config/aipr-config-service';
 import { webSocketService } from './modules/workschd/services/WebSocketService';
 import { startWorkschdScraperScheduler } from './modules/workschd/scraper/scheduler';
+import { startPrimaryDataScheduler } from './modules/primary-data/scheduler';
 import { resolveBackendHost, resolveBackendPort, TRUST_PROXY_HOPS } from './server-config';
 import { configureLoggerFromConfig } from './utils/logger';
 import { bootstrapDatabase } from './config/bootstrap-database';
@@ -70,6 +71,7 @@ async function bootstrap() {
   webSocketService.initialize(httpServer);
 
   startWorkschdScraperScheduler();
+  startPrimaryDataScheduler();
   initWorkers();
 
   const PORT = resolveBackendPort();
