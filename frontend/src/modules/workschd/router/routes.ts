@@ -103,6 +103,20 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'admin/config',
+                name: 'SystemConfigAdmin',
+                component: () => import('@/modules/workschd/views/admin/SystemConfigAdminPage.vue'),
+                meta: {
+                    icon: 'settings',
+                    titleKey: 'routes.systemConfig',
+                    surface: 'admin',
+                    requiresAuth: true,
+                    loginPath: '/login?service=workschd',
+                    roles: ['ADMIN'],
+                    rbacPermission: 'workschd:page:admin-config'
+                }
+            },
+            {
                 path: 'admin/rbac',
                 name: 'RbacAdmin',
                 component: () => import('@/modules/workschd/views/admin/rbac/RbacAdminLayout.vue'),

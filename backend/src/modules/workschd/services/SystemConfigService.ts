@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService, ConfigSetOptions } from '../../../config/config-service';
+import { SEED_KEYS } from '../../../config/seed-config';
+import { WORKSCHD_SENSITIVE_KEYS } from '../../../config/sensitive-keys';
 
 export interface ConfigListItem {
   key: string;
@@ -14,6 +16,13 @@ export interface ConfigListItem {
 
 export interface ConfigDetailItem extends ConfigListItem {
   value: string;
+}
+
+export interface ConfigCatalogItem {
+  key: string;
+  category: string;
+  description: string | null;
+  isSecret: boolean;
 }
 
 @Injectable()
@@ -78,6 +87,37 @@ export class SystemConfigService {
       orderBy: { category: 'asc' },
     });
     return rows.map((r) => r.category);
+  }
+
+  getCatalog(categories?: string[]): ConfigCatalogItem[] {
+    const catSet =
+      categories && categories.length > 0
+        ? new Set(categories.map((c) => c.trim()).filter(Boolean))
+        : null;
+    return SEED_KEYS.filter((entry) => !catSet || catSet.has(entry.category)).map((entry) => ({
+      key: entry.key,
+      category: entry.category,
+      description: entry.description,
+      isSecret: WORKSCHD_SENSITIVE_KEYS.has(entry.key),
+    }));
+  }
+
+  async ensureCatalogKeys(categories: string[], updatedBy: string): Promise<number> {
+    const catSet = new Set(categories.map((c) => c.trim()).filter(Boolean));
+    let created = 0;
+    for (const entry of SEED_KEYS) {
+      if (catSet.size > 0 && !catSet.has(entry.category)) continue;
+      const existing = await prisma.systemConfig.findUnique({ where: { key: entry.key } });
+      if (existing) continue;
+      await configService.set(entry.key, '', {
+        description: entry.description,
+        category: entry.category,
+        updatedBy,
+        isEncrypted: WORKSCHD_SENSITIVE_KEYS.has(entry.key),
+      });
+      created += 1;
+    }
+    return created;
   }
 
   async getPublicFrontendConfig(): Promise<Record<string, string>> {

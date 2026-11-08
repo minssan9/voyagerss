@@ -30,6 +30,26 @@ export class SystemConfigNestController {
     return { message: 'Config cache reloaded from DB' };
   }
 
+  @Get('catalog')
+  getCatalog(@Query('categories') categories?: string) {
+    const list =
+      categories && categories.trim().length > 0
+        ? categories.split(',').map((c) => c.trim())
+        : undefined;
+    return { data: this.svc.getCatalog(list) };
+  }
+
+  @Post('ensure-catalog')
+  @HttpCode(200)
+  async ensureCatalog(
+    @Body() body: { categories?: string[] },
+    @CurrentUser() user: AuthUser,
+  ) {
+    const categories = body?.categories?.length ? body.categories : ['finance', 'primary_data'];
+    const created = await this.svc.ensureCatalogKeys(categories, user.email);
+    return { message: 'Catalog keys ensured', created };
+  }
+
   @Get(':key')
   getConfig(@Param('key') key: string) {
     return this.svc.getConfig(key);

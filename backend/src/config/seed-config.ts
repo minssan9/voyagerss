@@ -20,7 +20,7 @@ interface SeedEntry {
   description: string;
 }
 
-const SEED_KEYS: SeedEntry[] = [
+export const SEED_KEYS: SeedEntry[] = [
   // JWT
   { key: 'JWT_SECRET',             category: 'jwt',      description: '공유 JWT 서명 시크릿 (workschd)' },
   { key: 'JWT_ACCESS_SECRET',      category: 'jwt',      description: 'Access 토큰 서명 시크릿' },

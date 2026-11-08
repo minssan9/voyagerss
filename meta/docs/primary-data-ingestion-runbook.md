@@ -53,7 +53,7 @@ See `meta/docs/primary-data-capability-matrix.md`.
 
 1. Apply migrations (`db:migrate` on boot or `bootstrapDatabase`).
 2. `npm run seed:config` to register keys in `system_config`.
-3. Set API keys in DB config or env; verify with `ingest:primary-data:dry-run`.
+3. Set API keys in **Workschd admin UI** (`/workschd/admin/config`) or `system_config`; verify with `ingest:primary-data:dry-run`.
 4. Enable `PD_INGESTION_ENABLED=true` only after approval.
 
 ## Licensed / unavailable categories

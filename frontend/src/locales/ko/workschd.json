@@ -622,6 +622,22 @@
     },
     "notifyLoadFailed": "대시보드 통계를 불러오지 못했습니다"
   },
+  "systemConfig": {
+    "title": "시스템 설정",
+    "subtitle": "1차 출처 데이터 수집 API 키 및 스케줄 옵션 (DB 저장·암호화)",
+    "apiKeysSection": "외부 API 인증 키",
+    "apiKeysHint": "DART, FRED, 공공데이터포털(관세청) 등 — 서버 재시작 없이 저장 후 캐시 리로드됩니다.",
+    "primaryDataSection": "Primary data 수집 옵션",
+    "ingestionEnabled": "일일 수집 스케줄 활성화 (PD_INGESTION_ENABLED)",
+    "tradeUniverseHint": "JSON 배열: [{\"hsSgn\":\"8542\",\"cntyCd\":\"US\"}] — 수집 범위 제한",
+    "twseSymbolsHint": "쉼표 구분 종목코드. 비우면 TWSE 전체 스냅샷",
+    "saveAll": "전체 저장",
+    "saveSuccess": "설정이 저장되었습니다",
+    "saveError": "설정 저장에 실패했습니다",
+    "reloadCache": "설정 캐시 리로드",
+    "reloadSuccess": "설정 캐시를 다시 읽었습니다",
+    "reloadError": "캐시 리로드에 실패했습니다"
+  },
   "rbac": {
     "title": "RBAC 권한 관리",
     "subtitle": "역할·권한·대상을 통합 관리합니다",

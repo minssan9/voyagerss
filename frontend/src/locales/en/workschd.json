@@ -622,6 +622,22 @@
     },
     "notifyLoadFailed": "Failed to load dashboard statistics"
   },
+  "systemConfig": {
+    "title": "System settings",
+    "subtitle": "Primary-source ingestion API keys and schedule options (stored encrypted in DB)",
+    "apiKeysSection": "External API credentials",
+    "apiKeysHint": "DART, FRED, Korea data.go.kr (customs) — saved to DB; reload cache after save.",
+    "primaryDataSection": "Primary data collection options",
+    "ingestionEnabled": "Enable daily ingestion scheduler (PD_INGESTION_ENABLED)",
+    "tradeUniverseHint": "JSON array: [{\"hsSgn\":\"8542\",\"cntyCd\":\"US\"}] — bounds collection scope",
+    "twseSymbolsHint": "Comma-separated tickers; empty = full TWSE snapshot",
+    "saveAll": "Save all",
+    "saveSuccess": "Settings saved",
+    "saveError": "Failed to save settings",
+    "reloadCache": "Reload config cache",
+    "reloadSuccess": "Config cache reloaded",
+    "reloadError": "Failed to reload cache"
+  },
   "rbac": {
     "title": "RBAC management",
     "subtitle": "Manage roles, permissions, and subjects in one place",
