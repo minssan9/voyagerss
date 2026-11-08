@@ -1,0 +1,6 @@
+# Copied to /data/gateway/docker-compose.voyagerss.override.yml (see install-gateway-voyagerss.sh).
+# Canonical copy also lives in en9door: gateway/docker-compose.voyagerss.override.yml
+services:
+  nginx:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
