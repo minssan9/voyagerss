@@ -6,6 +6,7 @@
   python -m vision_cam --source picamera --no-display --stream 8080   # 라즈베리파이
   python -m vision_cam --source sample.mp4 --events events.jsonl
   python -m vision_cam --analyzers object --object-every 3 --roi roi.json --decide
+  python -m vision_cam --analyzers yolo --kinematics --meters-per-pixel 0.002
   python -m vision_cam.roi_tool                          # ROI 구역 그리기 도구
 """
 from __future__ import annotations
@@ -23,6 +24,7 @@ import cv2
 
 from .analyzers import REGISTRY, build_analyzers
 from .decision import DecisionRules, DrivingDecider
+from .kinematics import KinematicsConfig, KinematicsEstimator
 from .pipeline import FrameReport, Pipeline
 from .roi import load_zones
 from .sources import open_source
@@ -64,6 +66,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="object 분석기가 검출할 클래스 (쉼표 구분, 비우면 전체)")
     p.add_argument("--object-every", type=int, default=int(env("VISION_CAM_OBJECT_EVERY", 1)),
                    help="N 프레임마다 1회 추론 (파이에서는 3 권장)")
+    p.add_argument("--yolo-model", default=env("VISION_CAM_YOLO_MODEL", "yolo26n.pt"),
+                   help="yolo 분석기 모델 (yolo26n.pt | yolo26s.pt | export 한 *_ncnn_model 폴더 등)")
+    p.add_argument("--yolo-confidence", type=float,
+                   default=float(env("VISION_CAM_YOLO_CONFIDENCE", 0.4)))
+    p.add_argument("--yolo-classes", default=env("VISION_CAM_YOLO_CLASSES", ""),
+                   help="yolo 분석기가 검출할 COCO 클래스 (쉼표 구분, 비우면 전체)")
+    p.add_argument("--yolo-every", type=int, default=int(env("VISION_CAM_YOLO_EVERY", 1)))
+    p.add_argument("--yolo-imgsz", type=int, default=int(env("VISION_CAM_YOLO_IMGSZ", 320)))
+    p.add_argument("--yolo-tracker", default=env("VISION_CAM_YOLO_TRACKER", "bytetrack.yaml"),
+                   help="bytetrack.yaml | botsort.yaml | none (추적 끔)")
+    p.add_argument("--kinematics", action="store_true",
+                   default=env("VISION_CAM_KINEMATICS", "").lower() in ("1", "true"),
+                   help="object/yolo 검출에 속도·가속도·모멘텀 계산 추가")
+    p.add_argument("--kinematics-config", metavar="FILE", default=env("VISION_CAM_KINEMATICS_CONFIG"),
+                   help="KinematicsConfig JSON (meters_per_pixel, homography, mass_kg ...)")
+    p.add_argument("--meters-per-pixel", type=float,
+                   default=float(env("VISION_CAM_METERS_PER_PIXEL", 0)) or None,
+                   help="원본 해상도 1px 당 실제 거리(m). 지정 시 m/s 단위로 보고")
     p.add_argument("--decide", action="store_true",
                    default=env("VISION_CAM_DECIDE", "").lower() in ("1", "true"),
                    help="자율주행 STOP/SLOW/GO 판단 레이어 활성화")
@@ -167,6 +187,28 @@ def run(args: argparse.Namespace) -> int:
         if classes:
             object_opts["classes"] = classes
         options["object"] = object_opts
+    if "yolo" in names:
+        yolo_opts: dict = {
+            "model": args.yolo_model,
+            "confidence": args.yolo_confidence,
+            "every_n": args.yolo_every,
+            "imgsz": args.yolo_imgsz,
+            "track": args.yolo_tracker.lower() != "none",
+        }
+        if yolo_opts["track"]:
+            yolo_opts["tracker"] = args.yolo_tracker
+        classes = [c.strip() for c in args.yolo_classes.split(",") if c.strip()]
+        if classes:
+            yolo_opts["classes"] = classes
+        options["yolo"] = yolo_opts
+
+    kinematics = None
+    if args.kinematics or args.kinematics_config:
+        kcfg = KinematicsConfig.from_file(args.kinematics_config) \
+            if args.kinematics_config else KinematicsConfig()
+        if args.meters_per_pixel:
+            kcfg.meters_per_pixel = args.meters_per_pixel
+        kinematics = KinematicsEstimator(kcfg)
 
     zones = load_zones(args.roi) if args.roi else None
     decider = None
@@ -176,7 +218,7 @@ def run(args: argparse.Namespace) -> int:
 
     pipeline = Pipeline(
         build_analyzers(names, options), analysis_width=args.analysis_width,
-        zones=zones, decider=decider,
+        zones=zones, decider=decider, kinematics=kinematics,
     )
     sink = EventSink(args.events, args.webhook, args.snapshot_dir, args.cooldown,
                       decision_heartbeat=args.decision_heartbeat)
@@ -194,7 +236,8 @@ def run(args: argparse.Namespace) -> int:
     source = open_source(args.source, args.width, args.height, args.fps)
     zone_names = [z.name for z in (zones or [])]
     print(f"[vision_cam] source={args.source} analyzers={names} "
-          f"roi={zone_names or 'off'} decide={'on' if decider else 'off'}", file=sys.stderr)
+          f"roi={zone_names or 'off'} decide={'on' if decider else 'off'} "
+          f"kinematics={kinematics.unit if kinematics else 'off'}", file=sys.stderr)
     frames = 0
     try:
         with source:

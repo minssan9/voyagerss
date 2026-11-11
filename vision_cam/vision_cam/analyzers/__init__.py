@@ -5,12 +5,14 @@ from .brightness import BrightnessAnalyzer
 from .face import FaceAnalyzer
 from .motion import MotionAnalyzer
 from .object import ObjectAnalyzer
+from .yolo import YoloAnalyzer
 
 REGISTRY: dict[str, type[Analyzer]] = {
     MotionAnalyzer.name: MotionAnalyzer,
     FaceAnalyzer.name: FaceAnalyzer,
     BrightnessAnalyzer.name: BrightnessAnalyzer,
     ObjectAnalyzer.name: ObjectAnalyzer,
+    YoloAnalyzer.name: YoloAnalyzer,
 }
 
 
@@ -30,6 +32,7 @@ __all__ = [
     "FaceAnalyzer",
     "BrightnessAnalyzer",
     "ObjectAnalyzer",
+    "YoloAnalyzer",
     "REGISTRY",
     "build_analyzers",
 ]

@@ -14,10 +14,12 @@ vision_cam/
 │   ├── roi.py             # ROI(관심 영역) 구역 정의/필터링
 │   ├── roi_tool.py        # ROI 구역을 클릭으로 그리는 도구 (python -m vision_cam.roi_tool)
 │   ├── decision.py        # 자율주행 STOP/SLOW/GO 규칙 기반 판단
+│   ├── kinematics.py      # 트랙별 속도/가속도/모멘텀 추정
 │   └── analyzers/
 │       ├── motion.py      # MOG2 배경 차분 움직임 감지
 │       ├── face.py        # Haar cascade 얼굴 검출
 │       ├── object.py      # MobileNet-SSD 객체 인식/분류
+│       ├── yolo.py        # YOLO26 객체 검출 + ByteTrack 추적 (선택 의존성)
 │       └── brightness.py  # 밝기 / 선명도(가림·초점) 측정
 ├── models/                 # object 분석기 가중치 (git 미포함, 다운로드 필요)
 ├── tests/                 # 카메라 없이 합성 프레임으로 테스트
@@ -26,6 +28,8 @@ vision_cam/
 │   ├── download-models.sh # object 분석기 모델 다운로드
 │   └── vision_cam.service  # systemd 유닛
 ├── roi.example.json       # ROI 구역 설정 예시
+├── kinematics.example.json # 속도/모멘텀 보정(호모그래피·질량) 예시
+├── requirements-yolo.txt  # yolo 분석기용 ultralytics
 └── .env.example
 ```
 
@@ -37,6 +41,7 @@ vision_cam/
 | `face` | Haar cascade (frontal face) | 얼굴 1개 이상 | `faces` |
 | `brightness` | 평균 밝기 + Laplacian variance | 어두움(<40) 또는 흐림(<30) | `brightness`, `sharpness` |
 | `object` | MobileNet-SSD (Caffe, VOC 21클래스) via `cv2.dnn` | `trigger_classes` 클래스 검출 | `objects`, `classes`, `inference_ms`, `stale` |
+| `yolo` | Ultralytics YOLO26 (COCO 80클래스) + ByteTrack | `trigger_classes` 클래스 검출 | 위와 동일 + `track_id` |
 
 ## 1. macOS 에서 테스트
 
@@ -118,6 +123,76 @@ horse, motorbike, person, pottedplant, sheep, sofa, train, tvmonitor`
 **파이 성능 팁**: 라즈베리파이 4 에서 1회 추론은 대략 100~200ms 걸립니다. `--object-every 3`
 (3프레임마다 1회) 과 `--analysis-width 320` 을 함께 쓰면 대략 5~8 FPS 로 동작합니다. SSD 는
 내부적으로 300x300 으로 리사이즈하므로 `--analysis-width` 를 더 키워도 정확도 이득은 적습니다.
+
+## YOLO26 객체 추적 (yolo)
+
+### 도입 검토
+
+| 항목 | `object` (MobileNet-SSD) | `yolo` (YOLO26n) |
+|---|---|---|
+| 클래스 | VOC 21 | COCO 80 (truck, traffic light, stop sign 등 포함) |
+| 정확도 | VOC mAP≈72 (구형, 작은 객체 약함) | COCO mAP50-95≈40.9 (Ultralytics 공개치) |
+| 후처리 | 고정 출력 | **NMS-free** end-to-end → 지연 일정, export 단순 |
+| 추적(ID) | 없음 → kinematics 의 IoU 매칭으로 보완 | **ByteTrack / BoT-SORT 내장** (`model.track`) |
+| 의존성 | OpenCV 만 | ultralytics + PyTorch (~1GB) |
+| 라즈베리파이 | 4 기준 100~200ms/회 | NCNN export 권장, 실측 필요 (imgsz 320) |
+| 라이선스 | MIT 계열 | **AGPL-3.0** (비공개 상용 배포 시 Enterprise 라이선스) |
+
+결론: 개발/서버(맥, x86, Jetson)는 `yolo` 기본, 의존성·라이선스 제약이 있는 곳은 `object` 유지.
+두 분석기 모두 같은 `Detection` 을 내므로 ROI·decision·kinematics 가 그대로 동작한다.
+(이 저장소 환경 CPU 실측: yolo26n, imgsz 640 → 약 31ms/프레임)
+
+```bash
+pip install -r requirements-yolo.txt
+python -m vision_cam --analyzers yolo --yolo-classes person,car,bicycle --kinematics
+
+# 라즈베리파이: PC 에서 NCNN 으로 변환 후 폴더째 복사
+yolo export model=yolo26n.pt format=ncnn imgsz=320
+python -m vision_cam --analyzers yolo --yolo-model yolo26n_ncnn_model --yolo-every 2 --no-display --stream 8080
+```
+
+| 옵션 | 설명 |
+|---|---|
+| `--yolo-model` | `yolo26n.pt`(기본, 자동 다운로드) / `yolo26s.pt` / export 한 모델 |
+| `--yolo-confidence` | 최소 신뢰도 (기본 0.4) |
+| `--yolo-classes` | COCO 클래스 필터 (쉼표 구분) |
+| `--yolo-every N` | N 프레임마다 1회 추론 |
+| `--yolo-imgsz` | 추론 입력 크기 (기본 320) |
+| `--yolo-tracker` | `bytetrack.yaml`(기본) / `botsort.yaml` / `none` |
+
+## 속도·가속도·모멘텀 (kinematics)
+
+`--kinematics` 를 켜면 `object` / `yolo` 검출마다 `track_id` 와 `kinematics` 가 붙는다.
+
+```json
+{"label": "person", "track_id": 3, "bbox": [281, 405, 123, 455],
+ "kinematics": {"unit": "m", "position": [1.2, 3.4], "velocity": [1.1, -0.1], "speed": 1.1,
+                "acceleration": [0.3, 0.0], "accel": 0.3, "heading_deg": -5.2,
+                "momentum": 77.0, "approach": 0.12, "age": 14}}
+```
+
+| 값 | 계산 | 단위 |
+|---|---|---|
+| `velocity` / `speed` | 기준점 위치 차분 / dt → EMA(`velocity_alpha`) | unit/s |
+| `acceleration` / `accel` | 속도 차분 / dt → EMA(`acceleration_alpha`), age<3 이면 0 | unit/s² |
+| `momentum` | `mass_kg[label] × speed` (질량 미지정 시 null) | kg·unit/s |
+| `approach` | bbox 면적 변화율, **양수 = 카메라로 접근** (≈ 1/TTC) | 1/s |
+
+단위 보정 (없으면 `px`):
+
+- `--meters-per-pixel 0.002` — 카메라가 평면을 정면/위에서 볼 때 (탑뷰)
+- `--kinematics-config kinematics.example.json` 의 `homography` — 비스듬한 시점에서 지면 좌표(m)로 변환. bbox **하단 중심(지면 접점)** 을 사용. 지면에 아는 크기의 사각형 4점을 찍어 `cv2.getPerspectiveTransform` 으로 구한다.
+
+```python
+import cv2, numpy as np
+img_pts = np.float32([[210, 400], [430, 400], [520, 470], [120, 470]])  # 화면상 4점(px)
+ground = np.float32([[0, 0], [1, 0], [1, 0.5], [0, 0.5]])              # 실제 좌표(m)
+print(cv2.getPerspectiveTransform(img_pts, ground).tolist())           # → homography
+```
+
+⚠️ 한계: 단안 카메라라 깊이를 모른다. 보정 없이 px/s 는 같은 물체라도 멀수록 작게 나온다.
+카메라가 움직이면(차량 탑재) 값은 카메라 기준 **상대 운동**이다. 가속도는 2차 미분이라 노이즈가 커서
+판단 근거로는 `speed`·`approach` 를 우선 쓰고, 가속도는 추세 확인용으로 쓰는 것을 권장한다.
 
 ## ROI 구역 설정
 

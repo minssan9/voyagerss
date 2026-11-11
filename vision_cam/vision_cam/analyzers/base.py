@@ -15,6 +15,10 @@ class Detection:
     score: float = 1.0
     # ROI 적용 후 이 검출이 속한 구역 이름들 (roi.apply_zones 가 채움)
     zones: list[str] = field(default_factory=list)
+    # 추적기가 부여한 객체 ID (YOLO 내장 tracker 또는 kinematics 의 IoU 매칭)
+    track_id: int | None = None
+    # kinematics.KinematicsEstimator 가 채우는 속도/가속도/모멘텀 정보
+    kinematics: dict[str, Any] | None = None
 
 
 @dataclass
@@ -30,6 +34,10 @@ class AnalysisResult:
             out = {"label": d.label, "bbox": list(d.bbox), "score": round(d.score, 3)}
             if d.zones:
                 out["zones"] = d.zones
+            if d.track_id is not None:
+                out["track_id"] = d.track_id
+            if d.kinematics is not None:
+                out["kinematics"] = d.kinematics
             return out
 
         return {

@@ -13,9 +13,13 @@ from .roi import apply_zones
 
 if TYPE_CHECKING:
     from .decision import Decision, DrivingDecider
+    from .kinematics import KinematicsEstimator
     from .roi import Zone
 
-_COLORS = {"motion": (0, 200, 255), "face": (80, 220, 80), "object": (255, 140, 0)}
+_COLORS = {"motion": (0, 200, 255), "face": (80, 220, 80), "object": (255, 140, 0),
+           "yolo": (255, 80, 200)}
+# 검출 결과에 kinematics(속도/가속도/모멘텀)를 붙일 분석기
+_KINEMATIC_ANALYZERS = ("object", "yolo")
 _ACTION_COLORS = {"STOP": (0, 0, 255), "SLOW": (0, 200, 255), "GO": (0, 200, 0)}
 
 
@@ -60,15 +64,21 @@ class Pipeline:
         analysis_width: int = 320,
         zones: list["Zone"] | None = None,
         decider: "DrivingDecider | None" = None,
+        kinematics: "KinematicsEstimator | None" = None,
     ):
         self.analyzers = analyzers
         self.analysis_width = analysis_width
         self.zones = zones or []
         self.decider = decider
+        # 분석기 이름별 estimator (object / yolo 의 track_id 공간이 섞이지 않도록 분리)
+        self._kinematics_proto = kinematics
+        self._kinematics: dict[str, "KinematicsEstimator"] = {}
         self._frame_times: deque[float] = deque(maxlen=30)
 
-    def process(self, frame: np.ndarray) -> FrameReport:
-        now = time.time()
+    def process(self, frame: np.ndarray, timestamp: float | None = None) -> FrameReport:
+        """timestamp: 프레임 촬영 시각(초). 녹화 파일을 분석할 때는 영상 시간을 넘겨야
+        속도/가속도가 실제 시간 기준으로 계산된다 (기본: 현재 시각)."""
+        now = time.time() if timestamp is None else timestamp
         self._frame_times.append(now)
         h, w = frame.shape[:2]
         scale = min(1.0, self.analysis_width / w) if self.analysis_width else 1.0
@@ -81,6 +91,8 @@ class Pipeline:
             if scale < 1.0:
                 for d in result.detections:
                     d.bbox = tuple(int(round(v / scale)) for v in d.bbox)
+            if self._kinematics_proto is not None and result.analyzer in _KINEMATIC_ANALYZERS:
+                self._update_kinematics(result, now)
             results.append(result)
 
         zone_hits: dict[str, list[str]] = {}
@@ -94,6 +106,21 @@ class Pipeline:
         if self.decider is not None:
             report.decision = self.decider.decide(report)
         return report
+
+    def _update_kinematics(self, result: AnalysisResult, ts: float) -> None:
+        from .kinematics import KinematicsEstimator
+
+        est = self._kinematics.get(result.analyzer)
+        if est is None:
+            est = KinematicsEstimator(self._kinematics_proto.config) \
+                if self._kinematics else self._kinematics_proto
+            self._kinematics[result.analyzer] = est
+        est.update(result.detections, ts, predict_only=bool(result.metrics.get("stale")))
+        moving = [d.kinematics for d in result.detections if d.kinematics]
+        if moving:
+            fastest = max(moving, key=lambda k: k["speed"])
+            result.metrics["max_speed"] = fastest["speed"]
+            result.metrics["speed_unit"] = f"{fastest['unit']}/s"
 
     def _fps(self) -> float:
         if len(self._frame_times) < 2:
@@ -125,8 +152,15 @@ class Pipeline:
             for d in result.detections:
                 x, y, w, h = d.bbox
                 cv2.rectangle(out, (x, y), (x + w, y + h), color, 2)
-                label = f"{d.label} {d.score:.2f}" if result.analyzer == "object" else d.label
+                if result.analyzer in _KINEMATIC_ANALYZERS:
+                    label = f"{d.label} {d.score:.2f}"
+                    if d.track_id is not None and d.track_id < 1_000_000:
+                        label = f"#{d.track_id} {label}"
+                else:
+                    label = d.label
                 cv2.putText(out, label, (x, max(12, y - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
+                if d.kinematics:
+                    _draw_kinematics(out, d, color, report.frame_size)
 
         lines = [f"FPS {report.fps:.1f}"]
         for r in report.results:
@@ -147,6 +181,26 @@ class Pipeline:
         if report.decision is not None:
             _draw_decision(out, report.decision)
         return out
+
+
+def _draw_kinematics(out: np.ndarray, d, color, frame_size) -> None:
+    """bbox 중심에서 속도 벡터 화살표 + 하단에 속도/가속도/모멘텀 텍스트."""
+    k = d.kinematics
+    x, y, w, h = d.bbox
+    cx, cy = x + w // 2, y + h // 2
+    vx, vy = k["velocity"]
+    if k["unit"] == "px":
+        # 0.5초 후 예상 위치까지 화살표
+        ex, ey = int(cx + vx * 0.5), int(cy + vy * 0.5)
+        if abs(ex - cx) + abs(ey - cy) > 2:
+            cv2.arrowedLine(out, (cx, cy), (ex, ey), color, 2, tipLength=0.25)
+    unit = k["unit"]
+    text = f"v={k['speed']:.2f}{unit}/s a={k['accel']:.2f}"
+    if k.get("momentum") is not None:
+        text += f" p={k['momentum']:.1f}"
+    ty = min(frame_size[1] - 4, y + h + 14)
+    cv2.putText(out, text, (x, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 3)
+    cv2.putText(out, text, (x, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
 
 
 def _draw_decision(out: np.ndarray, decision: "Decision") -> None:

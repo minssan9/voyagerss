@@ -7,3 +7,6 @@ events.jsonl
 .env
 models/*.caffemodel
 models/*.prototxt
+*.pt
+*_ncnn_model/
+*.onnx

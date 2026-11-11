@@ -1,0 +1,7 @@
+# yolo 분석기(YOLO26) 용 추가 의존성 — PyTorch 포함으로 무겁다 (~1GB)
+# 설치: pip install -r requirements.txt -r requirements-yolo.txt
+# CPU 전용 PyTorch 를 원하면 먼저: pip install torch --index-url https://download.pytorch.org/whl/cpu
+# 라즈베리파이는 PC 에서 NCNN 으로 export 한 모델을 쓰고, 파이에는 ultralytics + ncnn 만 설치 권장
+ultralytics>=8.4,<9
+# model.track() 의 ByteTrack/BoT-SORT 매칭에 필요 (ultralytics 가 자동 설치하지 않음)
+lap>=0.5.12
