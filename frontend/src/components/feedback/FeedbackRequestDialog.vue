@@ -9,6 +9,16 @@
 
       <q-form @submit.prevent="submit">
         <q-card-section class="q-gutter-md">
+          <q-btn-toggle
+            v-model="form.type"
+            spread
+            unelevated
+            no-caps
+            toggle-color="primary"
+            color="grey-2"
+            text-color="grey-8"
+            :options="typeOptions"
+          />
           <q-input
             v-model="form.title"
             :label="t('feedback.columns.title')"
@@ -56,11 +66,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useRoute } from 'vue-router'
-import { useFeedback } from '@/composables/useFeedback'
+import { useFeedback, type FeedbackType } from '@/composables/useFeedback'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue', 'submitted'])
@@ -77,7 +87,13 @@ watch(isOpen, v => {
   if (v) fillFromCurrentPage()
 })
 
-const form = reactive<{ title: string; content: string; file: File | null; pageUrl: string }>({
+const typeOptions = computed(() => [
+  { label: t('feedback.type.bug'), value: 'BUG' },
+  { label: t('feedback.type.improvement'), value: 'IMPROVEMENT' },
+])
+
+const form = reactive<{ type: FeedbackType; title: string; content: string; file: File | null; pageUrl: string }>({
+  type: 'IMPROVEMENT',
   title: '',
   content: '',
   file: null,
@@ -89,6 +105,7 @@ function fillFromCurrentPage() {
 }
 
 function resetForm() {
+  form.type = 'IMPROVEMENT'
   form.title = ''
   form.content = ''
   form.file = null
@@ -98,6 +115,7 @@ function resetForm() {
 async function submit() {
   try {
     await createFeedback({
+      type: form.type,
       title: form.title,
       content: form.content,
       pageUrl: form.pageUrl,

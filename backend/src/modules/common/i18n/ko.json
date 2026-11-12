@@ -51,7 +51,8 @@
       "attachmentSize": "첨부 파일은 5MB를 초과할 수 없습니다",
       "invalidStatus": "올바르지 않은 상태입니다: {status}",
       "notFound": "피드백을 찾을 수 없습니다",
-      "attachmentNotFound": "첨부 파일을 찾을 수 없습니다"
+      "attachmentNotFound": "첨부 파일을 찾을 수 없습니다",
+      "invalidType": "유형은 BUG 또는 IMPROVEMENT 이어야 합니다: {type}"
     }
   },
   "vision": {

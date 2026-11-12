@@ -51,7 +51,8 @@
       "attachmentSize": "Attachment exceeds the 5MB size limit",
       "invalidStatus": "Invalid status: {status}",
       "notFound": "Feedback not found",
-      "attachmentNotFound": "Attachment not found"
+      "attachmentNotFound": "Attachment not found",
+      "invalidType": "Type must be BUG or IMPROVEMENT: {type}"
     }
   },
   "vision": {
