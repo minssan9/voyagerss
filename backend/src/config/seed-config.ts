@@ -88,6 +88,10 @@ export const SEED_KEYS: SeedEntry[] = [
   { key: 'API_RATE_LIMIT_MAX_REQUESTS', category: 'security', description: 'API rate limit max requests per window' },
   // Notifications
   { key: 'SLACK_WEBHOOK_URL',      category: 'notifications', description: 'Slack incoming webhook URL' },
+  { key: 'LINEAR_API_KEY',         category: 'notifications', description: 'Linear Personal API Key — 피드백 등록 시 이슈 생성 (미설정 시 생략)' },
+  { key: 'LINEAR_TEAM_ID',         category: 'notifications', description: '피드백 이슈를 생성할 Linear 팀 ID(UUID)' },
+  { key: 'LINEAR_BUG_LABEL_ID',    category: 'notifications', description: '불편사항(BUG) 이슈 Linear 라벨 ID (선택)' },
+  { key: 'LINEAR_IMPROVEMENT_LABEL_ID', category: 'notifications', description: '개선사항(IMPROVEMENT) 이슈 Linear 라벨 ID (선택)' },
   // Scheduler
   { key: 'ENABLE_SCHEDULER',       category: 'scheduler', description: '데이터 수집 스케줄러 활성화' },
   { key: 'SCHEDULER_TIMEZONE',     category: 'scheduler', description: '스케줄러 타임존' },

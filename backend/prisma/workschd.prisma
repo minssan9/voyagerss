@@ -279,6 +279,8 @@ model SystemConfig {
 model Feedback {
   id          Int      @id @default(autoincrement())
   accountId   Int?     @map("account_id")
+  /// BUG=불편사항, IMPROVEMENT=개선사항
+  type        String   @default("IMPROVEMENT") @db.VarChar(20)
   title       String   @db.VarChar(200)
   content     String   @db.Text
   pageUrl     String?  @map("page_url") @db.VarChar(500)
@@ -286,6 +288,8 @@ model Feedback {
   fileName    String?  @map("file_name") @db.VarChar(255)
   fileMime    String?  @map("file_mime") @db.VarChar(100)
   fileData    Bytes?   @map("file_data")
+  linearIssueId  String? @map("linear_issue_id") @db.VarChar(64)
+  linearIssueUrl String? @map("linear_issue_url") @db.VarChar(500)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
