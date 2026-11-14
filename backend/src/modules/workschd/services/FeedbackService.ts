@@ -5,7 +5,10 @@ import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService } from '../../../config/config-service';
 import { Feedback } from '@prisma/client-workschd';
 
+export type FeedbackType = 'BUG' | 'IMPROVEMENT';
+
 export interface CreateFeedbackInput {
+  type?: string;
   title: string;
   content: string;
   pageUrl?: string;
@@ -23,10 +26,19 @@ export interface FeedbackListParams {
 const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 const ALLOWED_STATUSES = ['OPEN', 'IN_PROGRESS', 'DONE', 'REJECTED'];
 const SAFE_URL_PATTERN = /^https?:\/\//i;
+const FEEDBACK_TYPES: FeedbackType[] = ['BUG', 'IMPROVEMENT'];
+const TYPE_LABEL: Record<FeedbackType, string> = { BUG: '불편사항', IMPROVEMENT: '개선사항' };
+const LINEAR_GRAPHQL_URL = 'https://api.linear.app/graphql';
+const ISSUE_CREATE_MUTATION =
+  'mutation FeedbackIssueCreate($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }';
 
 @Injectable()
 export class FeedbackService {
   async create(accountId: number, input: CreateFeedbackInput): Promise<Feedback> {
+    const type = (input.type || 'IMPROVEMENT') as FeedbackType;
+    if (!FEEDBACK_TYPES.includes(type)) {
+      throw new I18nHttpException('workschd.feedback.invalidType', HttpStatus.BAD_REQUEST, { type });
+    }
     if (input.pageUrl && !SAFE_URL_PATTERN.test(input.pageUrl)) {
       throw new I18nHttpException('workschd.feedback.pageUrl', HttpStatus.BAD_REQUEST);
     }
@@ -42,6 +54,7 @@ export class FeedbackService {
     const feedback = await prisma.feedback.create({
       data: {
         accountId,
+        type,
         title: input.title,
         content: input.content,
         pageUrl: input.pageUrl,
@@ -53,6 +66,14 @@ export class FeedbackService {
 
     void this.notifySlack(feedback);
 
+    // 등록 즉시 Linear 이슈 생성 — 실패해도 등록은 성공으로 처리하고 linear 필드만 비워 둔다.
+    const issue = await this.createLinearIssue(feedback);
+    if (issue) {
+      return prisma.feedback.update({
+        where: { id: feedback.id },
+        data: { linearIssueId: issue.identifier.slice(0, 64), linearIssueUrl: issue.url.slice(0, 500) },
+      });
+    }
     return feedback;
   }
 
@@ -71,12 +92,15 @@ export class FeedbackService {
         select: {
           id: true,
           accountId: true,
+          type: true,
           title: true,
           content: true,
           pageUrl: true,
           status: true,
           fileName: true,
           fileMime: true,
+          linearIssueId: true,
+          linearIssueUrl: true,
           createdAt: true,
           updatedAt: true,
           account: { select: { accountId: true, username: true, email: true } },
@@ -113,13 +137,52 @@ export class FeedbackService {
     };
   }
 
+  private async createLinearIssue(feedback: Feedback): Promise<{ identifier: string; url: string } | null> {
+    const apiKey = configService.get('LINEAR_API_KEY', '');
+    const teamId = configService.get('LINEAR_TEAM_ID', '');
+    if (!apiKey || !teamId) return null;
+
+    const type = feedback.type as FeedbackType;
+    const labelId = configService.get(type === 'BUG' ? 'LINEAR_BUG_LABEL_ID' : 'LINEAR_IMPROVEMENT_LABEL_ID', '');
+    const description = [
+      feedback.content,
+      '',
+      '---',
+      `- 유형: ${TYPE_LABEL[type]}`,
+      feedback.pageUrl ? `- 페이지: ${feedback.pageUrl}` : '',
+      feedback.fileName ? `- 첨부파일: ${feedback.fileName} (관리자 화면에서 다운로드)` : '',
+      `- voyagerss feedback #${feedback.id}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const input: Record<string, unknown> = {
+      teamId,
+      title: `[${TYPE_LABEL[type]}] ${feedback.title}`,
+      description,
+    };
+    if (labelId) input.labelIds = [labelId];
+
+    try {
+      const { data } = await axios.post(
+        LINEAR_GRAPHQL_URL,
+        { query: ISSUE_CREATE_MUTATION, variables: { input } },
+        { headers: { Authorization: apiKey, 'Content-Type': 'application/json' }, timeout: 10000 },
+      );
+      const created = data?.data?.issueCreate;
+      return created?.success && created.issue ? created.issue : null;
+    } catch (err) {
+      // Linear 연동 실패가 피드백 등록 자체를 막아서는 안 됨
+      return null;
+    }
+  }
+
   private async notifySlack(feedback: Feedback): Promise<void> {
     const webhookUrl = configService.get('SLACK_WEBHOOK_URL', '');
     if (!webhookUrl) return;
 
     try {
       await axios.post(webhookUrl, {
-        text: `:loudspeaker: 새로운 기능 개선 요청이 접수되었습니다.\n*${feedback.title}*\n${feedback.content}`,
+        text: `:loudspeaker: 새로운 ${TYPE_LABEL[feedback.type as FeedbackType] ?? '피드백'}이 접수되었습니다.\n*${feedback.title}*\n${feedback.content}`,
       });
     } catch (err) {
       // Slack 알림 실패가 피드백 등록 자체를 막아서는 안 됨

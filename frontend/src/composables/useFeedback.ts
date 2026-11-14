@@ -2,14 +2,19 @@ import { ref } from 'vue'
 import { i18n } from '@/locales/i18n'
 import service from '@/api/common/axios-voyagerss'
 
+export type FeedbackType = 'BUG' | 'IMPROVEMENT'
+
 export interface FeedbackItem {
   id: number
+  type: FeedbackType
   title: string
   content: string
   pageUrl?: string | null
   status: string
   fileName?: string | null
   fileMime?: string | null
+  linearIssueId?: string | null
+  linearIssueUrl?: string | null
   createdAt: string
   updatedAt: string
   account?: { accountId: number; username: string; email: string } | null
@@ -23,6 +28,7 @@ export interface FeedbackListResult {
 }
 
 export interface CreateFeedbackPayload {
+  type: FeedbackType
   title: string
   content: string
   pageUrl?: string
@@ -61,7 +67,7 @@ export function useFeedback() {
       }
 
       const { data } = await service.post('/v2/feedback', body)
-      return data as { id: number; status: string }
+      return data as { id: number; status: string; linearIssueId?: string | null; linearIssueUrl?: string | null }
     } catch (e: any) {
       error.value = e?.message ?? i18n.global.t('feedback.createFailed')
       throw e

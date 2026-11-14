@@ -54,6 +54,25 @@
             </q-td>
           </template>
 
+          <template v-slot:body-cell-type="props">
+            <q-td :props="props">
+              <q-badge
+                outline
+                :color="props.row.type === 'BUG' ? 'negative' : 'primary'"
+                :label="props.row.type === 'BUG' ? t('feedback.type.bug') : t('feedback.type.improvement')"
+              />
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-linear="props">
+            <q-td :props="props">
+              <a v-if="props.row.linearIssueUrl" :href="props.row.linearIssueUrl" target="_blank" rel="noopener">
+                {{ props.row.linearIssueId }}
+              </a>
+              <span v-else>-</span>
+            </q-td>
+          </template>
+
           <template v-slot:body-cell-reporter="props">
             <q-td :props="props">
               {{ props.row.account?.username ?? props.row.account?.email ?? '-' }}
@@ -143,11 +162,13 @@ const statusFilterOptions = computed(() => [
 
 const columns = computed(() => [
   { name: 'id', label: t('feedback.columns.id'), field: 'id', align: 'left' as const },
+  { name: 'type', label: t('feedback.columns.type'), field: 'type', align: 'center' as const },
   { name: 'title', label: t('feedback.columns.title'), field: 'title', align: 'left' as const },
   { name: 'content', label: t('feedback.columns.content'), field: 'content', align: 'left' as const },
   { name: 'reporter', label: t('feedback.columns.reporter'), field: 'reporter', align: 'left' as const },
   { name: 'pageUrl', label: t('feedback.columns.pageUrl'), field: 'pageUrl', align: 'left' as const },
   { name: 'attachment', label: t('feedback.columns.attachment'), field: 'fileName', align: 'center' as const },
+  { name: 'linear', label: 'Linear', field: 'linearIssueId', align: 'center' as const },
   { name: 'status', label: t('feedback.columns.status'), field: 'status', align: 'center' as const },
   { name: 'createdAt', label: t('feedback.columns.createdAt'), field: 'createdAt', align: 'left' as const },
 ])

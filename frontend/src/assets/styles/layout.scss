@@ -264,6 +264,13 @@ body {
   padding-bottom: $footer-height;
 }
 
+@media (min-width: 1024px) {
+  .with-sidebar .q-page-container {
+    margin-left: var(--voy-sidebar-width, 260px);
+    width: calc(100% - var(--voy-sidebar-width, 260px));
+  }
+}
+
 .q-header.app-header,
 .q-header.app-header .q-toolbar {
   min-height: var(--voy-header-height, 44px);

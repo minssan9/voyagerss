@@ -12,7 +12,6 @@
 
 | 문서 | 설명 |
 |------|------|
-| [aipr-local-mlx.md](guides/aipr-local-mlx.md) | AIPR + 로컬 MLX 연동 (스크립트는 [local-llm](../../../local-llm/)) |
 | [MIGRATION-GUIDE.md](guides/MIGRATION-GUIDE.md) | DB 마이그레이션 |
 | [multi_schema_guide.md](guides/multi_schema_guide.md) | Prisma 멀티 스키마 |
 | [workschd-implementation-guide.md](guides/workschd-implementation-guide.md) | WorkSchd 구현 |
@@ -40,4 +39,3 @@
 ## Tooling
 
 - [meta/dotfiles/cursor-harness/](../dotfiles/cursor-harness/) — Cursor harness 설치
-- [~/repository/local-llm](../../../local-llm/) — 로컬 LLM (MLX + Open WebUI, [docs](../../../local-llm/docs/openwebui-mlx.md))

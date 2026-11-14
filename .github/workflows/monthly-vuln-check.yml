@@ -1,0 +1,29 @@
+# 매월 1일 09:00 Asia/Seoul. Actions cron은 UTC라 00:00이다.
+name: Monthly vulnerability check
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: frontend npm audit
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
+      - name: backend audit without a committed lockfile
+        working-directory: backend
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit --omit=dev --audit-level=high

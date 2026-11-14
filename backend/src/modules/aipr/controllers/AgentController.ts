@@ -4,7 +4,6 @@ import * as os from 'os';
 import * as path from 'path';
 import type { AiprRequest } from '../middleware/auth';
 import { AgentProviderFactory } from '../agent/agent-provider-factory';
-import { testOmpProvider } from '../agent/omp-runner';
 import { claudeCliProvider } from '../agent/claude-cli-provider';
 
 export class AgentController {
@@ -18,19 +17,24 @@ export class AgentController {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'aipr-agent-test-'));
 
     try {
-      if (providerId === 'omp_sdk') {
-        await testOmpProvider(tmpDir, onLog);
-      } else {
-        await claudeCliProvider.runPlan(
-          {
-            issue: { title: 'Test', body: 'List 3 files in repo tree only.' },
-            repoTree: 'README.md\npackage.json',
-            recentLog: 'abc123 init',
-            workdir: tmpDir,
-          },
-          onLog,
-        );
+      if (providerId !== 'claude_cli') {
+        res.status(400).json({
+          success: false,
+          provider: providerId,
+          message: 'Unsupported agent provider. AIPR uses claude_cli.',
+          logs,
+        });
+        return;
       }
+      await claudeCliProvider.runPlan(
+        {
+          issue: { title: 'Test', body: 'List 3 files in repo tree only.' },
+          repoTree: 'README.md\npackage.json',
+          recentLog: 'abc123 init',
+          workdir: tmpDir,
+        },
+        onLog,
+      );
       res.json({ success: true, provider: providerId, logs });
     } catch (err: any) {
       res.status(500).json({

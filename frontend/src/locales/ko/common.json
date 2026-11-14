@@ -77,9 +77,9 @@
     "vision": "Vision"
   },
   "feedback": {
-    "title": "기능 개선 요청",
+    "title": "불편·개선사항 등록",
     "admin": {
-      "title": "기능 개선 요청 관리",
+      "title": "불편·개선사항 관리",
       "subtitle": "사용자가 등록한 기능 개선 요청을 확인하고 처리 상태를 관리합니다.",
       "refresh": "새로고침",
       "statusFilter": "상태 필터",
@@ -102,7 +102,8 @@
       "pageUrl": "요청 페이지",
       "attachment": "첨부",
       "status": "상태",
-      "createdAt": "등록일"
+      "createdAt": "등록일",
+      "type": "유형"
     },
     "form": {
       "titleRequired": "제목을 입력해주세요",
@@ -110,10 +111,14 @@
       "attachmentOptional": "첨부 파일 (선택)",
       "fileSizeLimit": "파일 크기는 5MB를 초과할 수 없습니다"
     },
-    "submitSuccess": "기능 개선 요청이 등록되었습니다. 감사합니다!",
+    "submitSuccess": "등록되었습니다. 감사합니다!",
     "submitFailed": "등록에 실패했습니다. 잠시 후 다시 시도해주세요.",
     "createFailed": "피드백 등록에 실패했습니다.",
     "listFailed": "피드백 목록을 불러오지 못했습니다.",
-    "updateFailed": "피드백 상태 변경에 실패했습니다."
+    "updateFailed": "피드백 상태 변경에 실패했습니다.",
+    "type": {
+      "bug": "불편사항",
+      "improvement": "개선사항"
+    }
   }
 }

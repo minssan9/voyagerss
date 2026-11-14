@@ -60,6 +60,7 @@ const isMobileLayout = computed(() => {
 const layoutClasses = computed(() => [
   'shadow-2 rounded-borders',
   {
+    'with-sidebar': layoutStore.drawerLeft && !userStore.isWorker,
     'layout-worker': userStore.isWorker,
     'layout-mobile': isMobileLayout.value,
   },

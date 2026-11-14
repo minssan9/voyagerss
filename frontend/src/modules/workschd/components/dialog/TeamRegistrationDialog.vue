@@ -41,7 +41,7 @@
             </div>
           </div>
           
-          <div class="row justify-end q-mt-md">
+          <div class="dialog-actions">
             <q-btn
               type="submit"
               label="Register Team"

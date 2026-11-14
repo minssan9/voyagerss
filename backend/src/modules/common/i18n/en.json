@@ -51,7 +51,8 @@
       "attachmentSize": "Attachment exceeds the 5MB size limit",
       "invalidStatus": "Invalid status: {status}",
       "notFound": "Feedback not found",
-      "attachmentNotFound": "Attachment not found"
+      "attachmentNotFound": "Attachment not found",
+      "invalidType": "Type must be BUG or IMPROVEMENT: {type}"
     }
   },
   "vision": {
@@ -65,7 +66,9 @@
     "badUpstream": "Invalid upstream address.",
     "urlEmpty": "Address is empty.",
     "urlInvalid": "Not a valid http(s) address.",
-    "urlProtocol": "Only http or https addresses are allowed."
+    "urlProtocol": "Only http or https addresses are allowed.",
+    "frameNotFound": "No frame found in the camera stream.",
+    "frameTimeout": "Timed out waiting for a camera frame."
   },
   "aviation": {
     "topicsRequired": "A topics array is required",

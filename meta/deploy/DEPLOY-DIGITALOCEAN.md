@@ -49,12 +49,13 @@ Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.g
 
 ## Architecture
 
-- **DNS**: `voyagerss.com`, `api.voyagerss.com` → Droplet **host IP** (A record)
-- **Edge L7**: Docker gateway nginx at `/data/gateway` (shared with en9door) — port **80** entry
-- **Voyagerss routing** (via `nginx/conf.d/voyagerss.conf`):
-  - `api.voyagerss.com` → `host.docker.internal:9002` (BE: `/health`, `/api/`, `/socket.io/`)
-  - `voyagerss.com` → `host.docker.internal:9003` (FE SPA)
-- **App stack**: `/data/voyagerss/docker-compose.yml` — BE/FE bind `127.0.0.1:9002`, `:9003` on host
+- **DNS**: `voyagerss.com`, `api.voyagerss.com`, `en9door.com` → Droplet **A record** (no DO Load Balancer)
+- **Edge L7**: `en9door_gateway` at `/data/gateway` — **HTTP :80** and **HTTPS :443** on the droplet (Let's Encrypt)
+- **TLS files**: `nginx/ssl/fullchain.pem` + `privkey.pem` (unified; copy legacy with `cp -L`, not `install -L`)
+- **Voyagerss routing** ([`minssan9/en9door`](https://github.com/minssan9/en9door) `gateway/nginx/conf.d/voyagerss*.conf`):
+  - `api.voyagerss.com` → `voyagerss-backend:9002` on `en9door-net`
+  - `voyagerss.com` → `voyagerss-frontend:80` on `en9door-net`
+- **App stack**: `/data/voyagerss/docker-compose.prod.yml` — containers join **`en9door-net`**
 
 ### Gateway one-time setup (same Droplet as en9door)
 
@@ -90,10 +91,20 @@ Use [`meta/deploy/nginx/voyagerss.conf`](nginx/voyagerss.conf) with upstream `12
 ## DigitalOcean checklist
 
 1. Droplet (Ubuntu 22.04+, 2 vCPU / 4 GB RAM recommended)
-2. Cloud Firewall: SSH from admin IP; HTTP:80 from LB only; **do not** expose 9002/9003
-3. Load Balancer: HTTPS:443 → HTTP:80; cert for `api.voyagerss.com` and `voyagerss.com`
-4. Health check: HTTP :80, path `/health`, Host `api.voyagerss.com`
-5. DNS: `api` and `@` (apex) A records → LB IP
+2. Cloud Firewall: **:22** (admin), **:80**, **:443** to the internet; **do not** expose app ports `9002`/`9003` publicly
+3. **Gateway TLS**: deploy [`minssan9/en9door`](https://github.com/minssan9/en9door) **`release`** → workflow **gateway-en9door CD** (`/data/gateway`)
+4. Health: HTTP `GET /health` on gateway (default_server); HTTPS smoke `https://voyagerss.com/`, `https://en9door.com/`
+5. DNS: apex + `api` (and `www` as needed) **A** → droplet IP
+
+### Gateway TLS emergency (on droplet)
+
+```bash
+cd /data/gateway
+cp -L nginx/ssl/en9door/fullchain.pem nginx/ssl/fullchain.pem
+cp -L nginx/ssl/en9door/privkey.pem   nginx/ssl/privkey.pem
+chmod 0644 nginx/ssl/fullchain.pem && chmod 0600 nginx/ssl/privkey.pem
+# enable *-ssl.conf (rename .off → .conf), then: docker compose … exec nginx nginx -t && restart nginx
+```
 
 ## First-time bootstrap
 
@@ -128,6 +139,7 @@ VOYAGERSS_UPSTREAM_HOST=host.docker.internal DATA_DIR=/data/voyagerss bash meta/
 ## Environment
 
 - Backend: [`.env.production.example`](../../.env.production.example) → `DOTENV_PROD`
+- `DATABASE_URL` host `db-host` is the droplet MySQL alias (`extra_hosts: db-host:host-gateway`). MySQL must accept port 3306 from the Docker bridge; `bind-address = 127.0.0.1` refuses the connection after DNS succeeds.
 - Frontend build args are set in CI (`VITE_API_*` → `https://api.voyagerss.com`)
 
 Update Google/Kakao OAuth redirect URIs to `https://api.voyagerss.com/api/workschd/auth/.../callback`.
@@ -142,8 +154,9 @@ npm run deploy:smoke:fe   # Frontend apex
 On droplet (after gateway merge):
 
 ```bash
-curl -fsS -H "Host: api.voyagerss.com" http://127.0.0.1/health
-curl -fsS -o /dev/null -w "%{http_code}\n" -H "Host: voyagerss.com" http://127.0.0.1/
+curl -fsS http://127.0.0.1/health
+curl -fsS -o /dev/null -w "%{http_code}\n" https://voyagerss.com/
+curl -fsS -o /dev/null -w "%{http_code}\n" https://api.voyagerss.com/health
 ```
 
 

@@ -20,7 +20,7 @@ interface SeedEntry {
   description: string;
 }
 
-const SEED_KEYS: SeedEntry[] = [
+export const SEED_KEYS: SeedEntry[] = [
   // JWT
   { key: 'JWT_SECRET',             category: 'jwt',      description: '공유 JWT 서명 시크릿 (workschd)' },
   { key: 'JWT_ACCESS_SECRET',      category: 'jwt',      description: 'Access 토큰 서명 시크릿' },
@@ -48,6 +48,8 @@ const SEED_KEYS: SeedEntry[] = [
   // Finance APIs
   { key: 'BOK_API_KEY',            category: 'finance',  description: '한국은행 ECOS API 키' },
   { key: 'DART_API_KEY',           category: 'finance',  description: 'DART (금융감독원) API 키' },
+  { key: 'FRED_API_KEY',           category: 'finance',  description: 'FRED (St. Louis Fed) API 키' },
+  { key: 'DATA_GO_KR_SERVICE_KEY', category: 'finance',  description: '공공데이터포털 인증키 (관세청 수출입 등)' },
   { key: 'KIS_API_KEY',            category: 'finance',  description: 'KIS (한국투자증권) API 키' },
   { key: 'KIS_API_SECRET',         category: 'finance',  description: 'KIS API 시크릿' },
   // App
@@ -60,6 +62,19 @@ const SEED_KEYS: SeedEntry[] = [
   // Scraper
   { key: 'WORKSCHD_SCRAPER_ENABLED',                     category: 'scraper', description: '스크래퍼 스케줄러 활성화 (true/false)' },
   { key: 'WORKSCHD_SCRAPER_CRON',                        category: 'scraper', description: '스크래퍼 cron 표현식' },
+  // Primary-source macro / market data ingestion (official APIs only)
+  { key: 'PD_INGESTION_ENABLED',       category: 'primary_data', description: '1차 출처 데이터 수집 스케줄러 (true/false)' },
+  { key: 'PD_INGESTION_CRON',          category: 'primary_data', description: '수집 cron (KST 기본 06:30)' },
+  { key: 'PD_INGESTION_TIMEZONE',      category: 'primary_data', description: '수집 스케줄 타임존' },
+  { key: 'PD_ADAPTERS',                category: 'primary_data', description: '쉼표 구분 어댑터 ID 필터 (비우면 전체)' },
+  { key: 'PD_TWSE_SYMBOLS',            category: 'primary_data', description: 'TWSE 월매출 종목 필터 (비우면 전체)' },
+  { key: 'PD_TWSE_MASTER_LIMIT',       category: 'primary_data', description: 'TWSE 마스터 최대 행 (0=전체)' },
+  { key: 'PD_FRED_CREDIT_SERIES',      category: 'primary_data', description: 'FRED 신용 스프레드 시리즈 ID 목록' },
+  { key: 'PD_FRED_LOOKBACK_DAYS',      category: 'primary_data', description: 'FRED 조회 일수' },
+  { key: 'PD_KOREA_TRADE_UNIVERSE_JSON', category: 'primary_data', description: '관세청 HS×국가 수집 유니버스 JSON' },
+  { key: 'PD_KOREA_TRADE_MONTHS_BACK', category: 'primary_data', description: '관세청 조회 개월 수' },
+  { key: 'PD_DART_CORP_LIMIT',         category: 'primary_data', description: 'DART corpCode 파싱 최대 건수' },
+  { key: 'PD_DART_DISCLOSURE_DAYS',    category: 'primary_data', description: 'DART 공시 인덱스 조회 일수' },
   { key: 'WORKSCHD_SCRAPER_LISTING_URL_OVERRIDES_JSON',  category: 'scraper', description: '장례식장 URL 오버라이드 JSON' },
   // Telegram
   { key: 'TELEGRAM_BOT_TOKEN',     category: 'telegram', description: 'Telegram 봇 토큰' },
@@ -73,6 +88,10 @@ const SEED_KEYS: SeedEntry[] = [
   { key: 'API_RATE_LIMIT_MAX_REQUESTS', category: 'security', description: 'API rate limit max requests per window' },
   // Notifications
   { key: 'SLACK_WEBHOOK_URL',      category: 'notifications', description: 'Slack incoming webhook URL' },
+  { key: 'LINEAR_API_KEY',         category: 'notifications', description: 'Linear Personal API Key — 피드백 등록 시 이슈 생성 (미설정 시 생략)' },
+  { key: 'LINEAR_TEAM_ID',         category: 'notifications', description: '피드백 이슈를 생성할 Linear 팀 ID(UUID)' },
+  { key: 'LINEAR_BUG_LABEL_ID',    category: 'notifications', description: '불편사항(BUG) 이슈 Linear 라벨 ID (선택)' },
+  { key: 'LINEAR_IMPROVEMENT_LABEL_ID', category: 'notifications', description: '개선사항(IMPROVEMENT) 이슈 Linear 라벨 ID (선택)' },
   // Scheduler
   { key: 'ENABLE_SCHEDULER',       category: 'scheduler', description: '데이터 수집 스케줄러 활성화' },
   { key: 'SCHEDULER_TIMEZONE',     category: 'scheduler', description: '스케줄러 타임존' },
