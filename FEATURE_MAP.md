@@ -221,6 +221,10 @@
 - Route: `/vision/cam`
 - Page: `frontend/src/modules/vision/views/VisionCamTest.vue`
 
+## 비전 라이브
+- Route: `/vision/live`
+- Page: `frontend/src/modules/vision/views/VisionLiveTest.vue`
+
 ## 비전 판정
 - Route: `/vision/judge`
 - Page: `frontend/src/modules/vision/views/VisionJudgeTest.vue`
