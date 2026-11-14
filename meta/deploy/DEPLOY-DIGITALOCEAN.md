@@ -5,7 +5,7 @@
 | Path | Purpose |
 |------|---------|
 | `/data/voyagerss/docker-compose.yml` | BE + FE services (from `meta/deploy/docker-compose.prod.yml`) |
-| `/data/voyagerss/.env` | Backend secrets (`DOTENV_PROD` GitHub secret) |
+| `/data/voyagerss/.env` | Backend secrets. Deploys leave this file in place |
 | `/data/voyagerss/data/` | Persistent backend data (SQLite scraper, etc.) |
 | `/data/voyagerss/nginx/voyagerss.conf` | Rendered gateway config (from `meta/deploy/nginx/voyagerss.conf`) |
 
@@ -44,7 +44,6 @@ Images are built and pushed by [`.github/workflows/deploy-production.yml`](../.g
 | `DROPLET_USERNAME` | SSH user |
 | `DROPLET_PASSWORD` | Droplet SSH password (preferred; same as en9door) |
 | `DROPLET_KEY` | Legacy alias for `DROPLET_PASSWORD` |
-| `DOTENV_PROD` | Production backend `.env` (synced each deploy) |
 | `GHCR_PULL_TOKEN` | (optional) PAT with `read:packages` if images are private |
 
 ## Architecture
@@ -116,7 +115,7 @@ bash meta/deploy/scripts/bootstrap-droplet.sh
 
 Merge gateway nginx using the prompt in [`GATEWAY-NGINX-MERGE-PROMPT.md`](nginx/GATEWAY-NGINX-MERGE-PROMPT.md).
 
-Set GitHub secrets (`DROPLET_*`, `DOTENV_PROD`), then push to `main` — **Deploy Production (GHCR)** runs automatically.
+Set GitHub secrets (`DROPLET_*`), then push to `main` — **Deploy Production (GHCR)** runs automatically. `/data/voyagerss/.env` is not uploaded.
 
 Render reference config (default upstream `127.0.0.1`):
 
@@ -138,7 +137,7 @@ VOYAGERSS_UPSTREAM_HOST=host.docker.internal DATA_DIR=/data/voyagerss bash meta/
 
 ## Environment
 
-- Backend: [`.env.production.example`](../../.env.production.example) → `DOTENV_PROD`
+- Backend env stays at `/data/voyagerss/.env` on the droplet. Template: [`.env.example`](../../.env.example)
 - `DATABASE_URL` host `db-host` is the droplet MySQL alias (`extra_hosts: db-host:host-gateway`). MySQL must accept port 3306 from the Docker bridge; `bind-address = 127.0.0.1` refuses the connection after DNS succeeds.
 - Frontend build args are set in CI (`VITE_API_*` → `https://api.voyagerss.com`)
 

@@ -120,16 +120,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Write production .env for SCP
-        env:
-          DOTENV_CONTENT: ${{ secrets.DOTENV_PROD }}
-        run: |
-          if [[ -z "${DOTENV_CONTENT}" ]]; then
-            echo "DOTENV_PROD secret is empty" >&2
-            exit 1
-          fi
-          printf '%s' "${DOTENV_CONTENT}" > .env.prod
-
       - name: Check Droplet password secret
         run: |
           if [ -z "${{ secrets.DROPLET_PASSWORD }}" ] && [ -z "${{ secrets.DROPLET_KEY }}" ]; then
@@ -225,17 +215,7 @@ jobs:
           target: ${{ env.DEPLOY_ROOT }}
           strip_components: 2
 
-      - name: Sync production .env to Droplet
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USERNAME }}
-          password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
-          source: .env.prod
-          target: ${{ env.DEPLOY_ROOT }}
-          strip_components: 0
-
-      - name: Rename .env on Droplet
+      - name: Keep server .env
         uses: appleboy/ssh-action@v1.2.3
         with:
           host: ${{ secrets.DROPLET_HOST }}
@@ -243,18 +223,11 @@ jobs:
           password: ${{ secrets.DROPLET_PASSWORD || secrets.DROPLET_KEY }}
           script: |
             ROOT="${{ env.DEPLOY_ROOT }}"
-            if [[ -f "${ROOT}/.env.prod" ]]; then
-              mv -f "${ROOT}/.env.prod" "${ROOT}/.env"
-            elif [[ -f "${ROOT}/.env.prod/.env.prod" ]]; then
-              mv -f "${ROOT}/.env.prod/.env.prod" "${ROOT}/.env"
-              rmdir "${ROOT}/.env.prod" 2>/dev/null || true
-            elif [[ -f "${ROOT}/.env" ]]; then
-              echo "Keeping existing ${ROOT}/.env (.env.prod not uploaded)"
-            else
-              echo "No .env.prod or .env on droplet" >&2
-              ls -la "${ROOT}" >&2 || true
+            if [[ ! -s "${ROOT}/.env" ]]; then
+              echo "Missing ${ROOT}/.env — deploy leaves the server file in place" >&2
               exit 1
             fi
+            echo "Keeping existing ${ROOT}/.env"
 
       - name: Deploy Docker Compose stack on Droplet
         uses: appleboy/ssh-action@v1.2.3

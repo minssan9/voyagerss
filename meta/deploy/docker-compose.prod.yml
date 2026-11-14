@@ -1,7 +1,7 @@
 # Production runtime — pre-built GHCR images only (no build:).
 # Source: meta/deploy/docker-compose.prod.yml
 # Copied to /data/voyagerss/docker-compose.yml by .github/workflows/deploy-production.yml
-# Requires: GITHUB_OWNER, IMAGE_TAG, .env (DOTENV_PROD on server)
+# Requires: GITHUB_OWNER, IMAGE_TAG, and the server .env (deploys do not replace it)
 # Usage on droplet:
 #   export GITHUB_OWNER=<owner> IMAGE_TAG=<sha|latest>
 #   docker compose pull && docker compose up -d
