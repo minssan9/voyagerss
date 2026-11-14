@@ -29,6 +29,8 @@ services:
       BACKEND_HOST: "0.0.0.0"
       REDIS_HOST: redis
       REDIS_PORT: "6379"
+    extra_hosts:
+      - "db-host:host-gateway"
     ports:
       # Host bind for CI health checks; gateway uses en9door-net (voyagerss-backend:9002).
       - "9002:9002"

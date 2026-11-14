@@ -21,3 +21,4 @@ _bmad-output
 *.iml
 frontend/test-results
 .worktrees/
+.playwright-mcp

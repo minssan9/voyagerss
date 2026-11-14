@@ -139,6 +139,7 @@ VOYAGERSS_UPSTREAM_HOST=host.docker.internal DATA_DIR=/data/voyagerss bash meta/
 ## Environment
 
 - Backend: [`.env.production.example`](../../.env.production.example) → `DOTENV_PROD`
+- `DATABASE_URL` host `db-host` is the droplet MySQL alias (`extra_hosts: db-host:host-gateway`). MySQL must accept port 3306 from the Docker bridge; `bind-address = 127.0.0.1` refuses the connection after DNS succeeds.
 - Frontend build args are set in CI (`VITE_API_*` → `https://api.voyagerss.com`)
 
 Update Google/Kakao OAuth redirect URIs to `https://api.voyagerss.com/api/workschd/auth/.../callback`.
