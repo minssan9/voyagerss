@@ -27,14 +27,14 @@ from .decision import DecisionRules, DrivingDecider
 from .kinematics import KinematicsConfig, KinematicsEstimator
 from .pipeline import FrameReport, Pipeline
 from .roi import load_zones
-from .sources import open_source
+from .sources import BrowserSource, open_source
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     env = os.environ.get
     p = argparse.ArgumentParser(prog="vision_cam", description="OpenCV 실시간 카메라 분석")
     p.add_argument("--source", default=env("VISION_CAM_SOURCE", "auto"),
-                   help="auto | picamera | 카메라 인덱스(0) | 파일 경로 | rtsp URL")
+                   help="auto | browser | picamera | 카메라 인덱스(0) | 파일 경로 | rtsp URL")
     p.add_argument("--width", type=int, default=int(env("VISION_CAM_WIDTH", 640)))
     p.add_argument("--height", type=int, default=int(env("VISION_CAM_HEIGHT", 480)))
     p.add_argument("--fps", type=int, default=int(env("VISION_CAM_FPS", 30)))
@@ -223,17 +223,21 @@ def run(args: argparse.Namespace) -> int:
     sink = EventSink(args.events, args.webhook, args.snapshot_dir, args.cooldown,
                       decision_heartbeat=args.decision_heartbeat)
 
-    broadcaster = server = None
-    if args.stream:
-        from .stream import FrameBroadcaster, serve
-        broadcaster = FrameBroadcaster()
-        server = serve(broadcaster, port=args.stream)
-        print(f"[stream] http://0.0.0.0:{args.stream}/", file=sys.stderr)
-
     stop = threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
 
     source = open_source(args.source, args.width, args.height, args.fps)
+    if isinstance(source, BrowserSource) and not args.stream:
+        print("[vision_cam] source=browser 는 --stream 포트가 있어야 POST /frame 을 받습니다.",
+              file=sys.stderr)
+
+    broadcaster = server = None
+    if args.stream:
+        from .stream import FrameBroadcaster, serve
+        broadcaster = FrameBroadcaster()
+        ingest = source if isinstance(source, BrowserSource) else None
+        server = serve(broadcaster, port=args.stream, ingest=ingest)
+        print(f"[stream] http://0.0.0.0:{args.stream}/", file=sys.stderr)
     zone_names = [z.name for z in (zones or [])]
     print(f"[vision_cam] source={args.source} analyzers={names} "
           f"roi={zone_names or 'off'} decide={'on' if decider else 'off'} "
@@ -250,9 +254,12 @@ def run(args: argparse.Namespace) -> int:
                     continue
                 report = pipeline.process(frame)
                 overlay = Pipeline.draw(frame, report)
+                payload = report.to_dict()
                 sink.handle(report, overlay)
                 if broadcaster:
-                    broadcaster.publish(overlay, report.to_dict())
+                    broadcaster.publish(overlay, payload)
+                if isinstance(source, BrowserSource):
+                    source.complete(payload)
                 if args.display:
                     cv2.imshow("vision_cam (q: quit)", overlay)
                     if cv2.waitKey(1) & 0xFF in (ord("q"), 27):

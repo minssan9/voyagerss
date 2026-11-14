@@ -222,34 +222,6 @@ npm run seed:aipr-config
 
 **Docker (Adminer only):** From `backend/aipr/`, `docker compose -f docker-compose.dev.yml up -d` exposes Adminer at **`http://localhost:18080`**.
 
-#### Local MLX + oh-my-pi (OMP) agent (Apple Silicon)
-
-Run a private coding model under ~28GB and wire it to Auto-PR via the OMP SDK (`omp_sdk` provider). Full guide: [guides/aipr-local-mlx.md](guides/aipr-local-mlx.md).
-
-**Requirements:** Apple Silicon Mac, Python 3.12, [Bun](https://bun.sh) (OMP SDK runtime), ~20GB free disk for the model.
-
-```bash
-# One-shot: mlx-lm venv, models, OMP models.json (sibling repo local-llm)
-cd ~/repository/local-llm
-chmod +x mlx/*.sh openwebui/*.sh
-VOYAGERSS_ROOT=~/repository/voyagerss ./mlx/setup.sh
-
-# Start OpenAI-compatible MLX server (http://127.0.0.1:8080/v1)
-MLX_PROFILE=coding ./mlx/start-server.sh
-./mlx/status.sh
-```
-
-Add to `.env.local` (then `cd backend && npm run seed:aipr-config`):
-
-```env
-AIPR_AGENT_PROVIDER=omp_sdk
-AIPR_OMP_MODEL=mlx-local/qwen3-coder-local
-AIPR_OMP_THINKING_LEVEL=off
-AIPR_OMP_MAX_TURNS=40
-```
-
-Test from the AIPR admin API: `POST /aipr/agent/test-provider` with body `{ "provider": "omp_sdk" }`.
-
 ### 4. Verify Installation
 
 1. Open browser to `http://localhost:5173`
