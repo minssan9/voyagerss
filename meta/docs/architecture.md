@@ -205,13 +205,13 @@ flowchart TB
 
   plan --> runner[claude-runner / provider-client]
   build --> runner
-  runner --> agents["claude_cli 또는 omp_sdk"]
+  runner --> agents[claude_cli]
   runner --> git["GitHub / GitLab"]
   admin --> db[(aipr Prisma)]
   queues --> redis[(Redis)]
 ```
 
-에이전트 구현은 `backend/src/modules/aipr/agent/`입니다. 설정 키 `AIPR_AGENT_PROVIDER`가 `claude_cli`(기본) 또는 `omp_sdk`를 고릅니다. OMP는 Bun 브리지를 통해 로컬 모델로 나갈 수 있습니다. 절차는 [aipr-local-mlx.md](guides/aipr-local-mlx.md)에 있습니다.
+에이전트 구현은 `backend/src/modules/aipr/agent/`입니다. 제공자는 `claude_cli`입니다.
 
 `AgentController` 클래스는 있으나 `routes.ts`에 등록되어 있지 않습니다. 계획/빌드 진입은 워커입니다.
 

@@ -1,0 +1,10 @@
+{
+  "meters_per_pixel": null,
+  "homography": [[0.0021, 0.0, -0.67], [0.0, 0.0045, -0.9], [0.0, 0.0012, 1.0]],
+  "mass_kg": {"person": 70, "car": 1500, "bicycle": 85, "dog": 20, "truck": 8000},
+  "default_mass_kg": null,
+  "velocity_alpha": 0.5,
+  "acceleration_alpha": 0.3,
+  "max_age_s": 1.0,
+  "iou_threshold": 0.3
+}

@@ -6,7 +6,7 @@
 #   export GITHUB_OWNER=<owner> IMAGE_TAG=<sha|latest>
 #   docker compose pull && docker compose up -d
 #
-# Shares en9door_net with /data/gateway nginx for direct container upstream routing.
+# Shares en9door-net with /data/gateway nginx for direct container upstream routing.
 
 services:
   redis:
@@ -29,14 +29,16 @@ services:
       BACKEND_HOST: "0.0.0.0"
       REDIS_HOST: redis
       REDIS_PORT: "6379"
+    extra_hosts:
+      - "db-host:host-gateway"
     ports:
-      # Host bind for CI health checks; gateway uses en9door_net (voyagerss-backend:9002).
+      # Host bind for CI health checks; gateway uses en9door-net (voyagerss-backend:9002).
       - "9002:9002"
     volumes:
       - ./data:/app/data
     networks:
       - default
-      - en9door_net
+      - en9door-net
 
   frontend:
     image: ghcr.io/${GITHUB_OWNER}/voyagerss-frontend:${IMAGE_TAG}
@@ -46,8 +48,9 @@ services:
       - "9003:80"
     networks:
       - default
-      - en9door_net
+      - en9door-net
 
 networks:
-  en9door_net:
+  en9door-net:
     external: true
+    name: en9door-net

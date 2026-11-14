@@ -9,7 +9,6 @@ Monorepo: `backend/` (Nest/Express API) + `frontend/` (Vue 3 / Quasar) + `vision
 - **[Architecture](meta/docs/architecture.md)**
 - **[Setup & deployment](meta/docs/setup.md)**
 - **[Documentation index](meta/docs/README.md)**
-- **[Local MLX + AIPR guide](meta/docs/guides/aipr-local-mlx.md)**
 
 ## Quick start (local)
 

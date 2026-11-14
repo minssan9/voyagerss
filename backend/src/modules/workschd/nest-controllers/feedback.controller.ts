@@ -14,10 +14,10 @@ export class FeedbackNestController {
   @Post()
   async create(
     @CurrentWorkschdUser() user: WorkschdAuthUser,
-    @Body() body: { title: string; content: string; pageUrl?: string; fileName?: string; fileMime?: string; fileBase64?: string },
+    @Body() body: { type?: string; title: string; content: string; pageUrl?: string; fileName?: string; fileMime?: string; fileBase64?: string },
   ) {
     const feedback = await this.feedbackService.create(user.accountId, body);
-    return { id: feedback.id, status: feedback.status };
+    return { id: feedback.id, status: feedback.status, linearIssueId: feedback.linearIssueId, linearIssueUrl: feedback.linearIssueUrl };
   }
 
   @Get()

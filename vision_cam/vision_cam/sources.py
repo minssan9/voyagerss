@@ -2,6 +2,7 @@
 
 - OpenCVSource : macOS 내장/USB 웹캠, 라즈베리파이 USB 웹캠, 동영상 파일, RTSP URL
 - PiCamera2Source : 라즈베리파이 카메라 모듈 (libcamera / picamera2)
+- BrowserSource : 장치를 열지 않고 POST /frame 으로 받은 최신 프레임만 유지
 
 별도 스레드에서 계속 최신 프레임만 가져와 두기 때문에, 분석이 느려도
 버퍼에 오래된 프레임이 쌓여 지연(latency)이 커지지 않는다.
@@ -147,6 +148,68 @@ class PiCamera2Source(FrameSource):
             self._cam.close()
 
 
+class BrowserSource(FrameSource):
+    """장치를 열지 않는다. submit() 으로 넣은 가장 최근 BGR 프레임만 분석 루프에 넘긴다."""
+
+    def __init__(self):
+        self._cond = threading.Condition()
+        self._frame: np.ndarray | None = None
+        self._fresh = False
+        self._running = False
+        self._seq = 0
+        self._inflight = 0
+        self._completed_seq = 0
+        self._last_report: dict | None = None
+
+    def start(self) -> "BrowserSource":
+        with self._cond:
+            self._running = True
+        return self
+
+    def submit(self, frame: np.ndarray) -> int:
+        """최신 프레임을 교체하고 이 요청의 순번을 돌려준다. 이전 미처리 프레임은 버린다."""
+        with self._cond:
+            self._seq += 1
+            seq = self._seq
+            self._frame = frame
+            self._fresh = True
+            self._cond.notify_all()
+            return seq
+
+    def read(self) -> np.ndarray | None:
+        with self._cond:
+            if not self._fresh or self._frame is None:
+                return None
+            self._fresh = False
+            self._inflight = self._seq
+            return self._frame
+
+    def complete(self, report: dict) -> None:
+        """분석 루프가 read() 로 꺼낸 프레임의 결과를 게시한다."""
+        with self._cond:
+            self._completed_seq = self._inflight
+            self._last_report = report
+            self._cond.notify_all()
+
+    def wait_report(self, seq: int, timeout: float = 5.0) -> dict | None:
+        """seq 이상 프레임이 처리되면 가장 최근 리포트를 돌려준다. 더 새 프레임에 밀린 요청도 그 결과를 받는다."""
+        deadline = time.monotonic() + timeout
+        with self._cond:
+            while self._running and self._completed_seq < seq:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    return None
+                self._cond.wait(remaining)
+            if self._completed_seq >= seq and self._last_report is not None:
+                return dict(self._last_report)
+            return None
+
+    def stop(self) -> None:
+        with self._cond:
+            self._running = False
+            self._cond.notify_all()
+
+
 def is_raspberry_pi() -> bool:
     try:
         with open("/proc/device-tree/model") as f:
@@ -156,7 +219,9 @@ def is_raspberry_pi() -> bool:
 
 
 def open_source(spec: str, width: int, height: int, fps: int) -> FrameSource:
-    """spec: 'auto' | 'picamera' | 카메라 인덱스('0') | 파일 경로 | rtsp/http URL"""
+    """spec: 'auto' | 'browser' | 'picamera' | 카메라 인덱스('0') | 파일 경로 | rtsp/http URL"""
+    if spec == "browser":
+        return BrowserSource()
     if spec == "auto":
         if is_raspberry_pi():
             try:

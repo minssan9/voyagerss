@@ -1,4 +1,4 @@
-"""판정 유스케이스: VlmCore로 추론하고 결과를 이력 저장소에 기록한다."""
+"""판정 유스케이스: VlmCore로 추론하고 결과를 이력 저장소에 기록한다 (save=False면 기록 생략)."""
 from PIL import Image
 
 from vision_judge.config import VLM_MODEL
@@ -18,8 +18,12 @@ class JudgeService:
         self.record_repo = record_repo
         self.image_repo = image_repo
 
-    def judge_bool(self, image: Image.Image, image_bytes: bytes, filename: str, question: str) -> float:
+    def judge_bool(
+        self, image: Image.Image, image_bytes: bytes, filename: str, question: str, save: bool = True
+    ) -> float:
         probability = self.core.judge_bool(image, question)
+        if not save:
+            return probability
         image_filename = self.image_repo.save(image_bytes, filename)
         self.record_repo.insert(
             endpoint="bool",
@@ -33,9 +37,17 @@ class JudgeService:
         return probability
 
     def judge_choice(
-        self, image: Image.Image, image_bytes: bytes, filename: str, question: str, choices: list[str]
+        self,
+        image: Image.Image,
+        image_bytes: bytes,
+        filename: str,
+        question: str,
+        choices: list[str],
+        save: bool = True,
     ) -> dict[str, float]:
         probabilities = self.core.judge_choice(image, question, choices)
+        if not save:
+            return probabilities
         image_filename = self.image_repo.save(image_bytes, filename)
         self.record_repo.insert(
             endpoint="choice",

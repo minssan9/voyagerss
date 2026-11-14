@@ -43,6 +43,8 @@ _SEVERITY = {Action.GO: 0, Action.SLOW: 1, Action.STOP: 2}
 _DEFAULT_OBSTACLE_CLASSES = (
     "person", "bicycle", "car", "motorbike", "bus", "dog", "cat", "horse",
     "sheep", "cow", "chair", "bottle", "pottedplant",
+    # yolo(COCO) 분석기 라벨
+    "motorcycle", "truck", "potted plant", "bench", "stop sign",
 )
 
 
@@ -153,8 +155,10 @@ class DrivingDecider:
             return self._apply_ramp(self._settle(raw, reason, target, report.timestamp))
 
         obstacles = []
-        obj = results_by_name.get("object")
-        if obj is not None:
+        for name in ("object", "yolo"):
+            obj = results_by_name.get(name)
+            if obj is None:
+                continue
             for d in obj.detections:
                 if d.label in r.obstacle_classes and d.score >= r.min_score:
                     obstacles.append(d)

@@ -270,8 +270,8 @@ jobs:
             export IMAGE_TAG="${{ env.IMAGE_TAG }}"
             export GITHUB_OWNER="${{ github.repository_owner }}"
             echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            sudo docker network inspect en9door_net >/dev/null 2>&1 \
-              || sudo docker network create en9door_net
+            sudo docker network inspect en9door-net >/dev/null 2>&1 \
+              || echo "Create en9door-net by starting /data/gateway first (en9door gateway stack)."
             sudo -E docker compose -f docker-compose.yml pull
             sudo -E docker compose -f docker-compose.yml up -d --remove-orphans
             BE_IMAGE="ghcr.io/${GITHUB_OWNER}/voyagerss-backend:${IMAGE_TAG}"

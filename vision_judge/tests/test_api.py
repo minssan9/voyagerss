@@ -94,6 +94,19 @@ def test_api_records_list_detail_and_missing(client):
     assert res.status_code == 404
 
 
+def test_judge_without_save_skips_records(client):
+    files = {"image": ("test.png", _sample_image_bytes(), "image/png")}
+    res = client.post("/judge/bool", files=files, data={"question": "live?", "save": "false"})
+    assert res.status_code == 200
+    assert res.json() == {"probability": 0.75}
+
+    files = {"image": ("test.png", _sample_image_bytes(), "image/png")}
+    data = {"question": "Which?", "choices": "a,b", "save": "false"}
+    assert client.post("/judge/choice", files=files, data=data).status_code == 200
+
+    assert client.get("/api/records").json() == []
+
+
 def test_health(client):
     res = client.get("/health")
     assert res.status_code == 200

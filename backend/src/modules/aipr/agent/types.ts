@@ -2,7 +2,7 @@ import type { PageContext } from '../types/page-context';
 
 export type { PageContext };
 
-export type AgentProviderId = 'claude_cli' | 'omp_sdk';
+export type AgentProviderId = 'claude_cli';
 
 export type LogStream = 'stdout' | 'stderr' | 'event';
 
