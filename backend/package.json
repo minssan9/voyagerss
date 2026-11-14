@@ -50,7 +50,6 @@
     "@octokit/app": "^14.0.2",
     "@octokit/auth-app": "^6.1.4",
     "@octokit/rest": "^20.1.2",
-    "@oh-my-pi/pi-coding-agent": "^16.0.4",
     "@opentelemetry/auto-instrumentations-node": "^0.48.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
     "@opentelemetry/sdk-node": "^0.52.1",
