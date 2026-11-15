@@ -9,7 +9,7 @@
     "build": "tsc && tsc-alias -p tsconfig.json",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
-    "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/aviation.prisma && prisma generate --schema=./prisma/aipr.prisma && prisma generate --schema=./prisma/rbac.prisma && prisma generate --schema=./prisma/identity.prisma",
+    "generate": "prisma generate --schema=./prisma/workschd.prisma && prisma generate --schema=./prisma/aviation.prisma && prisma generate --schema=./prisma/aipr.prisma && prisma generate --schema=./prisma/rbac.prisma && prisma generate --schema=./prisma/identity.prisma && prisma generate --schema=./prisma/airspace.prisma",
     "generate:rbac": "prisma generate --schema=./prisma/rbac.prisma",
     "db:migrate": "ts-node --transpile-only -r tsconfig-paths/register -r ./src/load-env.ts src/config/schema-migrator.cli.ts",
     "migrate:deploy": "prisma migrate deploy --schema=./prisma/workschd.prisma",

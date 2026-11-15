@@ -6,6 +6,7 @@ import { WorkschdModule } from './modules/workschd/workschd.module';
 import { AviationModule } from './modules/aviation/aviation.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { VisionModule } from './modules/vision/vision.module';
+import { AirspaceModule } from './modules/airspace/airspace.module';
 import { IdentityModule } from './modules/identity/identity.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { IdentityModule } from './modules/identity/identity.module';
     WorkschdModule,
     AviationModule,
     VisionModule,
+    AirspaceModule,
   ],
 })
 export class AppModule {}

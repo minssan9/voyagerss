@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from .roi import Zone
 
 _COLORS = {"motion": (0, 200, 255), "face": (80, 220, 80), "object": (255, 140, 0),
-           "yolo": (255, 80, 200)}
+           "yolo": (255, 80, 200), "drone": (0, 0, 255)}
 # 검출 결과에 kinematics(속도/가속도/모멘텀)를 붙일 분석기
 _KINEMATIC_ANALYZERS = ("object", "yolo")
 _ACTION_COLORS = {"STOP": (0, 0, 255), "SLOW": (0, 200, 255), "GO": (0, 200, 0)}

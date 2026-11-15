@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from .base import AnalysisResult, Analyzer, Detection
 from .brightness import BrightnessAnalyzer
+from .drone import DroneAnalyzer
 from .face import FaceAnalyzer
 from .motion import MotionAnalyzer
 from .object import ObjectAnalyzer
@@ -13,6 +14,7 @@ REGISTRY: dict[str, type[Analyzer]] = {
     BrightnessAnalyzer.name: BrightnessAnalyzer,
     ObjectAnalyzer.name: ObjectAnalyzer,
     YoloAnalyzer.name: YoloAnalyzer,
+    DroneAnalyzer.name: DroneAnalyzer,
 }
 
 
@@ -31,6 +33,7 @@ __all__ = [
     "MotionAnalyzer",
     "FaceAnalyzer",
     "BrightnessAnalyzer",
+    "DroneAnalyzer",
     "ObjectAnalyzer",
     "YoloAnalyzer",
     "REGISTRY",
