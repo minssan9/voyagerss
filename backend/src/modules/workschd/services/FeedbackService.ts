@@ -3,6 +3,7 @@ import { I18nHttpException } from '../../common/i18n-http.exception';
 import axios from 'axios';
 import { workschdPrisma as prisma } from '../../../config/prisma';
 import { configService } from '../../../config/config-service';
+import { applyLinearProjectId } from './linear-project';
 import { Feedback } from '@prisma/client-workschd';
 
 export type FeedbackType = 'BUG' | 'IMPROVEMENT';
@@ -144,6 +145,7 @@ export class FeedbackService {
 
     const type = feedback.type as FeedbackType;
     const labelId = configService.get(type === 'BUG' ? 'LINEAR_BUG_LABEL_ID' : 'LINEAR_IMPROVEMENT_LABEL_ID', '');
+    const projectId = configService.get('LINEAR_PROJECT_ID', '');
     const description = [
       feedback.content,
       '',
@@ -161,6 +163,7 @@ export class FeedbackService {
       description,
     };
     if (labelId) input.labelIds = [labelId];
+    applyLinearProjectId(input, projectId);
 
     try {
       const { data } = await axios.post(
