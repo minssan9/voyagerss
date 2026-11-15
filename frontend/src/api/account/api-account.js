@@ -20,7 +20,7 @@ const apiAccount = {
 
   getSocialLoginUrl(socialType) {
     const base = import.meta.env.VITE_API_BASE_URL || '/api'
-    return `${base}/oauth2/authorization/${socialType}?redirect_uri=${import.meta.env.VITE_API_REDIRECT_URL}/auth/redirect`
+    return `${base}/identity/auth/${socialType}`
   },
   getSocialConnect(socialType) {
     const base = import.meta.env.VITE_API_BASE_URL || '/api'

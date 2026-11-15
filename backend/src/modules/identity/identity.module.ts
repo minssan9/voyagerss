@@ -4,6 +4,7 @@ import { IdentityPrismaService } from './identity-prisma.service';
 import { IdentityService } from './identity.service';
 import { IdentityOAuthService } from './identity-oauth.service';
 import { IdentityAuthController } from './identity-auth.controller';
+import { LegacyOAuthController } from './legacy-oauth.controller';
 import { WorkschdAuthModule } from '../workschd/workschd-auth.module';
 import { RbacModule } from '../rbac/rbac.module';
 
@@ -13,7 +14,7 @@ import { RbacModule } from '../rbac/rbac.module';
     forwardRef(() => WorkschdAuthModule),
     RbacModule,
   ],
-  controllers: [IdentityAuthController],
+  controllers: [IdentityAuthController, LegacyOAuthController],
   providers: [IdentityPrismaService, IdentityService, IdentityOAuthService],
   exports: [IdentityPrismaService, IdentityService, IdentityOAuthService],
 })
