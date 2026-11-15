@@ -90,6 +90,7 @@ export const SEED_KEYS: SeedEntry[] = [
   { key: 'SLACK_WEBHOOK_URL',      category: 'notifications', description: 'Slack incoming webhook URL' },
   { key: 'LINEAR_API_KEY',         category: 'notifications', description: 'Linear Personal API Key — 피드백 등록 시 이슈 생성 (미설정 시 생략)' },
   { key: 'LINEAR_TEAM_ID',         category: 'notifications', description: '피드백 이슈를 생성할 Linear 팀 ID(UUID)' },
+  { key: 'LINEAR_PROJECT_ID',      category: 'notifications', description: '피드백 이슈를 넣을 Linear 프로젝트 ID(UUID, 선택)' },
   { key: 'LINEAR_BUG_LABEL_ID',    category: 'notifications', description: '불편사항(BUG) 이슈 Linear 라벨 ID (선택)' },
   { key: 'LINEAR_IMPROVEMENT_LABEL_ID', category: 'notifications', description: '개선사항(IMPROVEMENT) 이슈 Linear 라벨 ID (선택)' },
   // Scheduler
