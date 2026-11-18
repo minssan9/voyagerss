@@ -38,6 +38,7 @@ frontend (`frontend/package.json`):
 - `frontend/src/api/`, `frontend/src/stores/common/`, `frontend/src/layout/`, `frontend/src/components/`
 - `frontend/e2e/` — Playwright 테스트
 - `vision_cam/`, `vision_judge/` — Python 프로세스 (각 README 참고)
+- `physical/` — 하드웨어: `esp32_tracker/`(PlatformIO 펌웨어, vision_cam `POST /frame` 연동 팬/틸트 추적), `hardware/`(BOM·배선·3D 프롬프트)
 - `meta/docs/` — 아키텍처/셋업/스펙 문서, `meta/deploy/` — docker-compose, nginx, 스모크 스크립트
 - `.github/workflows/` — `ci.yml`(Unified CI), `deploy-production.yml`(GHCR)
 
