@@ -1,0 +1,45 @@
+# vision_cam 자동 실행 — 서버(Linux) / 로컬(macOS·Windows Docker Desktop) 공통
+# (restart: unless-stopped → docker 가 켜지면 재부팅 후에도 자동 재시작)
+#
+#   cp .env.example .env                       # VISION_CAM_SOURCE 등 편집
+#
+#   [서버·Linux + USB 웹캠]  VISION_CAM_SOURCE=0
+#     docker compose -f docker-compose.yml -f docker-compose.usb.yml up -d --build
+#
+#   [어디서나 + IP 카메라]   VISION_CAM_SOURCE=rtsp://user:pass@host/stream
+#   [로컬 macOS + 내장 카메라] VISION_CAM_SOURCE=browser
+#     (Docker Desktop 은 맥 카메라를 컨테이너에 넘길 수 없음 → 브라우저가 프레임을 POST)
+#     docker compose up -d --build
+#
+#   WITH_YOLO=1 docker compose ... up -d --build   # YOLO26 포함 이미지
+#   docker compose logs -f   /   브라우저: http://<host>:8080
+services:
+  vision_cam:
+    build:
+      context: .
+      args:
+        WITH_YOLO: ${WITH_YOLO:-0}
+    image: vision_cam:${WITH_YOLO:-0}
+    container_name: vision_cam
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # 컨테이너 내부 경로로 고정 (결과는 ./data 에 남는다)
+      VISION_CAM_EVENTS_FILE: /app/data/events.jsonl
+      VISION_CAM_SNAPSHOT_DIR: /app/data/snapshots
+      VISION_CAM_STREAM_PORT: "8080"
+    ports:
+      - "${VISION_CAM_PUBLISH_PORT:-8080}:8080"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      # ROI / kinematics 설정을 쓸 때 .env 에서 VISION_CAM_ROI_FILE=/app/config/roi.json 처럼 지정
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/status', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
