@@ -8,6 +8,7 @@ import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -17,9 +18,13 @@ export default defineConfig(({ mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, path.resolve(process.cwd(), '../'), '')
   const backendTarget = `http://127.0.0.1:${env.BACKEND_PORT || '9002'}`
+  // 브라우저 웹캠(getUserMedia)은 https 또는 localhost 에서만 동작한다.
+  // LAN IP / local.voyagerss.com 으로 dev 서버에 접속해 웹캠을 쓰려면 FRONTEND_HTTPS=true
+  const devHttps = ['1', 'true'].includes(String(env.FRONTEND_HTTPS || '').toLowerCase())
 
   return {
     plugins: [
+      ...(devHttps ? [basicSsl()] : []),
       vue({
         template: { transformAssetUrls }
       }),
@@ -103,7 +108,7 @@ export default defineConfig(({ mode }) => {
       open: true, // 브라우저 자동 열기
       host: true, // 0.0.0.0 — allow external/LAN access
       allowedHosts: ['local.voyagerss.com'],
-      // https: false, // HTTPS 사용 여부
+      // https: FRONTEND_HTTPS=true 면 basicSsl 플러그인이 self-signed 인증서로 켠다
       cors: true, // CORS 활성화
       proxy: {
         // API 프록시 — browser → FE :9003 → BE :9002 (no direct backend calls)

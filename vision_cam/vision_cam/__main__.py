@@ -234,8 +234,10 @@ def run(args: argparse.Namespace) -> int:
     broadcaster = server = None
     if args.stream:
         from .stream import FrameBroadcaster, serve
-        broadcaster = FrameBroadcaster()
         ingest = source if isinstance(source, BrowserSource) else None
+        broadcaster = FrameBroadcaster(
+            initial_status={"source": "browser" if ingest else "device", "results": []},
+        )
         server = serve(broadcaster, port=args.stream, ingest=ingest)
         print(f"[stream] http://0.0.0.0:{args.stream}/", file=sys.stderr)
     zone_names = [z.name for z in (zones or [])]
@@ -255,6 +257,8 @@ def run(args: argparse.Namespace) -> int:
                 report = pipeline.process(frame)
                 overlay = Pipeline.draw(frame, report)
                 payload = report.to_dict()
+                # 프론트엔드가 브라우저 웹캠 모드로 자동 전환할 수 있도록 입력 종류를 알린다
+                payload["source"] = "browser" if isinstance(source, BrowserSource) else "device"
                 sink.handle(report, overlay)
                 if broadcaster:
                     broadcaster.publish(overlay, payload)

@@ -28,10 +28,11 @@ document.getElementById('s').textContent=JSON.stringify(j,null,2)}).catch(()=>{}
 
 
 class FrameBroadcaster:
-    def __init__(self, jpeg_quality: int = 75):
+    def __init__(self, jpeg_quality: int = 75, initial_status: dict | None = None):
         self.jpeg_quality = jpeg_quality
         self._jpeg: bytes | None = None
-        self._status: dict = {}
+        # 첫 프레임 전에도 /status 가 입력 종류(source) 등을 알려줄 수 있게 한다
+        self._status: dict = dict(initial_status or {})
         self._cond = threading.Condition()
 
     def publish(self, frame: np.ndarray, status: dict) -> None:

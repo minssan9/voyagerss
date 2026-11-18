@@ -45,6 +45,7 @@
     "@testing-library/vue": "^8.1.0",
     "@types/jest": "^30.0.0",
     "@types/nprogress": "^0.2.3",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-vue": "^4.6.2",
     "@vitest/ui": "^4.0.14",
     "@vue/eslint-config-prettier": "^9.0.0",

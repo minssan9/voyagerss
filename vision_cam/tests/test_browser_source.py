@@ -131,3 +131,8 @@ def test_post_frame_rejects_empty_body():
         source.stop()
         server.shutdown()
         server.server_close()
+
+
+def test_broadcaster_initial_status_reports_source_before_first_frame():
+    broadcaster = FrameBroadcaster(initial_status={"source": "browser", "results": []})
+    assert broadcaster.status == {"source": "browser", "results": []}

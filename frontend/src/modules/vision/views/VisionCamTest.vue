@@ -211,6 +211,11 @@ function startPolling() {
 }
 
 async function startCamera(): Promise<boolean> {
+  // 브라우저는 https 또는 localhost 에서만 카메라를 허용한다 (LAN IP / 도메인 http 접속 시 막힘)
+  if (!window.isSecureContext) {
+    inputMessage.value = t('vision.cam.insecureContext', { origin: window.location.origin })
+    return false
+  }
   if (!navigator.mediaDevices?.getUserMedia) {
     inputMessage.value = t('vision.cam.permissionDenied')
     return false
@@ -487,7 +492,13 @@ watch(videoFile, (file) => {
   videoUrl.value = file ? URL.createObjectURL(file) : ''
 })
 
-onMounted(() => {
+onMounted(async () => {
+  // vision_cam 이 browser 소스로 실행 중이면(pnpm dev 기본) 클라이언트 웹캠으로 바로 시작
+  const status = await getCamStatus()
+  if (status.result === 'SUCCESS' && status.data?.source === 'browser') {
+    sourceMode.value = 'camera'
+    return
+  }
   startPolling()
 })
 

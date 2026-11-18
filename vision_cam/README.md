@@ -63,19 +63,27 @@ pytest -q                                             # 카메라 없이 테스�
 
 ### 웹 카메라 · 사진 · 동영상 (`VISION_CAM_SOURCE=browser`)
 
-브라우저가 맥북 카메라를 쓰는 동안 이 프로세스가 `--source auto` 로 같은 장치를 열면 한쪽이 실패합니다. 웹 테스트는 장치를 열지 않는 `browser` 소스를 씁니다. `POST /frame` 으로 받은 최신 JPEG 만 기존 분석 루프가 처리하고, 오버레이는 그대로 `GET /stream.mjpg`, 결과는 `GET /status` 와 응답 JSON 입니다.
+웹(vite dev)으로 접속하면 **접속한 클라이언트 브라우저의 웹캠**을 씁니다. vision_cam 은 장치를 열지 않는 `browser` 소스로 돌고, 브라우저가 보낸 프레임(`POST /frame`)만 분석합니다. 오버레이는 `GET /stream.mjpg`, 결과는 `GET /status` 와 응답 JSON 입니다.
+
+저장소 루트의 `pnpm dev` 는 `scripts/dev-vision-cam.sh` 로 vision_cam 을 **`--source browser` 로** 띄웁니다 (`.env` 의 `VISION_CAM_SOURCE` 보다 우선).
+`/status` 가 `"source": "browser"` 를 알려주므로 `/vision/cam` 페이지는 열자마자 **브라우저 웹캠** 모드로 시작합니다.
 
 ```bash
-cd vision_cam
-cp .env.example .env
-# .env 에서 VISION_CAM_SOURCE=browser
+pnpm dev                                   # 기본: 클라이언트 브라우저 웹캠
+VISION_CAM_DEV_SOURCE=auto pnpm dev        # 서버에 연결된 카메라를 쓰고 싶을 때
 ```
 
-저장소 루트의 `pnpm dev` 는 `scripts/dev-vision-cam.sh` 가 `vision_cam/.env` 를 읽은 뒤 `--no-display --stream 8080` 으로 띄웁니다. CLI 기본값이 환경변수이므로 장치를 열지 않습니다.
+브라우저는 **https 또는 localhost** 에서만 웹캠을 허용합니다.
+
+| 접속 주소 | 웹캠 | 설정 |
+|---|---|---|
+| `http://localhost:9003` | ✅ | 없음 |
+| `http://<LAN-IP>:9003`, `http://local.voyagerss.com:9003` | ❌ 차단 | 화면에 안내 메시지 표시 |
+| `https://<LAN-IP>:9003`, `https://local.voyagerss.com:9003` | ✅ | 루트 `.env` 에 `FRONTEND_HTTPS=true` (self-signed 인증서 → 첫 접속 시 경고 수락) |
 
 1. 브라우저(Chrome 또는 개발 화면에 쓰는 브라우저)에 **시스템 설정 → 개인정보 보호 및 보안 → 카메라** 권한을 줍니다. 서버 스트림 모드만 쓸 때는 기존처럼 터미널 권한입니다.
 2. http://localhost:9003/vision/cam 을 엽니다.
-3. **맥북 카메라**: 미리보기, 분석 화면(오버레이), status 의 `motion` / `face` / `brightness` 를 확인합니다.
+3. **브라우저 웹캠**: 미리보기, 분석 화면(오버레이), status 의 `motion` / `face` / `brightness` 를 확인합니다.
 4. **사진**: 파일 또는 "카메라로 한 장". **동영상**: 재생 중에만 프레임을 보냅니다. 멈추면 전송도 멈춥니다.
 5. 질문 입력 후 **이 프레임 판정** 은 마지막 JPEG 를 `vision_judge` 에 한 번 보냅니다. 프레임마다 자동 판정하지 않습니다.
 
