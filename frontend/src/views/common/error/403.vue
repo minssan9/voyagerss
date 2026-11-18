@@ -9,7 +9,7 @@
       <q-btn
         color="primary"
         :label="t('forbidden.button.home')"
-        to="/"
+        to="/platform"
         class="q-mb-md"
       />
     </div>

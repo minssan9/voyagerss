@@ -17,7 +17,7 @@
           outline
           color="primary"
           :label="t('unauthorized.button.home')"
-          to="/"
+          to="/platform"
           class="q-mb-md"
         />
       </div>
@@ -40,7 +40,7 @@ const loginPath = computed(() => {
 
 const loginQuery = computed(() => {
   const r = route.query.redirect
-  const redirect = typeof r === 'string' && r.length > 0 ? r : '/'
+  const redirect = typeof r === 'string' && r.length > 0 ? r : '/platform'
   return { redirect }
 })
 </script>

@@ -138,7 +138,7 @@ async function handleLogin() {
     await userStore.fetchUser()
     $q.notify({ type: 'positive', message: t('login.success') })
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
-    const fallback = userStore.isWorker ? '/workschd/m/tasks' : '/'
+    const fallback = userStore.isWorker ? '/workschd/m/tasks' : '/platform'
     router.replace(redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : fallback)
   } catch (error: any) {
     let msg = t('login.error.default')

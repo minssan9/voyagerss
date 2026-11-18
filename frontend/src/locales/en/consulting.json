@@ -1,0 +1,167 @@
+{
+  "consulting": {
+    "meta": {
+      "title": "AI Architecture Consulting",
+      "description": "From AI strategy to LLM, RAG and agent architecture, PoC builds and operational governance — we design AI that actually runs in production."
+    },
+    "nav": {
+      "services": "Services",
+      "process": "Process",
+      "engagement": "Engagements",
+      "faq": "FAQ",
+      "contact": "Book a call",
+      "platform": "Platform"
+    },
+    "hero": {
+      "eyebrow": "AI Architecture & Advisory",
+      "title": "Design AI that runs\nin production, not just demos",
+      "subtitle": "Strategy, architecture, proof of concept and governance. We start from your business goals and finish with measurable outcomes.",
+      "ctaPrimary": "Book a free consultation",
+      "ctaSecondary": "Explore services"
+    },
+    "stats": [
+      {
+        "value": "4 wks",
+        "label": "Typical PoC timeline"
+      },
+      {
+        "value": "3 markets",
+        "label": "Korea · US · Japan"
+      },
+      {
+        "value": "End-to-End",
+        "label": "From strategy to operations"
+      }
+    ],
+    "services": {
+      "title": "Services",
+      "subtitle": "Expertise for every stage of your AI initiative",
+      "items": [
+        {
+          "icon": "insights",
+          "title": "AI Strategy & Roadmap",
+          "text": "We map your workflows, identify high-impact use cases, and build an ROI-driven, phased roadmap."
+        },
+        {
+          "icon": "account_tree",
+          "title": "Architecture Design",
+          "text": "Architecture for LLM, RAG, AI agent and multimodal systems — model selection, data pipelines and cost/latency trade-offs included."
+        },
+        {
+          "icon": "rocket_launch",
+          "title": "PoC & MVP Build",
+          "text": "Rapid prototypes that test your core hypothesis, with evals that quantify quality before you scale."
+        },
+        {
+          "icon": "hub",
+          "title": "System Integration",
+          "text": "Connect AI safely to your ERP, CRM and internal data, with APIs, access control and audit logging built for production."
+        },
+        {
+          "icon": "monitoring",
+          "title": "LLMOps & Operations",
+          "text": "Prompt and model versioning, monitoring, cost optimization and regression testing for reliable operations."
+        },
+        {
+          "icon": "verified_user",
+          "title": "Security & Governance",
+          "text": "Privacy, data residency, internal AI policy and risk assessment, reviewed against Korean, US and Japanese regulations."
+        }
+      ]
+    },
+    "process": {
+      "title": "How we work",
+      "subtitle": "Validate small, scale with confidence",
+      "steps": [
+        {
+          "title": "Discover",
+          "text": "Stakeholder interviews and a data and systems review to define problems and opportunities."
+        },
+        {
+          "title": "Design",
+          "text": "Target architecture, evaluation criteria, timeline and budget, documented."
+        },
+        {
+          "title": "Validate",
+          "text": "A PoC tests the core hypothesis, with a data-backed go / no-go decision."
+        },
+        {
+          "title": "Scale",
+          "text": "Production rollout, team enablement and continuous improvement."
+        }
+      ]
+    },
+    "engagement": {
+      "title": "Engagement models",
+      "subtitle": "Choose the model that fits your stage and goals",
+      "recommended": "Popular",
+      "items": [
+        {
+          "name": "Advisory",
+          "period": "Monthly",
+          "text": "Ongoing guidance on AI strategy and technical decisions.",
+          "features": [
+            "Monthly advisory sessions",
+            "Architecture & vendor reviews",
+            "Internal AI policy support"
+          ]
+        },
+        {
+          "name": "Design Sprint",
+          "period": "2–4 weeks",
+          "text": "Lock in the target architecture and execution plan for a specific initiative.",
+          "features": [
+            "Current-state assessment",
+            "Target architecture document",
+            "PoC scope & eval metrics"
+          ]
+        },
+        {
+          "name": "Build Partnership",
+          "period": "Per project",
+          "text": "We design, build and hand over to operations together with your team.",
+          "features": [
+            "PoC & MVP development",
+            "Integration & LLMOps",
+            "Team enablement"
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": [
+        {
+          "q": "We're just starting to explore AI. Can we still talk?",
+          "a": "Absolutely. Discovering and prioritizing use cases is the most common starting point."
+        },
+        {
+          "q": "Are we locked into a specific model or cloud?",
+          "a": "No. We compare commercial APIs, open-source models and on-premise options neutrally against your requirements, budget and security needs."
+        },
+        {
+          "q": "Can you work with sensitive internal data?",
+          "a": "Yes. We work under NDA and can build entirely inside your environment without data leaving it."
+        },
+        {
+          "q": "Which languages do you work in?",
+          "a": "Meetings and deliverables are available in English, Korean and Japanese."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Start your AI project with the right design",
+      "subtitle": "Tell us where you are and what you want to achieve. We reply within one business day.",
+      "button": "Contact us by email",
+      "mailSubject": "AI consulting inquiry"
+    },
+    "footer": {
+      "tagline": "AI architecture consulting & advisory",
+      "platform": "VoyagerSS Platform",
+      "privacy": "Privacy Policy",
+      "terms": "Terms",
+      "copyright": "© 2026 VoyagerSS. All rights reserved."
+    },
+    "language": "Language"
+  }
+}

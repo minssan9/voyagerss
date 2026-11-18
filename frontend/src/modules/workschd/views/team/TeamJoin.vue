@@ -18,7 +18,7 @@
                 color="primary"
                 class="q-mt-md"
                 :label="t('common.backToHome')"
-                @click="router.push({ name: 'home' })"
+                @click="router.push({ name: 'platform' })"
               />
             </div>
             

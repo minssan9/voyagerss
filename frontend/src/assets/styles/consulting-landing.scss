@@ -1,0 +1,383 @@
+// AI 컨설팅 메인 랜딩 (/) — Apple 스타일, layout: blank
+// BEM prefix: cl-
+
+$cl-text: #1d1d1f;
+$cl-text-2: #6e6e73;
+$cl-bg: #ffffff;
+$cl-bg-muted: #f5f5f7;
+$cl-line: #e5e5ea;
+$cl-accent: #0071e3;
+$cl-accent-hover: #0077ed;
+$cl-dark: #000000;
+
+.cl-page {
+  background: $cl-bg;
+  color: $cl-text;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Hiragino Sans', 'Apple SD Gothic Neo',
+    'Noto Sans JP', 'Noto Sans KR', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+
+
+  a { color: inherit; text-decoration: none; }
+
+  // 전역 heading 색상(브랜드 네이비) 무효화
+  h1, h2, h3, h4 { color: inherit; }
+}
+
+.cl-page .cl-cta { color: #f5f5f7; }
+
+// 한국어만 어절 단위 줄바꿈 (일본어는 공백이 없어 keep-all 시 줄바꿈이 깨짐)
+html[lang='ko'] .cl-page { word-break: keep-all; overflow-wrap: break-word; }
+
+html:has(.cl-page) { scroll-behavior: smooth; scroll-padding-top: 64px; }
+
+.cl-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  &--narrow { max-width: 760px; }
+}
+
+// ─── Nav ─────────────────────────────────────────────
+.cl-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+
+  &--scrolled { border-bottom-color: $cl-line; }
+
+  &__inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__brand {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+  }
+
+  &__brand-dot { color: $cl-accent; }
+
+  &__links {
+    display: flex;
+    gap: 28px;
+    margin-left: auto;
+    font-size: 14px;
+    color: $cl-text-2;
+
+    a:hover { color: $cl-text; }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.cl-lang {
+  appearance: none;
+  border: 1px solid $cl-line;
+  background: $cl-bg;
+  color: $cl-text;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:focus-visible { outline: 2px solid $cl-accent; outline-offset: 2px; }
+}
+
+// ─── Buttons ─────────────────────────────────────────
+.cl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+
+  &--sm { padding: 6px 16px; font-size: 13px; }
+
+  &--primary {
+    background: $cl-accent;
+    color: #fff !important;
+    &:hover { background: $cl-accent-hover; }
+  }
+
+  &--ghost {
+    color: $cl-accent !important;
+    &:hover { text-decoration: underline; }
+  }
+
+  &--light {
+    background: #fff;
+    color: $cl-text !important;
+    &:hover { background: $cl-bg-muted; }
+  }
+}
+
+// ─── Hero ────────────────────────────────────────────
+.cl-hero {
+  text-align: center;
+  padding: 120px 24px 96px;
+  max-width: 980px;
+  margin: 0 auto;
+
+  &__title {
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    white-space: pre-line;
+    margin: 0 0 24px;
+  }
+
+  &__subtitle {
+    font-size: clamp(17px, 2vw, 21px);
+    color: $cl-text-2;
+    max-width: 720px;
+    margin: 0 auto 40px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+.cl-eyebrow {
+  font-size: 14px;
+  font-weight: 600;
+  color: $cl-accent;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
+.cl-stats {
+  list-style: none;
+  padding: 0;
+  margin: 80px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid $cl-line;
+
+  &__item {
+    padding: 32px 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__value { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  &__label { font-size: 14px; color: $cl-text-2; }
+}
+
+// ─── Sections ────────────────────────────────────────
+.cl-section {
+  padding: 112px 0;
+
+  &--muted { background: $cl-bg-muted; }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  &__title {
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0 0 12px;
+  }
+
+  &__subtitle {
+    font-size: 19px;
+    color: $cl-text-2;
+    margin: 0;
+  }
+}
+
+.cl-grid {
+  display: grid;
+  gap: 20px;
+
+  &--3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+.cl-card {
+  background: $cl-bg;
+  border-radius: 20px;
+  padding: 36px 32px;
+
+  &__icon { color: $cl-accent; margin-bottom: 20px; }
+  &__title { font-size: 21px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+  &__text { font-size: 15px; color: $cl-text-2; margin: 0; }
+}
+
+// ─── Process ─────────────────────────────────────────
+.cl-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+
+  &__item {
+    border-top: 2px solid $cl-text;
+    padding-top: 24px;
+  }
+
+  &__num { font-size: 13px; font-weight: 600; color: $cl-accent; }
+  &__title { font-size: 24px; font-weight: 600; margin: 8px 0 8px; }
+  &__text { font-size: 15px; color: $cl-text-2; margin: 0; }
+}
+
+// ─── Engagement ──────────────────────────────────────
+.cl-plan {
+  position: relative;
+  background: $cl-bg;
+  border-radius: 20px;
+  padding: 40px 32px;
+  border: 1px solid transparent;
+
+  &--featured { border-color: $cl-accent; }
+
+  &__badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $cl-accent;
+    background: rgba(0, 113, 227, 0.08);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  &__name { font-size: 24px; font-weight: 600; margin: 0; }
+  &__period { font-size: 14px; color: $cl-text-2; margin: 4px 0 16px; }
+  &__text { font-size: 15px; margin: 0 0 24px; }
+
+  &__features {
+    list-style: none;
+    padding: 24px 0 0;
+    margin: 0;
+    border-top: 1px solid $cl-line;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+
+    li { display: flex; gap: 8px; align-items: center; }
+    .q-icon { color: $cl-accent; }
+  }
+}
+
+// ─── FAQ ─────────────────────────────────────────────
+.cl-faq {
+  border-bottom: 1px solid $cl-line;
+
+  &__q {
+    list-style: none;
+    cursor: pointer;
+    padding: 24px 0;
+    font-size: 19px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+
+    &::-webkit-details-marker { display: none; }
+    &::after { content: '+'; color: $cl-text-2; font-weight: 400; transition: transform 0.2s; }
+  }
+
+  &[open] &__q::after { transform: rotate(45deg); }
+
+  &__a { margin: 0 0 24px; color: $cl-text-2; font-size: 16px; }
+}
+
+// ─── CTA ─────────────────────────────────────────────
+.cl-cta {
+  background: $cl-dark;
+  color: #f5f5f7;
+  text-align: center;
+  padding: 120px 24px;
+
+  &__title {
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+
+  &__subtitle { font-size: 19px; color: #a1a1a6; margin: 0 0 40px; }
+  &__email { margin: 20px 0 0; font-size: 14px; color: #86868b; }
+}
+
+// ─── Footer ──────────────────────────────────────────
+.cl-footer {
+  background: $cl-bg-muted;
+  font-size: 13px;
+  color: $cl-text-2;
+
+  &__inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 32px;
+  }
+
+  strong { color: $cl-text; margin-right: 8px; }
+
+  &__links {
+    display: flex;
+    gap: 20px;
+    a:hover { color: $cl-text; }
+  }
+
+  &__copy { margin: 0 0 0 auto; }
+}
+
+// ─── Responsive ──────────────────────────────────────
+@media (max-width: 960px) {
+  .cl-grid--3 { grid-template-columns: 1fr 1fr; }
+  .cl-steps { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .cl-nav__links { display: none; }
+  .cl-nav__actions { margin-left: auto; }
+  .cl-hero { padding: 72px 16px 64px; }
+  .cl-stats { grid-template-columns: 1fr; margin-top: 56px; }
+  .cl-stats__item { padding: 20px 0 0; }
+  .cl-section { padding: 80px 0; }
+  .cl-container { padding: 0 16px; }
+  .cl-grid--3, .cl-steps { grid-template-columns: 1fr; }
+  .cl-footer__copy { margin-left: 0; }
+}

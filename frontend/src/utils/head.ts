@@ -17,6 +17,7 @@ function getRouteTitle(route: RouteLocationNormalizedLoaded): string {
 }
 
 function getRouteDescription(route: RouteLocationNormalizedLoaded): string {
+  if (route.meta.descriptionKey) return String(i18n.global.t(route.meta.descriptionKey))
   return route.meta.description ?? String(i18n.global.t('routes.description'))
 }
 

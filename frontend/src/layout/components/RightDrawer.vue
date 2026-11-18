@@ -170,11 +170,12 @@ const handleTeamChange = (teamId: number | null) => {
 const languageOptions = computed(() => [
   { label: t('common.language.korean'), value: 'ko' },
   { label: t('common.language.english'), value: 'en' },
+  { label: t('common.language.japanese'), value: 'ja' },
 ])
 
 // Load translations whenever the locale is changed via the selector
 watch(locale, (newLocale) => {
-  loadLanaguageAsync(newLocale)
+  loadLanaguageAsync(newLocale, true)
 })
 
 const toggleDarkMode = () => {

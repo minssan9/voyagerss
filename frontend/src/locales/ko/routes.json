@@ -40,6 +40,7 @@
     "aiprProviders": "Git 제공자",
     "aiprRepos": "저장소",
     "aiprRemoteIssues": "원격 이슈",
-    "description": "Voyagerss — 일정·재무·항공·자동 PR을 하나의 플랫폼에서 관리하세요."
+    "description": "Voyagerss — 일정·재무·항공·자동 PR을 하나의 플랫폼에서 관리하세요.",
+    "platform": "플랫폼"
   }
 }
