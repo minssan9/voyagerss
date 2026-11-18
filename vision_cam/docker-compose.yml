@@ -1,14 +1,18 @@
-# vision_cam 서버 로컬 자동 실행 (재부팅 시 docker 가 자동 재시작)
+# vision_cam 자동 실행 — 서버(Linux) / 로컬(macOS·Windows Docker Desktop) 공통
+# (restart: unless-stopped → docker 가 켜지면 재부팅 후에도 자동 재시작)
 #
-#   cp .env.example .env            # 설정 편집 (VISION_CAM_SOURCE 등)
-#   docker compose up -d --build    # 기본 이미지 (motion/face/brightness/object)
-#   WITH_YOLO=1 docker compose up -d --build   # YOLO26 포함 이미지
-#   docker compose logs -f
-#   브라우저: http://<server-ip>:8080
+#   cp .env.example .env                       # VISION_CAM_SOURCE 등 편집
 #
-# 카메라:
-#   - USB 웹캠: devices 의 /dev/video0 유지, VISION_CAM_SOURCE=0
-#   - IP 카메라: devices 블록 삭제, VISION_CAM_SOURCE=rtsp://user:pass@host/stream
+#   [서버·Linux + USB 웹캠]  VISION_CAM_SOURCE=0
+#     docker compose -f docker-compose.yml -f docker-compose.usb.yml up -d --build
+#
+#   [어디서나 + IP 카메라]   VISION_CAM_SOURCE=rtsp://user:pass@host/stream
+#   [로컬 macOS + 내장 카메라] VISION_CAM_SOURCE=browser
+#     (Docker Desktop 은 맥 카메라를 컨테이너에 넘길 수 없음 → 브라우저가 프레임을 POST)
+#     docker compose up -d --build
+#
+#   WITH_YOLO=1 docker compose ... up -d --build   # YOLO26 포함 이미지
+#   docker compose logs -f   /   브라우저: http://<host>:8080
 services:
   vision_cam:
     build:
@@ -26,10 +30,6 @@ services:
       VISION_CAM_EVENTS_FILE: /app/data/events.jsonl
       VISION_CAM_SNAPSHOT_DIR: /app/data/snapshots
       VISION_CAM_STREAM_PORT: "8080"
-    devices:
-      - ${VISION_CAM_DEVICE:-/dev/video0}:/dev/video0
-    group_add:
-      - video
     ports:
       - "${VISION_CAM_PUBLISH_PORT:-8080}:8080"
     volumes:

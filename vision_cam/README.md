@@ -25,11 +25,12 @@ vision_cam/
 ├── tests/                 # 카메라 없이 합성 프레임으로 테스트
 ├── deploy/
 │   ├── install-pi.sh      # 파이 설치 스크립트
-│   ├── run-local.sh       # 서버: venv 설치 + systemd 자동 실행 (Docker 없이)
+│   ├── run-local.sh       # Docker 없이 설치 + 자동 실행 (Linux systemd / macOS launchd)
 │   ├── docker-entrypoint.sh # 컨테이너 시작 시 모델 준비 후 실행
 │   ├── download-models.sh # object 분석기 모델 다운로드
 │   └── vision_cam.service  # systemd 유닛
-├── Dockerfile / docker-compose.yml  # 서버 자동 실행 (restart: unless-stopped)
+├── Dockerfile / docker-compose.yml  # 자동 실행 (restart: unless-stopped)
+├── docker-compose.usb.yml # Linux USB 웹캠 장치 매핑 override
 ├── roi.example.json       # ROI 구역 설정 예시
 ├── kinematics.example.json # 속도/모멘텀 보정(호모그래피·질량) 예시
 ├── requirements-yolo.txt  # yolo 분석기용 ultralytics
@@ -107,36 +108,49 @@ journalctl -u vision_cam -f
 | 화면 출력 | `cv2.imshow` 창 | `--stream` MJPEG 브라우저 |
 | 권장 `--analysis-width` | 320~640 | 240~320 |
 
-## 3. 서버(로컬 Linux)에서 자동 실행
+## 3. 자동 실행 (서버 / 로컬)
 
-### A. Docker Compose (권장)
+| 환경 | 카메라 | 권장 방법 |
+|---|---|---|
+| 서버 Linux | USB 웹캠 | Docker + `docker-compose.usb.yml` 또는 `run-local.sh` (systemd) |
+| 서버 Linux | IP 카메라(RTSP) | Docker (`docker-compose.yml` 만) |
+| 로컬 macOS | 내장 카메라 | `run-local.sh` (launchd) — Docker 는 맥 카메라 접근 불가 |
+| 로컬 macOS | 브라우저 / RTSP | Docker (`VISION_CAM_SOURCE=browser` 또는 `rtsp://...`) |
+
+### A. Docker Compose
 
 ```bash
-cd vision_cam
-cp .env.example .env                       # VISION_CAM_SOURCE, VISION_CAM_ANALYZERS 등 편집
-docker compose up -d --build               # 기본 이미지 (motion/face/brightness/object)
+cd vision_cam && cp .env.example .env      # VISION_CAM_SOURCE 등 편집
+
+# 서버 + USB 웹캠
+docker compose -f docker-compose.yml -f docker-compose.usb.yml up -d --build
+# IP 카메라 / 맥 브라우저 소스 (장치 매핑 없음)
+docker compose up -d --build
+
 WITH_YOLO=1 docker compose up -d --build   # YOLO26 포함 이미지 (~2GB)
-docker compose logs -f                     # 로그
-# 브라우저: http://<server-ip>:8080   /status → 최신 JSON
+docker compose logs -f                     # http://<host>:8080 , /status → JSON
 ```
 
 | 항목 | 설명 |
 |---|---|
-| 자동 시작 | `restart: unless-stopped` → docker 서비스가 켜지면 재부팅 후에도 자동 실행 |
-| 카메라 | USB: `/dev/video0` 매핑(`VISION_CAM_DEVICE` 로 변경) / IP 카메라: `devices` 삭제 후 `VISION_CAM_SOURCE=rtsp://...` |
+| 자동 시작 | `restart: unless-stopped` → Docker 가 켜지면 재부팅 후에도 자동 실행 (맥은 Docker Desktop "로그인 시 시작" 설정) |
 | 결과 | `./data/events.jsonl`, `./data/snapshots/` |
 | 모델 | `./models` 볼륨에 캐시 (object·yolo 사용 시 첫 실행에 자동 다운로드) |
-| 설정 파일 | `./config/` → 컨테이너 `/app/config` (예: `VISION_CAM_ROI_FILE=/app/config/roi.json`) |
+| 설정 파일 | `./config/` → `/app/config` (예: `VISION_CAM_ROI_FILE=/app/config/roi.json`) |
 | 헬스체크 | `/status` 응답 확인 (30초 간격) |
 
-### B. Docker 없이 (venv + systemd)
+### B. Docker 없이 — `deploy/run-local.sh` (Linux·macOS 공통)
 
 ```bash
-bash deploy/run-local.sh install [--yolo]  # venv + 의존성 + 모델 + .env
-bash deploy/run-local.sh run --stream 8080 # 포그라운드 테스트
-bash deploy/run-local.sh enable            # systemd 등록, 부팅 시 자동 시작 (Restart=always)
+bash deploy/run-local.sh install [--yolo]  # venv + 의존성 + 모델 + .env (OS 자동 판별)
+bash deploy/run-local.sh run --stream 8080 # 포그라운드 테스트 (맥에서 창 표시: --display)
+bash deploy/run-local.sh enable            # Linux: systemd(부팅 시) / macOS: launchd(로그인 시)
 bash deploy/run-local.sh status | logs | disable
 ```
+
+- Linux: `/etc/systemd/system/vision_cam.service`, `Restart=always`, 로그 `journalctl -u vision_cam`
+- macOS: `~/Library/LaunchAgents/com.voyagerss.vision_cam.plist`, `KeepAlive`, 로그 `~/Library/Logs/vision_cam/`
+  내장 카메라 사용 시 처음 한 번 **시스템 설정 → 개인정보 보호 및 보안 → 카메라** 에서 허용 필요
 
 ## 이벤트 출력
 

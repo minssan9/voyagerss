@@ -1,0 +1,11 @@
+# Linux 서버의 USB 웹캠(V4L2)을 컨테이너에 연결하는 override.
+#   docker compose -f docker-compose.yml -f docker-compose.usb.yml up -d --build
+# 다른 장치: VISION_CAM_DEVICE=/dev/video2
+services:
+  vision_cam:
+    devices:
+      - ${VISION_CAM_DEVICE:-/dev/video0}:/dev/video0
+    group_add:
+      - video
+    environment:
+      VISION_CAM_SOURCE: "0"
