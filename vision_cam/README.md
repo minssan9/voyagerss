@@ -25,8 +25,11 @@ vision_cam/
 ├── tests/                 # 카메라 없이 합성 프레임으로 테스트
 ├── deploy/
 │   ├── install-pi.sh      # 파이 설치 스크립트
+│   ├── run-local.sh       # 서버: venv 설치 + systemd 자동 실행 (Docker 없이)
+│   ├── docker-entrypoint.sh # 컨테이너 시작 시 모델 준비 후 실행
 │   ├── download-models.sh # object 분석기 모델 다운로드
 │   └── vision_cam.service  # systemd 유닛
+├── Dockerfile / docker-compose.yml  # 서버 자동 실행 (restart: unless-stopped)
 ├── roi.example.json       # ROI 구역 설정 예시
 ├── kinematics.example.json # 속도/모멘텀 보정(호모그래피·질량) 예시
 ├── requirements-yolo.txt  # yolo 분석기용 ultralytics
@@ -103,6 +106,37 @@ journalctl -u vision_cam -f
 | 캡처 backend | AVFoundation | V4L2 (USB) / picamera2 (CSI) |
 | 화면 출력 | `cv2.imshow` 창 | `--stream` MJPEG 브라우저 |
 | 권장 `--analysis-width` | 320~640 | 240~320 |
+
+## 3. 서버(로컬 Linux)에서 자동 실행
+
+### A. Docker Compose (권장)
+
+```bash
+cd vision_cam
+cp .env.example .env                       # VISION_CAM_SOURCE, VISION_CAM_ANALYZERS 등 편집
+docker compose up -d --build               # 기본 이미지 (motion/face/brightness/object)
+WITH_YOLO=1 docker compose up -d --build   # YOLO26 포함 이미지 (~2GB)
+docker compose logs -f                     # 로그
+# 브라우저: http://<server-ip>:8080   /status → 최신 JSON
+```
+
+| 항목 | 설명 |
+|---|---|
+| 자동 시작 | `restart: unless-stopped` → docker 서비스가 켜지면 재부팅 후에도 자동 실행 |
+| 카메라 | USB: `/dev/video0` 매핑(`VISION_CAM_DEVICE` 로 변경) / IP 카메라: `devices` 삭제 후 `VISION_CAM_SOURCE=rtsp://...` |
+| 결과 | `./data/events.jsonl`, `./data/snapshots/` |
+| 모델 | `./models` 볼륨에 캐시 (object·yolo 사용 시 첫 실행에 자동 다운로드) |
+| 설정 파일 | `./config/` → 컨테이너 `/app/config` (예: `VISION_CAM_ROI_FILE=/app/config/roi.json`) |
+| 헬스체크 | `/status` 응답 확인 (30초 간격) |
+
+### B. Docker 없이 (venv + systemd)
+
+```bash
+bash deploy/run-local.sh install [--yolo]  # venv + 의존성 + 모델 + .env
+bash deploy/run-local.sh run --stream 8080 # 포그라운드 테스트
+bash deploy/run-local.sh enable            # systemd 등록, 부팅 시 자동 시작 (Restart=always)
+bash deploy/run-local.sh status | logs | disable
+```
 
 ## 이벤트 출력
 

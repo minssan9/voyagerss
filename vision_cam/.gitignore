@@ -10,3 +10,5 @@ models/*.prototxt
 *.pt
 *_ncnn_model/
 *.onnx
+data/
+config/

@@ -1,0 +1,45 @@
+# vision_cam 서버 로컬 자동 실행 (재부팅 시 docker 가 자동 재시작)
+#
+#   cp .env.example .env            # 설정 편집 (VISION_CAM_SOURCE 등)
+#   docker compose up -d --build    # 기본 이미지 (motion/face/brightness/object)
+#   WITH_YOLO=1 docker compose up -d --build   # YOLO26 포함 이미지
+#   docker compose logs -f
+#   브라우저: http://<server-ip>:8080
+#
+# 카메라:
+#   - USB 웹캠: devices 의 /dev/video0 유지, VISION_CAM_SOURCE=0
+#   - IP 카메라: devices 블록 삭제, VISION_CAM_SOURCE=rtsp://user:pass@host/stream
+services:
+  vision_cam:
+    build:
+      context: .
+      args:
+        WITH_YOLO: ${WITH_YOLO:-0}
+    image: vision_cam:${WITH_YOLO:-0}
+    container_name: vision_cam
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # 컨테이너 내부 경로로 고정 (결과는 ./data 에 남는다)
+      VISION_CAM_EVENTS_FILE: /app/data/events.jsonl
+      VISION_CAM_SNAPSHOT_DIR: /app/data/snapshots
+      VISION_CAM_STREAM_PORT: "8080"
+    devices:
+      - ${VISION_CAM_DEVICE:-/dev/video0}:/dev/video0
+    group_add:
+      - video
+    ports:
+      - "${VISION_CAM_PUBLISH_PORT:-8080}:8080"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+      # ROI / kinematics 설정을 쓸 때 .env 에서 VISION_CAM_ROI_FILE=/app/config/roi.json 처럼 지정
+      - ./config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/status', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
