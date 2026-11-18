@@ -12,4 +12,10 @@ describe('SystemConfigService catalog', () => {
     expect(keys.has('PD_INGESTION_ENABLED')).toBe(true);
     expect(items.find((i) => i.key === 'DART_API_KEY')?.isSecret).toBe(true);
   });
+
+  it('exposes CONSULTING_CONTACT_EMAIL as a non-secret frontend key', () => {
+    const item = svc.getCatalog(['frontend']).find((i) => i.key === 'CONSULTING_CONTACT_EMAIL');
+    expect(item).toBeDefined();
+    expect(item?.isSecret).toBe(false);
+  });
 });

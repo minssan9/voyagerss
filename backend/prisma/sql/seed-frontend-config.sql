@@ -21,6 +21,13 @@ VALUES
  'CDN 기본 URL (프론트엔드 이미지/에셋)',
  'frontend', 'sql-seed', NOW(), NOW()),
 
+-- AI 컨설팅 랜딩(/) 문의 이메일 (비우면 이메일 CTA 숨김)
+('CONSULTING_CONTACT_EMAIL',
+ '',
+ 0,
+ 'AI 컨설팅 랜딩 상담 문의 수신 이메일',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
 -- Gemini AI (sensitive — browser-side key; consider server-side proxy instead)
 ('VITE_GEMINI_API_KEY',
  'AIzaSyCf7H4NgUhScGv7V6VThD5MXbZU5goVH10',

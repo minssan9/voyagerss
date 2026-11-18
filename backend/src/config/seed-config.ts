@@ -59,6 +59,8 @@ export const SEED_KEYS: SeedEntry[] = [
   { key: 'CORS_ENABLED',           category: 'app',      description: 'CORS 활성화 (true/false)' },
   { key: 'HELMET_ENABLED',         category: 'app',      description: 'Helmet 활성화 (true/false)' },
   { key: 'BASE_PATH',              category: 'app',      description: '로컬 파일 저장 기본 경로 (aviation 등)' },
+  // Frontend public (GET /api/workschd/config/public 로 비인증 노출 — 민감정보 금지)
+  { key: 'CONSULTING_CONTACT_EMAIL', category: 'frontend', description: 'AI 컨설팅 랜딩(/) 상담 문의 수신 이메일 (비우면 이메일 CTA 숨김)' },
   // Scraper
   { key: 'WORKSCHD_SCRAPER_ENABLED',                     category: 'scraper', description: '스크래퍼 스케줄러 활성화 (true/false)' },
   { key: 'WORKSCHD_SCRAPER_CRON',                        category: 'scraper', description: '스크래퍼 cron 표현식' },

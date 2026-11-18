@@ -19,7 +19,7 @@
           >
             <option v-for="opt in LOCALE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
           </select>
-          <a :href="mailtoHref" class="cl-btn cl-btn--primary cl-btn--sm">{{ t('consulting.nav.contact') }}</a>
+          <a v-if="mailtoHref" :href="mailtoHref" class="cl-btn cl-btn--primary cl-btn--sm">{{ t('consulting.nav.contact') }}</a>
         </div>
       </div>
     </header>
@@ -30,7 +30,7 @@
       <h1 class="cl-hero__title">{{ t('consulting.hero.title') }}</h1>
       <p class="cl-hero__subtitle">{{ t('consulting.hero.subtitle') }}</p>
       <div class="cl-hero__actions">
-        <a :href="mailtoHref" class="cl-btn cl-btn--primary">{{ t('consulting.hero.ctaPrimary') }}</a>
+        <a v-if="mailtoHref" :href="mailtoHref" class="cl-btn cl-btn--primary">{{ t('consulting.hero.ctaPrimary') }}</a>
         <a href="#services" class="cl-btn cl-btn--ghost">{{ t('consulting.hero.ctaSecondary') }}</a>
       </div>
       <ul class="cl-stats">
@@ -117,11 +117,11 @@
     </section>
 
     <!-- CTA -->
-    <section id="contact" class="cl-cta">
+    <section v-if="mailtoHref" id="contact" class="cl-cta">
       <h2 class="cl-cta__title">{{ t('consulting.cta.title') }}</h2>
       <p class="cl-cta__subtitle">{{ t('consulting.cta.subtitle') }}</p>
       <a :href="mailtoHref" class="cl-btn cl-btn--light">{{ t('consulting.cta.button') }}</a>
-      <p class="cl-cta__email">{{ CONTACT_EMAIL }}</p>
+      <p class="cl-cta__email">{{ contactEmail }}</p>
     </section>
 
     <!-- Footer -->
@@ -146,6 +146,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { loadLanaguageAsync } from '@/locales/i18n'
+import { useAppConfigStore } from '@/stores/common/store_app_config'
 
 interface Stat { value: string; label: string }
 interface Service { icon: string; title: string; text: string }
@@ -153,7 +154,8 @@ interface Step { title: string; text: string }
 interface Plan { name: string; period: string; text: string; features: string[] }
 interface Faq { q: string; a: string }
 
-const CONTACT_EMAIL = 'contact@voyagerss.com'
+// DB(workschd.system_config, category='frontend')에서 관리 — 비어 있으면 이메일 CTA 숨김
+const CONTACT_EMAIL_KEY = 'CONSULTING_CONTACT_EMAIL'
 const FEATURED_PLAN = 1
 
 // 언어명은 각 언어의 자국어 표기로 고정 (현재 언어와 무관)
@@ -183,8 +185,12 @@ const steps = computed(() => resolve<Step>('consulting.process.steps'))
 const plans = computed(() => resolve<Plan>('consulting.engagement.items'))
 const faqs = computed(() => resolve<Faq>('consulting.faq.items'))
 
-const mailtoHref = computed(
-  () => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t('consulting.cta.mailSubject'))}`
+const appConfig = useAppConfigStore()
+const contactEmail = computed(() => appConfig.get(CONTACT_EMAIL_KEY).trim())
+const mailtoHref = computed(() =>
+  contactEmail.value
+    ? `mailto:${contactEmail.value}?subject=${encodeURIComponent(t('consulting.cta.mailSubject'))}`
+    : ''
 )
 
 function onLocaleChange(next: string) {
