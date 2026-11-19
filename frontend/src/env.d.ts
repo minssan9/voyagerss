@@ -13,6 +13,7 @@ declare module 'vue-router' {
     icon?: string
     title?: string
     titleKey?: string
+    descriptionKey?: string
     tabTitle?: string
     description?: string
     layout?: 'default' | 'blank' | 'minimal'

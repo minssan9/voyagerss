@@ -6,7 +6,10 @@ import visionRoutes from '@/modules/vision/router/routes';
 
 // ─── Common Routes ───────────────────────────────────────────────
 const commonRoutes: RouteRecordRaw[] = [
-    { path: '/', name: 'home', component: () => import('@/views/Landing.vue'), meta: { icon: 'home', titleKey: 'routes.home', integrated: true } },
+    // 메인: AI 구축 설계 컨설팅 랜딩 (공개, 브라우저 언어 기반 ko/en/ja)
+    { path: '/', name: 'home', component: () => import('@/views/ConsultingLanding.vue'), meta: { icon: 'home', titleKey: 'consulting.meta.title', descriptionKey: 'consulting.meta.description', public: true, layout: 'blank', hidden: true } },
+    // 기존 통합 플랫폼 랜딩 (모듈 진입)
+    { path: '/platform', name: 'platform', component: () => import('@/views/Landing.vue'), meta: { icon: 'apps', titleKey: 'routes.platform', integrated: true } },
     { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info', titleKey: 'routes.about' } },
     { path: '/subscription', name: 'Subscription', component: () => import('@/modules/workschd/views/main/Subscription.vue'), meta: { icon: 'card_membership', titleKey: 'routes.subscription' } },
     { path: '/privacy-policy', name: 'PrivacyPolicy', component: () => import('@/modules/workschd/views/main/PrivacyPolicy.vue'), meta: { icon: 'policy', hidden: true, titleKey: 'routes.privacy' } },

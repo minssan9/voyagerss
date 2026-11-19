@@ -1,0 +1,883 @@
+// AI 컨설팅 메인 랜딩 (/) — 다크 프로덕트 런치 스타일, layout: blank
+// - 섹션 단위 스크롤 스냅 (html.cl-snap-root)
+// - 섹션 진입 시 .is-active → 내부 .cl-reveal 모션 재생
+// BEM prefix: cl-
+
+$cl-bg: #05060a;
+$cl-bg-alt: #0b0d14;
+$cl-surface: rgba(255, 255, 255, 0.04);
+$cl-surface-hover: rgba(255, 255, 255, 0.07);
+$cl-line: rgba(255, 255, 255, 0.1);
+$cl-text: #f5f5f7;
+$cl-text-2: #a1a1aa;
+$cl-text-3: #71717a;
+$cl-accent: #4f8cff;
+$cl-accent-2: #a970ff;
+$cl-gradient: linear-gradient(120deg, #7aa8ff 0%, #a970ff 50%, #ff7ab6 100%);
+$cl-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+// ─── 스크롤 스냅 ─────────────────────────────────────
+html.cl-snap-root {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  background: $cl-bg;
+
+  // 작은 화면 · 낮은 높이: 섹션이 화면보다 길어지므로 proximity
+  @media (max-width: 900px), (max-height: 700px) {
+    scroll-snap-type: y proximity;
+  }
+}
+
+.cl-page {
+  background: $cl-bg;
+  color: $cl-text;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Hiragino Sans', 'Apple SD Gothic Neo',
+    'Noto Sans JP', 'Noto Sans KR', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: clip;
+
+  a { color: inherit; text-decoration: none; }
+
+  // 전역 heading 색상(브랜드 네이비) 무효화
+  h1, h2, h3, h4 { color: inherit; }
+}
+
+// 한국어만 어절 단위 줄바꿈 (일본어는 공백이 없어 keep-all 시 줄바꿈이 깨짐)
+html[lang='ko'] .cl-page { word-break: keep-all; overflow-wrap: break-word; }
+
+.cl-snap {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cl-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  &--narrow { max-width: 760px; }
+}
+
+// ─── 공통 리빌 모션 ──────────────────────────────────
+.cl-reveal {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity 0.9s $cl-ease,
+    transform 0.9s $cl-ease;
+  transition-delay: calc(var(--i, 0) * 90ms);
+
+  // 3D: 아래에서 뒤로 눕혀진 상태로 일어서기
+  &--3d { transform: perspective(900px) translate3d(0, 60px, -80px) rotateX(24deg); }
+  &--left { transform: translate3d(-40px, 0, 0); }
+}
+
+.is-active .cl-reveal {
+  opacity: 1;
+  transform: none;
+}
+
+// ─── Nav ─────────────────────────────────────────────
+.cl-nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  transition: background 0.3s, border-color 0.3s;
+  border-bottom: 1px solid transparent;
+
+  &--scrolled {
+    background: rgba(5, 6, 10, 0.65);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom-color: $cl-line;
+  }
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  &__brand { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  &__brand-dot { color: $cl-accent; }
+
+  &__links {
+    display: flex;
+    gap: 28px;
+    margin-left: auto;
+    font-size: 14px;
+    color: $cl-text-2;
+
+    a { transition: color 0.2s; }
+    a:hover, a.is-active { color: $cl-text; }
+  }
+
+  &__actions { display: flex; align-items: center; gap: 12px; }
+}
+
+.cl-lang {
+  appearance: none;
+  border: 1px solid $cl-line;
+  background: transparent;
+  color: $cl-text;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+
+  option { color: #111; }
+  &:focus-visible { outline: 2px solid $cl-accent; outline-offset: 2px; }
+}
+
+// ─── 섹션 인디케이터 ─────────────────────────────────
+.cl-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: height 0.4s $cl-ease, background 0.3s;
+
+    &.is-active { height: 28px; background: $cl-text; }
+    &:focus-visible { outline: 2px solid $cl-accent; outline-offset: 3px; }
+  }
+}
+
+// ─── Buttons ─────────────────────────────────────────
+.cl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 13px 26px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.3s;
+  white-space: nowrap;
+
+  &--sm { padding: 6px 16px; font-size: 13px; }
+
+  &--primary {
+    background: $cl-accent;
+    color: #fff !important;
+    box-shadow: 0 0 0 0 rgba(79, 140, 255, 0.5);
+    &:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(79, 140, 255, 0.45); }
+  }
+
+  &--ghost {
+    color: $cl-text !important;
+    &:hover { color: $cl-accent !important; }
+  }
+
+  &--light {
+    background: #fff;
+    color: #000 !important;
+    &:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(255, 255, 255, 0.25); }
+  }
+}
+
+.cl-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 20px;
+  background: $cl-gradient;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// ─── 1. Hero ─────────────────────────────────────────
+.cl-hero {
+  text-align: center;
+  padding: 100px 24px 72px;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(79, 140, 255, 0.12), transparent 70%), $cl-bg;
+
+  &__globe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  &__title {
+    font-size: clamp(38px, 6.5vw, 76px);
+    line-height: 1.06;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    white-space: pre-line;
+    margin: 0 0 24px;
+    background: linear-gradient(180deg, #fff 30%, rgba(255, 255, 255, 0.6));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  &__subtitle {
+    font-size: clamp(17px, 2vw, 20px);
+    color: $cl-text-2;
+    max-width: 680px;
+    margin: 0 auto 40px;
+  }
+
+  &__actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+}
+
+.cl-stats {
+  list-style: none;
+  padding: 0;
+  margin: 64px auto 0;
+  max-width: 760px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  &__item {
+    padding: 18px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid $cl-line;
+    backdrop-filter: blur(8px);
+  }
+
+  &__value { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  &__label { font-size: 13px; color: $cl-text-2; }
+}
+
+.cl-scroll-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  width: 26px;
+  height: 42px;
+  margin-left: -13px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+
+  span {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    width: 4px;
+    height: 8px;
+    margin-left: -2px;
+    border-radius: 2px;
+    background: #fff;
+    animation: cl-scroll-hint 1.8s $cl-ease infinite;
+  }
+}
+
+@keyframes cl-scroll-hint {
+  0% { transform: translateY(0); opacity: 1; }
+  80% { transform: translateY(14px); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+// ─── Sections ────────────────────────────────────────
+.cl-section {
+  padding: 104px 0 72px;
+  background: $cl-bg;
+
+  &--alt { background: $cl-bg-alt; }
+
+  &__header { text-align: center; margin-bottom: 56px; }
+
+  &__title {
+    font-size: clamp(32px, 4.4vw, 56px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 12px;
+  }
+
+  &__subtitle { font-size: 18px; color: $cl-text-2; margin: 0; }
+}
+
+.cl-grid {
+  display: grid;
+  gap: 16px;
+  &--3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+// ─── 2. Services : 3D 틸트 카드 ─────────────────────
+
+.cl-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 30px 28px;
+  background: $cl-surface;
+  border: 1px solid $cl-line;
+  transform-style: preserve-3d;
+
+  &__glare {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgba(122, 168, 255, 0.18), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  &:hover &__glare { opacity: 1; }
+
+  &__icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(79, 140, 255, 0.25), rgba(169, 112, 255, 0.25));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    transform: translateZ(40px);
+    animation: cl-float 5s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * -0.7s);
+  }
+
+  &__icon { color: #c7d7ff; }
+  &__title { font-size: 20px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; transform: translateZ(24px); }
+  &__text { font-size: 14.5px; color: $cl-text-2; margin: 0; transform: translateZ(12px); }
+}
+
+// 포인터 틸트 (리빌은 바깥 래퍼가 담당)
+.cl-tilt-stage > * { perspective: 1000px; }
+
+.cl-tilt {
+  height: 100%;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.35s ease-out, border-color 0.3s;
+
+  &:hover { border-color: rgba(122, 168, 255, 0.35); }
+}
+
+@keyframes cl-float {
+  0%, 100% { transform: translateZ(40px) translateY(0); }
+  50% { transform: translateZ(40px) translateY(-6px); }
+}
+
+// ─── 3. Process : 타임라인 드로잉 ────────────────────
+.cl-timeline {
+  position: relative;
+
+  &__track {
+    position: absolute;
+    left: 12.5%;
+    right: 12.5%;
+    top: 28px;
+    height: 2px;
+    background: $cl-line;
+    overflow: visible;
+  }
+
+  &__fill {
+    position: absolute;
+    inset: 0;
+    background: $cl-gradient;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.6s $cl-ease 0.3s;
+  }
+
+  &__pulse {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 80px;
+    height: 6px;
+    margin-top: -3px;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, #fff, rgba(169, 112, 255, 0.6), transparent);
+    filter: blur(1px);
+    opacity: 0;
+  }
+}
+
+.is-active .cl-timeline__fill { transform: scaleX(1); }
+.is-active .cl-timeline__pulse { animation: cl-pulse-run 3.2s linear 1.9s infinite; }
+
+@keyframes cl-pulse-run {
+  0% { left: -40px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: calc(100% - 40px); opacity: 0; }
+}
+
+.cl-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  text-align: center;
+
+  &__node {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $cl-bg-alt;
+    border: 1px solid rgba(122, 168, 255, 0.5);
+    font-size: 14px;
+    font-weight: 700;
+    color: #c7d7ff;
+    margin-bottom: 20px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 1px solid rgba(122, 168, 255, 0.35);
+      opacity: 0;
+    }
+  }
+
+  &__title { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+  &__text { font-size: 14.5px; color: $cl-text-2; margin: 0 auto; max-width: 240px; }
+}
+
+.is-active .cl-steps__node::after {
+  animation: cl-ring 2.4s ease-out infinite;
+  animation-delay: calc(var(--i, 0) * 180ms);
+}
+
+@keyframes cl-ring {
+  0% { transform: scale(0.8); opacity: 0.9; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+// ─── 4. Engagement : 3D 캐러셀 ──────────────────────
+.cl-plans {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+}
+
+.cl-plan {
+  position: relative;
+  border-radius: 22px;
+  padding: 36px 30px;
+  background: $cl-surface;
+  border: 1px solid $cl-line;
+  opacity: 0;
+  transform: translateZ(-300px) rotateY(0deg);
+  transition:
+    opacity 1s $cl-ease,
+    transform 1.2s $cl-ease;
+
+  &--pos0 { transform-origin: right center; transition-delay: 0.25s; }
+  &--pos1 { transition-delay: 0.1s; }
+  &--pos2 { transform-origin: left center; transition-delay: 0.25s; }
+
+  &--featured {
+    background: linear-gradient(180deg, rgba(79, 140, 255, 0.14), rgba(169, 112, 255, 0.06));
+    border-color: rgba(122, 168, 255, 0.5);
+    box-shadow: 0 30px 80px -20px rgba(79, 140, 255, 0.35);
+  }
+
+  &__badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: $cl-gradient;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  &__name { font-size: 24px; font-weight: 600; margin: 0; }
+  &__period { font-size: 14px; color: $cl-text-3; margin: 4px 0 16px; }
+  &__text { font-size: 15px; color: $cl-text-2; margin: 0 0 24px; }
+
+  &__features {
+    list-style: none;
+    padding: 24px 0 0;
+    margin: 0;
+    border-top: 1px solid $cl-line;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+
+    li { display: flex; gap: 8px; align-items: center; }
+    .q-icon { color: $cl-accent; }
+  }
+}
+
+.is-active .cl-plan {
+  opacity: 1;
+  &--pos0 { transform: rotateY(14deg) translateZ(-40px); }
+  &--pos1 { transform: translateZ(30px); animation: cl-hover-y 6s ease-in-out 1.4s infinite; }
+  &--pos2 { transform: rotateY(-14deg) translateZ(-40px); }
+}
+
+@keyframes cl-hover-y {
+  0%, 100% { transform: translateZ(30px) translateY(0); }
+  50% { transform: translateZ(30px) translateY(-10px); }
+}
+
+// ─── 5. Subscribe : 3D 멤버십 카드 ───────────────────
+.cl-sub {
+  background: radial-gradient(ellipse 60% 60% at 75% 50%, rgba(79, 140, 255, 0.14), transparent 70%), $cl-bg;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  &__title { text-align: left; }
+  &__copy .cl-section__subtitle { text-align: left; }
+
+  &__features {
+    list-style: none;
+    padding: 0;
+    margin: 32px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 16px;
+
+    li { display: flex; gap: 10px; align-items: center; }
+    .q-icon { color: $cl-accent; flex-shrink: 0; }
+  }
+
+  &__stage {
+    perspective: 1200px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.cl-member {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1.42;
+  border-radius: 24px;
+  padding: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, #1b2a5c 0%, #3a1f6b 55%, #5a1f4f 100%);
+  box-shadow:
+    0 40px 100px -30px rgba(79, 140, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transform-style: preserve-3d;
+  animation: cl-member-idle 7s ease-in-out infinite;
+
+  // 회전하는 테두리 광택
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg, transparent 0 70%, rgba(122, 168, 255, 0.55) 80%, transparent 90%);
+    animation: cl-spin 6s linear infinite;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 23px;
+    background: linear-gradient(135deg, #172350 0%, #331b5f 55%, #4c1b45 100%);
+    z-index: 0;
+  }
+
+  > * { position: relative; z-index: 1; }
+
+  &__shine {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), rgba(255, 255, 255, 0.22), transparent 45%);
+    mix-blend-mode: soft-light;
+  }
+
+  &__top { display: flex; justify-content: space-between; align-items: center; transform: translateZ(30px); }
+  &__brand { font-weight: 700; letter-spacing: -0.02em; }
+
+  &__chip {
+    width: 40px;
+    height: 30px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #e8d18f, #b8954a);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+  }
+
+  &__plan { margin: auto 0 4px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); transform: translateZ(20px); }
+
+  &__price { margin: 0; display: flex; align-items: baseline; gap: 8px; transform: translateZ(40px); }
+  &__amount { font-size: 56px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  &__period { font-size: 18px; color: rgba(255, 255, 255, 0.75); }
+  &__note { margin: 6px 0 0; font-size: 13px; color: rgba(255, 255, 255, 0.6); transform: translateZ(20px); }
+  &__cta { margin-top: 18px; align-self: flex-start; transform: translateZ(30px); }
+}
+
+@keyframes cl-spin { to { transform: rotate(360deg); } }
+
+@keyframes cl-member-idle {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+
+// ─── 6. FAQ : 플로팅 오브 ───────────────────────────
+.cl-faq-section { isolation: isolate; }
+
+.cl-orb {
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.45;
+  pointer-events: none;
+
+  &--a {
+    width: 420px; height: 420px;
+    left: -120px; top: 10%;
+    background: #3b5bff;
+    animation: cl-orb-a 14s ease-in-out infinite;
+  }
+
+  &--b {
+    width: 360px; height: 360px;
+    right: -100px; bottom: 5%;
+    background: #a14dff;
+    animation: cl-orb-b 16s ease-in-out infinite;
+  }
+}
+
+@keyframes cl-orb-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(120px, 80px) scale(1.15); }
+}
+
+@keyframes cl-orb-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-100px, -60px) scale(0.9); }
+}
+
+.cl-faq {
+  border-bottom: 1px solid $cl-line;
+
+  &__q {
+    list-style: none;
+    cursor: pointer;
+    padding: 22px 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+
+    &::-webkit-details-marker { display: none; }
+    &::after { content: '+'; color: $cl-text-2; font-weight: 400; font-size: 22px; line-height: 1; transition: transform 0.3s $cl-ease; }
+  }
+
+  &[open] &__q::after { transform: rotate(45deg); }
+  &__a { margin: 0 0 22px; color: $cl-text-2; font-size: 15.5px; }
+}
+
+// ─── 7. CTA : 3D 자이로 링 ──────────────────────────
+.cl-cta {
+  text-align: center;
+  padding: 96px 0 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 45%, rgba(169, 112, 255, 0.16), transparent 70%), $cl-bg;
+
+  &__body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+  }
+
+  &__title {
+    font-size: clamp(32px, 4.6vw, 60px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 16px;
+    max-width: 900px;
+  }
+
+  &__subtitle { font-size: 18px; color: $cl-text-2; margin: 0 0 36px; }
+  &__email { margin: 18px 0 0; font-size: 14px; color: $cl-text-3; }
+}
+
+.cl-gyro {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 520px;
+  height: 520px;
+  margin: -260px 0 0 -260px;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  opacity: 0.55;
+
+  &__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(122, 168, 255, 0.45);
+    box-shadow: 0 0 40px rgba(122, 168, 255, 0.15), inset 0 0 40px rgba(169, 112, 255, 0.12);
+    transform-style: preserve-3d;
+
+    &--1 { animation: cl-gyro-1 18s linear infinite; }
+    &--2 { inset: 40px; border-color: rgba(169, 112, 255, 0.45); animation: cl-gyro-2 14s linear infinite; }
+    &--3 { inset: 90px; border-color: rgba(255, 122, 182, 0.4); animation: cl-gyro-3 11s linear infinite; }
+  }
+
+  &__core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(169, 112, 255, 0.55), transparent 70%);
+    filter: blur(10px);
+    animation: cl-breathe 4s ease-in-out infinite;
+  }
+}
+
+@keyframes cl-gyro-1 { from { transform: rotateX(70deg) rotateZ(0); } to { transform: rotateX(70deg) rotateZ(360deg); } }
+@keyframes cl-gyro-2 { from { transform: rotateY(65deg) rotateZ(0); } to { transform: rotateY(65deg) rotateZ(-360deg); } }
+@keyframes cl-gyro-3 { from { transform: rotateX(-50deg) rotateY(30deg) rotateZ(0); } to { transform: rotateX(-50deg) rotateY(30deg) rotateZ(360deg); } }
+@keyframes cl-breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 1; } }
+
+// ─── Footer (CTA 섹션 하단) ─────────────────────────
+.cl-footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid $cl-line;
+  font-size: 13px;
+  color: $cl-text-3;
+  margin-top: 64px;
+
+  &__inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 32px;
+    text-align: left;
+  }
+
+  strong { color: $cl-text; margin-right: 8px; }
+
+  &__links {
+    display: flex;
+    gap: 20px;
+    a:hover { color: $cl-text; }
+  }
+
+  &__copy { margin: 0 0 0 auto; }
+}
+
+// ─── Responsive ──────────────────────────────────────
+@media (max-width: 960px) {
+  .cl-grid--3 { grid-template-columns: 1fr 1fr; }
+  .cl-steps { grid-template-columns: 1fr 1fr; row-gap: 40px; }
+  .cl-timeline__track { display: none; }
+  .cl-plans { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  .is-active .cl-plan--pos0,
+  .is-active .cl-plan--pos2 { transform: none; }
+  .is-active .cl-plan--pos1 { transform: none; animation: none; }
+  .cl-dots { display: none; }
+  .cl-sub__grid { grid-template-columns: 1fr; gap: 48px; }
+}
+
+@media (max-width: 640px) {
+  .cl-nav__links { display: none; }
+  .cl-nav__actions { margin-left: auto; }
+  .cl-hero { padding: 88px 16px 80px; }
+  .cl-stats { grid-template-columns: 1fr; max-width: 320px; margin-top: 40px; }
+  .cl-section { padding: 88px 0 56px; }
+  .cl-container { padding: 0 16px; }
+  .cl-grid--3, .cl-steps { grid-template-columns: 1fr; }
+  .cl-gyro { width: 340px; height: 340px; margin: -170px 0 0 -170px; }
+  .cl-footer__copy { margin-left: 0; }
+  .cl-member { aspect-ratio: auto; min-height: 240px; }
+  .cl-member__amount { font-size: 44px; }
+}
+
+// ─── 모션 최소화 설정 존중 ───────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  html.cl-snap-root { scroll-behavior: auto; }
+
+  .cl-page *,
+  .cl-page *::before,
+  .cl-page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .cl-reveal,
+  .cl-plan { opacity: 1; transform: none !important; }
+  .cl-timeline__fill { transform: scaleX(1); }
+}

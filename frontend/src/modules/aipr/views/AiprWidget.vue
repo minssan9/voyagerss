@@ -10,7 +10,7 @@ const route = useRoute();
 const { t } = useI18n();
 
 const queryLocale = route.query.locale as string;
-if (queryLocale === 'ko' || queryLocale === 'en') {
+if (queryLocale === 'ko' || queryLocale === 'en' || queryLocale === 'ja') {
   void loadLanaguageAsync(queryLocale);
 }
 
