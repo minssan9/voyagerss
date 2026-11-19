@@ -10,7 +10,8 @@
       "engagement": "Engagements",
       "faq": "FAQ",
       "contact": "Book a call",
-      "platform": "Platform"
+      "platform": "Platform",
+      "subscribe": "Membership"
     },
     "hero": {
       "eyebrow": "AI Architecture & Advisory",
@@ -144,6 +145,10 @@
           "a": "Yes. We work under NDA and can build entirely inside your environment without data leaving it."
         },
         {
+          "q": "How do I join the membership?",
+          "a": "Click Join membership to email us and we'll reply with payment details. Membership runs for one year."
+        },
+        {
           "q": "Which languages do you work in?",
           "a": "Meetings and deliverables are available in English, Korean and Japanese."
         }
@@ -162,6 +167,22 @@
       "terms": "Terms",
       "copyright": "© 2026 VoyagerSS. All rights reserved."
     },
-    "language": "Language"
+    "language": "Language",
+    "subscribe": {
+      "eyebrow": "Membership",
+      "title": "AI Insights Membership",
+      "subtitle": "A year of field-tested AI architecture know-how, delivered to you.",
+      "planName": "Annual Membership",
+      "period": "year",
+      "priceNote": "About {monthly} per month · billed yearly",
+      "features": [
+        "Monthly AI architecture insight report",
+        "LLM, RAG and agent design templates & checklists",
+        "Quarterly live Q&A sessions",
+        "Priority booking for consultations"
+      ],
+      "button": "Join membership",
+      "mailSubject": "AI Insights Membership request"
+    }
   }
 }

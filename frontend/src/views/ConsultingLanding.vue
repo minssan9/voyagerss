@@ -125,7 +125,40 @@
       </div>
     </section>
 
-    <!-- 5. FAQ : 2D 플로팅 오브 -->
+    <!-- 5. Subscribe : 3D 멤버십 카드 -->
+    <section id="subscribe" class="cl-snap cl-section cl-sub" data-section>
+      <div class="cl-container cl-sub__grid">
+        <div class="cl-sub__copy">
+          <p class="cl-eyebrow cl-reveal" style="--i: 0">{{ t('consulting.subscribe.eyebrow') }}</p>
+          <h2 class="cl-section__title cl-sub__title cl-reveal" style="--i: 1">{{ t('consulting.subscribe.title') }}</h2>
+          <p class="cl-section__subtitle cl-reveal" style="--i: 2">{{ t('consulting.subscribe.subtitle') }}</p>
+          <ul class="cl-sub__features">
+            <li v-for="(f, i) in subFeatures" :key="i" class="cl-reveal cl-reveal--left" :style="{ '--i': 3 + i }">
+              <q-icon name="check_circle" size="20px" /> {{ f }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="cl-sub__stage cl-reveal cl-reveal--3d" style="--i: 2">
+          <article class="cl-member cl-tilt" @pointermove="onTilt" @pointerleave="onTiltLeave">
+            <span class="cl-member__shine" />
+            <div class="cl-member__top">
+              <span class="cl-member__brand">VoyagerSS<span class="cl-nav__brand-dot">.</span>AI</span>
+              <span class="cl-member__chip" />
+            </div>
+            <p class="cl-member__plan">{{ t('consulting.subscribe.planName') }}</p>
+            <p class="cl-member__price">
+              <span class="cl-member__amount">{{ subPrice }}</span>
+              <span class="cl-member__period">/ {{ t('consulting.subscribe.period') }}</span>
+            </p>
+            <p class="cl-member__note">{{ t('consulting.subscribe.priceNote', { monthly: subMonthly }) }}</p>
+            <a v-if="subscribeHref" :href="subscribeHref" class="cl-btn cl-btn--light cl-member__cta">{{ t('consulting.subscribe.button') }}</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. FAQ : 2D 플로팅 오브 -->
     <section id="faq" class="cl-snap cl-section cl-section--alt cl-faq-section" data-section>
       <span class="cl-orb cl-orb--a" aria-hidden="true" />
       <span class="cl-orb cl-orb--b" aria-hidden="true" />
@@ -140,7 +173,7 @@
       </div>
     </section>
 
-    <!-- 6. CTA + Footer : 3D 자이로 링 -->
+    <!-- 7. CTA + Footer : 3D 자이로 링 -->
     <section id="contact" class="cl-snap cl-cta" data-section>
       <div class="cl-gyro" aria-hidden="true">
         <span class="cl-gyro__ring cl-gyro__ring--1" />
@@ -190,9 +223,12 @@ interface Faq { q: string; a: string }
 
 // DB(workschd.system_config, category='frontend')에서 관리 — 비어 있으면 이메일 CTA 숨김
 const CONTACT_EMAIL_KEY = 'CONSULTING_CONTACT_EMAIL'
+// 연간 구독 가격(USD) — DB 값이 없거나 잘못되면 기본값 사용
+const SUB_PRICE_KEY = 'CONSULTING_SUBSCRIPTION_PRICE_USD'
+const DEFAULT_SUB_PRICE_USD = 20
 const FEATURED_PLAN = 1
-const SECTION_IDS = ['top', 'services', 'process', 'engagement', 'faq', 'contact'] as const
-const NAV_IDS = ['services', 'process', 'engagement', 'faq'] as const
+const SECTION_IDS = ['top', 'services', 'process', 'engagement', 'subscribe', 'faq', 'contact'] as const
+const NAV_IDS = ['services', 'process', 'engagement', 'subscribe', 'faq'] as const
 const SNAP_ROOT_CLASS = 'cl-snap-root'
 
 // 언어명은 각 언어의 자국어 표기로 고정 (현재 언어와 무관)
@@ -227,6 +263,21 @@ const contactEmail = computed(() => appConfig.get(CONTACT_EMAIL_KEY).trim())
 const mailtoHref = computed(() =>
   contactEmail.value
     ? `mailto:${contactEmail.value}?subject=${encodeURIComponent(t('consulting.cta.mailSubject'))}`
+    : ''
+)
+
+const subFeatures = computed(() => resolve<string>('consulting.subscribe.features'))
+const subPriceUsd = computed(() => {
+  const v = Number(appConfig.get(SUB_PRICE_KEY, String(DEFAULT_SUB_PRICE_USD)))
+  return Number.isFinite(v) && v > 0 ? v : DEFAULT_SUB_PRICE_USD
+})
+const formatUsd = (v: number, digits = 0) =>
+  new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v)
+const subPrice = computed(() => formatUsd(subPriceUsd.value, Number.isInteger(subPriceUsd.value) ? 0 : 2))
+const subMonthly = computed(() => formatUsd(subPriceUsd.value / 12, 2))
+const subscribeHref = computed(() =>
+  contactEmail.value
+    ? `mailto:${contactEmail.value}?subject=${encodeURIComponent(`${t('consulting.subscribe.mailSubject')} (${subPrice.value} / ${t('consulting.subscribe.period')})`)}`
     : ''
 )
 

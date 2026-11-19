@@ -28,6 +28,13 @@ VALUES
  'AI 컨설팅 랜딩 상담 문의 수신 이메일',
  'frontend', 'sql-seed', NOW(), NOW()),
 
+-- AI 컨설팅 랜딩 연간 멤버십 가격 (USD)
+('CONSULTING_SUBSCRIPTION_PRICE_USD',
+ '20',
+ 0,
+ 'AI 컨설팅 랜딩 연간 멤버십 가격(USD)',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
 -- Gemini AI (sensitive — browser-side key; consider server-side proxy instead)
 ('VITE_GEMINI_API_KEY',
  'AIzaSyCf7H4NgUhScGv7V6VThD5MXbZU5goVH10',

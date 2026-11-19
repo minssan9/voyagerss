@@ -10,7 +10,8 @@
       "engagement": "협업 모델",
       "faq": "FAQ",
       "contact": "상담 신청",
-      "platform": "플랫폼"
+      "platform": "플랫폼",
+      "subscribe": "구독"
     },
     "hero": {
       "eyebrow": "AI Architecture & Advisory",
@@ -144,6 +145,10 @@
           "a": "NDA 체결 후 진행하며, 데이터 반출 없이 고객 환경 안에서 구축하는 방식도 지원합니다."
         },
         {
+          "q": "멤버십은 어떻게 신청하나요?",
+          "a": "멤버십 신청 버튼으로 메일을 보내주시면 결제 안내를 회신드립니다. 1년 단위로 이용할 수 있습니다."
+        },
+        {
           "q": "어떤 언어로 진행되나요?",
           "a": "한국어, 영어, 일본어로 미팅과 문서 작성이 가능합니다."
         }
@@ -162,6 +167,22 @@
       "terms": "이용약관",
       "copyright": "© 2026 VoyagerSS. All rights reserved."
     },
-    "language": "언어"
+    "language": "언어",
+    "subscribe": {
+      "eyebrow": "Membership",
+      "title": "AI 인사이트 멤버십",
+      "subtitle": "컨설팅 현장의 설계 노하우를 1년 동안 꾸준히 받아보세요.",
+      "planName": "Annual Membership",
+      "period": "년",
+      "priceNote": "월 {monthly} 수준 · 연 1회 결제",
+      "features": [
+        "월간 AI 아키텍처 인사이트 리포트",
+        "LLM · RAG · Agent 설계 템플릿과 체크리스트",
+        "분기별 온라인 Q&A 세션",
+        "컨설팅 상담 우선 예약"
+      ],
+      "button": "멤버십 신청",
+      "mailSubject": "AI 인사이트 멤버십 신청"
+    }
   }
 }

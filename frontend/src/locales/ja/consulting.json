@@ -10,7 +10,8 @@
       "engagement": "支援形態",
       "faq": "FAQ",
       "contact": "相談する",
-      "platform": "プラットフォーム"
+      "platform": "プラットフォーム",
+      "subscribe": "メンバーシップ"
     },
     "hero": {
       "eyebrow": "AI Architecture & Advisory",
@@ -144,6 +145,10 @@
           "a": "NDAを締結のうえ対応します。データを外部に出さず、お客様の環境内で構築する方法にも対応しています。"
         },
         {
+          "q": "メンバーシップはどのように申し込めますか？",
+          "a": "「メンバーシップに申し込む」からメールをお送りいただくと、お支払い方法をご案内します。1年単位でご利用いただけます。"
+        },
+        {
           "q": "対応言語は何ですか？",
           "a": "日本語、英語、韓国語で打ち合わせと資料作成に対応しています。"
         }
@@ -162,6 +167,22 @@
       "terms": "利用規約",
       "copyright": "© 2026 VoyagerSS. All rights reserved."
     },
-    "language": "言語"
+    "language": "言語",
+    "subscribe": {
+      "eyebrow": "Membership",
+      "title": "AIインサイト・メンバーシップ",
+      "subtitle": "コンサルティング現場の設計ノウハウを、1年間継続してお届けします。",
+      "planName": "Annual Membership",
+      "period": "年",
+      "priceNote": "月あたり約{monthly} · 年1回払い",
+      "features": [
+        "月刊 AIアーキテクチャ・インサイトレポート",
+        "LLM・RAG・エージェント設計テンプレートとチェックリスト",
+        "四半期ごとのオンラインQ&Aセッション",
+        "コンサルティング相談の優先予約"
+      ],
+      "button": "メンバーシップに申し込む",
+      "mailSubject": "AIインサイト・メンバーシップ申込"
+    }
   }
 }

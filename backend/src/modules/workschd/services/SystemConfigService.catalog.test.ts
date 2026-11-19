@@ -14,8 +14,11 @@ describe('SystemConfigService catalog', () => {
   });
 
   it('exposes CONSULTING_CONTACT_EMAIL as a non-secret frontend key', () => {
-    const item = svc.getCatalog(['frontend']).find((i) => i.key === 'CONSULTING_CONTACT_EMAIL');
-    expect(item).toBeDefined();
-    expect(item?.isSecret).toBe(false);
+    const items = svc.getCatalog(['frontend']);
+    for (const key of ['CONSULTING_CONTACT_EMAIL', 'CONSULTING_SUBSCRIPTION_PRICE_USD']) {
+      const item = items.find((i) => i.key === key);
+      expect(item).toBeDefined();
+      expect(item?.isSecret).toBe(false);
+    }
   });
 });
