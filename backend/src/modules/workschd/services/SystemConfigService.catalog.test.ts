@@ -15,7 +15,7 @@ describe('SystemConfigService catalog', () => {
 
   it('exposes CONSULTING_CONTACT_EMAIL as a non-secret frontend key', () => {
     const items = svc.getCatalog(['frontend']);
-    for (const key of ['CONSULTING_CONTACT_EMAIL', 'CONSULTING_SUBSCRIPTION_PRICE_USD']) {
+    for (const key of ['CONSULTING_CONTACT_EMAIL', 'CONSULTING_SUBSCRIPTION_PRICE_USD', 'CONSULTING_HOURLY_RATE_USD', 'COMPANY_NAME_EN', 'COMPANY_BUSINESS_REG_NO']) {
       const item = items.find((i) => i.key === key);
       expect(item).toBeDefined();
       expect(item?.isSecret).toBe(false);

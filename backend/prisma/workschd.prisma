@@ -298,3 +298,40 @@ model Feedback {
   @@index([status], map: "idx_feedback_status")
   @@map("feedback")
 }
+
+/// AI 컨설팅 랜딩 — 기업/시스템 분석용 문서 제출 (db/migration/V6)
+model ConsultingSubmission {
+  id          Int      @id @default(autoincrement())
+  /// COMPANY=기업 분석, SYSTEM=시스템 분석
+  type        String   @db.VarChar(20)
+  companyName String   @map("company_name") @db.VarChar(200)
+  contactName String   @map("contact_name") @db.VarChar(100)
+  email       String   @db.VarChar(255)
+  phone       String?  @db.VarChar(50)
+  message     String?  @db.Text
+  locale      String?  @db.VarChar(10)
+  /// RECEIVED / REVIEWING / DONE
+  status      String   @default("RECEIVED") @db.VarChar(20)
+  ipAddress   String?  @map("ip_address") @db.VarChar(64)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  files       ConsultingSubmissionFile[]
+
+  @@index([createdAt], map: "idx_consulting_submission_created")
+  @@index([status], map: "idx_consulting_submission_status")
+  @@map("consulting_submission")
+}
+
+model ConsultingSubmissionFile {
+  id           Int                  @id @default(autoincrement())
+  submissionId Int                  @map("submission_id")
+  fileName     String               @map("file_name") @db.VarChar(255)
+  fileMime     String               @map("file_mime") @db.VarChar(150)
+  fileSize     Int                  @map("file_size")
+  fileData     Bytes                @map("file_data")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  submission   ConsultingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade, map: "fk_consulting_submission_file_submission")
+
+  @@index([submissionId], map: "idx_consulting_submission_file_submission")
+  @@map("consulting_submission_file")
+}

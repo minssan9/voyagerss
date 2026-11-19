@@ -35,6 +35,43 @@ VALUES
  'AI 컨설팅 랜딩 연간 멤버십 가격(USD)',
  'frontend', 'sql-seed', NOW(), NOW()),
 
+-- AI 컨설팅 시간당 요금 / 푸터 사업자 정보(영문)
+('CONSULTING_HOURLY_RATE_USD',
+ '40',
+ 0,
+ 'AI 컨설팅 시간당 요금(USD)',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
+('COMPANY_NAME_EN',
+ 'VoyagerSS',
+ 0,
+ '푸터 사업자 정보(영문) 상호',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
+('COMPANY_CEO_EN',
+ '',
+ 0,
+ '푸터 사업자 정보(영문) 대표자',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
+('COMPANY_BUSINESS_REG_NO',
+ '',
+ 0,
+ '푸터 사업자등록번호',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
+('COMPANY_ADDRESS_EN',
+ '',
+ 0,
+ '푸터 사업자 정보(영문) 주소',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
+('COMPANY_PHONE',
+ '',
+ 0,
+ '푸터 대표 전화',
+ 'frontend', 'sql-seed', NOW(), NOW()),
+
 -- Gemini AI (sensitive — browser-side key; consider server-side proxy instead)
 ('VITE_GEMINI_API_KEY',
  'AIzaSyCf7H4NgUhScGv7V6VThD5MXbZU5goVH10',

@@ -36,6 +36,8 @@ export function useSectionWheel(root: Ref<HTMLElement | null>, selector: string,
 
   function onWheel(e: WheelEvent) {
     if (!mql?.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
+    // 메뉴 패널 등 자체 스크롤 영역은 제외
+    if ((e.target as Element | null)?.closest?.('[data-wheel-ignore]')) return
 
     const now = performance.now()
     const isNewGesture = now - lastWheelAt > gapMs

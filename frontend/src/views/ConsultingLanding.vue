@@ -1,27 +1,6 @@
 <template>
   <div ref="pageRef" class="cl-page">
-    <!-- Nav -->
-    <header class="cl-nav" :class="{ 'cl-nav--scrolled': activeIndex > 0 }">
-      <div class="cl-nav__inner">
-        <a href="#top" class="cl-nav__brand" @click.prevent="goTo('top')">VoyagerSS<span class="cl-nav__brand-dot">.</span>AI</a>
-        <nav class="cl-nav__links">
-          <a v-for="id in NAV_IDS" :key="id" :href="`#${id}`" :class="{ 'is-active': SECTION_IDS[activeIndex] === id }" @click.prevent="goTo(id)">
-            {{ t(`consulting.nav.${id}`) }}
-          </a>
-        </nav>
-        <div class="cl-nav__actions">
-          <select
-            class="cl-lang"
-            :value="locale"
-            :aria-label="t('consulting.language')"
-            @change="onLocaleChange(($event.target as HTMLSelectElement).value)"
-          >
-            <option v-for="opt in LOCALE_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-          </select>
-          <a v-if="mailtoHref" :href="mailtoHref" class="cl-btn cl-btn--primary cl-btn--sm">{{ t('consulting.nav.contact') }}</a>
-        </div>
-      </div>
-    </header>
+    <ConsultingHeader :active-id="SECTION_IDS[activeIndex]" :scrolled="activeIndex > 0" />
 
     <!-- 섹션 인디케이터 -->
     <nav class="cl-dots" aria-label="sections">
@@ -103,6 +82,11 @@
         <header class="cl-section__header">
           <h2 class="cl-section__title cl-reveal" style="--i: 0">{{ t('consulting.engagement.title') }}</h2>
           <p class="cl-section__subtitle cl-reveal" style="--i: 1">{{ t('consulting.engagement.subtitle') }}</p>
+          <div class="cl-rate cl-reveal" style="--i: 2">
+            <span class="cl-rate__label">{{ t('consulting.engagement.rateLabel') }}</span>
+            <span class="cl-rate__price">{{ hourlyRate }}<small> / {{ t('consulting.engagement.rateUnit') }}</small></span>
+          </div>
+          <p class="cl-rate__note cl-reveal" style="--i: 3">{{ t('consulting.engagement.rateNote') }}</p>
         </header>
         <div class="cl-plans">
           <article
@@ -189,20 +173,7 @@
           <p class="cl-cta__email cl-reveal" style="--i: 3">{{ contactEmail }}</p>
         </template>
       </div>
-      <footer class="cl-footer">
-        <div class="cl-footer__inner">
-          <div>
-            <strong>VoyagerSS</strong>
-            <span class="cl-footer__tagline">{{ t('consulting.footer.tagline') }}</span>
-          </div>
-          <nav class="cl-footer__links">
-            <router-link to="/platform">{{ t('consulting.footer.platform') }}</router-link>
-            <router-link to="/privacy-policy">{{ t('consulting.footer.privacy') }}</router-link>
-            <router-link to="/terms">{{ t('consulting.footer.terms') }}</router-link>
-          </nav>
-          <p class="cl-footer__copy">{{ t('consulting.footer.copyright') }}</p>
-        </div>
-      </footer>
+      <ConsultingFooter />
     </section>
   </div>
 </template>
@@ -210,9 +181,12 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { loadLanaguageAsync } from '@/locales/i18n'
+import { useRoute } from 'vue-router'
 import { useAppConfigStore } from '@/stores/common/store_app_config'
+import { resolveMessages } from '@/utils/i18n-resolve'
 import NeuralGlobe from '@/components/landing/NeuralGlobe.vue'
+import ConsultingHeader from '@/components/landing/ConsultingHeader.vue'
+import ConsultingFooter from '@/components/landing/ConsultingFooter.vue'
 import { useSectionWheel } from '@/composables/useSectionWheel'
 
 interface Stat { value: string; label: string }
@@ -226,31 +200,17 @@ const CONTACT_EMAIL_KEY = 'CONSULTING_CONTACT_EMAIL'
 // 연간 구독 가격(USD) — DB 값이 없거나 잘못되면 기본값 사용
 const SUB_PRICE_KEY = 'CONSULTING_SUBSCRIPTION_PRICE_USD'
 const DEFAULT_SUB_PRICE_USD = 20
+// 컨설팅 시간당 요금(USD)
+const HOURLY_RATE_KEY = 'CONSULTING_HOURLY_RATE_USD'
+const DEFAULT_HOURLY_RATE_USD = 40
 const FEATURED_PLAN = 1
 const SECTION_IDS = ['top', 'services', 'process', 'engagement', 'subscribe', 'faq', 'contact'] as const
-const NAV_IDS = ['services', 'process', 'engagement', 'subscribe', 'faq'] as const
 const SNAP_ROOT_CLASS = 'cl-snap-root'
-
-// 언어명은 각 언어의 자국어 표기로 고정 (현재 언어와 무관)
-const LOCALE_OPTIONS = [
-  { value: 'ko', label: '한국어' },
-  { value: 'en', label: 'English' },
-  { value: 'ja', label: '日本語' }
-] as const
 
 const { t, tm, rt, locale } = useI18n()
 
-/** tm() 결과(메시지 AST)를 일반 문자열 객체로 변환 */
-function resolve<T>(key: string): T[] {
-  const toPlain = (node: unknown): unknown => {
-    if (Array.isArray(node)) return node.map(toPlain)
-    if (node && typeof node === 'object' && !('type' in (node as object)) && !('b' in (node as object))) {
-      return Object.fromEntries(Object.entries(node as object).map(([k, v]) => [k, toPlain(v)]))
-    }
-    return rt(node as Parameters<typeof rt>[0])
-  }
-  return toPlain(tm(key)) as T[]
-}
+const route = useRoute()
+const resolve = <T>(key: string) => resolveMessages<T[]>(tm, rt, key)
 
 const stats = computed(() => resolve<Stat>('consulting.stats'))
 const services = computed(() => resolve<Service>('consulting.services.items'))
@@ -266,24 +226,24 @@ const mailtoHref = computed(() =>
     : ''
 )
 
+const priceOf = (key: string, fallback: number) => {
+  const v = Number(appConfig.get(key, String(fallback)))
+  return Number.isFinite(v) && v > 0 ? v : fallback
+}
+const hourlyRateUsd = computed(() => priceOf(HOURLY_RATE_KEY, DEFAULT_HOURLY_RATE_USD))
+
 const subFeatures = computed(() => resolve<string>('consulting.subscribe.features'))
-const subPriceUsd = computed(() => {
-  const v = Number(appConfig.get(SUB_PRICE_KEY, String(DEFAULT_SUB_PRICE_USD)))
-  return Number.isFinite(v) && v > 0 ? v : DEFAULT_SUB_PRICE_USD
-})
+const subPriceUsd = computed(() => priceOf(SUB_PRICE_KEY, DEFAULT_SUB_PRICE_USD))
 const formatUsd = (v: number, digits = 0) =>
   new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'USD', currencyDisplay: 'narrowSymbol', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v)
 const subPrice = computed(() => formatUsd(subPriceUsd.value, Number.isInteger(subPriceUsd.value) ? 0 : 2))
+const hourlyRate = computed(() => formatUsd(hourlyRateUsd.value, Number.isInteger(hourlyRateUsd.value) ? 0 : 2))
 const subMonthly = computed(() => formatUsd(subPriceUsd.value / 12, 2))
 const subscribeHref = computed(() =>
   contactEmail.value
     ? `mailto:${contactEmail.value}?subject=${encodeURIComponent(`${t('consulting.subscribe.mailSubject')} (${subPrice.value} / ${t('consulting.subscribe.period')})`)}`
     : ''
 )
-
-function onLocaleChange(next: string) {
-  void loadLanaguageAsync(next, true)
-}
 
 // ─── 섹션 스냅 / 활성화 ─────────────────────────────
 const pageRef = ref<HTMLElement | null>(null)
@@ -293,8 +253,8 @@ useSectionWheel(pageRef, '[data-section]')
 let revealObserver: IntersectionObserver | null = null
 let activeObserver: IntersectionObserver | null = null
 
-function goTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function goTo(id: string, behavior: ScrollBehavior = 'smooth') {
+  document.getElementById(id)?.scrollIntoView({ behavior, block: 'start' })
 }
 
 // ─── 3D 틸트 카드 ───────────────────────────────────
@@ -341,6 +301,10 @@ onMounted(() => {
     revealObserver?.observe(s)
     activeObserver?.observe(s)
   })
+
+  // 다른 페이지에서 `/#services` 등으로 들어온 경우 해당 섹션으로 이동
+  const hashId = route.hash.replace('#', '')
+  if (hashId) requestAnimationFrame(() => goTo(hashId, 'instant'))
 })
 
 onUnmounted(() => {

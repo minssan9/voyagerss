@@ -93,7 +93,7 @@ describe('schema migrator', () => {
 
   it('loads the committed migration files in version order', () => {
     const loaded = loadMigrationScripts();
-    expect(loaded.map((item) => item.version)).toEqual([1, 2, 3]);
+    expect(loaded.map((item) => item.version)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(loaded[0].script).toBe('V1__baseline.sql');
     expect(loaded[1].script).toBe('V2__drop_investand_tables.sql');
     expect(loaded[2].script).toBe('V3__identity_rbac_team_join.sql');

@@ -8,6 +8,8 @@ import visionRoutes from '@/modules/vision/router/routes';
 const commonRoutes: RouteRecordRaw[] = [
     // 메인: AI 구축 설계 컨설팅 랜딩 (공개, 브라우저 언어 기반 ko/en/ja)
     { path: '/', name: 'home', component: () => import('@/views/ConsultingLanding.vue'), meta: { icon: 'home', titleKey: 'consulting.meta.title', descriptionKey: 'consulting.meta.description', public: true, layout: 'blank', hidden: true } },
+    // 컨설팅: 필요 문서 안내 + 기업/시스템 분석 문서 제출 (공개)
+    { path: '/consulting/documents', name: 'ConsultingDocuments', component: () => import('@/views/ConsultingDocuments.vue'), meta: { icon: 'upload_file', titleKey: 'consulting.documents.meta.title', descriptionKey: 'consulting.documents.meta.description', public: true, layout: 'blank', hidden: true } },
     // 기존 통합 플랫폼 랜딩 (모듈 진입)
     { path: '/platform', name: 'platform', component: () => import('@/views/Landing.vue'), meta: { icon: 'apps', titleKey: 'routes.platform', integrated: true } },
     { path: '/about', name: 'about', component: () => import('@/modules/workschd/views/main/About.vue'), meta: { icon: 'info', titleKey: 'routes.about' } },
