@@ -299,7 +299,7 @@ model Feedback {
   @@map("feedback")
 }
 
-/// AI 컨설팅 랜딩 — 기업/시스템 분석용 문서 제출 (db/migration/V6)
+/// AI 컨설팅 랜딩 — 기업/시스템 분석용 문서 제출 (db/migration/V7)
 model ConsultingSubmission {
   id          Int      @id @default(autoincrement())
   /// COMPANY=기업 분석, SYSTEM=시스템 분석
