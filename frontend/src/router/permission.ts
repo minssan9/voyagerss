@@ -120,8 +120,32 @@ export function setupRouterGuards(router: Router) {
     LoadingService.done()
   })
 
-  router.onError((e) => {
+  router.onError((e, to) => {
     LoadingService.done()
+    // 배포 후 옛 번들이 이미 삭제된 화면 청크를 요청하면 이동이 조용히 실패한다 → 해당 경로로 전체 새로고침
+    if (isChunkLoadError(e) && reloadOnce(to.fullPath)) return
     console.error('Navigation guard error:', e)
   })
+}
+
+const CHUNK_ERROR_PATTERN =
+  /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|is not a valid JavaScript MIME type|Unable to preload CSS/i
+const CHUNK_RELOAD_KEY = 'voy-chunk-reload'
+
+export function isChunkLoadError(e: unknown): boolean {
+  const message = e instanceof Error ? e.message : String(e ?? '')
+  return CHUNK_ERROR_PATTERN.test(message)
+}
+
+/** 같은 경로로 연속 새로고침되는 무한 루프 방지 (10초 내 1회) */
+function reloadOnce(fullPath: string): boolean {
+  try {
+    const last = JSON.parse(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 'null') as { path: string; at: number } | null
+    if (last && last.path === fullPath && Date.now() - last.at < 10_000) return false
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, JSON.stringify({ path: fullPath, at: Date.now() }))
+  } catch {
+    // storage 불가 시에도 1회 새로고침은 시도
+  }
+  window.location.assign(fullPath)
+  return true
 }
