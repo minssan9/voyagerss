@@ -11,7 +11,15 @@
       "faq": "FAQ",
       "contact": "상담 신청",
       "platform": "플랫폼",
-      "subscribe": "구독"
+      "subscribe": "구독",
+      "home": "홈",
+      "about": "소개",
+      "documents": "문서 제출",
+      "login": "로그인",
+      "myPlatform": "내 플랫폼",
+      "menu": "메뉴",
+      "pricing": "요금",
+      "legal": "약관"
     },
     "hero": {
       "eyebrow": "AI Architecture & Advisory",
@@ -127,7 +135,10 @@
             "팀 내재화 교육"
           ]
         }
-      ]
+      ],
+      "rateLabel": "컨설팅 비용",
+      "rateUnit": "시간",
+      "rateNote": "모든 협업 모델은 투입 시간 × 시간당 요금으로 산정하며, 착수 전 예상 시간과 견적을 먼저 안내드립니다."
     },
     "faq": {
       "title": "자주 묻는 질문",
@@ -147,6 +158,10 @@
         {
           "q": "멤버십은 어떻게 신청하나요?",
           "a": "멤버십 신청 버튼으로 메일을 보내주시면 결제 안내를 회신드립니다. 1년 단위로 이용할 수 있습니다."
+        },
+        {
+          "q": "컨설팅 비용은 어떻게 산정되나요?",
+          "a": "투입 시간에 시간당 요금을 곱해 산정합니다. 착수 전에 범위를 확인하고 예상 시간과 견적을 먼저 안내드립니다."
         },
         {
           "q": "어떤 언어로 진행되나요?",
@@ -183,6 +198,125 @@
       ],
       "button": "멤버십 신청",
       "mailSubject": "AI 인사이트 멤버십 신청"
+    },
+    "documents": {
+      "meta": {
+        "title": "필요 문서 안내 · 제출",
+        "description": "기업 분석과 시스템 분석에 필요한 문서를 확인하고 안전하게 제출하세요."
+      },
+      "eyebrow": "Documents",
+      "title": "필요 문서 안내",
+      "subtitle": "정확한 진단을 위해 아래 문서를 준비해 주세요. 없는 문서는 건너뛰어도 괜찮습니다.",
+      "required": "필수",
+      "optional": "선택",
+      "company": {
+        "title": "기업 분석",
+        "desc": "비즈니스 목표와 업무 흐름을 이해하고 AI 적용 우선순위를 정하는 데 사용합니다.",
+        "items": [
+          {
+            "name": "회사 소개서",
+            "note": "사업 영역, 주요 고객, 조직 규모",
+            "level": "required"
+          },
+          {
+            "name": "AI 도입 목표 · 과제 목록",
+            "note": "해결하고 싶은 문제와 기대 효과",
+            "level": "required"
+          },
+          {
+            "name": "조직도 · 업무 프로세스",
+            "note": "부서별 역할, 주요 업무 흐름도",
+            "level": "optional"
+          },
+          {
+            "name": "사업계획서 · KPI",
+            "note": "최근 1년 목표와 성과 지표",
+            "level": "optional"
+          },
+          {
+            "name": "보유 데이터 현황",
+            "note": "데이터 종류, 위치, 규모, 관리 주체",
+            "level": "optional"
+          }
+        ]
+      },
+      "system": {
+        "title": "시스템 분석",
+        "desc": "현재 시스템 구조를 파악해 AI 아키텍처와 연동 방식을 설계하는 데 사용합니다.",
+        "items": [
+          {
+            "name": "시스템 아키텍처 다이어그램",
+            "note": "서비스 구성, 외부 연동 관계",
+            "level": "required"
+          },
+          {
+            "name": "인프라 · 클라우드 구성",
+            "note": "서버/클라우드, 네트워크, 배포 방식",
+            "level": "required"
+          },
+          {
+            "name": "데이터베이스 스키마 · ERD",
+            "note": "주요 테이블과 관계",
+            "level": "optional"
+          },
+          {
+            "name": "API 명세서",
+            "note": "OpenAPI, 연동 규격 문서",
+            "level": "optional"
+          },
+          {
+            "name": "보안 · 개인정보 정책",
+            "note": "접근 권한, 데이터 보관 정책",
+            "level": "optional"
+          },
+          {
+            "name": "운영 지표 · 로그 샘플",
+            "note": "트래픽, 장애 이력 (비식별 처리)",
+            "level": "optional"
+          }
+        ]
+      },
+      "tips": [
+        "개인정보와 비밀번호, API 키 등 민감 정보는 가리거나 삭제한 뒤 제출해 주세요.",
+        "파일이 많으면 ZIP으로 묶어 올려 주세요.",
+        "제출한 문서는 NDA 기준으로 분석 목적으로만 사용합니다."
+      ],
+      "form": {
+        "title": "문서 제출",
+        "subtitle": "제출 후 1영업일 내에 담당자가 검토 결과와 다음 단계를 안내드립니다.",
+        "type": "분석 유형",
+        "companyName": "회사명",
+        "contactName": "담당자명",
+        "email": "이메일",
+        "phone": "연락처 (선택)",
+        "message": "요청 사항 (선택)",
+        "messagePlaceholder": "분석 범위, 일정, 궁금한 점을 적어 주세요.",
+        "files": "첨부 파일",
+        "drop": "파일을 끌어다 놓거나",
+        "browse": "파일 선택",
+        "limits": "최대 {count}개 · 파일당 {file}MB · 전체 {total}MB",
+        "allowed": "허용 형식: {ext}",
+        "remove": "삭제",
+        "consent": "문서 검토와 회신을 위한 개인정보(이름, 이메일, 연락처) 수집·이용에 동의합니다.",
+        "privacy": "개인정보처리방침",
+        "submit": "문서 제출하기",
+        "submitting": "업로드 중… {percent}%",
+        "success": "제출이 완료되었습니다",
+        "successDesc": "접수 번호 #{id} · 첨부 {count}개. 1영업일 내에 {email}로 회신드립니다.",
+        "again": "추가로 제출하기",
+        "errors": {
+          "required": "필수 항목을 입력해 주세요.",
+          "email": "올바른 이메일 주소를 입력해 주세요.",
+          "consent": "개인정보 수집·이용에 동의해 주세요.",
+          "noFiles": "첨부 파일을 1개 이상 선택해 주세요.",
+          "tooManyFiles": "첨부 파일은 최대 {count}개까지 가능합니다.",
+          "fileType": "허용되지 않는 파일 형식입니다: {name}",
+          "fileSize": "파일당 최대 {mb}MB입니다: {name}",
+          "totalSize": "전체 첨부 용량은 최대 {mb}MB입니다.",
+          "server": "제출에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        }
+      },
+      "cta": "필요 문서 보기"
     }
   }
 }

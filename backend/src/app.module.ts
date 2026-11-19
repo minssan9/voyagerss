@@ -7,6 +7,7 @@ import { AviationModule } from './modules/aviation/aviation.module';
 import { RbacModule } from './modules/rbac/rbac.module';
 import { VisionModule } from './modules/vision/vision.module';
 import { IdentityModule } from './modules/identity/identity.module';
+import { ConsultingModule } from './modules/consulting/consulting.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { IdentityModule } from './modules/identity/identity.module';
     WorkschdModule,
     AviationModule,
     VisionModule,
+    ConsultingModule,
   ],
 })
 export class AppModule {}

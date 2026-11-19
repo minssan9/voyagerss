@@ -11,7 +11,15 @@
       "faq": "FAQ",
       "contact": "Book a call",
       "platform": "Platform",
-      "subscribe": "Membership"
+      "subscribe": "Membership",
+      "home": "Home",
+      "about": "About",
+      "documents": "Documents",
+      "login": "Log in",
+      "myPlatform": "My platform",
+      "menu": "Menu",
+      "pricing": "Pricing",
+      "legal": "Legal"
     },
     "hero": {
       "eyebrow": "AI Architecture & Advisory",
@@ -127,7 +135,10 @@
             "Team enablement"
           ]
         }
-      ]
+      ],
+      "rateLabel": "Consulting fee",
+      "rateUnit": "hour",
+      "rateNote": "Every engagement is billed as hours × hourly rate. We share an estimated scope and quote before work begins."
     },
     "faq": {
       "title": "Frequently asked questions",
@@ -147,6 +158,10 @@
         {
           "q": "How do I join the membership?",
           "a": "Click Join membership to email us and we'll reply with payment details. Membership runs for one year."
+        },
+        {
+          "q": "How is the consulting fee calculated?",
+          "a": "Fees are hours worked multiplied by the hourly rate. We confirm scope first and share estimated hours and a quote before starting."
         },
         {
           "q": "Which languages do you work in?",
@@ -183,6 +198,125 @@
       ],
       "button": "Join membership",
       "mailSubject": "AI Insights Membership request"
+    },
+    "documents": {
+      "meta": {
+        "title": "Required Documents",
+        "description": "See which documents we need for company and system analysis, and submit them securely."
+      },
+      "eyebrow": "Documents",
+      "title": "Required documents",
+      "subtitle": "Prepare the documents below for an accurate assessment. It's fine to skip anything you don't have.",
+      "required": "Required",
+      "optional": "Optional",
+      "company": {
+        "title": "Company analysis",
+        "desc": "Helps us understand your business goals and workflows to prioritize AI use cases.",
+        "items": [
+          {
+            "name": "Company profile",
+            "note": "Business areas, key customers, team size",
+            "level": "required"
+          },
+          {
+            "name": "AI goals & problem list",
+            "note": "Problems to solve and expected impact",
+            "level": "required"
+          },
+          {
+            "name": "Org chart & workflows",
+            "note": "Team roles and key process flows",
+            "level": "optional"
+          },
+          {
+            "name": "Business plan & KPIs",
+            "note": "Goals and metrics for the past year",
+            "level": "optional"
+          },
+          {
+            "name": "Data inventory",
+            "note": "Data types, location, volume, owners",
+            "level": "optional"
+          }
+        ]
+      },
+      "system": {
+        "title": "System analysis",
+        "desc": "Helps us map your current systems to design the AI architecture and integrations.",
+        "items": [
+          {
+            "name": "System architecture diagram",
+            "note": "Services and external integrations",
+            "level": "required"
+          },
+          {
+            "name": "Infrastructure & cloud setup",
+            "note": "Servers/cloud, network, deployment",
+            "level": "required"
+          },
+          {
+            "name": "Database schema / ERD",
+            "note": "Key tables and relationships",
+            "level": "optional"
+          },
+          {
+            "name": "API specification",
+            "note": "OpenAPI or integration specs",
+            "level": "optional"
+          },
+          {
+            "name": "Security & privacy policy",
+            "note": "Access control, data retention",
+            "level": "optional"
+          },
+          {
+            "name": "Ops metrics & log samples",
+            "note": "Traffic, incident history (anonymized)",
+            "level": "optional"
+          }
+        ]
+      },
+      "tips": [
+        "Remove or mask personal data, passwords and API keys before uploading.",
+        "If you have many files, bundle them into a ZIP.",
+        "Your documents are used only for this analysis, under NDA."
+      ],
+      "form": {
+        "title": "Submit documents",
+        "subtitle": "We'll review your submission and reply with next steps within one business day.",
+        "type": "Analysis type",
+        "companyName": "Company name",
+        "contactName": "Contact name",
+        "email": "Email",
+        "phone": "Phone (optional)",
+        "message": "Notes (optional)",
+        "messagePlaceholder": "Tell us about scope, timeline or questions.",
+        "files": "Attachments",
+        "drop": "Drag & drop files here, or",
+        "browse": "browse",
+        "limits": "Up to {count} files · {file}MB each · {total}MB total",
+        "allowed": "Allowed: {ext}",
+        "remove": "Remove",
+        "consent": "I agree to the collection and use of my personal information (name, email, phone) to review and respond to this submission.",
+        "privacy": "Privacy Policy",
+        "submit": "Submit documents",
+        "submitting": "Uploading… {percent}%",
+        "success": "Submission received",
+        "successDesc": "Reference #{id} · {count} file(s). We'll reply to {email} within one business day.",
+        "again": "Submit more",
+        "errors": {
+          "required": "Please fill in the required fields.",
+          "email": "Enter a valid email address.",
+          "consent": "Please agree to the privacy terms.",
+          "noFiles": "Attach at least one file.",
+          "tooManyFiles": "You can attach up to {count} files.",
+          "fileType": "File type not allowed: {name}",
+          "fileSize": "Each file can be up to {mb}MB: {name}",
+          "totalSize": "Total attachments can be up to {mb}MB.",
+          "server": "Submission failed. Please try again shortly."
+        }
+      },
+      "cta": "See required documents"
     }
   }
 }
