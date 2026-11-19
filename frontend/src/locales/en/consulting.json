@@ -58,7 +58,7 @@
           "text": "Connect AI safely to your ERP, CRM and internal data, with APIs, access control and audit logging built for production."
         },
         {
-          "icon": "monitoring",
+          "icon": "speed",
           "title": "LLMOps & Operations",
           "text": "Prompt and model versioning, monitoring, cost optimization and regression testing for reliable operations."
         },
