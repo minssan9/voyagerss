@@ -15,13 +15,12 @@ export class RbacSyncService implements OnModuleInit {
 
   constructor(private readonly rbac: RbacPrismaService) {}
 
-  async onModuleInit() {
-    try {
-      await this.sync();
-    } catch (err) {
+  onModuleInit() {
+    // Not awaited: hundreds of sequential queries must not block app.listen on a slow DB
+    this.sync().catch((err) => {
       // Non-fatal: RBAC DB might not be migrated yet in the environment
       this.logger.warn(`RBAC sync skipped: ${(err as Error).message}`);
-    }
+    });
   }
 
   async sync(): Promise<SyncResult> {
