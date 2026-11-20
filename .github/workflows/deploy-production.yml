@@ -9,6 +9,12 @@ permissions:
   contents: read
   packages: write
 
+# 연속 머지 시 두 배포가 Droplet에서 동시에 docker compose 를 실행하면
+# 컨테이너 이름 충돌로 둘 다 실패한다 → 한 번에 하나만 실행 (진행 중 배포는 끝까지, 대기 중인 오래된 배포는 최신으로 대체)
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 env:
   REGISTRY: ghcr.io
   BACKEND_IMAGE: voyagerss-backend
