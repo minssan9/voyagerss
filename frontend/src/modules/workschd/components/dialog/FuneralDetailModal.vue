@@ -151,10 +151,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import { useUserStore } from '@/stores/common/store_user';
 import { ScrapedFuneral } from '@/modules/workschd/api/api-scraper';
 import scraperApi from '@/modules/workschd/api/api-scraper';
 import taskApi from '@/modules/workschd/api/api-task';
+import apiTeamShop from '@/modules/workschd/api/api-team-shop';
 import AdminFuneralModal from './AdminFuneralModal.vue';
 
 interface Props {
@@ -169,6 +171,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const $q = useQuasar();
 const userStore = useUserStore();
 const showAdminModal = ref(false);
 const workerCount = ref(3);
@@ -198,6 +201,26 @@ async function createTask() {
   if (creatingTask.value) return;
   creatingTask.value = true;
   try {
+    const teamId = userStore.user.teamId ?? userStore.teams[0]?.id;
+    if (!teamId) throw new Error('No team to create the task under');
+
+    const shopsRes = await apiTeamShop.getShopsByTeamId(teamId);
+    const shops = Array.isArray(shopsRes.data) ? shopsRes.data : (shopsRes.data as any)?.content ?? [];
+    const home = (props.funeral.funeralHomeName || '').trim();
+    const shop =
+      shops.find((s: { name?: string }) => (s.name || '').trim() === home) ||
+      shops.find((s: { name?: string }) => {
+        const n = (s.name || '').trim();
+        return n && home && (n.includes(home) || home.includes(n));
+      });
+    if (!shop?.id) {
+      $q.notify({
+        type: 'negative',
+        message: `팀 매장에 "${home || '장례식장'}"과 이름이 맞는 매장이 없습니다`,
+      });
+      return;
+    }
+
     const now = new Date();
     const end = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
@@ -212,8 +235,8 @@ async function createTask() {
       startDateTime: now.toISOString(),
       endDateTime: end.toISOString(),
       status: 'OPEN',
-      teamId: userStore.user.teamId || 0,
-      shopId: null,
+      teamId,
+      shopId: shop.id,
       active: true
     } as any;
 
