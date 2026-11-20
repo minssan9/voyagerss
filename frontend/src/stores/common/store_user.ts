@@ -163,11 +163,11 @@ export const useUserStore = defineStore('user', {
     },
 
     async fetchTeams(): Promise<void> {
-      if (!this.user.accountId || !this.accessToken) return
+      if (!this.user.accountId || (!this.accessToken && !Cookies.get('accessToken'))) return
 
       try {
         const response = await apiAccount.getTeamsByAccountId(this.user.accountId)
-        this.teams = response.data
+        this.teams = response.data.content ?? response.data
       } catch (error) {
         console.error('Error fetching teams:', error)
         throw error
@@ -177,10 +177,8 @@ export const useUserStore = defineStore('user', {
     async fetchRbacPagePermissions(): Promise<void> {
       if (!this.user.accountId) return
       try {
-        const res = await apiRbac.getSubjectPermissions('workschd', String(this.user.accountId))
-        this.rbacPagePermissions = res.data.data
-          .filter((p: any) => p.type === 'PAGE')
-          .map((p: any) => p.code as string)
+        const res = await apiRbac.getMe()
+        this.rbacPagePermissions = res.data.data.pages.map((p) => p.code)
       } catch {
         // Non-fatal: RBAC DB might not be set up yet
         this.rbacPagePermissions = []
