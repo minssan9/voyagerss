@@ -19,7 +19,8 @@
     "language": {
       "label": "언어",
       "english": "영어",
-      "korean": "한국어"
+      "korean": "한국어",
+      "japanese": "일본어"
     },
     "settings": "설정",
     "loginAction": "로그인",

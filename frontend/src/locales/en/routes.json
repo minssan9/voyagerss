@@ -40,6 +40,7 @@
     "aiprProviders": "Git providers",
     "aiprRepos": "Repositories",
     "aiprRemoteIssues": "Remote issues",
-    "description": "Voyagerss — manage schedules, finance, aviation, and auto-PR in one platform."
+    "description": "Voyagerss — manage schedules, finance, aviation, and auto-PR in one platform.",
+    "platform": "Platform"
   }
 }

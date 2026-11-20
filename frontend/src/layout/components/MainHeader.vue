@@ -14,7 +14,7 @@
       </q-btn>
 
       <!-- Brand -->
-      <router-link :to="userStore.isWorker ? { name: 'TaskListMobile' } : { name: 'home' }" class="app-header__brand">
+      <router-link :to="userStore.isWorker ? { name: 'TaskListMobile' } : { name: 'platform' }" class="app-header__brand">
         Voyagerss
       </router-link>
 

@@ -78,6 +78,14 @@ cp .env.example .env
 
 `object` 분석은 `bash deploy/download-models.sh` 이후입니다. 기본 테스트는 `motion,face,brightness` 입니다.
 
+### ESP32 팬/틸트 카메라 (`VISION_CAM_SOURCE=browser`)
+
+ESP32 카메라 보드가 같은 `POST /frame` 으로 JPEG 를 보내고, 응답의 `track_id` 로 서보를 돌려 대상을 화면 중앙에 유지합니다. 펌웨어·부품·배선은 [`physical/`](../physical/README.md).
+
+```bash
+VISION_CAM_SOURCE=browser python -m vision_cam --analyzers yolo --kinematics --no-display --stream 8080
+```
+
 ## 2. 라즈베리파이로 이관
 
 권장: Raspberry Pi 4/5, Raspberry Pi OS Bookworm 64-bit.

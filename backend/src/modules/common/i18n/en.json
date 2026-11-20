@@ -89,5 +89,21 @@
     "invalidQuery": "Query parameters are invalid.",
     "frameTooLarge": "Video frame is too large.",
     "noFrame": "No video frame received."
+  },
+  "consulting": {
+    "submission": {
+      "invalidType": "Submission type must be COMPANY or SYSTEM",
+      "required": "Company name and contact name are required",
+      "invalidEmail": "Enter a valid email address",
+      "consent": "You must agree to the collection and use of personal information",
+      "noFiles": "Attach at least one file",
+      "tooManyFiles": "You can attach up to {max} files",
+      "fileType": "File type not allowed: {ext}",
+      "fileSize": "Each file can be up to {mb}MB",
+      "totalSize": "Total attachment size can be up to {mb}MB",
+      "tooMany": "Too many submissions. Please try again later",
+      "invalidStatus": "Invalid status: {status}",
+      "fileNotFound": "Attachment not found"
+    }
   }
 }

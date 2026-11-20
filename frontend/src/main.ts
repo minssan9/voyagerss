@@ -19,6 +19,7 @@ const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches 
 const initialDark = savedDark !== null ? savedDark === 'true' : prefersDark;
 
 import { useAppConfigStore } from '@/stores/common/store_app_config'
+import { registerSW } from 'virtual:pwa-register'
 import { setActivePinia } from 'pinia'
 import { bootDevSession } from '@/boot/dev-auto-login'
 
@@ -27,6 +28,9 @@ declare global {
     Kakao: any;
   }
 }
+
+// 새 버전 서비스워커가 활성화되면 페이지를 새로고침해 옛 번들이 남지 않게 한다 (registerType: autoUpdate)
+registerSW({ immediate: true })
 
 async function bootstrap() {
   const app = createApp(App)

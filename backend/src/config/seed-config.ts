@@ -59,6 +59,15 @@ export const SEED_KEYS: SeedEntry[] = [
   { key: 'CORS_ENABLED',           category: 'app',      description: 'CORS 활성화 (true/false)' },
   { key: 'HELMET_ENABLED',         category: 'app',      description: 'Helmet 활성화 (true/false)' },
   { key: 'BASE_PATH',              category: 'app',      description: '로컬 파일 저장 기본 경로 (aviation 등)' },
+  // Frontend public (GET /api/workschd/config/public 로 비인증 노출 — 민감정보 금지)
+  { key: 'CONSULTING_CONTACT_EMAIL', category: 'frontend', description: 'AI 컨설팅 랜딩(/) 상담 문의 수신 이메일 (비우면 이메일 CTA 숨김)' },
+  { key: 'CONSULTING_HOURLY_RATE_USD', category: 'frontend', description: 'AI 컨설팅 시간당 요금(USD, 숫자). 비우면 40' },
+  { key: 'COMPANY_NAME_EN',          category: 'frontend', description: '푸터 사업자 정보(영문) — 상호. 비우면 VoyagerSS' },
+  { key: 'COMPANY_CEO_EN',           category: 'frontend', description: '푸터 사업자 정보(영문) — 대표자' },
+  { key: 'COMPANY_BUSINESS_REG_NO',  category: 'frontend', description: '푸터 사업자 정보 — 사업자등록번호' },
+  { key: 'COMPANY_ADDRESS_EN',       category: 'frontend', description: '푸터 사업자 정보(영문) — 주소' },
+  { key: 'COMPANY_PHONE',            category: 'frontend', description: '푸터 사업자 정보 — 대표 전화' },
+  { key: 'CONSULTING_SUBSCRIPTION_PRICE_USD', category: 'frontend', description: 'AI 컨설팅 랜딩 연간 멤버십 가격(USD, 숫자). 비우면 20' },
   // Scraper
   { key: 'WORKSCHD_SCRAPER_ENABLED',                     category: 'scraper', description: '스크래퍼 스케줄러 활성화 (true/false)' },
   { key: 'WORKSCHD_SCRAPER_CRON',                        category: 'scraper', description: '스크래퍼 cron 표현식' },
