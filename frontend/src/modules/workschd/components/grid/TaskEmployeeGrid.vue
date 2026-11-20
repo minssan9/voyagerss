@@ -3,7 +3,7 @@
     <q-card>
       <q-card-section>
         <!-- Search and Filter Bar -->
-        <div class="row items-center q-mb-md">
+        <div class="row items-center q-col-gutter-md q-mb-md">
           <div class="col-12 col-md-4">
             <q-input 
               v-model="searchText" 
@@ -18,7 +18,7 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-md-3 q-ml-md">
+          <div class="col-12 col-md-3">
             <q-select
               v-model="statusFilter"
               :options="statusOptions"
@@ -235,10 +235,4 @@ export default {
   name: 'TaskEmployeeGrid'
 }
 </script>
-
-<style scoped>
-.task-employee-grid {
-  width: 100%;
-}
-</style> 
 

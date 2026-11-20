@@ -45,7 +45,7 @@
 
     <!-- Task Form Dialog -->
     <q-dialog v-model="showTaskDialog" persistent>
-      <q-card style="min-width: 350px; max-width: 500px;">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ isEditMode ? 'Edit Task' : 'Register New Task' }}</div>    
         </q-card-section>

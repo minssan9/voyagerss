@@ -142,7 +142,7 @@
 
     <!-- Cleanup Dialog -->
     <q-dialog v-model="showCleanupDialog" persistent>
-      <q-card style="min-width: 300px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ t('aviation.weather.cleanupTitle') }}</div>
         </q-card-section>
@@ -189,18 +189,18 @@
               <div>{{ selectedImage?.sizeMB }} MB</div>
             </div>
           </div>
-          <div class="image-container">
+          <div class="flex flex-center bg-grey-2 rounded-borders q-pa-md">
             <img
               v-if="imageUrl"
               :src="imageUrl"
               :alt="selectedImage?.filename"
-              class="weather-image"
+              class="page-aviation-weather__image"
               @error="handleImageError"
             />
-            <div v-else-if="imageLoading" class="flex flex-center" style="min-height: 400px">
+            <div v-else-if="imageLoading" class="flex flex-center page-aviation-weather__placeholder">
               <q-spinner color="primary" size="3em" />
             </div>
-            <div v-else class="flex flex-center text-negative" style="min-height: 400px">
+            <div v-else class="flex flex-center text-negative page-aviation-weather__placeholder">
               {{ t('aviation.weather.imageLoadFailed') }}
             </div>
           </div>
@@ -497,21 +497,3 @@ onMounted(() => {
   loadGatheringStatus();
 });
 </script>
-
-<style scoped lang="sass">
-.weather-image
-  width: 100%
-  height: auto
-  max-height: calc(100vh - 200px)
-  object-fit: contain
-  border: 1px solid #e0e0e0
-  border-radius: 4px
-
-.image-container
-  display: flex
-  justify-content: center
-  align-items: center
-  background-color: #f5f5f5
-  border-radius: 4px
-  padding: 16px
-</style>

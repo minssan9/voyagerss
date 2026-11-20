@@ -67,7 +67,7 @@
 
     <!-- Restore Dialog -->
     <q-dialog v-model="showRestoreDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ t('aviation.backups.restoreTitle') }}</div>
         </q-card-section>
@@ -186,6 +186,3 @@ async function validateData() {
   }
 }
 </script>
-
-<style scoped lang="sass">
-</style>

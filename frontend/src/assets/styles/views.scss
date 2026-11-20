@@ -910,3 +910,15 @@
         transform: translateX(-50%) translateY(-5px);
     }
 }
+.page-aviation-weather__image {
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - 200px);
+    object-fit: contain;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.page-aviation-weather__placeholder {
+    min-height: 400px;
+}

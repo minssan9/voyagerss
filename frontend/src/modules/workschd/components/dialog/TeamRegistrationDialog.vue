@@ -7,11 +7,11 @@
       </q-card-section>
 
       <q-card-section class="dialog-content">
-        <q-form @submit="onSubmit" class="dialog-form q-gutter-md"> 
+        <q-form @submit="onSubmit" class="dialog-form q-gutter-y-md"> 
           
           <!-- Team Information -->
-          <div class="row">
-            <div class="col-12 col-md-6">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="teamForm.name"
                 label="Team Name"
@@ -20,7 +20,7 @@
                 :rules="[val => !!val || 'Team name is required']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <q-input
                 v-model="teamForm.region"
                 label="Region"
@@ -29,7 +29,7 @@
                 :rules="[val => !!val || 'Region is required']"
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <q-select
                 v-model="teamForm.scheduleType"
                 :options="scheduleTypes"

@@ -256,8 +256,3 @@ async function loadDashboardData() {
   // todayShifts.value = data.todayShifts
 }
 </script>
-
-<style lang="scss" scoped>
-/* Dashboard styles now use .card-stat and .card-action from components.scss */
-</style> 
-```

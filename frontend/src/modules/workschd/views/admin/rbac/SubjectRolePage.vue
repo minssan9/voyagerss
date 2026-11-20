@@ -51,7 +51,7 @@
 
     <!-- Assign Role Dialog -->
     <q-dialog v-model="assignDialog" persistent>
-      <q-card style="min-width: 420px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ t('rbac.subjects.assignDialogTitle') }}</div>
         </q-card-section>

@@ -2,11 +2,11 @@
   <div class="api-key-guide q-mt-sm q-pa-md rounded-borders bg-blue-grey-1" data-testid="api-key-acquisition-guide">
     <div class="text-subtitle2 q-mb-xs">{{ guide.title }}</div>
     <ol class="q-pl-md q-my-sm text-body2 guide-steps">
-      <li v-for="(step, idx) in guide.steps" :key="idx">{{ step }}</li>
+      <li v-for="(step, idx) in guide.steps" :key="idx" class="q-mb-xs">{{ step }}</li>
     </ol>
     <div class="q-mb-xs text-caption text-weight-medium">{{ t('systemConfig.guideOfficialLinks') }}</div>
     <ul class="q-pl-md q-my-none text-body2 guide-links">
-      <li v-for="link in guide.links" :key="link.href">
+      <li v-for="link in guide.links" :key="link.href" class="q-mb-xs">
         <a
           :href="link.href"
           target="_blank"
@@ -48,10 +48,3 @@ const guide = computed((): ApiKeyAcquisitionGuide => {
   return found;
 });
 </script>
-
-<style scoped>
-.guide-steps li,
-.guide-links li {
-  margin-bottom: 4px;
-}
-</style>

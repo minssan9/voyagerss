@@ -20,7 +20,7 @@
       <!-- UNIFIED FORM SECTION -->
       <template v-if="dialogMode !== 'approval' && dialogMode !== 'join' && dialogMode !== 'cancel'">
         <q-card-section class="dialog-content">
-          <q-form @submit.prevent="handleFormSubmit" class="q-gutter-md">
+          <q-form @submit.prevent="handleFormSubmit" class="q-gutter-y-md">
             <div class="row q-col-gutter-md">
               <!-- Basic Info Card -->
               <div class="col-12 col-md-4">
@@ -129,7 +129,7 @@
                   <q-card-section>
                     <div class="text-h6">{{ t('task.location') }}</div>
                     <q-separator class="q-my-sm" />
-                    <div id="map" style="height: 300px;"></div>
+                    <div id="map" class="task-dialog__map"></div>
                   </q-card-section>
                 </q-card>
               </div>

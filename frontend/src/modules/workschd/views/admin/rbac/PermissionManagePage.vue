@@ -131,11 +131,11 @@
 
     <!-- Create/Edit Dialog -->
     <q-dialog v-model="dialog" persistent>
-      <q-card style="min-width: 480px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ editingPerm ? t('rbac.permissions.editPermission') : t('rbac.permissions.addPermission') }}</div>
         </q-card-section>
-        <q-card-section class="q-pt-none q-gutter-sm">
+        <q-card-section class="q-pt-none q-gutter-y-sm">
           <q-input
             v-if="!editingPerm"
             v-model="form.code"
@@ -144,21 +144,23 @@
             :hint="t('rbac.permissions.permissionCodeHint')"
           />
           <q-input v-model="form.name" :label="t('rbac.permissions.permissionName')" outlined dense />
-          <div class="row q-gutter-sm">
-            <q-select
-              v-model="form.type"
-              :options="typeOptions"
-              :label="t('rbac.common.type') + ' *'"
-              outlined dense emit-value map-options
-              class="col"
-            />
-            <q-select
-              v-model="form.module"
-              :options="moduleOptions"
-              :label="t('rbac.common.module') + ' *'"
-              outlined dense emit-value map-options
-              class="col"
-            />
+          <div class="row q-col-gutter-sm">
+            <div class="col">
+              <q-select
+                v-model="form.type"
+                :options="typeOptions"
+                :label="t('rbac.common.type') + ' *'"
+                outlined dense emit-value map-options
+              />
+            </div>
+            <div class="col">
+              <q-select
+                v-model="form.module"
+                :options="moduleOptions"
+                :label="t('rbac.common.module') + ' *'"
+                outlined dense emit-value map-options
+              />
+            </div>
           </div>
           <q-input
             v-model="form.resource"

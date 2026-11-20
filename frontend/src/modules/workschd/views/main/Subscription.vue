@@ -4,9 +4,9 @@
       <div class="q-px-lg">
         <div class="text-h5 q-mb-lg">{{ t('subscription.title') }}</div>
         <div class="row q-col-gutter-md">
-          <div v-for="plan in plans" :key="plan.type" class="col-3 col-xs-12">
-            <q-card flat bordered class="subscription-card" :class="{ 'selected-plan': planType === plan.type }">
-              <q-card-section>
+          <div v-for="plan in plans" :key="plan.type" class="col-12 col-sm-6 col-md-3">
+            <q-card flat bordered class="full-height" :class="{ 'bg-blue-1': planType === plan.type }">
+              <q-card-section class="q-pa-lg">
                 <div class="row items-center justify-between">
                   <div class="col-auto">
                     <div class="text-grey">{{ plan.name }}</div>
@@ -15,7 +15,6 @@
                   <div class="col-auto">
                     <q-btn
                       :color="planType === plan.type ? 'grey' : plan.buttonColor"
-                      :class="['subscription-btn', planType === plan.type ? 'current-plan' : '']"
                       :label="planType === plan.type ? t('subscription.currentPlan') : t('subscription.choose')"
                       @click="subscribe(plan.type)"
                       :disable="planType === plan.type"
@@ -31,7 +30,7 @@
         <div class="q-mt-xl">
           <div class="text-subtitle1 q-mb-md">{{ t('subscription.allAccountsIncluded') }}</div>
           <div class="row q-col-gutter-md">
-            <div class="col-3" v-for="(featureKey, index) in featureKeys" :key="index">
+            <div class="col-12 col-sm-6 col-md-3" v-for="(featureKey, index) in featureKeys" :key="index">
               <div class="flex items-center q-mb-sm">
                 <q-icon name="check" color="green" size="xs" class="q-mr-sm" />
                 <span class="text-grey-7">{{ t(`subscription.features.${featureKey}`) }}</span>
@@ -85,12 +84,3 @@ async function subscribe(plan: string) {
   }
 }
 </script>
-
-<style scoped>
-.subscription-card { height: 100%; transition: all 0.3s ease; }
-.subscription-card:hover { border-color: var(--q-primary); }
-.selected-plan { border: 2px solid var(--q-primary); background-color: rgba(var(--q-primary), 0.05); }
-.subscription-card .q-card__section { padding: 24px; }
-.subscription-btn { min-width: 120px; font-weight: 500; }
-.subscription-btn.current-plan { background-color: #e0e0e0 !important; color: #666 !important; }
-</style>

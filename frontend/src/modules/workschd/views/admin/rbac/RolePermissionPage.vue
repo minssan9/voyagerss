@@ -1,36 +1,38 @@
 <template>
-  <div class="row q-gutter-md">
+  <div class="row q-col-gutter-md">
     <!-- Left: Role list -->
-    <q-card flat bordered style="min-width: 240px; width: 240px">
-      <q-card-section class="q-pb-xs">
-        <div class="text-subtitle2">{{ t('rbac.rolePermissions.selectRole') }}</div>
-      </q-card-section>
-      <q-list dense>
-        <q-item
-          v-for="role in roles"
-          :key="role.id"
-          clickable
-          :active="selectedRole?.id === role.id"
-          active-class="bg-primary text-white"
-          @click="selectRole(role)"
-        >
-          <q-item-section>
-            <q-item-label>{{ role.name }}</q-item-label>
-            <q-item-label caption :class="selectedRole?.id === role.id ? 'text-white' : ''">{{ role.code }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-chip dense :color="selectedRole?.id === role.id ? 'white' : 'blue-2'"
-              :text-color="selectedRole?.id === role.id ? 'primary' : 'blue-9'">
-              {{ role._count?.rolePermissions ?? 0 }}
-            </q-chip>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card>
+    <div class="col-12 col-md-3">
+      <q-card flat bordered>
+        <q-card-section class="q-pb-xs">
+          <div class="text-subtitle2">{{ t('rbac.rolePermissions.selectRole') }}</div>
+        </q-card-section>
+        <q-list dense>
+          <q-item
+            v-for="role in roles"
+            :key="role.id"
+            clickable
+            :active="selectedRole?.id === role.id"
+            active-class="bg-primary text-white"
+            @click="selectRole(role)"
+          >
+            <q-item-section>
+              <q-item-label>{{ role.name }}</q-item-label>
+              <q-item-label caption :class="selectedRole?.id === role.id ? 'text-white' : ''">{{ role.code }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-chip dense :color="selectedRole?.id === role.id ? 'white' : 'blue-2'"
+                :text-color="selectedRole?.id === role.id ? 'primary' : 'blue-9'">
+                {{ role._count?.rolePermissions ?? 0 }}
+              </q-chip>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </div>
 
     <!-- Right: Permission assignment -->
-    <div class="col">
-      <div v-if="!selectedRole" class="column items-center justify-center" style="height: 300px">
+    <div class="col-12 col-md-9">
+      <div v-if="!selectedRole" class="column items-center justify-center q-py-xl">
         <q-icon name="arrow_back" size="48px" color="grey-4" />
         <p class="text-grey-6 q-mt-sm">{{ t('rbac.rolePermissions.selectRoleHint') }}</p>
       </div>
@@ -50,7 +52,6 @@
             :label="t('rbac.common.type')"
             dense outlined clearable
             emit-value map-options
-            style="min-width: 120px"
           />
           <q-select
             v-model="filterModule"
@@ -58,7 +59,6 @@
             :label="t('rbac.common.module')"
             dense outlined clearable
             emit-value map-options
-            style="min-width: 130px"
           />
         </teleport>
 

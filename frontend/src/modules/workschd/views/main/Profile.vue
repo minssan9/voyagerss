@@ -13,7 +13,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">Profile Information</div>
 
-            <q-form @submit="updateProfile" class="q-gutter-md">
+            <q-form @submit="updateProfile" class="q-gutter-y-md">
               <q-input
                 v-model="profileForm.name"
                 label="Full Name"
@@ -85,7 +85,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">Change Password</div>
 
-            <q-form @submit="changePassword" class="q-gutter-md">
+            <q-form @submit="changePassword" class="q-gutter-y-md">
               <q-input
                 v-model="passwordForm.oldPassword"
                 label="Current Password"
@@ -348,7 +348,3 @@ onMounted(() => {
   loadProfile()
 })
 </script>
-
-<style scoped>
-/* Add any custom styles here */
-</style>

@@ -1,59 +1,65 @@
 <template>
-  <div class="signup-page">
-    <div class="signup-card">
-      <div class="brand">
-        <div class="brand-icon">{{ t('workschdSignup.brandIcon') }}</div>
-        <h1 class="brand-name">{{ t('workschdSignup.title') }}</h1>
-        <p class="brand-sub">{{ t('workschdSignup.subtitle') }}</p>
+  <div class="column items-center justify-center q-pa-md auth-page window-height">
+    <div class="auth-container card q-pa-lg">
+      <div class="column items-center q-mb-lg">
+        <q-avatar size="64px" color="dark" text-color="white" class="text-weight-bold q-mb-md">
+          {{ t('workschdSignup.brandIcon') }}
+        </q-avatar>
+        <h1 class="text-h5 text-weight-bold q-my-none">{{ t('workschdSignup.title') }}</h1>
+        <p class="text-grey-7 q-mt-xs q-mb-none">{{ t('workschdSignup.subtitle') }}</p>
       </div>
 
-      <div class="divider"></div>
+      <q-separator class="q-mb-lg" />
 
-      <form class="form" @submit.prevent="submit">
-        <input
+      <q-form class="q-gutter-y-sm" @submit="submit">
+        <q-input
           v-model="username"
-          type="text"
-          class="input-field"
+          outlined
           :placeholder="t('workschdSignup.namePlaceholder')"
-          required
           autocomplete="name"
+          :rules="[val => !!val]"
         />
-        <input
+        <q-input
           v-model="email"
           type="email"
-          class="input-field"
+          outlined
           :placeholder="t('workschdSignup.emailPlaceholder')"
-          required
           autocomplete="email"
+          :rules="[val => !!val]"
         />
-        <input
+        <q-input
           v-model="password"
           type="password"
-          class="input-field"
+          outlined
           :placeholder="t('workschdSignup.passwordPlaceholder')"
-          minlength="8"
-          required
           autocomplete="new-password"
+          :rules="[val => (val?.length ?? 0) >= 8]"
         />
-        <input
+        <q-input
           v-model="passwordConfirm"
           type="password"
-          class="input-field"
+          outlined
           :placeholder="t('workschdSignup.passwordConfirmPlaceholder')"
-          required
           autocomplete="new-password"
+          :rules="[val => !!val]"
         />
 
-        <div v-if="error" class="error-notice">{{ error }}</div>
+        <q-banner v-if="error" dense rounded class="bg-red-1 text-negative text-center">{{ error }}</q-banner>
 
-        <button type="submit" class="submit-btn" :disabled="loading">
-          {{ loading ? t('workschdSignup.submitting') : t('workschdSignup.submit') }}
-        </button>
-      </form>
+        <q-btn
+          type="submit"
+          color="dark"
+          unelevated
+          no-caps
+          class="full-width"
+          :loading="loading"
+          :label="t('workschdSignup.submit')"
+        />
+      </q-form>
 
-      <p class="login-note">
+      <p class="text-caption text-grey-7 text-center q-mt-lg q-mb-none">
         {{ t('workschdSignup.hasAccount') }}
-        <router-link to="/login?service=workschd" class="link">{{ t('workschdSignup.login') }}</router-link>
+        <router-link to="/login?service=workschd" class="text-primary">{{ t('workschdSignup.login') }}</router-link>
       </p>
     </div>
   </div>
@@ -104,122 +110,3 @@ async function submit() {
   }
 }
 </script>
-
-<style scoped>
-.signup-page {
-  min-height: 100vh;
-  background: #f5f5f7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-}
-
-.signup-card {
-  background: #fff;
-  border-radius: 24px;
-  padding: 48px 40px 36px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-}
-
-.brand {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.brand-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  background: #1d1d1f;
-  color: #fff;
-  font-size: 26px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-}
-
-.brand-name {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin: 0 0 6px;
-  letter-spacing: -0.5px;
-}
-
-.brand-sub {
-  font-size: 14px;
-  color: #6e6e73;
-  margin: 0;
-}
-
-.divider {
-  height: 1px;
-  background: #f2f2f7;
-  margin: 0 0 28px;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.input-field {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1px solid #d2d2d7;
-  border-radius: 12px;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.15s;
-  box-sizing: border-box;
-}
-
-.input-field:focus {
-  border-color: #0071e3;
-}
-
-.error-notice {
-  background: #fce4ec;
-  color: #c62828;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  text-align: center;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 14px;
-  background: #1d1d1f;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.15s;
-  margin-top: 4px;
-}
-
-.submit-btn:hover:not(:disabled) { opacity: 0.85; }
-.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.login-note {
-  font-size: 13px;
-  color: #6e6e73;
-  text-align: center;
-  margin: 20px 0 0;
-}
-
-.link {
-  color: #0071e3;
-  text-decoration: none;
-}
-</style>

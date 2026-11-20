@@ -41,7 +41,7 @@
 
     <!-- Create/Edit Dialog -->
     <q-dialog v-model="showCreateDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ editingTopic ? t('aviation.topics.editTopic') : t('aviation.topics.addTopic') }}</div>
         </q-card-section>
@@ -234,6 +234,3 @@ onMounted(() => {
   loadTopics();
 });
 </script>
-
-<style scoped lang="sass">
-</style>

@@ -4,12 +4,12 @@
 
       <!-- Hero -->
       <section class="lp-hero">
-        <span class="lp-badge" style="background: rgba(48,184,138,0.08); color: #30b88a;">
+        <span class="lp-badge lp-tone--teal">
           <q-icon name="flight" size="14px" />
           {{ t('aviation.dashboard.badge') }}
         </span>
-        <h1 class="lp-title" style="white-space: pre-line;">{{ t('aviation.dashboard.title') }}</h1>
-        <p class="lp-subtitle" style="white-space: pre-line;">
+        <h1 class="lp-title text-pre-line">{{ t('aviation.dashboard.title') }}</h1>
+        <p class="lp-subtitle text-pre-line">
           {{ t('aviation.dashboard.subtitle') }}
         </p>
         <div class="lp-actions">
@@ -23,7 +23,7 @@
         <div class="lp-stat">
           <q-skeleton v-if="!stats" type="text" width="60px" class="q-mx-auto" />
           <template v-else>
-            <div class="lp-stat__icon" style="color: #30b88a;"><q-icon name="menu_book" size="22px" /></div>
+            <div class="lp-stat__icon lp-tone--teal"><q-icon name="menu_book" size="22px" /></div>
             <div class="lp-stat__value">{{ stats.totalTopics ?? 0 }}</div>
             <div class="lp-stat__label">{{ t('aviation.dashboard.totalTopics') }}</div>
           </template>
@@ -31,13 +31,13 @@
         <div class="lp-stat">
           <q-skeleton v-if="!stats" type="text" width="60px" class="q-mx-auto" />
           <template v-else>
-            <div class="lp-stat__icon" style="color: #118ab2;"><q-icon name="check_circle" size="22px" /></div>
+            <div class="lp-stat__icon lp-tone--cyan"><q-icon name="check_circle" size="22px" /></div>
             <div class="lp-stat__value">{{ stats.activeTopics ?? 0 }}</div>
             <div class="lp-stat__label">{{ t('aviation.dashboard.activeTopics') }}</div>
           </template>
         </div>
         <div class="lp-stat">
-          <div class="lp-stat__icon" style="color: #6b7280;"><q-icon name="calendar_today" size="22px" /></div>
+          <div class="lp-stat__icon lp-tone--grey"><q-icon name="calendar_today" size="22px" /></div>
           <div class="lp-stat__value">{{ weeklySchedule.length }}</div>
           <div class="lp-stat__label">{{ t('aviation.dashboard.weeklySchedule') }}</div>
         </div>
@@ -68,7 +68,7 @@
       <!-- Quick Navigation -->
       <div class="lp-nav-grid">
         <div class="lp-nav-card" @click="router.push('/aviation/topics')">
-          <div class="lp-nav-card__icon" style="background: rgba(48,184,138,0.08); color: #30b88a;">
+          <div class="lp-nav-card__icon lp-tone--teal">
             <q-icon name="menu_book" size="24px" />
           </div>
           <div class="lp-nav-card__title">{{ t('aviation.dashboard.navTopicsTitle') }}</div>
@@ -76,7 +76,7 @@
           <q-icon name="arrow_forward_ios" size="14px" class="lp-nav-card__arrow" />
         </div>
         <div class="lp-nav-card" @click="router.push('/aviation/weather')">
-          <div class="lp-nav-card__icon" style="background: rgba(17,138,178,0.08); color: #118ab2;">
+          <div class="lp-nav-card__icon lp-tone--cyan">
             <q-icon name="cloud" size="24px" />
           </div>
           <div class="lp-nav-card__title">{{ t('aviation.dashboard.navWeatherTitle') }}</div>
@@ -84,7 +84,7 @@
           <q-icon name="arrow_forward_ios" size="14px" class="lp-nav-card__arrow" />
         </div>
         <div class="lp-nav-card" @click="router.push('/aviation/backups')">
-          <div class="lp-nav-card__icon" style="background: rgba(107,114,128,0.08); color: #6b7280;">
+          <div class="lp-nav-card__icon lp-tone--grey">
             <q-icon name="backup" size="24px" />
           </div>
           <div class="lp-nav-card__title">{{ t('aviation.dashboard.navBackupsTitle') }}</div>
@@ -133,7 +133,3 @@ onMounted(() => {
   loadSchedule()
 })
 </script>
-
-<style scoped lang="scss">
-@import '@/assets/styles/landing-shared';
-</style>

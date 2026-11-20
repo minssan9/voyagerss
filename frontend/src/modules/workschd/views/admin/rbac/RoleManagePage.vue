@@ -43,7 +43,7 @@
 
     <!-- Create/Edit Dialog -->
     <q-dialog v-model="dialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ editingRole ? t('rbac.roles.editRole') : t('rbac.roles.addRole') }}</div>
         </q-card-section>

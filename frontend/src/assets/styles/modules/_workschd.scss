@@ -380,6 +380,15 @@
 
 .team-members .ag-theme-alpine {
   width: 100%;
+  height: 400px;
+}
+
+#workschd-page-toolbar .q-select {
+  min-width: 130px;
+}
+
+.task-dialog__map {
+  height: 300px;
 }
 
 .team-schedule {

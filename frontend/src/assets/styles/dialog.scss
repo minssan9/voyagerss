@@ -22,6 +22,11 @@
   }
 }
 
+// Quasar caps minimized dialogs at 560px; let .dialog-card sizes apply
+.q-dialog__inner--minimized > .dialog-card {
+  max-width: 90vw;
+}
+
 .dialog-title {
   display: flex;
   align-items: center;
@@ -238,7 +243,7 @@
 .emp-name { font-size: 14px; font-weight: 600; color: #1d1d1f; }
 .emp-meta { display: flex; gap: 8px; margin-top: 2px; }
 .emp-email { font-size: 12px; color: #6e6e73; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
-.emp-date { font-size: 12px; color: #aeaeb2; }
+.emp-date { font-size: 12px; color: #aeaeb2; white-space: nowrap; }
 
 .emp-status { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
 

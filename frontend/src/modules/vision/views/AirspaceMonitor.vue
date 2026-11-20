@@ -60,7 +60,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-md-8">
+      <div class="col-12 col-md-7">
         <q-card flat bordered class="page-vision__card">
           <q-card-section>
             <div class="page-vision__card-title">{{ t('airspace.tracks.title') }}</div>
@@ -106,7 +106,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-5">
         <q-card flat bordered class="page-vision__card">
           <q-card-section>
             <div class="page-vision__card-title">{{ t('airspace.control.title') }}</div>

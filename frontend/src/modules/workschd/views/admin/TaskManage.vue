@@ -74,7 +74,7 @@
 
     <!-- Shift Template Dialog (stub) -->
     <q-dialog v-model="showTemplateDialog">
-      <q-card style="min-width:300px">
+      <q-card class="dialog-card small">
         <q-card-section>
           <div class="text-h6">{{ t('task.manage.shiftTemplateTitle') }}</div>
           <q-list>

@@ -20,10 +20,10 @@
             <div class="modern-card__body">
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <div class="row q-gutter-y-md">
-                    <q-item v-for="(feature, index) in 3" :key="index" class="modern-bg__glass q-my-sm" style="border-radius: 12px;">
+                  <div class="column q-gutter-y-md">
+                    <q-item v-for="(feature, index) in 3" :key="index" class="modern-bg__glass rounded-borders q-my-sm">
                       <q-item-section avatar>
-                        <q-avatar :style="`background: ${['#4361ee', '#3a0ca3', '#4cc9f0'][index]}`" text-color="white">{{ index + 1 }}</q-avatar>
+                        <q-avatar :color="['indigo-6', 'deep-purple-10', 'light-blue-4'][index]" text-color="white">{{ index + 1 }}</q-avatar>
                       </q-item-section>
                       <q-item-section>
                         <p>{{ t(`about.overview.feature${index + 1}`) }}</p>
@@ -32,7 +32,7 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-6 flex flex-center">
-                  <q-img src="https://placehold.co/400x300" class="rounded-borders q-mt-md" style="border-radius: 16px; box-shadow: var(--shadow-lg);" />
+                  <q-img src="https://placehold.co/400x300" class="rounded-borders shadow-6 q-mt-md" />
                 </div>
               </div>
             </div>
@@ -45,7 +45,7 @@
           <div class="row q-col-gutter-lg">
             <div class="col-12 col-md-4" v-for="i in 3" :key="i">
               <div class="modern-card slide-up" :class="`stagger-${i+1}`">
-                <div class="modern-card__header" :style="`background: ${['#4361ee', '#3a0ca3', '#4cc9f0'][i-1]}; color: white;`">
+                <div class="modern-card__header text-white" :class="['bg-indigo-6', 'bg-deep-purple-10', 'bg-light-blue-4'][i - 1]">
                   <h3 class="text-h6 q-mb-sm">{{ t(`about.features.feature${i}.title`) }}</h3>
                 </div>
                 <div class="modern-card__body">
@@ -78,14 +78,14 @@
         <!-- Customer Feedback -->
         <div class="col-12 q-mt-xl">
           <div class="modern-card slide-up stagger-6">
-            <div class="modern-card__header" style="background: linear-gradient(145deg, #4cc9f0, #4361ee); color: white;">
+            <div class="modern-card__header workschd-gradient text-white">
               <h2 class="modern-text__title text-h5 q-mb-md">{{ t('about.customerFeedback.title') }}</h2>
             </div>
             <div class="modern-card__body">
               <div class="row q-col-gutter-lg">
                 <div class="col-12 col-md-6 flex flex-center">
-                  <div class="modern-bg__glass q-pa-md" style="border-radius: 16px;">
-                    <p class="text-body1 q-py-lg q-px-md" style="font-style: italic;">{{ t('about.customerFeedback.quote') }}</p>
+                  <div class="modern-bg__glass rounded-borders q-pa-md">
+                    <p class="text-body1 text-italic q-py-lg q-px-md">{{ t('about.customerFeedback.quote') }}</p>
                     <div class="text-right q-pr-md">
                       <p class="text-weight-bold q-mb-none">{{ t('about.customerFeedback.authorName') }}</p>
                       <p class="text-caption">{{ t('about.customerFeedback.authorTitle') }}</p>
@@ -93,7 +93,7 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-6 flex flex-center">
-                  <q-img src="https://placehold.co/300x300" class="rounded-borders" style="border-radius: 16px; box-shadow: var(--shadow-lg);" />
+                  <q-img src="https://placehold.co/300x300" class="rounded-borders shadow-6" />
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="team-members q-mb-md">
     <div class="text-h6">{{ t('team.manage.teamMembers') }}</div>
-    <div class="ag-theme-alpine" style="height: 400px; width: 100%;">
+    <div class="ag-theme-alpine">
       <GridDefault
         :columnDefs="memberColumnDefs"
         :rowData="members"

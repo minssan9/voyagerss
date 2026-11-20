@@ -45,7 +45,7 @@
     
     <!-- Shop Dialog (used for both add and edit) -->
     <q-dialog v-model="showShopDialog" persistent>
-      <q-card style="min-width: 400px">
+      <q-card class="dialog-card small">
         <q-card-section class="row items-center">
           <div class="text-h6">
             {{ dialogMode === 'add' ? t('team.shop.addShop') : t('team.shop.editShop') }}
@@ -91,7 +91,7 @@
     
     <!-- Shop Details Dialog -->
     <q-dialog v-model="showShopDetails">
-      <q-card style="min-width: 350px">
+      <q-card class="dialog-card small">
         <q-card-section class="row items-center">
           <div class="text-h6">{{ t('team.shop.shopDetails') }}</div>
           <q-space />
